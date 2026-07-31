@@ -2,14 +2,14 @@
 <html lang="id">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>PORTAL::IskakFatoni</title>
   <link rel="stylesheet" href="style.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
 
-  <!-- PARTICLE CANVAS (Efek Partikel Melayang) -->
+  <!-- PARTICLE CANVAS -->
   <canvas id="particle-canvas"></canvas>
 
   <main class="container">
@@ -25,7 +25,7 @@
       <p class="bio">I'am certified electronical and computer teacher, also a former Kamen Rider</p>
     </header>
 
-    <!-- Progress Bar Cyan (LinearProgressIndicator) -->
+    <!-- Progress Bar Cyan -->
     <div id="loading-bar-wrapper" class="progress-bar-container">
       <div class="progress-bar-fill"></div>
     </div>
@@ -70,22 +70,23 @@
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
     import { getFirestore, collection, query, orderBy, onSnapshot, doc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-    // --- EFEK PARTIKEL CANVAS (PARTICLE BACKGROUND) ---
+    // --- SCRIPT PARTIKEL SECURE CANVAS (KUNCI AGAR TIDAK MELER KE KANAN) ---
     const canvas = document.getElementById('particle-canvas');
     const ctx = canvas.getContext('2d');
     let particles = [];
 
     function initCanvas() {
-      canvas.width = window.innerWidth;
+      // Ambil ukuran riil viewport
+      canvas.width = document.documentElement.clientWidth || window.innerWidth;
       canvas.height = window.innerHeight;
       particles = [];
-      for (let i = 0; i < 45; i++) {
+      for (let i = 0; i < 35; i++) {
         particles.push({
           x: Math.random() * canvas.width,
           y: Math.random() * canvas.height,
-          radius: Math.random() * 2.5 + 1,
-          speedY: Math.random() * -0.6 - 0.2,
-          speedX: (Math.random() - 0.5) * 0.4,
+          radius: Math.random() * 2 + 1,
+          speedY: Math.random() * -0.5 - 0.2,
+          speedX: (Math.random() - 0.5) * 0.3,
           opacity: Math.random() * 0.6 + 0.3
         });
       }
@@ -96,8 +97,8 @@
       particles.forEach(p => {
         ctx.beginPath();
         ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
-        ctx.fillStyle = `rgba(0, 245, 212, ${p.opacity})`; // Accent Cyan #00F5D4
-        ctx.shadowBlur = 8;
+        ctx.fillStyle = `rgba(0, 245, 212, ${p.opacity})`;
+        ctx.shadowBlur = 6;
         ctx.shadowColor = "#00F5D4";
         ctx.fill();
 
