@@ -22,7 +22,7 @@
       <p class="bio">I'am certified electronical and computer teacher, also a former Kamen Rider</p>
     </header>
 
-    <!-- Daftar Link Dinamis dari Firebase -->
+    <!-- Daftar Link Dinamis dari Firebase / Off Mode Notice -->
     <section id="links-container" class="links">
       <div class="skeleton-card"></div>
       <div class="skeleton-card"></div>
@@ -37,7 +37,7 @@
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-    import { getFirestore, collection, query, orderBy, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+    import { getFirestore, collection, query, orderBy, onSnapshot, doc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyDhq4QoCn00GkfpKXSP8PnvSvEKa2yn0ic",
@@ -53,32 +53,53 @@
     const db = getFirestore(app);
     const container = document.getElementById('links-container');
 
-    const q = query(collection(db, "links"), orderBy("order", "asc"));
-    onSnapshot(q, (snapshot) => {
-      container.innerHTML = '';
-      
-      if (snapshot.empty) {
-        container.innerHTML = '<p style="color:#64748b; font-size: 0.85rem;">Belum ada link yang aktif.</p>';
-        return;
-      }
+    // Pantau Status Portal (ON / OFF MODE)
+    onSnapshot(doc(db, "settings", "portal"), (docSnap) => {
+      const isOnline = docSnap.exists() ? docSnap.data().isOnline : true;
 
-      let index = 0;
-      snapshot.forEach((doc) => {
-        const data = doc.data();
-        const colorClass = `card-color-${index % 4}`;
-        index++;
-
-        container.innerHTML += `
-          <a href="${data.url}" target="_blank" rel="noopener noreferrer" class="link-card ${colorClass}">
-            <i class="${data.icon || 'fa-solid fa-link'} icon"></i>
-            <span>${data.title}</span>
-          </a>
+      if (!isOnline) {
+        // TAMPILAN OFF MODE
+        container.innerHTML = `
+          <div class="off-card">
+            <i class="fa-solid fa-store-slash"></i>
+            <h2>PORTAL TUTUP</h2>
+            <p>BELUM ADA TUGAS ATAU INFO TERBARU</p>
+          </div>
         `;
-      });
-    }, (error) => {
-      console.error("Firestore Error:", error);
-      container.innerHTML = `<p style="color:#ef4444; font-size:0.8rem;">Gagal memuat link.</p>`;
+      } else {
+        // TAMPILAN ON MODE (MEMUAT DAFTAR LINK)
+        loadPublicLinks();
+      }
     });
+
+    function loadPublicLinks() {
+      const q = query(collection(db, "links"), orderBy("order", "asc"));
+      onSnapshot(q, (snapshot) => {
+        container.innerHTML = '';
+        
+        if (snapshot.empty) {
+          container.innerHTML = '<p style="color:#64748b; font-size: 0.85rem;">Belum ada link yang aktif.</p>';
+          return;
+        }
+
+        let index = 0;
+        snapshot.forEach((docSnap) => {
+          const data = docSnap.data();
+          const colorClass = `card-color-${index % 4}`;
+          index++;
+
+          container.innerHTML += `
+            <a href="${data.url}" target="_blank" rel="noopener noreferrer" class="link-card ${colorClass}">
+              <i class="${data.icon || 'fa-solid fa-link'} icon"></i>
+              <span>${data.title}</span>
+            </a>
+          `;
+        });
+      }, (error) => {
+        console.error("Firestore Error:", error);
+        container.innerHTML = `<p style="color:#ef4444; font-size:0.8rem;">Gagal memuat link.</p>`;
+      });
+    }
   </script>
 
 </body>
