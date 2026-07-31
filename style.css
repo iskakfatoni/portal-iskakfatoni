@@ -1,150 +1,31 @@
-/* Google Fonts */
-@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap');
-
-* {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
-}
-
-body {
-  font-family: 'Plus Jakarta Sans', sans-serif;
-  background-color: #0b0f19;
-  /* Ambient Gradient Background */
-  background-image: 
-    radial-gradient(at 0% 0%, rgba(56, 189, 248, 0.12) 0px, transparent 50%),
-    radial-gradient(at 100% 100%, rgba(99, 102, 241, 0.12) 0px, transparent 50%);
-  background-attachment: fixed;
-  color: #f8fafc;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  min-height: 100vh;
-  padding: 32px 16px;
-}
-
-/* Container Card Utama */
+/* Container disesuaikan agar tidak terlalu besar */
 .container {
   width: 100%;
-  max-width: 440px;
-  background: rgba(15, 23, 42, 0.65);
+  max-width: 380px; /* Ramping & pas di layar HP (sebelumnya 440px) */
+  background: rgba(15, 23, 42, 0.75);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
   border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 24px;
-  padding: 40px 28px;
-  box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.5);
+  border-radius: 20px;
+  padding: 30px 20px; /* Padding lebih ramping */
+  box-shadow: 0 15px 35px -10px rgba(0, 0, 0, 0.5);
   text-align: center;
 }
 
-/* Profil Section */
-.profile {
-  margin-bottom: 32px;
-}
-
+/* Profil Avatar disesuaikan */
 .avatar-wrapper {
   position: relative;
   display: inline-block;
-  margin-bottom: 16px;
+  margin-bottom: 12px;
 }
 
 .avatar {
-  width: 100px;
-  height: 100px;
+  width: 90px;  /* Ukuran foto dibuat pas & tidak dominan berlebihan */
+  height: 90px;
   border-radius: 50%;
   object-fit: cover;
-  border: 2px solid rgba(56, 189, 248, 0.5);
-  box-shadow: 0 0 25px rgba(56, 189, 248, 0.25);
+  object-position: top center; /* Memastikan wajah terfokus pas di tengah */
+  border: 2px solid rgba(56, 189, 248, 0.6);
+  box-shadow: 0 0 20px rgba(56, 189, 248, 0.25);
   transition: transform 0.3s ease;
-}
-
-.avatar-wrapper:hover .avatar {
-  transform: scale(1.05);
-}
-
-.name {
-  font-size: 1.35rem;
-  font-weight: 700;
-  color: #ffffff;
-  letter-spacing: -0.02em;
-  margin-bottom: 6px;
-}
-
-.bio {
-  font-size: 0.875rem;
-  color: #94a3b8;
-  line-height: 1.5;
-  font-weight: 400;
-}
-
-/* Links Section */
-.links {
-  display: flex;
-  flex-direction: column;
-  gap: 14px;
-}
-
-.link-card {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  position: relative;
-  padding: 16px 20px;
-  background: rgba(30, 41, 59, 0.7);
-  border: 1px solid rgba(255, 255, 255, 0.06);
-  color: #f1f5f9;
-  text-decoration: none;
-  border-radius: 14px;
-  font-weight: 600;
-  font-size: 0.95rem;
-  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-}
-
-.link-card .icon {
-  position: absolute;
-  left: 18px;
-  font-size: 1.2rem;
-  color: #38bdf8;
-  transition: transform 0.25s ease, color 0.25s ease;
-}
-
-/* Hover & Active Effects */
-.link-card:hover {
-  background: rgba(56, 189, 248, 0.12);
-  border-color: rgba(56, 189, 248, 0.4);
-  color: #ffffff;
-  transform: translateY(-2px);
-  box-shadow: 0 8px 20px -4px rgba(56, 189, 248, 0.25);
-}
-
-.link-card:hover .icon {
-  transform: scale(1.15);
-  color: #38bdf8;
-}
-
-.link-card:active {
-  transform: translateY(0);
-}
-
-/* Footer */
-.footer {
-  margin-top: 36px;
-  font-size: 0.8rem;
-  color: #64748b;
-  font-weight: 500;
-}
-
-/* Skeleton Loading State */
-.skeleton-card {
-  height: 54px;
-  background: linear-gradient(90deg, rgba(30,41,59,0.5) 25%, rgba(51,65,85,0.5) 50%, rgba(30,41,59,0.5) 75%);
-  background-size: 200% 100%;
-  animation: loading 1.5s infinite;
-  border-radius: 14px;
-}
-
-@keyframes loading {
-  0% { background-position: 200% 0; }
-  100% { background-position: -200% 0; }
 }
