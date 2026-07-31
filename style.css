@@ -1,178 +1,39 @@
-/* Google Fonts - Plus Jakarta Sans */
-@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+/* --- SEMENTARA TAMBAHKAN DI BAGIAN BAWAH style.css --- */
 
-* {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
-}
-
-body {
-  font-family: 'Plus Jakarta Sans', sans-serif;
-  /* Latar belakang selaras dengan warna bingkai foto (Cyan, Purple, Pink) */
-  background-color: #f5f3ff;
-  background-image: 
-    radial-gradient(at 10% 10%, rgba(0, 245, 212, 0.35) 0px, transparent 50%),   /* Cyan Glow */
-    radial-gradient(at 90% 10%, rgba(139, 92, 246, 0.35) 0px, transparent 50%),  /* Purple Glow */
-    radial-gradient(at 50% 90%, rgba(236, 72, 153, 0.35) 0px, transparent 50%);  /* Pink Glow */
-  background-attachment: fixed;
-  color: #0f172a;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  min-height: 100vh;
-  padding: 24px 16px;
-}
-
-/* ========================================================= */
-/* --- CARD UTAMA: EFEK GLASSMORPHISM (KACA TRANSPARAN) --- */
-/* ========================================================= */
-.container {
-  width: 100%;
-  max-width: 380px;
-  /* Transparansi kaca tipis dengan blur lembut */
-  background: rgba(255, 255, 255, 0.45);
-  backdrop-filter: blur(24px) saturate(180%);
-  -webkit-backdrop-filter: blur(24px) saturate(180%);
-  /* Border kilau kaca halus */
-  border: 1.5px solid rgba(255, 255, 255, 0.65);
-  border-radius: 32px;
-  padding: 32px 22px;
-  box-shadow: 
-    0 20px 50px -10px rgba(139, 92, 246, 0.2),
-    inset 0 1px 1px rgba(255, 255, 255, 0.8);
-  text-align: center;
-}
-
-/* Profile Section */
-.profile {
-  margin-bottom: 26px;
-}
-
-/* Bingkai Foto Profil Kotak Rounded */
-.avatar-ring {
-  display: inline-block;
-  padding: 4px;
-  background: linear-gradient(135deg, #00f5d4, #8b5cf6, #ec4899);
-  border-radius: 24px;
-  margin-bottom: 14px;
-  box-shadow: 0 10px 25px -5px rgba(139, 92, 246, 0.35);
-  transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
-}
-
-.avatar-ring:hover {
-  transform: scale(1.05);
-}
-
-.avatar {
-  width: 110px;
-  height: 110px;
+.off-card {
+  background: linear-gradient(135deg, rgba(239, 68, 68, 0.85), rgba(225, 29, 72, 0.85));
+  backdrop-filter: blur(10px);
+  color: #ffffff;
+  padding: 24px 20px;
   border-radius: 20px;
-  object-fit: cover;
-  object-position: top center;
+  box-shadow: 0 10px 25px -5px rgba(239, 68, 68, 0.4);
+  border: 1.5px solid rgba(255, 255, 255, 0.4);
+  text-align: center;
+  margin: 10px 0;
+  animation: fadeIn 0.4s ease;
+}
+
+.off-card i {
+  font-size: 2.2rem;
+  margin-bottom: 10px;
   display: block;
-  background-color: #f1f5f9;
 }
 
-/* Typography Header */
-.name {
-  font-size: 1.25rem;
+.off-card h2 {
+  font-size: 1.15rem;
   font-weight: 800;
-  color: #0f172a;
-  letter-spacing: -0.02em;
+  letter-spacing: 0.05em;
   margin-bottom: 6px;
-  line-height: 1.3;
 }
 
-.bio {
-  font-size: 0.85rem;
-  color: #334155;
+.off-card p {
+  font-size: 0.8rem;
   font-weight: 600;
-  line-height: 1.4;
+  opacity: 0.92;
+  line-height: 1.35;
 }
 
-/* Links List */
-.links {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-
-/* Button Link Styling */
-.link-card {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  position: relative;
-  padding: 15px 18px;
-  color: #ffffff;
-  text-decoration: none;
-  border-radius: 18px;
-  font-weight: 700;
-  font-size: 0.92rem;
-  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.link-card .icon {
-  position: absolute;
-  left: 18px;
-  font-size: 1.2rem;
-  color: #ffffff;
-  transition: transform 0.25s ease;
-}
-
-.link-card:hover {
-  transform: translateY(-3px);
-  filter: brightness(1.06);
-}
-
-.link-card:hover .icon {
-  transform: scale(1.2);
-}
-
-.link-card:active {
-  transform: translateY(0);
-}
-
-/* --- VARIASI GRADIENT WARNA VIBRANT --- */
-.card-color-0 {
-  background: linear-gradient(135deg, #0ea5e9, #3b82f6);
-  box-shadow: 0 8px 20px -4px rgba(14, 165, 233, 0.4);
-}
-
-.card-color-1 {
-  background: linear-gradient(135deg, #ec4899, #8b5cf6);
-  box-shadow: 0 8px 20px -4px rgba(236, 72, 153, 0.4);
-}
-
-.card-color-2 {
-  background: linear-gradient(135deg, #10b981, #059669);
-  box-shadow: 0 8px 20px -4px rgba(16, 185, 129, 0.4);
-}
-
-.card-color-3 {
-  background: linear-gradient(135deg, #f97316, #e11d48);
-  box-shadow: 0 8px 20px -4px rgba(249, 115, 22, 0.4);
-}
-
-/* Footer */
-.footer {
-  margin-top: 32px;
-  font-size: 0.78rem;
-  color: #475569;
-  font-weight: 600;
-}
-
-/* Skeleton Loading State */
-.skeleton-card {
-  height: 52px;
-  background: linear-gradient(90deg, rgba(203, 213, 225, 0.5) 25%, rgba(226, 232, 240, 0.7) 50%, rgba(203, 213, 225, 0.5) 75%);
-  background-size: 200% 100%;
-  animation: loading 1.5s infinite;
-  border-radius: 18px;
-}
-
-@keyframes loading {
-  0% { background-position: 200% 0; }
-  100% { background-position: -200% 0; }
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
 }
