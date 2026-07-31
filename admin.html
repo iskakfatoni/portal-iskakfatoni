@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Admin Dashboard - Microsite Portal</title>
+  <title>PORTAL::IskakFatoni - Admin Dashboard</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -120,7 +120,7 @@
     <div class="login-header">
       <i class="fa-solid fa-user-shield"></i>
       <h2>Admin Login</h2>
-      <p style="font-size:0.85rem; color:#64748b; margin-top:4px;">Portal Microsite Management</p>
+      <p style="font-size:0.85rem; color:#64748b; margin-top:4px;">PORTAL::IskakFatoni</p>
     </div>
     
     <div class="form-group">
@@ -146,7 +146,7 @@
     <header class="top-bar">
       <div class="top-bar-title">
         <h1><i class="fa-solid fa-sliders" style="color: #38bdf8;"></i> Dashboard Admin Portal</h1>
-        <p>Kelola daftar link microsite secara penuh dan realtime</p>
+        <p>Kelola daftar link di PORTAL secara penuh dan realtime</p>
       </div>
       <button id="btn-logout" class="btn btn-danger">
         <i class="fa-solid fa-power-off"></i> Logout
@@ -158,14 +158,14 @@
       <div class="status-info">
         <i class="fa-solid fa-power-off" style="font-size: 1.4rem; color: #38bdf8;"></i>
         <div>
-          <h3 style="font-size: 1rem; font-weight: 700; color: #fff;">Status Portal Publik</h3>
-          <p style="font-size: 0.8rem; color: #94a3b8;">Atur apakah portal sedang Buka (Tampil Link) atau Tutup</p>
+          <h3 style="font-size: 1rem; font-weight: 700; color: #fff;">Status Portal</h3>
+          <p style="font-size: 0.8rem; color: #94a3b8;">Atur apakah portal di mode BUKA atau TUTUP ?</p>
         </div>
       </div>
       <div style="display: flex; align-items: center; gap: 16px;">
         <span id="portal-status-badge" class="status-badge status-on">ONLINE</span>
         <button id="btn-toggle-portal" class="btn btn-toggle">
-          <i class="fa-solid fa-toggle-on"></i> Ubah Ke OFF MODE
+          <i class="fa-solid fa-toggle-on"></i> Ubah Ke OFFLINE MODE
         </button>
       </div>
     </div>
@@ -307,12 +307,12 @@
           badge.innerText = 'ONLINE';
           badge.className = 'status-badge status-on';
           btnToggle.className = 'btn btn-toggle is-off';
-          btnToggle.innerHTML = '<i class="fa-solid fa-toggle-off"></i> Ubah Ke OFF MODE';
+          btnToggle.innerHTML = '<i class="fa-solid fa-toggle-off"></i> Ubah Ke OFFLINE MODE';
         } else {
           badge.innerText = 'OFFLINE';
           badge.className = 'status-badge status-off';
           btnToggle.className = 'btn btn-toggle';
-          btnToggle.innerHTML = '<i class="fa-solid fa-toggle-on"></i> Ubah Ke ON MODE';
+          btnToggle.innerHTML = '<i class="fa-solid fa-toggle-on"></i> Ubah Ke ONLINE MODE';
         }
       });
     }
