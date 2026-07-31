@@ -1,54 +1,33 @@
-<!DOCTYPE html>
-<html lang="id">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Link Bio</title>
-  <link rel="stylesheet" href="style.css">
-  <!-- Google Fonts & FontAwesome Icons -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-</head>
-<body>
+<!-- Container tempat link akan dimuat secara dinamis -->
+<section id="links-container" class="links">
+  <!-- Spinner / Loading state -->
+  <p>Loading links...</p>
+</section>
 
-  <main class="container">
-    <!-- Profil Header -->
-    <header class="profile">
-      <img src="https://via.placeholder.com/120" alt="Foto Profil" class="avatar">
-      <h1 class="name">Nama Kamu</h1>
-      <p class="bio">Developer & Maker | Tech Enthusiast</p>
-    </header>
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+  import { getFirestore, collection, getDocs, query, orderBy } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-    <!-- Daftar Link -->
-    <section class="links">
-      <a href="https://github.com/username" target="_blank" rel="noopener noreferrer" class="link-card">
-        <i class="fa-brands fa-github icon"></i>
-        <span>GitHub Repositories</span>
-      </a>
+  const firebaseConfig = { /* Konfigurasi Firebase Kamu */ };
+  const app = initializeApp(firebaseConfig);
+  const db = getFirestore(app);
 
-      <a href="https://linkedin.com/in/username" target="_blank" rel="noopener noreferrer" class="link-card">
-        <i class="fa-brands fa-linkedin icon"></i>
-        <span>LinkedIn Profile</span>
-      </a>
+  async function loadLinks() {
+    const container = document.getElementById('links-container');
+    const q = query(collection(db, "links"), orderBy("order", "asc"));
+    const querySnapshot = await getDocs(q);
+    
+    container.innerHTML = ''; // Clear loading
+    querySnapshot.forEach((doc) => {
+      const data = doc.data();
+      container.innerHTML += `
+        <a href="${data.url}" target="_blank" class="link-card">
+          <i class="${data.icon} icon"></i>
+          <span>${data.title}</span>
+        </a>
+      `;
+    });
+  }
 
-      <a href="https://youtube.com/@username" target="_blank" rel="noopener noreferrer" class="link-card">
-        <i class="fa-brands fa-youtube icon"></i>
-        <span>Channel YouTube</span>
-      </a>
-
-      <a href="mailto:email@domain.com" class="link-card">
-        <i class="fa-solid fa-envelope icon"></i>
-        <span>Kontak Email</span>
-      </a>
-    </section>
-
-    <!-- Footer -->
-    <footer class="footer">
-      <p>© 2026 • Crafted with passion</p>
-    </footer>
-  </main>
-
-</body>
-</html>
+  loadLinks();
+</script>
