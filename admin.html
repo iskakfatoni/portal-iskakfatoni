@@ -61,7 +61,7 @@
 
     /* --- DASHBOARD FULLSCREEN DESKTOP --- */
     .dashboard-container {
-      width: 100%; /* Memenuhi seluruh lebar layar */
+      width: 100%;
       max-width: 100%;
     }
 
@@ -94,10 +94,10 @@
       margin-top: 2px;
     }
 
-    /* Split Screen Grid (2 Kolom Full-Width) */
+    /* Split Screen Grid (Dibuat 1fr 1fr agar selebar dan seimbang 50%:50%) */
     .main-grid {
       display: grid;
-      grid-template-columns: 380px 1fr; /* Kolom Kiri 380px, Kolom Kanan mengisi sisa layar PC */
+      grid-template-columns: 1fr 1fr;
       gap: 24px;
       align-items: start;
     }
@@ -110,6 +110,7 @@
       border-radius: 20px;
       padding: 28px;
       box-shadow: 0 15px 35px -10px rgba(0, 0, 0, 0.4);
+      width: 100%;
     }
 
     .panel-title {
@@ -218,7 +219,7 @@
       color: #090d16;
     }
 
-    /* List Items - Table Like layout */
+    /* List Items */
     .link-list {
       display: flex;
       flex-direction: column;
@@ -331,7 +332,7 @@
     <!-- Split Screen Content -->
     <div class="main-grid">
       
-      <!-- Kolom Kiri: Form Input / Edit -->
+      <!-- Kolom Kiri: Form Input / Edit (50% Lebar) -->
       <div class="panel-card">
         <h3 id="form-title" class="panel-title">
           <i class="fa-solid fa-plus-circle"></i> Tambah Link Baru
@@ -370,7 +371,7 @@
         </button>
       </div>
 
-      <!-- Kolom Kanan: Daftar Link Aktif -->
+      <!-- Kolom Kanan: Daftar Link Aktif (50% Lebar) -->
       <div class="panel-card">
         <h3 class="panel-title">
           <i class="fa-solid fa-list-check"></i> Daftar Link Aktif
