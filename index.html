@@ -1,82 +1,47 @@
-<!DOCTYPE html>
-<html lang="id">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Muchamad Iskak Fatoni - Link Bio</title>
-  <link rel="stylesheet" href="style.css">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-</head>
-<body>
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+  import { getFirestore, collection, query, orderBy, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-  <main class="container">
-    <!-- Profil Header -->
-    <header class="profile">
-      <div class="avatar-ring">
-        <img 
-          src="foto_asn_profile.png" 
-          onerror="this.onerror=null; this.src='foto_asn_profile.png';" 
-          alt="Muchamad Iskak Fatoni" 
-          class="avatar">
-      </div>
-      <h1 class="name">Muchamad Iskak Fatoni, S.Pd., Gr.</h1>
-      <p class="bio">Open Source & IoT Developer | Tech Enthusiast</p>
-    </header>
+  const firebaseConfig = {
+    apiKey: "AIzaSyDhq4QoCn00GkfpKXSP8PnvSvEKa2yn0ic",
+    authDomain: "portal-iskakfatoni.firebaseapp.com",
+    projectId: "portal-iskakfatoni",
+    storageBucket: "portal-iskakfatoni.firebasestorage.app",
+    messagingSenderId: "367350728822",
+    appId: "1:367350728822:web:6b0c6fd4824102d8acf757",
+    measurementId: "G-0BNNKQQ24V"
+  };
 
-    <!-- Daftar Link Dinamis dari Firebase -->
-    <section id="links-container" class="links">
-      <div class="skeleton-card"></div>
-      <div class="skeleton-card"></div>
-      <div class="skeleton-card"></div>
-    </section>
+  const app = initializeApp(firebaseConfig);
+  const db = getFirestore(app);
+  const container = document.getElementById('links-container');
 
-    <!-- Footer -->
-    <footer class="footer">
-      <p>© 2026 • Developed by Iskak Fatoni</p>
-    </footer>
-  </main>
+  const q = query(collection(db, "links"), orderBy("order", "asc"));
+  onSnapshot(q, (snapshot) => {
+    container.innerHTML = '';
+    
+    if (snapshot.empty) {
+      container.innerHTML = '<p style="color:#94a3b8; font-size: 0.85rem;">Belum ada link yang aktif.</p>';
+      return;
+    }
 
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-    import { getFirestore, collection, query, orderBy, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
-
-    const firebaseConfig = {
-      apiKey: "AIzaSyDhq4QoCn00GkfpKXSP8PnvSvEKa2yn0ic",
-      authDomain: "portal-iskakfatoni.firebaseapp.com",
-      projectId: "portal-iskakfatoni",
-      storageBucket: "portal-iskakfatoni.firebasestorage.app",
-      messagingSenderId: "367350728822",
-      appId: "1:367350728822:web:6b0c6fd4824102d8acf757",
-      measurementId: "G-0BNNKQQ24V"
-    };
-
-    const app = initializeApp(firebaseConfig);
-    const db = getFirestore(app);
-    const container = document.getElementById('links-container');
-
-    const q = query(collection(db, "links"), orderBy("order", "asc"));
-    onSnapshot(q, (snapshot) => {
-      container.innerHTML = '';
+    let index = 0;
+    snapshot.forEach((doc) => {
+      const data = doc.data();
       
-      if (snapshot.empty) {
-        container.innerHTML = '<p style="color:#94a3b8; font-size: 0.85rem;">Belum ada link yang aktif.</p>';
-        return;
-      }
+      // Menggilir variasi warna (0, 1, 2, 3) secara otomatis
+      const colorClass = `card-color-${index % 4}`;
+      index++;
 
-      snapshot.forEach((doc) => {
-        const data = doc.data();
-        container.innerHTML += `
-          <a href="${data.url}" target="_blank" rel="noopener noreferrer" class="link-card">
-            <i class="${data.icon || 'fa-solid fa-link'} icon"></i>
-            <span>${data.title}</span>
-          </a>
-        `;
-      });
-    }, (error) => {
-      console.error("Firestore Error:", error);
-      container.innerHTML = `<p style="color:#ef4444; font-size:0.8rem;">Gagal memuat link.</p>`;
+      container.innerHTML += `
+        <a href="${data.url}" target="_blank" rel="noopener noreferrer" class="link-card ${colorClass}">
+          <i class="${data.icon || 'fa-solid fa-link'} icon"></i>
+          <span>${data.title}</span>
+        </a>
+      `;
     });
-  </script>
-
-</body>
-</html>
+  }, (error) => {
+    console.error("Firestore Error:", error);
+    container.innerHTML = `<p style="color:#ef4444; font-size:0.8rem;">Gagal memuat link.</p>`;
+  });
+</script>
