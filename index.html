@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Iskak Fatoni - Link Bio</title>
+  <title>Muchamad Iskak Fatoni - Link Bio</title>
   <link rel="stylesheet" href="style.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
@@ -13,13 +13,14 @@
     <!-- Profil Header -->
     <header class="profile">
       <div class="avatar-wrapper">
-        <img src="https://via.placeholder.com/120" alt="Foto Profil" class="avatar">
+        <!-- Menggunakan foto profil ASN kamu -->
+        <img src="foto_asn_profile.png.jpg" alt="Foto Muchamad Iskak Fatoni" class="avatar">
       </div>
-      <h1 class="name">Iskak Fatoni, S.Pd., Gr.</h1>
-      <p class="bio">Open Source & IoT Developer | Tech Enthusiast</p>
+      <h1 class="name">Muchamad Iskak Fatoni, S.Pd., Gr.</h1>
+      <p class="bio">Developer & IoT Maker | Open Source Enthusiast</p>
     </header>
 
-    <!-- Daftar Link Dinamis -->
+    <!-- Daftar Link Dinamis dari Firestore -->
     <section id="links-container" class="links">
       <div class="skeleton-card"></div>
       <div class="skeleton-card"></div>
@@ -55,7 +56,7 @@
       container.innerHTML = '';
       
       if (snapshot.empty) {
-        container.innerHTML = '<p style="color:#94a3b8; font-size: 0.9rem;">Belum ada link yang aktif.</p>';
+        container.innerHTML = '<p style="color:#94a3b8; font-size: 0.85rem;">Belum ada link yang aktif.</p>';
         return;
       }
 
@@ -70,7 +71,7 @@
       });
     }, (error) => {
       console.error("Firestore Error:", error);
-      container.innerHTML = `<p style="color:#ef4444; font-size:0.85rem;">Gagal memuat link.</p>`;
+      container.innerHTML = `<p style="color:#ef4444; font-size:0.8rem;">Gagal memuat link.</p>`;
     });
   </script>
 
