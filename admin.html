@@ -93,9 +93,10 @@
       margin-top: 2px;
     }
 
+    /* GRID LAYOUT: Kolom Form Kunci di 380px (tidak melebar), Kolom Daftar Link Mengisi Sisa Layar */
     .main-grid {
       display: grid;
-      grid-template-columns: 1fr 1fr;
+      grid-template-columns: 380px 1fr;
       gap: 24px;
       align-items: start;
     }
@@ -332,7 +333,7 @@
     <!-- Split Screen Content -->
     <div class="main-grid">
       
-      <!-- Kolom Kiri: Form Input / Edit -->
+      <!-- Kolom Kiri: Form Input / Edit (Dikunci pada 380px) -->
       <div class="panel-card">
         <h3 id="form-title" class="panel-title">
           <i class="fa-solid fa-plus-circle"></i> Tambah Link Baru
@@ -383,7 +384,7 @@
         </button>
       </div>
 
-      <!-- Kolom Kanan: Daftar Link Aktif -->
+      <!-- Kolom Kanan: Daftar Link Aktif (Sisa Lebar Layar) -->
       <div class="panel-card">
         <h3 class="panel-title">
           <i class="fa-solid fa-list-check"></i> Daftar Link Aktif
