@@ -1,33 +1,66 @@
-<!-- Container tempat link akan dimuat secara dinamis -->
-<section id="links-container" class="links">
-  <!-- Spinner / Loading state -->
-  <p>Loading links...</p>
-</section>
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>My Bio Links</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+  <main class="container">
+    <header class="profile">
+      <img src="https://via.placeholder.com/110" alt="Avatar" class="avatar">
+      <h1 class="name">Nama Kamu</h1>
+      <p class="bio">Developer & Tech Enthusiast</p>
+    </header>
 
-<script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-  import { getFirestore, collection, getDocs, query, orderBy } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+    <!-- Container Link Dinamis -->
+    <section id="links-container" class="links">
+      <p style="color: #94a3b8;">Memuat link...</p>
+    </section>
 
-  const firebaseConfig = { /* Konfigurasi Firebase Kamu */ };
-  const app = initializeApp(firebaseConfig);
-  const db = getFirestore(app);
+    <footer class="footer">
+      <p>© 2026 • Powered by Firebase</p>
+    </footer>
+  </main>
 
-  async function loadLinks() {
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+    import { getFirestore, collection, query, orderBy, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+    // Tempel konfigurasi Firebase kamu di sini
+    const firebaseConfig = {
+      apiKey: "PASTE_API_KEY_KAMU",
+      authDomain: "PASTE_PROJECT.firebaseapp.com",
+      projectId: "PASTE_PROJECT_ID",
+      storageBucket: "PASTE_PROJECT.appspot.com",
+      messagingSenderId: "PASTE_SENDER_ID",
+      appId: "PASTE_APP_ID"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
     const container = document.getElementById('links-container');
-    const q = query(collection(db, "links"), orderBy("order", "asc"));
-    const querySnapshot = await getDocs(q);
-    
-    container.innerHTML = ''; // Clear loading
-    querySnapshot.forEach((doc) => {
-      const data = doc.data();
-      container.innerHTML += `
-        <a href="${data.url}" target="_blank" class="link-card">
-          <i class="${data.icon} icon"></i>
-          <span>${data.title}</span>
-        </a>
-      `;
-    });
-  }
 
-  loadLinks();
-</script>
+    // Realtime listener dari Firestore (Otomatis update tanpa refresh)
+    const q = query(collection(db, "links"), orderBy("order", "asc"));
+    onSnapshot(q, (snapshot) => {
+      container.innerHTML = '';
+      if (snapshot.empty) {
+        container.innerHTML = '<p style="color:#94a3b8;">Belum ada link.</p>';
+        return;
+      }
+      snapshot.forEach((doc) => {
+        const data = doc.data();
+        container.innerHTML += `
+          <a href="${data.url}" target="_blank" rel="noopener noreferrer" class="link-card">
+            <i class="${data.icon || 'fa-solid fa-link'} icon"></i>
+            <span>${data.title}</span>
+          </a>
+        `;
+      });
+    });
+  </script>
+</body>
+</html>
