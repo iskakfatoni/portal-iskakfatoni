@@ -3,25 +3,33 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>My Bio Links</title>
+  <title>Muchamad Iskak Fatoni - Link Bio</title>
   <link rel="stylesheet" href="style.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
+
   <main class="container">
+    <!-- Profil Header -->
     <header class="profile">
-      <img src="https://via.placeholder.com/110" alt="Avatar" class="avatar">
-      <h1 class="name">Nama Kamu</h1>
-      <p class="bio">Developer & Tech Enthusiast</p>
+      <div class="avatar-wrapper">
+        <!-- Menggunakan foto profil ASN kamu -->
+        <img src="foto_asn_profile.png.jpg" alt="Foto Muchamad Iskak Fatoni" class="avatar">
+      </div>
+      <h1 class="name">Muchamad Iskak Fatoni, S.Pd., Gr.</h1>
+      <p class="bio">Developer & IoT Maker | Open Source Enthusiast</p>
     </header>
 
-    <!-- Container Link Dinamis -->
+    <!-- Daftar Link Dinamis dari Firestore -->
     <section id="links-container" class="links">
-      <p style="color: #94a3b8;">Memuat link...</p>
+      <div class="skeleton-card"></div>
+      <div class="skeleton-card"></div>
+      <div class="skeleton-card"></div>
     </section>
 
+    <!-- Footer -->
     <footer class="footer">
-      <p>© 2026 • Powered by Firebase</p>
+      <p>© 2026 • Developed by Iskak Fatoni</p>
     </footer>
   </main>
 
@@ -29,28 +37,29 @@
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
     import { getFirestore, collection, query, orderBy, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-    // Tempel konfigurasi Firebase kamu di sini
     const firebaseConfig = {
-      apiKey: "PASTE_API_KEY_KAMU",
-      authDomain: "PASTE_PROJECT.firebaseapp.com",
-      projectId: "PASTE_PROJECT_ID",
-      storageBucket: "PASTE_PROJECT.appspot.com",
-      messagingSenderId: "PASTE_SENDER_ID",
-      appId: "PASTE_APP_ID"
+      apiKey: "AIzaSyDhq4QoCn00GkfpKXSP8PnvSvEKa2yn0ic",
+      authDomain: "portal-iskakfatoni.firebaseapp.com",
+      projectId: "portal-iskakfatoni",
+      storageBucket: "portal-iskakfatoni.firebasestorage.app",
+      messagingSenderId: "367350728822",
+      appId: "1:367350728822:web:6b0c6fd4824102d8acf757",
+      measurementId: "G-0BNNKQQ24V"
     };
 
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
     const container = document.getElementById('links-container');
 
-    // Realtime listener dari Firestore (Otomatis update tanpa refresh)
     const q = query(collection(db, "links"), orderBy("order", "asc"));
     onSnapshot(q, (snapshot) => {
       container.innerHTML = '';
+      
       if (snapshot.empty) {
-        container.innerHTML = '<p style="color:#94a3b8;">Belum ada link.</p>';
+        container.innerHTML = '<p style="color:#94a3b8; font-size: 0.85rem;">Belum ada link yang aktif.</p>';
         return;
       }
+
       snapshot.forEach((doc) => {
         const data = doc.data();
         container.innerHTML += `
@@ -60,7 +69,11 @@
           </a>
         `;
       });
+    }, (error) => {
+      console.error("Firestore Error:", error);
+      container.innerHTML = `<p style="color:#ef4444; font-size:0.8rem;">Gagal memuat link.</p>`;
     });
   </script>
+
 </body>
 </html>
