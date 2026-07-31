@@ -3,62 +3,390 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Admin Dashboard - Microsite</title>
-  <link rel="stylesheet" href="style.css">
+  <title>Admin Dashboard - Microsite Portal</title>
+  <!-- Google Fonts & Icons -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
   <style>
-    .admin-card { background: #1e293b; padding: 20px; border-radius: 12px; margin-bottom: 20px; border: 1px solid #334155; }
-    input { width: 100%; padding: 10px; margin: 8px 0; background: #0f172a; border: 1px solid #334155; color: #fff; border-radius: 6px; box-sizing: border-box; }
-    button { padding: 10px 16px; background: #38bdf8; border: none; color: #0f172a; font-weight: bold; border-radius: 6px; cursor: pointer; margin-top: 8px; }
-    button:hover { background: #0284c7; color: #fff; }
-    .btn-danger { background: #ef4444; color: #fff; }
-    .btn-danger:hover { background: #dc2626; }
-    .item-row { display: flex; justify-content: space-between; align-items: center; background: #0f172a; padding: 12px; border-radius: 8px; margin-bottom: 8px; }
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      background-color: #0b0f19;
+      background-image: 
+        radial-gradient(circle at 10% 20%, rgba(56, 189, 248, 0.08) 0%, transparent 40%),
+        radial-gradient(circle at 90% 80%, rgba(99, 102, 241, 0.08) 0%, transparent 40%);
+      background-attachment: fixed;
+      color: #f8fafc;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 40px 20px;
+    }
+
+    /* --- LOGIN BOX (Centered Desktop) --- */
+    .login-container {
+      width: 100%;
+      max-width: 420px;
+      background: rgba(15, 23, 42, 0.8);
+      backdrop-filter: blur(16px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 20px;
+      padding: 36px 32px;
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.6);
+    }
+
+    .login-header {
+      text-align: center;
+      margin-bottom: 24px;
+    }
+
+    .login-header i {
+      font-size: 2.5rem;
+      color: #38bdf8;
+      margin-bottom: 12px;
+    }
+
+    .login-header h2 {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: #fff;
+    }
+
+    /* --- DASHBOARD LAYOUT (Desktop Focus) --- */
+    .dashboard-container {
+      width: 100%;
+      max-width: 1100px; /* Lebar maksimal ideal untuk Laptop/PC */
+      margin: 0 auto;
+    }
+
+    /* Top Bar Header */
+    .top-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: rgba(15, 23, 42, 0.75);
+      backdrop-filter: blur(16px);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 16px;
+      padding: 20px 28px;
+      margin-bottom: 24px;
+      box-shadow: 0 10px 30px -10px rgba(0,0,0,0.5);
+    }
+
+    .top-bar-title h1 {
+      font-size: 1.35rem;
+      font-weight: 800;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .top-bar-title p {
+      font-size: 0.85rem;
+      color: #94a3b8;
+      margin-top: 2px;
+    }
+
+    /* Split Screen Grid (2 Kolom) */
+    .main-grid {
+      display: grid;
+      grid-template-columns: 380px 1fr; /* Kolom Form 380px, Kolom Tabel sisa layar */
+      gap: 24px;
+      align-items: start;
+    }
+
+    /* Panels & Cards */
+    .panel-card {
+      background: rgba(15, 23, 42, 0.75);
+      backdrop-filter: blur(16px);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 20px;
+      padding: 24px;
+      box-shadow: 0 15px 35px -10px rgba(0, 0, 0, 0.4);
+    }
+
+    .panel-title {
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: #38bdf8;
+      margin-bottom: 18px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+      padding-bottom: 12px;
+    }
+
+    /* Form Controls */
+    .form-group {
+      margin-bottom: 16px;
+    }
+
+    .form-group label {
+      display: block;
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: #cbd5e1;
+      margin-bottom: 6px;
+    }
+
+    input {
+      width: 100%;
+      padding: 11px 14px;
+      background: #090d16;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      color: #fff;
+      font-family: inherit;
+      font-size: 0.9rem;
+      border-radius: 10px;
+      transition: all 0.2s ease;
+    }
+
+    input:focus {
+      outline: none;
+      border-color: #38bdf8;
+      box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.15);
+    }
+
+    /* Buttons */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 11px 20px;
+      font-family: inherit;
+      font-size: 0.9rem;
+      font-weight: 700;
+      border-radius: 10px;
+      border: none;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .btn-primary {
+      background: #38bdf8;
+      color: #090d16;
+      width: 100%;
+    }
+
+    .btn-primary:hover {
+      background: #0284c7;
+      color: #fff;
+      box-shadow: 0 4px 15px rgba(56, 189, 248, 0.3);
+    }
+
+    .btn-secondary {
+      background: #475569;
+      color: #fff;
+      width: 100%;
+      margin-top: 8px;
+    }
+
+    .btn-secondary:hover { background: #334155; }
+
+    .btn-danger {
+      background: rgba(239, 68, 68, 0.15);
+      color: #f87171;
+      border: 1px solid rgba(239, 68, 68, 0.3);
+      padding: 8px 14px;
+      font-size: 0.8rem;
+    }
+
+    .btn-danger:hover {
+      background: #ef4444;
+      color: #fff;
+    }
+
+    .btn-edit {
+      background: rgba(56, 189, 248, 0.15);
+      color: #38bdf8;
+      border: 1px solid rgba(56, 189, 248, 0.3);
+      padding: 8px 14px;
+      font-size: 0.8rem;
+    }
+
+    .btn-edit:hover {
+      background: #38bdf8;
+      color: #090d16;
+    }
+
+    /* Table / List Items */
+    .link-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .link-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: rgba(9, 13, 22, 0.6);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      border-radius: 12px;
+      padding: 14px 18px;
+      transition: all 0.2s ease;
+    }
+
+    .link-item:hover {
+      border-color: rgba(56, 189, 248, 0.3);
+      background: rgba(15, 23, 42, 0.8);
+    }
+
+    .link-info {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .badge-order {
+      background: rgba(56, 189, 248, 0.15);
+      color: #38bdf8;
+      font-size: 0.8rem;
+      font-weight: 800;
+      padding: 6px 10px;
+      border-radius: 8px;
+      min-width: 32px;
+      text-align: center;
+    }
+
+    .link-details h4 {
+      font-size: 0.95rem;
+      color: #fff;
+      font-weight: 600;
+    }
+
+    .link-details p {
+      font-size: 0.8rem;
+      color: #64748b;
+      margin-top: 2px;
+    }
+
+    .actions {
+      display: flex;
+      gap: 8px;
+    }
+
     .hidden { display: none !important; }
+
+    /* Responsive untuk Layar Kecil */
+    @media (max-width: 868px) {
+      .main-grid {
+        grid-template-columns: 1fr;
+      }
+    }
   </style>
 </head>
 <body>
-  <main class="container" style="max-width: 600px;">
-    
-    <!-- SECTION LOGIN -->
-    <div id="login-section" class="admin-card">
+
+  <!-- ================= SECTION LOGIN ================= -->
+  <div id="login-section" class="login-container">
+    <div class="login-header">
+      <i class="fa-solid fa-user-shield"></i>
       <h2>Admin Login</h2>
-      <input type="email" id="login-email" placeholder="Email Admin">
-      <input type="password" id="login-password" placeholder="Password">
-      <button id="btn-login">Login</button>
-      <p id="login-error" style="color:#ef4444; margin-top:8px; font-size:0.9rem;"></p>
+      <p style="font-size:0.85rem; color:#64748b; margin-top:4px;">Portal Microsite Management</p>
+    </div>
+    
+    <div class="form-group">
+      <label>Email Admin</label>
+      <input type="email" id="login-email" placeholder="nama@domain.com">
     </div>
 
-    <!-- SECTION DASHBOARD -->
-    <div id="dashboard-section" class="hidden">
-      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
-        <h2 style="margin:0;">Manage Links</h2>
-        <button id="btn-logout" class="btn-danger">Logout</button>
-      </div>
+    <div class="form-group">
+      <label>Password</label>
+      <input type="password" id="login-password" placeholder="••••••••">
+    </div>
 
-      <!-- FORM TAMBAH / EDIT -->
-      <div class="admin-card">
-        <h3 id="form-title">Tambah Link Baru</h3>
+    <button id="btn-login" class="btn btn-primary" style="margin-top: 10px;">
+      <i class="fa-solid fa-right-to-bracket"></i> Masuk Dashboard
+    </button>
+    <p id="login-error" style="color:#ef4444; margin-top:12px; font-size:0.85rem; text-align:center;"></p>
+  </div>
+
+
+  <!-- ================= SECTION DASHBOARD ================= -->
+  <div id="dashboard-section" class="dashboard-container hidden">
+    
+    <!-- Top Header Bar -->
+    <header class="top-bar">
+      <div class="top-bar-title">
+        <h1><i class="fa-solid fa-sliders" style="color: #38bdf8;"></i> Dashboard Admin</h1>
+        <p>Kelola link microsite secara langsung dan realtime</p>
+      </div>
+      <button id="btn-logout" class="btn btn-danger">
+        <i class="fa-solid fa-power-off"></i> Logout
+      </button>
+    </header>
+
+    <!-- Split Screen Content -->
+    <div class="main-grid">
+      
+      <!-- Kolom Kiri: Form Input / Edit -->
+      <div class="panel-card">
+        <h3 id="form-title" class="panel-title">
+          <i class="fa-solid fa-plus-circle"></i> Tambah Link Baru
+        </h3>
+
         <input type="hidden" id="link-id">
-        <input type="text" id="link-title" placeholder="Judul Link (mis: GitHub)">
-        <input type="url" id="link-url" placeholder="URL (mis: https://github.com/...)">
-        <input type="text" id="link-icon" placeholder="FontAwesome Icon Class (mis: fa-brands fa-github)">
-        <input type="number" id="link-order" placeholder="Urutan Tampil (mis: 1, 2, 3)">
-        <button id="btn-save">Simpan Link</button>
-        <button id="btn-cancel" class="hidden" style="background:#64748b; color:#fff;">Batal</button>
+
+        <div class="form-group">
+          <label>Judul Link</label>
+          <input type="text" id="link-title" placeholder="Contoh: GitHub Repositories">
+        </div>
+
+        <div class="form-group">
+          <label>URL Tujuan</label>
+          <input type="url" id="link-url" placeholder="https://github.com/username">
+        </div>
+
+        <div class="form-group">
+          <label>FontAwesome Icon Class</label>
+          <input type="text" id="link-icon" placeholder="fa-brands fa-github">
+          <small style="color:#64748b; font-size:0.75rem; display:block; margin-top:4px;">
+            Contoh: <code>fa-brands fa-youtube</code> atau <code>fa-solid fa-envelope</code>
+          </small>
+        </div>
+
+        <div class="form-group">
+          <label>Urutan Tampil (Order)</label>
+          <input type="number" id="link-order" placeholder="1, 2, 3...">
+        </div>
+
+        <button id="btn-save" class="btn btn-primary">
+          <i class="fa-solid fa-floppy-disk"></i> Simpan Link
+        </button>
+        <button id="btn-cancel" class="btn btn-secondary hidden">
+          Batal Edit
+        </button>
       </div>
 
-      <!-- DAFTAR LINK -->
-      <div class="admin-card">
-        <h3>Daftar Link Aktif</h3>
-        <div id="admin-links-list"></div>
+      <!-- Kolom Kanan: Daftar Link Aktif -->
+      <div class="panel-card">
+        <h3 class="panel-title">
+          <i class="fa-solid fa-list-check"></i> Daftar Link Aktif
+        </h3>
+
+        <div id="admin-links-list" class="link-list">
+          <p style="color:#64748b; font-size:0.9rem;">Memuat daftar link...</p>
+        </div>
       </div>
+
     </div>
 
-  </main>
+  </div>
 
   <script type="module">
-    // Import seluruh modul dari CDN gstatic agar bisa berjalan langsung di browser tanpa bundler
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
     import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-analytics.js";
     import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
@@ -83,7 +411,7 @@
     const dashboardSection = document.getElementById('dashboard-section');
     const loginError = document.getElementById('login-error');
 
-    // Cek Sesi Authentication
+    // Cek Sesi Auth
     onAuthStateChanged(auth, (user) => {
       if (user) {
         loginSection.classList.add('hidden');
@@ -95,7 +423,7 @@
       }
     });
 
-    // Handle Login
+    // Action Login
     document.getElementById('btn-login').addEventListener('click', async () => {
       const email = document.getElementById('login-email').value;
       const pass = document.getElementById('login-password').value;
@@ -103,11 +431,11 @@
       try {
         await signInWithEmailAndPassword(auth, email, pass);
       } catch (err) {
-        loginError.innerText = 'Login gagal: ' + err.message;
+        loginError.innerText = 'Login gagal: Periksa email dan password.';
       }
     });
 
-    // Handle Logout
+    // Action Logout
     document.getElementById('btn-logout').addEventListener('click', () => signOut(auth));
 
     // Form Elements
@@ -119,24 +447,33 @@
     const btnSave = document.getElementById('btn-save');
     const btnCancel = document.getElementById('btn-cancel');
 
-    // Realtime List untuk Admin
+    // Realtime List untuk Admin Dashboard
     function loadAdminLinks() {
       const q = query(collection(db, "links"), orderBy("order", "asc"));
       onSnapshot(q, (snapshot) => {
         const listDiv = document.getElementById('admin-links-list');
         listDiv.innerHTML = '';
+
+        if (snapshot.empty) {
+          listDiv.innerHTML = '<p style="color:#64748b; font-size:0.85rem;">Belum ada link yang tersimpan.</p>';
+          return;
+        }
+
         snapshot.forEach((docSnap) => {
           const data = docSnap.data();
           const row = document.createElement('div');
-          row.className = 'item-row';
+          row.className = 'link-item';
           row.innerHTML = `
-            <div>
-              <strong>[${data.order}] ${data.title}</strong><br>
-              <small style="color:#94a3b8;">${data.url}</small>
+            <div class="link-info">
+              <span class="badge-order">#${data.order || 1}</span>
+              <div class="link-details">
+                <h4><i class="${data.icon || 'fa-solid fa-link'}" style="color:#38bdf8; margin-right:6px;"></i> ${data.title}</h4>
+                <p>${data.url}</p>
+              </div>
             </div>
-            <div>
-              <button class="btn-edit" style="padding:4px 8px; font-size:0.8rem;">Edit</button>
-              <button class="btn-delete btn-danger" style="padding:4px 8px; font-size:0.8rem;">Hapus</button>
+            <div class="actions">
+              <button class="btn btn-edit"><i class="fa-solid fa-pen"></i> Edit</button>
+              <button class="btn btn-danger"><i class="fa-solid fa-trash"></i> Hapus</button>
             </div>
           `;
           
@@ -146,12 +483,12 @@
             linkUrlInput.value = data.url;
             linkIconInput.value = data.icon || '';
             linkOrderInput.value = data.order || 1;
-            document.getElementById('form-title').innerText = 'Edit Link';
+            document.getElementById('form-title').innerHTML = '<i class="fa-solid fa-pen-to-square"></i> Edit Link';
             btnCancel.classList.remove('hidden');
           };
 
-          row.querySelector('.btn-delete').onclick = async () => {
-            if (confirm(`Hapus "${data.title}"?`)) {
+          row.querySelector('.btn-danger').onclick = async () => {
+            if (confirm(`Yakin ingin menghapus "${data.title}"?`)) {
               await deleteDoc(doc(db, "links", docSnap.id));
             }
           };
@@ -161,7 +498,7 @@
       });
     }
 
-    // Save/Update Action
+    // Save/Update Link
     btnSave.addEventListener('click', async () => {
       const id = linkIdInput.value;
       const title = linkTitleInput.value.trim();
@@ -191,9 +528,10 @@
       linkUrlInput.value = '';
       linkIconInput.value = '';
       linkOrderInput.value = '';
-      document.getElementById('form-title').innerText = 'Tambah Link Baru';
+      document.getElementById('form-title').innerHTML = '<i class="fa-solid fa-plus-circle"></i> Tambah Link Baru';
       btnCancel.classList.add('hidden');
     }
   </script>
+
 </body>
 </html>
