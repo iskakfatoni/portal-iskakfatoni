@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Dashboard - Microsite</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    .admin-card { background: #1e293b; padding: 20px; border-radius: 12px; margin-bottom: 20px; border: 1px solid #334155; }
+    input { width: 100%; padding: 10px; margin: 8px 0; background: #0f172a; border: 1px solid #334155; color: #fff; border-radius: 6px; box-sizing: border-box; }
+    button { padding: 10px 16px; background: #38bdf8; border: none; color: #0f172a; font-weight: bold; border-radius: 6px; cursor: pointer; margin-top: 8px; }
+    button:hover { background: #0284c7; color: #fff; }
+    .btn-danger { background: #ef4444; color: #fff; }
+    .btn-danger:hover { background: #dc2626; }
+    .item-row { display: flex; justify-content: space-between; align-items: center; background: #0f172a; padding: 12px; border-radius: 8px; margin-bottom: 8px; }
+    .hidden { display: none !important; }
+  </style>
+</head>
+<body>
+  <main class="container" style="max-width: 600px;">
+    
+    <!-- SECTION LOGIN -->
+    <div id="login-section" class="admin-card">
+      <h2>Admin Login</h2>
+      <input type="email" id="login-email" placeholder="Email Admin">
+      <input type="password" id="login-password" placeholder="Password">
+      <button id="btn-login">Login</button>
+      <p id="login-error" style="color:#ef4444; margin-top:8px; font-size:0.9rem;"></p>
+    </div>
+
+    <!-- SECTION DASHBOARD -->
+    <div id="dashboard-section" class="hidden">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+        <h2 style="margin:0;">Manage Links</h2>
+        <button id="btn-logout" class="btn-danger">Logout</button>
+      </div>
+
+      <!-- FORM TAMBAH / EDIT -->
+      <div class="admin-card">
+        <h3 id="form-title">Tambah Link Baru</h3>
+        <input type="hidden" id="link-id">
+        <input type="text" id="link-title" placeholder="Judul Link (mis: GitHub)">
+        <input type="url" id="link-url" placeholder="URL (mis: https://github.com/...)">
+        <input type="text" id="link-icon" placeholder="FontAwesome Icon Class (mis: fa-brands fa-github)">
+        <input type="number" id="link-order" placeholder="Urutan Tampil (mis: 1, 2, 3)">
+        <button id="btn-save">Simpan Link</button>
+        <button id="btn-cancel" class="hidden" style="background:#64748b; color:#fff;">Batal</button>
+      </div>
+
+      <!-- DAFTAR LINK -->
+      <div class="admin-card">
+        <h3>Daftar Link Aktif</h3>
+        <div id="admin-links-list"></div>
+      </div>
+    </div>
+
+  </main>
+
+  <script type="module">
+    import { initializeApp } from "firebase/app";
+import { getAnalytics } from "firebase/analytics";
+    import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+    import { getFirestore, collection, addDoc, updateDoc, deleteDoc, doc, query, orderBy, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyDhq4QoCn00GkfpKXSP8PnvSvEKa2yn0ic",
+  authDomain: "portal-iskakfatoni.firebaseapp.com",
+  projectId: "portal-iskakfatoni",
+  storageBucket: "portal-iskakfatoni.firebasestorage.app",
+  messagingSenderId: "367350728822",
+  appId: "1:367350728822:web:6b0c6fd4824102d8acf757",
+  measurementId: "G-0BNNKQQ24V"
+};
+    const app = initializeApp(firebaseConfig);
+const analytics = getAnalytics(app);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+
+    const loginSection = document.getElementById('login-section');
+    const dashboardSection = document.getElementById('dashboard-section');
+    const loginError = document.getElementById('login-error');
+
+    // Cek Sesi Authentication
+    onAuthStateChanged(auth, (user) => {
+      if (user) {
+        loginSection.classList.add('hidden');
+        dashboardSection.classList.remove('hidden');
+        loadAdminLinks();
+      } else {
+        loginSection.classList.remove('hidden');
+        dashboardSection.classList.add('hidden');
+      }
+    });
+
+    // Handle Login
+    document.getElementById('btn-login').addEventListener('click', async () => {
+      const email = document.getElementById('login-email').value;
+      const pass = document.getElementById('login-password').value;
+      loginError.innerText = '';
+      try {
+        await signInWithEmailAndPassword(auth, email, pass);
+      } catch (err) {
+        loginError.innerText = 'Login gagal: ' + err.message;
+      }
+    });
+
+    // Handle Logout
+    document.getElementById('btn-logout').addEventListener('click', () => signOut(auth));
+
+    // Form Elements
+    const linkIdInput = document.getElementById('link-id');
+    const linkTitleInput = document.getElementById('link-title');
+    const linkUrlInput = document.getElementById('link-url');
+    const linkIconInput = document.getElementById('link-icon');
+    const linkOrderInput = document.getElementById('link-order');
+    const btnSave = document.getElementById('btn-save');
+    const btnCancel = document.getElementById('btn-cancel');
+
+    // Realtime List untuk Admin
+    function loadAdminLinks() {
+      const q = query(collection(db, "links"), orderBy("order", "asc"));
+      onSnapshot(q, (snapshot) => {
+        const listDiv = document.getElementById('admin-links-list');
+        listDiv.innerHTML = '';
+        snapshot.forEach((docSnap) => {
+          const data = docSnap.data();
+          const row = document.createElement('div');
+          row.className = 'item-row';
+          row.innerHTML = `
+            <div>
+              <strong>[${data.order}] ${data.title}</strong><br>
+              <small style="color:#94a3b8;">${data.url}</small>
+            </div>
+            <div>
+              <button class="btn-edit" style="padding:4px 8px; font-size:0.8rem;">Edit</button>
+              <button class="btn-delete btn-danger" style="padding:4px 8px; font-size:0.8rem;">Hapus</button>
+            </div>
+          `;
+          
+          row.querySelector('.btn-edit').onclick = () => {
+            linkIdInput.value = docSnap.id;
+            linkTitleInput.value = data.title;
+            linkUrlInput.value = data.url;
+            linkIconInput.value = data.icon || '';
+            linkOrderInput.value = data.order || 1;
+            document.getElementById('form-title').innerText = 'Edit Link';
+            btnCancel.classList.remove('hidden');
+          };
+
+          row.querySelector('.btn-delete').onclick = async () => {
+            if (confirm(`Hapus "${data.title}"?`)) {
+              await deleteDoc(doc(db, "links", docSnap.id));
+            }
+          };
+
+          listDiv.appendChild(row);
+        });
+      });
+    }
+
+    // Save/Update Action
+    btnSave.addEventListener('click', async () => {
+      const id = linkIdInput.value;
+      const title = linkTitleInput.value.trim();
+      const url = linkUrlInput.value.trim();
+      const icon = linkIconInput.value.trim();
+      const order = parseInt(linkOrderInput.value) || 1;
+
+      if (!title || !url) {
+        alert('Judul dan URL wajib diisi!');
+        return;
+      }
+
+      if (id) {
+        await updateDoc(doc(db, "links", id), { title, url, icon, order });
+      } else {
+        await addDoc(collection(db, "links"), { title, url, icon, order });
+      }
+
+      resetForm();
+    });
+
+    btnCancel.addEventListener('click', resetForm);
+
+    function resetForm() {
+      linkIdInput.value = '';
+      linkTitleInput.value = '';
+      linkUrlInput.value = '';
+      linkIconInput.value = '';
+      linkOrderInput.value = '';
+      document.getElementById('form-title').innerText = 'Tambah Link Baru';
+      btnCancel.classList.add('hidden');
+    }
+  </script>
+</body>
+</html>
