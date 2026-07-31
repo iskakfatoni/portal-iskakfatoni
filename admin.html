@@ -26,17 +26,15 @@
       background-attachment: fixed;
       color: #f8fafc;
       min-height: 100vh;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      padding: 40px 20px;
+      padding: 24px;
     }
 
     /* --- LOGIN BOX (Centered Desktop) --- */
     .login-container {
       width: 100%;
       max-width: 420px;
-      background: rgba(15, 23, 42, 0.8);
+      margin: 80px auto;
+      background: rgba(15, 23, 42, 0.85);
       backdrop-filter: blur(16px);
       border: 1px solid rgba(255, 255, 255, 0.1);
       border-radius: 20px;
@@ -61,11 +59,10 @@
       color: #fff;
     }
 
-    /* --- DASHBOARD LAYOUT (Desktop Focus) --- */
+    /* --- DASHBOARD FULLSCREEN DESKTOP --- */
     .dashboard-container {
-      width: 100%;
-      max-width: 1100px; /* Lebar maksimal ideal untuk Laptop/PC */
-      margin: 0 auto;
+      width: 100%; /* Memenuhi seluruh lebar layar */
+      max-width: 100%;
     }
 
     /* Top Bar Header */
@@ -73,22 +70,22 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
-      background: rgba(15, 23, 42, 0.75);
+      background: rgba(15, 23, 42, 0.8);
       backdrop-filter: blur(16px);
       border: 1px solid rgba(255, 255, 255, 0.08);
       border-radius: 16px;
-      padding: 20px 28px;
+      padding: 20px 32px;
       margin-bottom: 24px;
       box-shadow: 0 10px 30px -10px rgba(0,0,0,0.5);
     }
 
     .top-bar-title h1 {
-      font-size: 1.35rem;
+      font-size: 1.4rem;
       font-weight: 800;
       color: #fff;
       display: flex;
       align-items: center;
-      gap: 10px;
+      gap: 12px;
     }
 
     .top-bar-title p {
@@ -97,44 +94,44 @@
       margin-top: 2px;
     }
 
-    /* Split Screen Grid (2 Kolom) */
+    /* Split Screen Grid (2 Kolom Full-Width) */
     .main-grid {
       display: grid;
-      grid-template-columns: 380px 1fr; /* Kolom Form 380px, Kolom Tabel sisa layar */
+      grid-template-columns: 380px 1fr; /* Kolom Kiri 380px, Kolom Kanan mengisi sisa layar PC */
       gap: 24px;
       align-items: start;
     }
 
     /* Panels & Cards */
     .panel-card {
-      background: rgba(15, 23, 42, 0.75);
+      background: rgba(15, 23, 42, 0.8);
       backdrop-filter: blur(16px);
       border: 1px solid rgba(255, 255, 255, 0.08);
       border-radius: 20px;
-      padding: 24px;
+      padding: 28px;
       box-shadow: 0 15px 35px -10px rgba(0, 0, 0, 0.4);
     }
 
     .panel-title {
-      font-size: 1.05rem;
+      font-size: 1.1rem;
       font-weight: 700;
       color: #38bdf8;
-      margin-bottom: 18px;
+      margin-bottom: 20px;
       display: flex;
       align-items: center;
-      gap: 8px;
+      gap: 10px;
       border-bottom: 1px solid rgba(255, 255, 255, 0.06);
-      padding-bottom: 12px;
+      padding-bottom: 14px;
     }
 
     /* Form Controls */
     .form-group {
-      margin-bottom: 16px;
+      margin-bottom: 18px;
     }
 
     .form-group label {
       display: block;
-      font-size: 0.8rem;
+      font-size: 0.82rem;
       font-weight: 600;
       color: #cbd5e1;
       margin-bottom: 6px;
@@ -142,12 +139,12 @@
 
     input {
       width: 100%;
-      padding: 11px 14px;
+      padding: 12px 16px;
       background: #090d16;
       border: 1px solid rgba(255, 255, 255, 0.12);
       color: #fff;
       font-family: inherit;
-      font-size: 0.9rem;
+      font-size: 0.92rem;
       border-radius: 10px;
       transition: all 0.2s ease;
     }
@@ -164,7 +161,7 @@
       align-items: center;
       justify-content: center;
       gap: 8px;
-      padding: 11px 20px;
+      padding: 12px 22px;
       font-family: inherit;
       font-size: 0.9rem;
       font-weight: 700;
@@ -199,8 +196,8 @@
       background: rgba(239, 68, 68, 0.15);
       color: #f87171;
       border: 1px solid rgba(239, 68, 68, 0.3);
-      padding: 8px 14px;
-      font-size: 0.8rem;
+      padding: 8px 16px;
+      font-size: 0.85rem;
     }
 
     .btn-danger:hover {
@@ -212,8 +209,8 @@
       background: rgba(56, 189, 248, 0.15);
       color: #38bdf8;
       border: 1px solid rgba(56, 189, 248, 0.3);
-      padding: 8px 14px;
-      font-size: 0.8rem;
+      padding: 8px 16px;
+      font-size: 0.85rem;
     }
 
     .btn-edit:hover {
@@ -221,67 +218,69 @@
       color: #090d16;
     }
 
-    /* Table / List Items */
+    /* List Items - Table Like layout */
     .link-list {
       display: flex;
       flex-direction: column;
-      gap: 10px;
+      gap: 12px;
     }
 
     .link-item {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      background: rgba(9, 13, 22, 0.6);
+      background: rgba(9, 13, 22, 0.7);
       border: 1px solid rgba(255, 255, 255, 0.06);
       border-radius: 12px;
-      padding: 14px 18px;
+      padding: 16px 22px;
       transition: all 0.2s ease;
     }
 
     .link-item:hover {
       border-color: rgba(56, 189, 248, 0.3);
-      background: rgba(15, 23, 42, 0.8);
+      background: rgba(15, 23, 42, 0.9);
     }
 
     .link-info {
       display: flex;
       align-items: center;
-      gap: 14px;
+      gap: 16px;
+      flex: 1;
+      padding-right: 20px;
     }
 
     .badge-order {
       background: rgba(56, 189, 248, 0.15);
       color: #38bdf8;
-      font-size: 0.8rem;
+      font-size: 0.85rem;
       font-weight: 800;
-      padding: 6px 10px;
+      padding: 8px 12px;
       border-radius: 8px;
-      min-width: 32px;
+      min-width: 40px;
       text-align: center;
     }
 
     .link-details h4 {
-      font-size: 0.95rem;
+      font-size: 1rem;
       color: #fff;
       font-weight: 600;
     }
 
     .link-details p {
-      font-size: 0.8rem;
+      font-size: 0.85rem;
       color: #64748b;
-      margin-top: 2px;
+      margin-top: 3px;
+      word-break: break-all;
     }
 
     .actions {
       display: flex;
-      gap: 8px;
+      gap: 10px;
     }
 
     .hidden { display: none !important; }
 
-    /* Responsive untuk Layar Kecil */
-    @media (max-width: 868px) {
+    @media (max-width: 900px) {
       .main-grid {
         grid-template-columns: 1fr;
       }
@@ -321,8 +320,8 @@
     <!-- Top Header Bar -->
     <header class="top-bar">
       <div class="top-bar-title">
-        <h1><i class="fa-solid fa-sliders" style="color: #38bdf8;"></i> Dashboard Admin</h1>
-        <p>Kelola link microsite secara langsung dan realtime</p>
+        <h1><i class="fa-solid fa-sliders" style="color: #38bdf8;"></i> Dashboard Admin Portal</h1>
+        <p>Kelola daftar link microsite secara penuh dan realtime</p>
       </div>
       <button id="btn-logout" class="btn btn-danger">
         <i class="fa-solid fa-power-off"></i> Logout
