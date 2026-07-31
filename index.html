@@ -53,9 +53,13 @@
     const db = getFirestore(app);
     const container = document.getElementById('links-container');
 
-    // Pantau Status Portal (ON / OFF MODE)
+    // Listener Realtime Status Portal dengan Pengaman Default ON
     onSnapshot(doc(db, "settings", "portal"), (docSnap) => {
-      const isOnline = docSnap.exists() ? docSnap.data().isOnline : true;
+      let isOnline = true;
+
+      if (docSnap.exists() && docSnap.data().isOnline !== undefined) {
+        isOnline = docSnap.data().isOnline;
+      }
 
       if (!isOnline) {
         // TAMPILAN OFF MODE
@@ -70,6 +74,9 @@
         // TAMPILAN ON MODE (MEMUAT DAFTAR LINK)
         loadPublicLinks();
       }
+    }, (error) => {
+      console.warn("Gagal memuat status portal, default ke ON Mode:", error);
+      loadPublicLinks();
     });
 
     function loadPublicLinks() {
@@ -96,8 +103,8 @@
           `;
         });
       }, (error) => {
-        console.error("Firestore Error:", error);
-        container.innerHTML = `<p style="color:#ef4444; font-size:0.8rem;">Gagal memuat link.</p>`;
+        console.error("Firestore Links Error:", error);
+        container.innerHTML = `<p style="color:#ef4444; font-size:0.8rem;">Gagal memuat link. Periksa aturan Firestore Rules.</p>`;
       });
     }
   </script>
