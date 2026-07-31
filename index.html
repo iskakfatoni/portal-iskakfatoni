@@ -33,10 +33,10 @@
   </main>
 
   <script type="module">
-    // Import modul dari CDN gstatic agar bisa langsung berjalan di browser
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
     import { getFirestore, collection, query, orderBy, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
+    // Konfigurasi resmi proyek portal-iskakfatoni
     const firebaseConfig = {
       apiKey: "AIzaSyDhq4QoCn00GkfpKXSP8PnvSvEKa2yn0ic",
       authDomain: "portal-iskakfatoni.firebaseapp.com",
@@ -51,10 +51,10 @@
     const db = getFirestore(app);
     const container = document.getElementById('links-container');
 
-    // Realtime Listener dari Cloud Firestore
+    // Realtime Listener
     const q = query(collection(db, "links"), orderBy("order", "asc"));
     onSnapshot(q, (snapshot) => {
-      container.innerHTML = ''; // Kosongkan status 'Memuat link...'
+      container.innerHTML = '';
       
       if (snapshot.empty) {
         container.innerHTML = '<p style="color:#94a3b8;">Belum ada link yang ditambahkan.</p>';
@@ -71,12 +71,8 @@
         `;
       });
     }, (error) => {
-      console.error("Firestore Read Error:", error);
-      container.innerHTML = `
-        <p style="color:#ef4444; font-size:0.9rem;">
-          Gagal memuat link. Pastikan Rules Firestore sudah diset ke read: true.
-        </p>
-      `;
+      console.error("Firestore Error:", error);
+      container.innerHTML = `<p style="color:#ef4444; font-size:0.9rem;">Gagal memuat link: ${error.message}</p>`;
     });
   </script>
 
