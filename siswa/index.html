@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PORTAL :: Scanner Absensi Siswa</title>
+  <!-- Tailwind CSS via CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- HTML5 QR Code Library -->
+  <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            darkSlate: '#0F172A',
+            deepIndigo: '#1E1B4B',
+            accentCyan: '#00F5D4'
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    /* Kostumisasi tampilan kotak scanner html5-qrcode */
+    #reader video {
+      object-fit: cover !important;
+      border-radius: 1rem;
+    }
+    #reader {
+      border: none !important;
+    }
+  </style>
+</head>
+<body class="bg-gradient-to-b from-darkSlate to-deepIndigo text-slate-100 min-h-screen flex flex-col justify-between p-4">
+
+  <!-- CONTAINER UTAMA -->
+  <div class="max-w-md w-full mx-auto space-y-4">
+    
+    <!-- HEADER PROFIL SISWA & BUTTON LOGOUT -->
+    <div class="bg-slate-800/80 backdrop-blur-md rounded-2xl p-4 border border-slate-700/50 flex items-center justify-between shadow-lg">
+      <div class="flex items-center space-x-3">
+        <div class="w-10 h-10 rounded-full bg-cyan-500/20 border border-accentCyan/40 flex items-center justify-center text-accentCyan font-bold text-sm">
+          <span id="user-initials">S</span>
+        </div>
+        <div>
+          <h2 id="user-name" class="text-sm font-bold text-white line-clamp-1">Memuat Siswa...</h2>
+          <p id="user-info" class="text-xs text-slate-400">NIS: - | Kelas: -</p>
+        </div>
+      </div>
+      <button id="btn-logout" title="Keluar Akun" class="p-2 text-slate-400 hover:text-red-400 hover:bg-red-500/10 rounded-xl transition">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+        </svg>
+      </button>
+    </div>
+
+    <!-- AREA CAMERA SCANNER -->
+    <div class="bg-slate-800/80 backdrop-blur-md rounded-2xl p-4 border border-slate-700/50 shadow-2xl space-y-3">
+      <div class="flex items-center justify-between">
+        <span class="text-xs font-bold uppercase tracking-wider text-accentCyan flex items-center gap-1.5">
+          <span class="w-2 h-2 rounded-full bg-accentCyan animate-pulse"></span>
+          Kamera Absensi
+        </span>
+        <span id="scan-status" class="text-[11px] text-slate-400">Menyiapkan Kamera...</span>
+      </div>
+
+      <!-- FRAME VIEWFINDER KAMERA -->
+      <div class="relative overflow-hidden rounded-xl bg-slate-900 border border-slate-700/60 aspect-square flex items-center justify-center">
+        <div id="reader" class="w-full h-full"></div>
+        
+        <!-- Overlay Animasi Scanning -->
+        <div id="scanner-overlay" class="pointer-events-none absolute inset-0 border-2 border-accentCyan/30 rounded-xl hidden flex flex-col justify-between p-6">
+          <div class="w-full h-0.5 bg-accentCyan/80 shadow-[0_0_15px_#00F5D4] animate-bounce"></div>
+        </div>
+      </div>
+
+      <p class="text-center text-xs text-slate-400">
+        Arahkan kamera ke **QR Code Sesi** di layar guru/proyektor.
+      </p>
+    </div>
+
+    <!-- MODAL / POPUP OVERLAY RESULT -->
+    <div id="modal-result" class="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-50 flex items-center justify-center p-4 hidden">
+      <div class="bg-slate-800 border border-slate-700 rounded-2xl p-6 max-w-xs w-full text-center space-y-4 shadow-2xl">
+        <div id="modal-icon-container" class="w-16 h-16 rounded-full mx-auto flex items-center justify-center">
+          <!-- Icon injected via JS -->
+        </div>
+        <div>
+          <h3 id="modal-title" class="text-lg font-bold text-white">Status Absensi</h3>
+          <p id="modal-desc" class="text-xs text-slate-300 mt-1">Pesan status...</p>
+        </div>
+        <button id="btn-close-modal" class="w-full py-2.5 bg-slate-700 hover:bg-slate-600 text-white font-medium text-xs rounded-xl transition">
+          Tutup & Scan Lagi
+        </button>
+      </div>
+    </div>
+
+    <!-- RIWAYAT ABSENSI RECENT -->
+    <div class="bg-slate-800/80 backdrop-blur-md rounded-2xl p-4 border border-slate-700/50 shadow-lg space-y-3">
+      <h3 class="text-xs font-semibold text-slate-300 uppercase tracking-wider">Status Sesi Hari Ini</h3>
+      <div id="recent-logs" class="space-y-2">
+        <div class="p-3 bg-slate-900/50 rounded-xl border border-slate-700/30 text-center text-xs text-slate-500">
+          Belum ada catatan absensi hari ini.
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- FOOTER BRANDING -->
+  <div class="mt-6 text-center border-t border-slate-700/30 pt-3">
+    <p class="text-[11px] text-slate-500 font-mono">Developed by Iskak Fatoni</p>
+  </div>
+
+  <!-- SCRIPT SCANNER & FIRESTORE LOGIC -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+    import { 
+      getFirestore, 
+      collection, 
+      query, 
+      where, 
+      getDocs, 
+      addDoc, 
+      serverTimestamp 
+    } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+    import { firebaseConfig } from "../assets/js/config/firebase-config.js";
+
+    // Inisialisasi Firebase
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    // DOM Elements
+    const userNameEl = document.getElementById('user-name');
+    const userInfoEl = document.getElementById('user-info');
+    const userInitialsEl = document.getElementById('user-initials');
+    const btnLogout = document.getElementById('btn-logout');
+    const scanStatus = document.getElementById('scan-status');
+    const modalResult = document.getElementById('modal-result');
+    const modalIconContainer = document.getElementById('modal-icon-container');
+    const modalTitle = document.getElementById('modal-title');
+    const modalDesc = document.getElementById('modal-desc');
+    const btnCloseModal = document.getElementById('btn-close-modal');
+    const scannerOverlay = document.getElementById('scanner-overlay');
+    const recentLogsEl = document.getElementById('recent-logs');
+
+    let currentSiswa = null;
+    let html5QrCode = null;
+    let isProcessingScan = false;
+
+    // 1. CEK AUTENTIKASI / SESSION LOCALSTORAGE
+    document.addEventListener('DOMContentLoaded', () => {
+      const sessionRaw = localStorage.getItem('siswa_session');
+      if (!sessionRaw) {
+        window.location.href = 'login.html';
+        return;
+      }
+
+      try {
+        currentSiswa = JSON.parse(sessionRaw);
+        userNameEl.innerText = currentSiswa.nama || "Siswa";
+        userInfoEl.innerText = `NIS: ${currentSiswa.nis} | Kelas: ${currentSiswa.nama_kelas || currentSiswa.id_kelas || '-'}`;
+        userInitialsEl.innerText = (currentSiswa.nama || 'S').charAt(0).toUpperCase();
+
+        initScanner();
+      } catch (e) {
+        localStorage.removeItem('siswa_session');
+        window.location.href = 'login.html';
+      }
+    });
+
+    // LOGOUT HANDLER
+    btnLogout.addEventListener('click', () => {
+      if (confirm("Apakah Anda yakin ingin keluar dari akun ini?")) {
+        if (html5QrCode) {
+          html5QrCode.stop().catch(() => {});
+        }
+        localStorage.removeItem('siswa_session');
+        window.location.href = 'login.html';
+      }
+    });
+
+    // 2. INISIALISASI CAMERA SCANNER (WebRTC)
+    function initScanner() {
+      html5QrCode = new Html5Qrcode("reader");
+      const config = { 
+        fps: 10, 
+        qrbox: { width: 220, height: 220 },
+        aspectRatio: 1.0
+      };
+
+      html5QrCode.start(
+        { facingMode: "environment" }, // Prioritaskan kamera belakang
+        config,
+        onScanSuccess,
+        onScanFailure
+      ).then(() => {
+        scanStatus.innerText = "Kamera Aktif";
+        scannerOverlay.classList.remove('hidden');
+      }).catch(err => {
+        console.error("Gagal membuka kamera:", err);
+        scanStatus.innerText = "Izin Kamera Ditolak / Tidak Tersedia";
+      });
+    }
+
+    // 3. HANDLER SCANNER FAILURE / SCANNING IN PROGRESS
+    function onScanFailure(error) {
+      // Abaikan kegagalan frame biasa saat mencari QR Code
+    }
+
+    // 4. HANDLER SCAN SUCCESS & FIRESTORE VERIFICATION
+    async function onScanSuccess(decodedText, decodedResult) {
+      if (isProcessingScan) return;
+      isProcessingScan = true;
+
+      // Haptic feedback (getar HP jika didukung)
+      if (navigator.vibrate) navigator.vibrate(100);
+
+      scanStatus.innerText = "Memverifikasi QR...";
+
+      try {
+        // Query Firestore: Cari sesi yang `current_qr_token` mencocokkan decodedText DAN `is_active` == true
+        const qSesi = query(
+          collection(db, "sesi_absensi"), 
+          where("current_qr_token", "==", decodedText),
+          where("is_active", "==", true)
+        );
+
+        const querySnapSesi = await getDocs(qSesi);
+
+        if (querySnapSesi.empty) {
+          showModal(false, "QR Invalid / Kedaluwarsa", "QR Code ini sudah tidak berlaku atau salah. Minta guru refresh tampilan.");
+          return;
+        }
+
+        const docSesi = querySnapSesi.docs[0];
+        const dataSesi = docSesi.data();
+        const idSesi = docSesi.id;
+
+        // Cek apakah siswa sudah pernah melakukan scan di sesi ini (Cegah ganda)
+        const qCekLog = query(
+          collection(db, "log_absensi"),
+          where("id_sesi", "==", idSesi),
+          where("nis", "==", currentSiswa.nis)
+        );
+
+        const snapCekLog = await getDocs(qCekLog);
+
+        if (!snapCekLog.empty) {
+          showModal(false, "Sudah Absen", "Anda sudah tercatat HADIR di sesi pelajaran ini.");
+          return;
+        }
+
+        // TAMBAHKAN LOG ABSENSI KE FIRESTORE
+        await addDoc(collection(db, "log_absensi"), {
+          id_sesi: idSesi,
+          nis: currentSiswa.nis,
+          nama_siswa: currentSiswa.nama,
+          id_kelas: currentSiswa.id_kelas || dataSesi.id_kelas || "-",
+          waktu_scan: new Date().toISOString(),
+          created_at: serverTimestamp(),
+          status: "Hadir"
+        });
+
+        // TAMPILKAN UI SUCCESS
+        showModal(true, "Absensi Berhasil!", `Selamat, ${currentSiswa.nama}! Kehadiran Anda berhasil dicatat.`);
+        updateRecentLogList(dataSesi.nama_mapel || "Pelajaran");
+
+      } catch (err) {
+        console.error("Firestore Error:", err);
+        showModal(false, "Kesalahan Sistem", "Gagal memproses absensi. Pastikan koneksi terhubung.");
+      }
+    }
+
+    // 5. HELPER DISPLAY MODAL RESULT
+    function showModal(isSuccess, title, desc) {
+      modalTitle.innerText = title;
+      modalDesc.innerText = desc;
+
+      if (isSuccess) {
+        modalIconContainer.className = "w-16 h-16 rounded-full mx-auto flex items-center justify-center bg-emerald-500/20 text-emerald-400 border border-emerald-500/40";
+        modalIconContainer.innerHTML = `
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+          </svg>
+        `;
+      } else {
+        modalIconContainer.className = "w-16 h-16 rounded-full mx-auto flex items-center justify-center bg-red-500/20 text-red-400 border border-red-500/40";
+        modalIconContainer.innerHTML = `
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        `;
+      }
+
+      modalResult.classList.remove('hidden');
+    }
+
+    btnCloseModal.addEventListener('click', () => {
+      modalResult.classList.add('hidden');
+      scanStatus.innerText = "Kamera Aktif";
+      // Buka penahan scan ganda
+      setTimeout(() => {
+        isProcessingScan = false;
+      }, 1000);
+    });
+
+    function updateRecentLogList(mapelName) {
+      const timeStr = new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
+      recentLogsEl.innerHTML = `
+        <div class="p-3 bg-emerald-500/10 border border-emerald-500/30 rounded-xl flex items-center justify-between">
+          <div>
+            <p class="text-xs font-bold text-emerald-400">HADIR - ${mapelName}</p>
+            <p class="text-[10px] text-slate-400">Waktu: ${timeStr} WIB</p>
+          </div>
+          <span class="px-2 py-1 bg-emerald-500/20 text-emerald-400 text-[10px] font-bold rounded-lg">Verified</span>
+        </div>
+      `;
+    }
+  </script>
+</body>
+</html>
