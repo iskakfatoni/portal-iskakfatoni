@@ -292,7 +292,7 @@
       </div>
     </div>
 
-    <!-- PENGATURAN RUNNING TEXT PENGUMUMAN (MANUAL) -->
+    <!-- PENGATURAN RUNNING TEXT PENGUMUMAN -->
     <div class="status-card" style="width: 75%; flex-direction: column; align-items: stretch; gap: 10px;">
       <label style="font-size: 0.85rem; font-weight: 700; color: #38bdf8;">
         <i class="fa-solid fa-bullhorn"></i> Teks Pengumuman Running Text (Manual)
@@ -378,7 +378,14 @@
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-    import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+    import { 
+      getAuth, 
+      signInWithEmailAndPassword, 
+      onAuthStateChanged, 
+      signOut, 
+      setPersistence, 
+      browserSessionPersistence 
+    } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
     import { getFirestore, collection, addDoc, updateDoc, deleteDoc, doc, query, orderBy, onSnapshot, setDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
     const firebaseConfig = {
@@ -421,12 +428,16 @@
       }
     });
 
+    // PROSES SUBMIT LOGIN (DENGAN SESSION PERSISTENCE)
     loginForm.addEventListener('submit', async (e) => {
       e.preventDefault();
       const email = document.getElementById('login-email').value;
       const pass = document.getElementById('login-password').value;
       loginError.innerText = '';
+
       try {
+        // 🔒 PAKSA SESI HANYA BERLAKU SELAMA TAB/BROWSER DIBUKA
+        await setPersistence(auth, browserSessionPersistence);
         await signInWithEmailAndPassword(auth, email, pass);
       } catch (err) {
         loginError.innerText = 'Login gagal: Periksa email dan password.';
