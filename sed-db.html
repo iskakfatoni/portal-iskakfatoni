@@ -46,11 +46,16 @@
       collection, 
       serverTimestamp 
     } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
-    import { firebaseConfig } from "./assets/js/config/firebase-config.js";
 
-    // Inisialisasi Firebase
-    const app = initializeApp(firebaseConfig);
-    const db = getFirestore(app);
+    // 🔑 ISI KREDENSIAL FIREBASE ANDA DI SINI
+    const firebaseConfig = {
+      apiKey: "PASTE_API_KEY_ANDA_DI_SINI",
+      authDomain: "portal-iskakfatoni.firebaseapp.com",
+      projectId: "portal-iskakfatoni",
+      storageBucket: "portal-iskakfatoni.appspot.com",
+      messagingSenderId: "123456789012",
+      appId: "1:123456789012:web:abcdef1234567890"
+    };
 
     const logBox = document.getElementById('log-box');
     const btnSeed = document.getElementById('btn-seed');
@@ -70,18 +75,24 @@
       logBox.scrollTop = logBox.scrollHeight;
     }
 
+    // Tangkap unhandled error
+    window.addEventListener('error', (e) => {
+      log(`❌ Error JS: ${e.message}`, 'error');
+    });
+
     btnSeed.addEventListener('click', async () => {
       btnSeed.disabled = true;
       btnText.innerText = "Memproses Seeding...";
       btnSpinner.classList.remove('hidden');
       logBox.innerHTML = '';
 
-      log("Memulai proses injeksi data ke Firestore...", "warn");
+      log("Menghubungkan ke Firebase Firestore...", "warn");
 
       try {
-        // -------------------------------------------------------------
-        // 1. SEED KOLEKSI: kelas (Daftar Kelas TEI)
-        // -------------------------------------------------------------
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        // 1. SEED KOLEKSI: kelas
         log("Membuat koleksi 'kelas'...");
         const dataKelas = [
           { id: "XI-TEI-1", nama_kelas: "XI TEI 1", wali_kelas: "Iskak Fatoni, S.Pd., Gr." },
@@ -99,12 +110,10 @@
             wali_kelas: item.wali_kelas,
             created_at: serverTimestamp()
           });
-          log(`  ✔ Kelas '${item.nama_kelas}' berhasil dibuat.`, "success");
+          log(`  ✔ Kelas '${item.nama_kelas}' dibuat.`, "success");
         }
 
-        // -------------------------------------------------------------
-        // 2. SEED KOLEKSI: siswa (Sampel Siswa TEI)
-        // -------------------------------------------------------------
+        // 2. SEED KOLEKSI: siswa
         log("Membuat koleksi 'siswa'...");
         const dataSiswa = [
           { nis: "2026001", nama_siswa: "Ahmad Fatoni", id_kelas: "XI-TEI-1", nama_kelas: "XI TEI 1" },
@@ -124,12 +133,10 @@
             nama_kelas: item.nama_kelas,
             created_at: serverTimestamp()
           });
-          log(`  ✔ Siswa '${item.nama_siswa}' (NIS: ${item.nis} - ${item.nama_kelas}) dibuat.`, "success");
+          log(`  ✔ Siswa '${item.nama_siswa}' (${item.nama_kelas}) dibuat.`, "success");
         }
 
-        // -------------------------------------------------------------
-        // 3. SEED KOLEKSI: sesi_absensi (Sesi Sampel)
-        // -------------------------------------------------------------
+        // 3. SEED KOLEKSI: sesi_absensi
         log("Membuat koleksi 'sesi_absensi'...");
         const refSesi = await addDoc(collection(db, "sesi_absensi"), {
           id_kelas: "XI-TEI-1",
@@ -139,11 +146,9 @@
           current_qr_token: "SAMPLE_TOKEN_EXPIRED",
           created_at: serverTimestamp()
         });
-        log(`  ✔ Sesi Absensi Sampel berhasil dibuat (ID: ${refSesi.id}).`, "success");
+        log(`  ✔ Sesi Absensi Sampel dibuat.`, "success");
 
-        // -------------------------------------------------------------
-        // 4. SEED KOLEKSI: log_absensi (Log Sampel)
-        // -------------------------------------------------------------
+        // 4. SEED KOLEKSI: log_absensi
         log("Membuat koleksi 'log_absensi'...");
         await addDoc(collection(db, "log_absensi"), {
           id_sesi: refSesi.id,
@@ -154,13 +159,13 @@
           status: "Hadir",
           created_at: serverTimestamp()
         });
-        log(`  ✔ Log Absensi Sampel untuk Ahmad Fatoni berhasil dibuat.`, "success");
+        log(`  ✔ Log Absensi Sampel dibuat.`, "success");
 
-        log("🎉 SEEDING SELESAI! Seluruh kelas TEI & sampel siswa siap digunakan.", "success");
+        log("🎉 SEEDING SELESAI! Seluruh koleksi & data siswa TEI berhasil diinjeksi.", "success");
 
       } catch (err) {
         console.error(err);
-        log(`❌ Error: ${err.message}`, "error");
+        log(`❌ Error Firebase: ${err.message}`, "error");
       } finally {
         btnSeed.disabled = false;
         btnText.innerText = "🚀 Jalankan Ulang Seeder";
