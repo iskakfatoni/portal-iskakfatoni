@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PORTAL :: Absensi Siswa</title>
+  <!-- Tailwind CSS via CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            darkSlate: '#0F172A',
+            deepIndigo: '#1E1B4B',
+            accentCyan: '#00F5D4'
+          }
+        }
+      }
+    }
+  </script>
+</head>
+<body class="bg-gradient-to-b from-darkSlate to-deepIndigo text-slate-100 min-h-screen flex items-center justify-center p-4">
+
+  <!-- CARD ROUTER INTERAKTIF -->
+  <div class="max-w-md w-full bg-slate-800/80 backdrop-blur-md rounded-2xl p-6 border border-slate-700/50 shadow-2xl">
+    
+    <!-- HEADER BRANDING -->
+    <div class="text-center mb-6">
+      <div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-cyan-500/10 border border-accentCyan/30 mb-3 text-accentCyan">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
+      </div>
+      <h1 class="text-2xl font-bold tracking-wide text-white">PORTAL ABSENSI</h1>
+      <p class="text-xs text-slate-400 mt-1">Mengalihkan ke modul yang sesuai...</p>
+    </div>
+
+    <!-- INDIKATOR LOADING / ROUTING STATUS -->
+    <div id="loading-state" class="flex flex-col items-center justify-center py-6 space-y-4">
+      <div class="w-10 h-10 border-4 border-slate-600 border-t-accentCyan rounded-full animate-spin"></div>
+      <p id="status-text" class="text-sm font-medium text-slate-300">Memeriksa Sesi Login...</p>
+    </div>
+
+    <!-- NAVIGATION FALLBACK (Tampil jika auto-redirect tidak merespons) -->
+    <div id="fallback-nav" class="hidden space-y-3 pt-4 border-t border-slate-700/50">
+      <p class="text-xs text-center text-slate-400 mb-2">Pilih halaman secara manual:</p>
+      
+      <a href="siswa/index.html" class="flex items-center justify-between w-full px-4 py-3 bg-cyan-500/10 hover:bg-cyan-500/20 border border-accentCyan/40 rounded-xl text-accentCyan font-medium text-sm transition">
+        <span>📱 Portal Siswa (Scanner QR)</span>
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+        </svg>
+      </a>
+
+      <a href="guru/index.html" class="flex items-center justify-between w-full px-4 py-3 bg-slate-700/50 hover:bg-slate-700 border border-slate-600 rounded-xl text-slate-200 font-medium text-sm transition">
+        <span>💻 Dashboard Guru / Sesi QR</span>
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+        </svg>
+      </a>
+    </div>
+
+    <!-- FOOTER BRANDING -->
+    <div class="mt-6 text-center border-t border-slate-700/30 pt-4">
+      <p class="text-[11px] text-slate-500 font-mono">Developed by Iskak Fatoni</p>
+    </div>
+
+  </div>
+
+  <!-- SCRIPT ROUTER LOGIC -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+    import { firebaseConfig } from "./assets/js/config/firebase-config.js";
+
+    // Inisialisasi Firebase Auth untuk pengecekan role Guru
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+
+    const statusText = document.getElementById('status-text');
+    const loadingState = document.getElementById('loading-state');
+    const fallbackNav = document.getElementById('fallback-nav');
+
+    // Mencegah pemicuan bertubi-tubi
+    let isRedirecting = false;
+
+    function redirectTo(path, message) {
+      if (isRedirecting) return;
+      isRedirecting = true;
+      if (statusText) statusText.innerText = message;
+      
+      setTimeout(() => {
+        window.location.href = path;
+      }, 400); // Penundaan halus 400ms untuk transisi UI
+    }
+
+    // Pengecekan Utama (Smart Router)
+    function routeUser() {
+      const urlParams = new URLSearchParams(window.location.search);
+      const forceRole = urlParams.get('role');
+
+      // 1. Cek Parameter URL (Opsional override: absensi.html?role=guru atau absensi.html?role=siswa)
+      if (forceRole === 'guru') {
+        redirectTo('guru/index.html', 'Mengarahkan ke Dashboard Guru...');
+        return;
+      } else if (forceRole === 'siswa') {
+        redirectTo('siswa/index.html', 'Mengarahkan ke Scanner Siswa...');
+        return;
+      }
+
+      // 2. Cek Sesi Siswa yang Tersimpan di LocalStorage (Digunakan WebView Android)
+      const siswaSession = localStorage.getItem('siswa_session');
+      if (siswaSession) {
+        try {
+          const dataSiswa = JSON.parse(siswaSession);
+          if (dataSiswa && dataSiswa.nis) {
+            redirectTo('siswa/index.html', `Selamat Datang, ${dataSiswa.nama || 'Siswa'}!`);
+            return;
+          }
+        } catch (e) {
+          console.error("Gagal membaca LocalStorage siswa:", e);
+          localStorage.removeItem('siswa_session');
+        }
+      }
+
+      // 3. Cek Sesi Login Guru via Firebase Auth
+      onAuthStateChanged(auth, (user) => {
+        if (user) {
+          // Guru sudah terautentikasi di Firebase Auth
+          redirectTo('guru/index.html', 'Sesi Guru Ditemukan. Membuka Dashboard...');
+        } else {
+          // 4. Default Fallback untuk Akses Baru di WebView Android Siswa
+          // Jika tidak ada sesi guru dan tidak ada sesi siswa, arahkan ke Login Siswa
+          redirectTo('siswa/login.html', 'Mengarahkan ke Halaman Login Siswa...');
+        }
+      });
+    }
+
+    // Jalankan Router setelah DOM siap
+    document.addEventListener('DOMContentLoaded', () => {
+      routeUser();
+
+      // Tampilkan tombol navigasi manual jika alur otomatis tertahan > 3 detik
+      setTimeout(() => {
+        if (!isRedirecting && fallbackNav) {
+          statusText.innerText = "Sesi tidak terdeteksi otomatis.";
+          fallbackNav.classList.remove('hidden');
+        }
+      }, 3000);
+    });
+  </script>
+</body>
+</html>
