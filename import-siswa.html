@@ -6,7 +6,7 @@
   <title>PORTAL :: Impor Data Siswa TEI</title>
   <!-- Tailwind CSS via CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
-  <!-- SheetJS Library untuk baca file Excel -->
+  <!-- SheetJS Library untuk membaca file Excel/CSV -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 </head>
 <body class="bg-slate-900 text-slate-100 min-h-screen flex items-center justify-center p-4 font-sans">
@@ -21,16 +21,18 @@
         </svg>
       </div>
       <h1 class="text-xl font-bold text-white tracking-wide">IMPOR DATA SISWA TEI</h1>
-      <p class="text-xs text-slate-400 mt-1">Unduh template Excel, isi data siswa, lalu unggah kembali ke Firestore</p>
+      <p class="text-xs text-slate-400 mt-1">Unduh template Excel, isi data siswa, lalu unggah ke Firestore</p>
     </div>
 
     <!-- LANGKAH 1: UNDUH TEMPLATE -->
     <div class="p-4 bg-slate-900/80 rounded-xl border border-slate-700 space-y-2">
       <span class="text-[11px] font-bold text-cyan-400 uppercase tracking-wider block">Langkah 1: Unduh Format</span>
       <p class="text-xs text-slate-300">Gunakan template resmi agar nama kolom sesuai dengan sistem database.</p>
+      
+      <!-- Tombol dengan onClick langsung (pasti merespons) -->
       <button 
-        id="btn-download-template"
         type="button"
+        onclick="downloadTemplate()"
         class="w-full py-2.5 px-4 bg-slate-700 hover:bg-slate-600 border border-slate-600 text-slate-200 font-semibold text-xs rounded-lg transition flex items-center justify-center gap-2 cursor-pointer"
       >
         <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -74,31 +76,11 @@
 
   </div>
 
-  <!-- SCRIPT IMPORT & DOWNLOAD LOGIC -->
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-    import { 
-      getFirestore, 
-      doc, 
-      setDoc, 
-      serverTimestamp 
-    } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
-    import { firebaseConfig } from "./assets/js/config/firebase-config.js";
-
-    // Inisialisasi Firebase
-    const app = initializeApp(firebaseConfig);
-    const db = getFirestore(app);
-
-    const btnDownloadTemplate = document.getElementById('btn-download-template');
-    const excelFileInput = document.getElementById('excel-file-input');
-    const btnImport = document.getElementById('btn-import');
-    const btnText = document.getElementById('btn-text');
-    const btnSpinner = document.getElementById('btn-spinner');
-    const logBox = document.getElementById('log-box');
-
-    let parsedSiswaData = [];
-
+  <!-- 1. SCRIPT REGULER (UNDUH TEMPLATE INLINE) -->
+  <script>
     function log(message, type = 'info') {
+      const logBox = document.getElementById('log-box');
+      if (!logBox) return;
       const p = document.createElement('p');
       if (type === 'success') p.className = 'text-emerald-400 font-semibold';
       else if (type === 'error') p.className = 'text-red-400 font-semibold';
@@ -111,17 +93,11 @@
       logBox.scrollTop = logBox.scrollHeight;
     }
 
-    // Tangkap jika terjadi unhandled error JS
-    window.addEventListener('error', (e) => {
-      log(`❌ Global Error: ${e.message}`, 'error');
-    });
-
-    // 1. UNDUH TEMPLATE NATIVE (PASTI BISA UNDUH DI BROWSER APA PUN)
-    btnDownloadTemplate.addEventListener('click', () => {
+    // FUNGSI UNDUH TEMPLATE NATIVE (DIJAMIN REAKSI 100%)
+    function downloadTemplate() {
       try {
-        log("Membuat file template...", "warn");
+        log("Menyiapkan file template...", "warn");
         
-        // Header & Isian Sampel CSV
         const csvContent = 
           "NIS,Nama Siswa,ID Kelas,Nama Kelas\n" +
           "2026101,Ahmad Rizky,XI-TEI-1,XI TEI 1\n" +
@@ -129,7 +105,6 @@
           "2026103,Cahya Kamila,XI-TEI-1-MUTU,XI TEI 1 MUTU\n" +
           "2026104,Doni Pratama,XII-TEI-MUTU,XII TEI MUTU";
 
-        // Buat Blob dan Pemicu Download
         const blob = new Blob(["\ufeff" + csvContent], { type: 'text/csv;charset=utf-8;' });
         const url = URL.createObjectURL(blob);
         const link = document.createElement("a");
@@ -144,12 +119,49 @@
 
         log("Template CSV/Excel berhasil terunduh!", "success");
       } catch (err) {
-        console.error(err);
+        alert("Error download: " + err.message);
         log(`Gagal mengunduh: ${err.message}`, "error");
       }
-    });
+    }
+  </script>
 
-    // 2. BACA & PARSE FILE EXCEL / CSV SAAT DIUNGGAH
+  <!-- 2. SCRIPT MODULE (FIREBASE IMPOR LOGIC) -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+    import { 
+      getFirestore, 
+      doc, 
+      setDoc, 
+      serverTimestamp 
+    } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+    // 🔑 KREDENSIAL FIREBASE PROJECT ANDA
+    const firebaseConfig = {
+      apiKey: "PASTE_API_KEY_ANDA_DI_SINI",
+      authDomain: "portal-iskakfatoni.firebaseapp.com",
+      projectId: "portal-iskakfatoni",
+      storageBucket: "portal-iskakfatoni.appspot.com",
+      messagingSenderId: "123456789012",
+      appId: "1:123456789012:web:abcdef1234567890"
+    };
+
+    let db;
+    try {
+      const app = initializeApp(firebaseConfig);
+      db = getFirestore(app);
+      log("Koneksi Firebase berhasil dimuat.", "info");
+    } catch (e) {
+      log("Error Init Firebase: " + e.message, "error");
+    }
+
+    const excelFileInput = document.getElementById('excel-file-input');
+    const btnImport = document.getElementById('btn-import');
+    const btnText = document.getElementById('btn-text');
+    const btnSpinner = document.getElementById('btn-spinner');
+
+    let parsedSiswaData = [];
+
+    // BACA FILE EXCEL SAAT DIUNGGAH
     excelFileInput.addEventListener('change', (e) => {
       const file = e.target.files[0];
       if (!file) {
@@ -158,7 +170,7 @@
       }
 
       if (typeof XLSX === 'undefined') {
-        log("Pustaka SheetJS belum siap. Periksa koneksi internet Anda.", "error");
+        log("Pustaka SheetJS belum siap, pastikan terhubung internet.", "error");
         return;
       }
 
@@ -178,7 +190,6 @@
             return;
           }
 
-          // Pemetaan Nama Kolom
           parsedSiswaData = jsonRaw.map(row => ({
             nis: String(row["NIS"] || "").trim(),
             nama_siswa: String(row["Nama Siswa"] || "").trim(),
@@ -186,7 +197,7 @@
             nama_kelas: String(row["Nama Kelas"] || "").trim()
           })).filter(item => item.nis && item.nama_siswa);
 
-          log(`File berhasil dibaca: Ditemukan ${parsedSiswaData.length} data siswa valid.`, "warn");
+          log(`File dibaca: Ditemukan ${parsedSiswaData.length} data siswa valid.`, "warn");
           btnImport.disabled = false;
 
         } catch (err) {
@@ -199,9 +210,9 @@
       reader.readAsArrayBuffer(file);
     });
 
-    // 3. SIMPAN DATA KE CLOUD FIRESTORE
+    // SIMPAN DATA KE CLOUD FIRESTORE
     btnImport.addEventListener('click', async () => {
-      if (parsedSiswaData.length === 0) return;
+      if (parsedSiswaData.length === 0 || !db) return;
 
       btnImport.disabled = true;
       btnText.innerText = "Mengimpor Data...";
