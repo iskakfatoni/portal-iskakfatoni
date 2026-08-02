@@ -37,7 +37,7 @@
       align-items: center;
     }
 
-    /* CONTAINER LOGIN (DIOPTIMALKAN UNTUK TIMBULKAN KEYBOARD HP) */
+    /* CONTAINER LOGIN */
     .login-container {
       width: 100%; 
       max-width: 420px; 
@@ -103,7 +103,6 @@
     .form-group { margin-bottom: 18px; }
     .form-group label { display: block; font-size: 0.85rem; font-weight: 600; color: #cbd5e1; margin-bottom: 8px; }
 
-    /* ELEMEN INPUT SECURE DENGAN RESEP PEMICU KEYBOARD LENGKAP */
     input[type="text"],
     input[type="email"],
     input[type="password"],
@@ -117,7 +116,7 @@
       border: 1.5px solid rgba(255, 255, 255, 0.2); 
       color: #ffffff;
       font-family: inherit; 
-      font-size: 16px; /* 16px mencegah auto-zoom di iOS & Android */
+      font-size: 16px;
       border-radius: 12px; 
       outline: none;
       -webkit-appearance: none;
@@ -172,7 +171,7 @@
 </head>
 <body>
 
-  <!-- SECTION LOGIN (MENGGUNAKAN TAG FORM STANDAR) -->
+  <!-- SECTION LOGIN -->
   <div id="login-section" class="login-container">
     <div class="login-header">
       <i class="fa-solid fa-user-shield"></i>
@@ -239,6 +238,19 @@
         <span id="portal-status-badge" class="status-badge status-on">ONLINE</span>
         <button id="btn-toggle-portal" class="btn btn-toggle">
           <i class="fa-solid fa-toggle-on"></i> Ubah Ke OFFLINE MODE
+        </button>
+      </div>
+    </div>
+
+    <!-- PENGATURAN RUNNING TEXT PENGUMUMAN (OPSIONAL DARI ADMIN) -->
+    <div class="status-card" style="width: 75%; flex-direction: column; align-items: stretch; gap: 10px;">
+      <label style="font-size: 0.85rem; font-weight: 700; color: #38bdf8;">
+        <i class="fa-solid fa-bullhorn"></i> Teks Pengumuman Running Text (Manual)
+      </label>
+      <div style="display: flex; gap: 10px;">
+        <input type="text" id="custom-announcement" placeholder="Ketik pengumuman baru...">
+        <button id="btn-update-announcement" class="btn btn-primary" style="width: auto; whitespace: nowrap;">
+          Update
         </button>
       </div>
     </div>
@@ -340,7 +352,7 @@
 
     let isPortalOnline = true;
 
-    // PAKSA FOKUS DAN KELUARKAN KEYBOARD SAAT INPUT DIKETUK DI HP
+    // FOKUS MENCEGAH KEYBOARD TERSUMBAT DI HP
     document.querySelectorAll('input').forEach(input => {
       input.addEventListener('touchstart', function() {
         this.focus();
@@ -359,7 +371,6 @@
       }
     });
 
-    // PROSES SUBMIT LOGIN
     loginForm.addEventListener('submit', async (e) => {
       e.preventDefault();
       const email = document.getElementById('login-email').value;
@@ -374,14 +385,18 @@
 
     document.getElementById('btn-logout').addEventListener('click', () => signOut(auth));
 
-    // KONTROL MODE PORTAL (ON/OFF)
+    // KONTROL MODE PORTAL (ON/OFF & ANNOUNCEMENT)
     function listenPortalStatus() {
       onSnapshot(doc(db, "settings", "portal"), (docSnap) => {
         const badge = document.getElementById('portal-status-badge');
         const btnToggle = document.getElementById('btn-toggle-portal');
+        const customAnnounceInput = document.getElementById('custom-announcement');
         
         if (docSnap.exists()) {
           isPortalOnline = docSnap.data().isOnline;
+          if (docSnap.data().announcement) {
+            customAnnounceInput.value = docSnap.data().announcement;
+          }
         } else {
           isPortalOnline = true;
         }
@@ -404,6 +419,17 @@
       await setDoc(doc(db, "settings", "portal"), {
         isOnline: !isPortalOnline
       }, { merge: true });
+    });
+
+    // UPDATE MANUAL RUNNING TEXT
+    document.getElementById('btn-update-announcement').addEventListener('click', async () => {
+      const text = document.getElementById('custom-announcement').value.trim();
+      if (text) {
+        await setDoc(doc(db, "settings", "portal"), {
+          announcement: text
+        }, { merge: true });
+        alert('Teks Pengumuman Berhasil Diperbarui!');
+      }
     });
 
     // CRUD LINKS
@@ -465,6 +491,7 @@
       });
     }
 
+    // OTOMATISASI RUNNING TEXT SAAT SIMPAN LINK BARU
     btnSave.addEventListener('click', async () => {
       const id = linkIdInput.value;
       const title = linkTitleInput.value.trim();
@@ -480,7 +507,14 @@
       if (id) {
         await updateDoc(doc(db, "links", id), { title, url, icon, order });
       } else {
+        // Simpan Link Baru
         await addDoc(collection(db, "links"), { title, url, icon, order });
+        
+        // 🚀 KUNCI OTOMATISASI: Update Running Text secara otomatis di Firestore
+        const autoAnnouncement = `📌 TAUTAN BARU DITAMBAHKAN: ${title.toUpperCase()}! Silakan periksa daftar link di bawah ini.`;
+        await setDoc(doc(db, "settings", "portal"), {
+          announcement: autoAnnouncement
+        }, { merge: true });
       }
 
       resetForm();
