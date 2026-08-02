@@ -15,7 +15,9 @@
 </head>
 <body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col justify-center items-center p-4 font-sans">
 
-  <!-- SECTION 1: FORM LOGIN GURU -->
+  <!-- ========================================== -->
+  <!-- SECTION 1: FORM LOGIN GURU                -->
+  <!-- ========================================== -->
   <div id="login-section" class="max-w-md w-full bg-slate-900/90 backdrop-blur-xl rounded-2xl p-6 border border-slate-800 shadow-2xl space-y-6">
     <div class="text-center">
       <div class="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-cyan-500/10 text-cyan-400 mb-3 border border-cyan-500/30">
@@ -45,7 +47,9 @@
   </div>
 
 
-  <!-- SECTION 2: DASHBOARD KONTROL ABSENSI -->
+  <!-- ========================================== -->
+  <!-- SECTION 2: DASHBOARD KONTROL ABSENSI       -->
+  <!-- ========================================== -->
   <div id="dashboard-section" class="max-w-md w-full hidden space-y-5 my-4">
     
     <!-- TOP BAR (HEADER & LOGOUT) -->
@@ -71,36 +75,25 @@
       </div>
     </header>
 
-    <!-- FORM KONTROL KELAS & MAPEL -->
+    <!-- FORM KONTROL KELAS & MAPEL (DINAMIS FIRESTORE) -->
     <div class="bg-slate-900/80 backdrop-blur-md p-5 rounded-2xl border border-slate-800 space-y-3 shadow-xl">
       <h3 class="text-xs font-bold text-cyan-400 border-b border-slate-800 pb-2 flex items-center gap-2 uppercase tracking-wider">
         <i class="fa-solid fa-sliders"></i> Konfigurasi Sesi
       </h3>
 
+      <!-- DROPDOWN KELAS -->
       <div class="space-y-1">
         <label for="select-kelas" class="block text-[11px] font-semibold text-slate-300">Pilih Kelas TEI</label>
         <select id="select-kelas" class="w-full px-3.5 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-slate-100 text-xs focus:outline-none focus:border-cyan-500 cursor-pointer">
-          <option value="XI-TEI-1">XI TEI 1</option>
-          <option value="XI-TEI-2">XI TEI 2</option>
-          <option value="XII-TEI-1">XII TEI 1</option>
-          <option value="XII-TEI-2">XII TEI 2</option>
-          <option value="XI-TEI-1-MUTU">XI TEI 1 MUTU</option>
-          <option value="XI-TEI-2-MUTU">XI TEI 2 MUTU</option>
-          <option value="XII-TEI-MUTU">XII TEI MUTU</option>
+          <option value="">-- Memuat Daftar Kelas... --</option>
         </select>
       </div>
 
+      <!-- DROPDOWN MAPEL -->
       <div class="space-y-1">
         <label for="select-mapel" class="block text-[11px] font-semibold text-slate-300">Pilih Mata Pelajaran</label>
         <select id="select-mapel" class="w-full px-3.5 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-slate-100 text-xs focus:outline-none focus:border-cyan-500 cursor-pointer">
-          <option value="Penerapan Rangkaian Elektronika">Penerapan Rangkaian Elektronika (PRE)</option>
-          <option value="Perencanaan & Instalasi Sistem Audio Video">Perencanaan & Instalasi Sistem Audio Video (PISAV)</option>
-          <option value="Penerapan Sistem Radio & Televisi">Penerapan Sistem Radio & Televisi (PSRT)</option>
-          <option value="Mikroprosesor & Mikrokontroler">Mikroprosesor & Mikrokontroler</option>
-          <option value="Pembuatan & Pemeliharaan Peralatan Elektronika">Pembuatan & Pemeliharaan Peralatan Elektronika</option>
-          <option value="Produk Kreatif & Kewirausahaan">Produk Kreatif & Kewirausahaan (PKK)</option>
-          <option value="Dasar-Dasar Teknik Elektronika">Dasar-Dasar Teknik Elektronika</option>
-          <option value="Projek IPAS">Projek IPAS</option>
+          <option value="">-- Memuat Mata Pelajaran... --</option>
         </select>
       </div>
 
@@ -115,7 +108,7 @@
       </div>
     </div>
 
-    <!-- TAMPILAN QR CARD (DENGAN TOMBOL FULLSCREEN SANGAT COCOK UNTUK HP GURU) -->
+    <!-- TAMPILAN QR CARD -->
     <div class="bg-slate-900/80 backdrop-blur-md p-5 rounded-2xl border border-slate-800 flex flex-col items-center justify-center text-center space-y-3 shadow-xl">
       <div class="flex items-center justify-between w-full border-b border-slate-800 pb-2">
         <span class="text-[11px] font-bold text-cyan-400 uppercase tracking-wider">Tampilan QR Ponsel</span>
@@ -127,7 +120,7 @@
         <p class="text-xs text-slate-500 font-sans">Sesi Belum Aktif</p>
       </div>
 
-      <!-- TOMBOL LAYAR PENUH (FULLSCREEN MODAL) -->
+      <!-- TOMBOL FULLSCREEN MODAL -->
       <button 
         id="btn-fullscreen-qr" 
         disabled 
@@ -137,7 +130,7 @@
       </button>
     </div>
 
-    <!-- LIVE LOG SISWA YANG BERHASIL SCAN -->
+    <!-- LIVE LOG KEHADIRAN SISWA -->
     <div class="bg-slate-900/80 backdrop-blur-md p-5 rounded-2xl border border-slate-800 space-y-3 shadow-xl">
       <div class="flex items-center justify-between border-b border-slate-800 pb-2">
         <h3 class="text-xs font-bold text-cyan-400 flex items-center gap-2 uppercase tracking-wider">
@@ -159,13 +152,13 @@
   </div>
 
 
-  <!-- MODAL FULLSCREEN QR CODE (SANGAT JELAS DI HP GURU) -->
+  <!-- MODAL FULLSCREEN QR CODE -->
   <div id="qr-fullscreen-modal" class="fixed inset-0 bg-slate-950/95 backdrop-blur-2xl z-50 hidden flex flex-col items-center justify-between p-6 text-center">
     
     <div class="w-full flex items-center justify-between border-b border-slate-800 pb-4">
       <div>
-        <h3 id="modal-kelas-title" class="text-base font-bold text-white text-left">XI TEI 1</h3>
-        <p id="modal-mapel-title" class="text-xs text-cyan-400 text-left">Penerapan Rangkaian Elektronika</p>
+        <h3 id="modal-kelas-title" class="text-base font-bold text-white text-left">-</h3>
+        <p id="modal-mapel-title" class="text-xs text-cyan-400 text-left">-</p>
       </div>
       <button id="btn-close-modal" class="w-10 h-10 bg-slate-800 hover:bg-slate-700 text-white rounded-full flex items-center justify-center font-bold text-sm cursor-pointer border border-slate-700">
         ✕
@@ -204,6 +197,8 @@
       updateDoc, 
       query, 
       where, 
+      orderBy,
+      getDocs,
       onSnapshot, 
       serverTimestamp 
     } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
@@ -231,6 +226,8 @@
     const userEmailDisplay = document.getElementById('user-email-display');
     const btnLogout = document.getElementById('btn-logout');
 
+    const selectKelas = document.getElementById('select-kelas');
+    const selectMapel = document.getElementById('select-mapel');
     const btnStartSesi = document.getElementById('btn-start-sesi');
     const btnStopSesi = document.getElementById('btn-stop-sesi');
     const btnFullscreenQr = document.getElementById('btn-fullscreen-qr');
@@ -255,6 +252,10 @@
         loginSection.classList.add('hidden');
         dashboardSection.classList.remove('hidden');
         userEmailDisplay.innerText = user.email;
+
+        // Load Dropdown dari Firestore
+        loadKelasDropdown();
+        loadMapelDropdown();
       } else {
         loginSection.classList.remove('hidden');
         dashboardSection.classList.add('hidden');
@@ -284,10 +285,55 @@
       }
     });
 
-    // 🚀 4. KONTROL MULAI SESI ABSENSI
+    // 📚 4. LOAD DROPDOWN KELAS DARI FIRESTORE
+    async function loadKelasDropdown() {
+      selectKelas.innerHTML = '<option value="">-- Pilih Kelas TEI --</option>';
+      try {
+        const q = query(collection(db, "kelas"));
+        const snapshot = await getDocs(q);
+        if (!snapshot.empty) {
+          snapshot.forEach(docSnap => {
+            const data = docSnap.data();
+            const option = document.createElement('option');
+            option.value = data.nama_kelas || docSnap.id;
+            option.textContent = data.nama_kelas || docSnap.id;
+            selectKelas.appendChild(option);
+          });
+        }
+      } catch (err) {
+        console.error("Gagal load kelas:", err);
+      }
+    }
+
+    // 📖 5. LOAD DROPDOWN MAPEL DARI FIRESTORE
+    async function loadMapelDropdown() {
+      selectMapel.innerHTML = '<option value="">-- Pilih Mata Pelajaran --</option>';
+      try {
+        const q = query(collection(db, "mapel"), orderBy("order", "asc"));
+        const snapshot = await getDocs(q);
+        if (!snapshot.empty) {
+          snapshot.forEach(docSnap => {
+            const data = docSnap.data();
+            const option = document.createElement('option');
+            option.value = data.nama_mapel;
+            option.textContent = data.nama_mapel;
+            selectMapel.appendChild(option);
+          });
+        }
+      } catch (err) {
+        console.error("Gagal load mapel:", err);
+      }
+    }
+
+    // 🚀 6. KONTROL MULAI SESI ABSENSI
     btnStartSesi.addEventListener('click', async () => {
-      const kelas = document.getElementById('select-kelas').value;
-      const mapel = document.getElementById('select-mapel').value;
+      const kelas = selectKelas.value;
+      const mapel = selectMapel.value;
+
+      if (!kelas || !mapel) {
+        alert("Pilih Kelas dan Mata Pelajaran terlebih dahulu!");
+        return;
+      }
 
       try {
         btnStartSesi.disabled = true;
@@ -317,6 +363,7 @@
 
         updateQRDisplay(activeToken);
 
+        // Auto Refresh QR tiap 10 detik
         qrInterval = setInterval(async () => {
           if (!currentSesiId) return;
           activeToken = 'QR-' + Math.random().toString(36).substring(2, 10).toUpperCase();
@@ -334,7 +381,7 @@
       }
     });
 
-    // 🛑 5. TUTUP SESI
+    // 🛑 7. TUTUP SESI
     btnStopSesi.addEventListener('click', async () => {
       if (currentSesiId) {
         await updateDoc(doc(db, "sesi_absensi", currentSesiId), {
@@ -358,19 +405,8 @@
       qrContainer.innerHTML = '';
       qrModalContainer.innerHTML = '';
 
-      // Tampilan Normal Card
-      new QRCode(qrContainer, {
-        text: token,
-        width: 160,
-        height: 160
-      });
-
-      // Tampilan Fullscreen Modal HP Guru (Ukuran Lebih Besar)
-      new QRCode(qrModalContainer, {
-        text: token,
-        width: 240,
-        height: 240
-      });
+      new QRCode(qrContainer, { text: token, width: 160, height: 160 });
+      new QRCode(qrModalContainer, { text: token, width: 240, height: 240 });
     }
 
     // REALTIME LOG KEHADIRAN SISWA
