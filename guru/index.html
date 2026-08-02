@@ -3,412 +3,406 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>PORTAL :: Dashboard Guru - Generator QR Absensi</title>
+  <title>PORTAL :: Dashboard Admin & Guru Absensi</title>
   <!-- Tailwind CSS via CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
-  <!-- QRCode.js Library untuk Render QR Code -->
+  <!-- FontAwesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <!-- QRCode.js Library -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
-  <script>
-    tailwind.config = {
-      theme: {
-        extend: {
-          colors: {
-            darkSlate: '#0F172A',
-            deepIndigo: '#1E1B4B',
-            accentCyan: '#00F5D4'
-          }
-        }
-      }
-    }
-  </script>
-  <style>
-    /* Styling khusus agar QR Code yang di-render di dalam canvas/img pas dengan container */
-    #qrcode img, #qrcode canvas {
-      margin: auto;
-      border-radius: 0.75rem;
-      padding: 0.75rem;
-      background: white;
-    }
-  </style>
+  <!-- SheetJS Library (Excel Export) -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 </head>
-<body class="bg-gradient-to-b from-darkSlate to-deepIndigo text-slate-100 min-h-screen p-4 md:p-6">
+<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col justify-center items-center p-4 font-sans">
 
-  <div class="max-w-6xl mx-auto space-y-6">
+  <!-- ========================================== -->
+  <!-- SECTION 1: FORM LOGIN GURU                -->
+  <!-- ========================================== -->
+  <div id="login-section" class="max-w-md w-full bg-slate-900/90 backdrop-blur-xl rounded-2xl p-6 border border-slate-800 shadow-2xl space-y-6">
+    <div class="text-center">
+      <div class="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-cyan-500/10 text-cyan-400 mb-3 border border-cyan-500/30">
+        <i class="fa-solid fa-user-shield text-2xl"></i>
+      </div>
+      <h1 class="text-xl font-bold text-white tracking-wide">LOGIN GURU / ADMIN</h1>
+      <p class="text-xs text-slate-400 mt-1">Portal Absensi TEI :: IskakFatoni</p>
+    </div>
+
+    <form id="login-form" class="space-y-4" onsubmit="return false;">
+      <div class="space-y-1">
+        <label for="login-email" class="block text-xs font-semibold text-slate-300">Email Guru</label>
+        <input 
+          type="email" 
+          id="login-email" 
+          placeholder="guru@sekolah.sch.id" 
+          required 
+          class="w-full px-4 py-3 bg-slate-950 border border-slate-800 rounded-xl text-slate-100 focus:outline-none focus:border-cyan-500 text-sm"
+        >
+      </div>
+
+      <div class="space-y-1">
+        <label for="login-password" class="block text-xs font-semibold text-slate-300">Password</label>
+        <input 
+          type="password" 
+          id="login-password" 
+          placeholder="••••••••" 
+          required 
+          class="w-full px-4 py-3 bg-slate-950 border border-slate-800 rounded-xl text-slate-100 focus:outline-none focus:border-cyan-500 text-sm"
+        >
+      </div>
+
+      <p id="login-error" class="text-red-400 text-xs font-semibold text-center hidden"></p>
+
+      <button 
+        type="submit" 
+        id="btn-login"
+        class="w-full py-3.5 px-4 bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-bold text-sm rounded-xl transition shadow-lg shadow-cyan-500/20 flex items-center justify-center gap-2 cursor-pointer"
+      >
+        <i class="fa-solid fa-right-to-bracket"></i> Masuk Dashboard Guru
+      </button>
+    </form>
+  </div>
+
+
+  <!-- ========================================== -->
+  <!-- SECTION 2: DASHBOARD KONTROL ABSENSI       -->
+  <!-- ========================================== -->
+  <div id="dashboard-section" class="max-w-5xl w-full hidden space-y-6 my-6">
     
-    <!-- HEADER BRANDING & USER BAR -->
-    <header class="bg-slate-800/80 backdrop-blur-md rounded-2xl p-4 md:p-5 border border-slate-700/50 flex flex-col md:flex-row md:items-center justify-between gap-4 shadow-xl">
-      <div class="flex items-center space-x-3">
-        <div class="p-3 bg-cyan-500/10 border border-accentCyan/30 rounded-xl text-accentCyan">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
-          </svg>
+    <!-- TOP BAR (HEADER & MENU LOGOUT) -->
+    <header class="flex flex-wrap items-center justify-between bg-slate-900/90 backdrop-blur-md p-4 px-6 rounded-2xl border border-slate-800 shadow-xl gap-4">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-xl bg-cyan-500/10 border border-cyan-500/30 flex items-center justify-center text-cyan-400 font-bold">
+          <i class="fa-solid fa-qrcode text-lg"></i>
         </div>
         <div>
-          <h1 class="text-lg font-bold text-white tracking-wide">DASHBOARD GURU :: PORTAL ABSENSI</h1>
-          <p class="text-xs text-slate-400">Pengelola Sesi & Monitor Kehadiran Real-time</p>
+          <h2 class="text-base font-bold text-white tracking-wide">Dashboard Guru Absensi</h2>
+          <p id="user-email-display" class="text-xs text-slate-400 font-mono">guru@sekolah.sch.id</p>
         </div>
       </div>
 
-      <div class="flex items-center space-x-3 self-end md:self-auto">
-        <a href="rekap.html" class="px-3.5 py-2 bg-slate-700 hover:bg-slate-600 border border-slate-600 text-slate-200 rounded-xl text-xs font-semibold transition flex items-center gap-1.5">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-          </svg>
-          Rekap & Export Excel
-        </a>
+      <!-- MENU KONTROL KANAN (TERMASUK TOMBOL LOGOUT) -->
+      <div class="flex items-center gap-3">
+        <button 
+          id="btn-export-excel" 
+          class="px-3.5 py-2 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 font-semibold text-xs rounded-xl transition flex items-center gap-2 cursor-pointer"
+        >
+          <i class="fa-solid fa-file-excel"></i> Export Excel
+        </button>
+
+        <button 
+          id="btn-logout" 
+          class="px-4 py-2 bg-red-500/15 hover:bg-red-500/30 text-red-400 border border-red-500/40 font-bold text-xs rounded-xl transition shadow-md shadow-red-500/10 flex items-center gap-2 cursor-pointer"
+        >
+          <i class="fa-solid fa-power-off"></i> Logout
+        </button>
       </div>
     </header>
 
-    <!-- GRID UTAMA: CONTROLLER SESI & DISPLAY QR -->
-    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+    <!-- MAIN PANEL GRID -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+      
+      <!-- KIRI: FORM BUKA SESI -->
+      <div class="bg-slate-900/80 backdrop-blur-md p-6 rounded-2xl border border-slate-800 space-y-4 shadow-xl">
+        <h3 class="text-sm font-bold text-cyan-400 border-b border-slate-800 pb-3 flex items-center gap-2">
+          <i class="fa-solid fa-circle-play"></i> Buka Sesi Absensi Baru
+        </h3>
 
-      <!-- COLUMN LEFT: FORM BUKA SESI & GENERATOR QR (5/12) -->
-      <div class="lg:col-span-5 space-y-6">
-
-        <!-- PANEL SETUP SESI -->
-        <div class="bg-slate-800/80 backdrop-blur-md rounded-2xl p-5 border border-slate-700/50 shadow-xl space-y-4">
-          <h2 class="text-sm font-bold uppercase tracking-wider text-accentCyan flex items-center gap-2">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-            </svg>
-            Buat Sesi Absensi Baru
-          </h2>
-
-          <div class="space-y-3">
-            <div>
-              <label class="block text-xs font-semibold text-slate-300 mb-1">Nama Kelas</label>
-              <input type="text" id="input-kelas" placeholder="Contoh: X IPA 1 / XII TKJ 2" class="w-full px-3.5 py-2.5 bg-slate-900 border border-slate-700 rounded-xl text-white text-sm focus:outline-none focus:border-accentCyan">
-            </div>
-
-            <div>
-              <label class="block text-xs font-semibold text-slate-300 mb-1">Mata Pelajaran</label>
-              <input type="text" id="input-mapel" placeholder="Contoh: Fisika / Pemrograman Web" class="w-full px-3.5 py-2.5 bg-slate-900 border border-slate-700 rounded-xl text-white text-sm focus:outline-none focus:border-accentCyan">
-            </div>
-
-            <button id="btn-toggle-sesi" class="w-full py-3 px-4 bg-gradient-to-r from-teal-400 to-accentCyan text-slate-950 font-bold text-sm rounded-xl hover:opacity-90 active:scale-[0.99] transition shadow-lg shadow-cyan-500/20">
-              🚀 Mulai Sesi Absensi
-            </button>
-          </div>
+        <div class="space-y-1">
+          <label for="select-kelas" class="block text-xs font-semibold text-slate-300">Pilih Kelas TEI</label>
+          <select id="select-kelas" class="w-full px-4 py-3 bg-slate-950 border border-slate-800 rounded-xl text-slate-100 text-sm focus:outline-none focus:border-cyan-500">
+            <option value="XI-TEI-1">XI TEI 1</option>
+            <option value="XI-TEI-2">XI TEI 2</option>
+            <option value="XII-TEI-1">XII TEI 1</option>
+            <option value="XII-TEI-2">XII TEI 2</option>
+            <option value="XI-TEI-1-MUTU">XI TEI 1 MUTU</option>
+            <option value="XI-TEI-2-MUTU">XI TEI 2 MUTU</option>
+            <option value="XII-TEI-MUTU">XII TEI MUTU</option>
+          </select>
         </div>
 
-        <!-- PANEL QR CODE DISPLAY -->
-        <div id="panel-qr" class="bg-slate-800/80 backdrop-blur-md rounded-2xl p-6 border border-slate-700/50 shadow-2xl text-center space-y-4 hidden">
-          <div class="flex items-center justify-between border-b border-slate-700/50 pb-3">
-            <span class="text-xs font-bold text-emerald-400 flex items-center gap-1.5">
-              <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-ping"></span>
-              SESI AKTIF
-            </span>
-            <span id="timer-badge" class="text-xs font-mono bg-slate-900 px-2.5 py-1 rounded-lg border border-slate-700 text-accentCyan">
-              Refresh: 10s
-            </span>
-          </div>
-
-          <!-- TARGET QR CODE RENDER -->
-          <div class="p-4 bg-slate-900/80 border border-slate-700/60 rounded-2xl inline-block shadow-inner">
-            <div id="qrcode"></div>
-          </div>
-
-          <!-- PROGRESS BAR TIMEOUT 10s -->
-          <div class="w-full bg-slate-900 rounded-full h-1.5 overflow-hidden">
-            <div id="progress-bar" class="bg-accentCyan h-full w-full transition-all duration-1000 linear"></div>
-          </div>
-
-          <p class="text-xs text-slate-400">
-            Tampilkan layar ini di proyektor/HP. Token QR diperbarui otomatis secara dinamis setiap 10 detik.
-          </p>
+        <div class="space-y-1">
+          <label for="input-mapel" class="block text-xs font-semibold text-slate-300">Mata Pelajaran</label>
+          <input type="text" id="input-mapel" placeholder="Contoh: Penerapan Rangkaian Elektronika" class="w-full px-4 py-3 bg-slate-950 border border-slate-800 rounded-xl text-slate-100 text-sm focus:outline-none focus:border-cyan-500">
         </div>
 
+        <div class="flex gap-2 pt-2">
+          <button id="btn-start-sesi" class="flex-1 py-3 px-4 bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-sm rounded-xl transition shadow-lg shadow-emerald-500/20 flex items-center justify-center gap-2 cursor-pointer">
+            <i class="fa-solid fa-play"></i> Mulai Sesi QR
+          </button>
+          
+          <button id="btn-stop-sesi" disabled class="py-3 px-4 bg-slate-800 hover:bg-red-500/20 text-slate-500 border border-slate-700 font-bold text-sm rounded-xl transition flex items-center justify-center gap-2 cursor-not-allowed">
+            <i class="fa-solid fa-stop"></i> Tutup
+          </button>
+        </div>
       </div>
 
-      <!-- COLUMN RIGHT: REAL-TIME MONITORING SISWA HADIR (7/12) -->
-      <div class="lg:col-span-7">
-        <div class="bg-slate-800/80 backdrop-blur-md rounded-2xl p-5 border border-slate-700/50 shadow-xl space-y-4 h-full flex flex-col justify-between">
-          
-          <div class="space-y-4">
-            <div class="flex items-center justify-between border-b border-slate-700/50 pb-3">
-              <div>
-                <h2 class="text-sm font-bold text-white uppercase tracking-wider">Live Log Kehadiran</h2>
-                <p id="info-sesi-aktif" class="text-xs text-slate-400 mt-0.5">Belum ada sesi yang berjalan.</p>
-              </div>
-              <div class="bg-cyan-500/10 border border-accentCyan/30 px-3 py-1.5 rounded-xl text-center">
-                <span id="counter-hadir" class="text-lg font-extrabold text-accentCyan">0</span>
-                <span class="text-[10px] text-slate-400 block -mt-1 font-semibold uppercase">Siswa Hadir</span>
-              </div>
-            </div>
-
-            <!-- CONTAINER LIST SISWA HADIR -->
-            <div id="list-siswa-hadir" class="space-y-2 max-h-[420px] overflow-y-auto pr-1">
-              <div class="p-8 border border-dashed border-slate-700 rounded-2xl text-center text-slate-500 text-xs">
-                Silakan buka sesi absensi terlebih dahulu untuk mulai memantau kehadiran siswa secara real-time.
-              </div>
-            </div>
-          </div>
-
-          <!-- FOOTER PANEL -->
-          <div class="pt-4 border-t border-slate-700/30 text-right">
-            <p class="text-[11px] text-slate-500 font-mono">Developed by Iskak Fatoni</p>
-          </div>
-
+      <!-- KANAN: TAMPILAN QR CODE DINAMIS -->
+      <div class="bg-slate-900/80 backdrop-blur-md p-6 rounded-2xl border border-slate-800 flex flex-col items-center justify-center text-center space-y-4 shadow-xl">
+        <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider">QR Code Sesi Absensi</span>
+        
+        <div id="qrcode-container" class="p-3 bg-white rounded-2xl shadow-2xl min-w-[180px] min-h-[180px] flex items-center justify-center">
+          <p class="text-xs text-slate-500 font-sans">Sesi Belum Dibatasi</p>
         </div>
+
+        <p id="session-status" class="text-xs text-slate-400 font-mono">Status: Sesi Nonaktif</p>
       </div>
 
     </div>
 
+    <!-- LIVE LOG SISWA YANG BERHASIL SCAN -->
+    <div class="bg-slate-900/80 backdrop-blur-md p-6 rounded-2xl border border-slate-800 space-y-3 shadow-xl">
+      <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+        <h3 class="text-sm font-bold text-cyan-400 flex items-center gap-2">
+          <i class="fa-solid fa-list-check"></i> Live Log Kehadiran Siswa
+        </h3>
+        <span id="log-count" class="text-xs text-slate-400 font-mono">Total: 0 Siswa</span>
+      </div>
+
+      <div id="log-siswa-container" class="space-y-2 max-h-60 overflow-y-auto pr-1">
+        <p class="text-xs text-slate-500 text-center py-4">// Data siswa yang melakukan scan QR akan muncul di sini secara realtime...</p>
+      </div>
+    </div>
+
+    <!-- FOOTER -->
+    <div class="text-center pt-2 border-t border-slate-800/60">
+      <p class="text-xs text-slate-500 font-mono">Developed by Iskak Fatoni, S.Pd., Gr.</p>
+    </div>
+
   </div>
 
-  <!-- SCRIPT LOGIC (FIREBASE & QR GENERATOR) -->
+
+  <!-- SCRIPT AUTHENTICATION & LOGIC -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+    import { 
+      getAuth, 
+      signInWithEmailAndPassword, 
+      onAuthStateChanged, 
+      signOut,
+      setPersistence,
+      browserSessionPersistence 
+    } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
     import { 
       getFirestore, 
       collection, 
       addDoc, 
-      updateDoc, 
       doc, 
-      onSnapshot, 
+      updateDoc, 
       query, 
       where, 
-      orderBy,
+      onSnapshot, 
       serverTimestamp 
     } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
-    import { firebaseConfig } from "../assets/js/config/firebase-config.js";
 
-    // Inisialisasi Firebase & Firestore
+    // Konfigurasi Firebase Portal IskakFatoni
+    const firebaseConfig = {
+      apiKey: "AIzaSyDhq4QoCn00GkfpKXSP8PnvSvEKa2yn0ic",
+      authDomain: "portal-iskakfatoni.firebaseapp.com",
+      projectId: "portal-iskakfatoni",
+      storageBucket: "portal-iskakfatoni.firebasestorage.app",
+      messagingSenderId: "367350728822",
+      appId: "1:367350728822:web:6b0c6fd4824102d8acf757",
+      measurementId: "G-0BNNKQQ24V"
+    };
+
     const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
     const db = getFirestore(app);
 
     // DOM Elements
-    const inputKelas = document.getElementById('input-kelas');
-    const inputMapel = document.getElementById('input-mapel');
-    const btnToggleSesi = document.getElementById('btn-toggle-sesi');
-    const panelQr = document.getElementById('panel-qr');
-    const timerBadge = document.getElementById('timer-badge');
-    const progressBar = document.getElementById('progress-bar');
-    const infoSesiAktif = document.getElementById('info-sesi-aktif');
-    const counterHadir = document.getElementById('counter-hadir');
-    const listSiswaHadir = document.getElementById('list-siswa-hadir');
+    const loginSection = document.getElementById('login-section');
+    const dashboardSection = document.getElementById('dashboard-section');
+    const loginForm = document.getElementById('login-form');
+    const loginError = document.getElementById('login-error');
+    const userEmailDisplay = document.getElementById('user-email-display');
+    const btnLogout = document.getElementById('btn-logout');
 
-    // App State Variables
+    const btnStartSesi = document.getElementById('btn-start-sesi');
+    const btnStopSesi = document.getElementById('btn-stop-sesi');
+    const btnExportExcel = document.getElementById('btn-export-excel');
+    const qrContainer = document.getElementById('qrcode-container');
+    const sessionStatus = document.getElementById('session-status');
+    const logSiswaContainer = document.getElementById('log-siswa-container');
+    const logCount = document.getElementById('log-count');
+
     let currentSesiId = null;
-    let isSesiActive = false;
-    let qrTimerInterval = null;
-    let countdownInterval = null;
-    let unsubscribeLogListener = null;
-    let qrcodeObj = null;
-    let countdownSec = 10;
+    let qrInterval = null;
+    let unsubscribeLog = null;
+    let currentLogData = [];
 
-    // HELPER: Generate Token Acak Unik
-    function generateRandomToken() {
-      const array = new Uint8Array(16);
-      crypto.getRandomValues(array);
-      return Array.from(array, byte => byte.toString(16).padStart(2, '0')).join('');
-    }
-
-    // TOGGLE START / STOP SESI
-    btnToggleSesi.addEventListener('click', async () => {
-      if (!isSesiActive) {
-        await startSesi();
+    // 🔒 1. MONITORING STATUS AUTHENTICATION
+    onAuthStateChanged(auth, (user) => {
+      if (user) {
+        loginSection.classList.add('hidden');
+        dashboardSection.classList.remove('hidden');
+        userEmailDisplay.innerText = user.email;
       } else {
-        await stopSesi();
+        loginSection.classList.remove('hidden');
+        dashboardSection.classList.add('hidden');
+        resetSesiState();
       }
     });
 
-    // 1. MULAI SESI ABSENSI BARU
-    async function startSesi() {
-      const kelas = inputKelas.value.trim();
-      const mapel = inputMapel.value.trim();
-
-      if (!kelas || !mapel) {
-        alert("Silakan isi nama kelas dan mata pelajaran terlebih dahulu.");
-        return;
-      }
-
-      btnToggleSesi.disabled = true;
-      btnToggleSesi.innerText = "Membuat Sesi...";
+    // 🔒 2. LOGIC LOGIN GURU
+    loginForm.addEventListener('submit', async () => {
+      const email = document.getElementById('login-email').value.trim();
+      const pass = document.getElementById('login-password').value.trim();
+      loginError.classList.add('hidden');
 
       try {
-        const initialToken = generateRandomToken();
+        await setPersistence(auth, browserSessionPersistence);
+        await signInWithEmailAndPassword(auth, email, pass);
+      } catch (err) {
+        loginError.innerText = "Login gagal: Email atau password salah!";
+        loginError.classList.remove('hidden');
+      }
+    });
 
-        // Buat dokumen sesi baru di Firestore
+    // 🚪 3. MENU LOGOUT DENGAN KONFIRMASI
+    btnLogout.addEventListener('click', () => {
+      if (confirm("Apakah Anda yakin ingin keluar dari Dashboard Guru?")) {
+        signOut(auth);
+      }
+    });
+
+    // 🚀 4. KONTROL MULAI SESI ABSENSI
+    btnStartSesi.addEventListener('click', async () => {
+      const kelas = document.getElementById('select-kelas').value;
+      const mapel = document.getElementById('input-mapel').value.trim() || 'Pelajaran TEI';
+
+      try {
+        btnStartSesi.disabled = true;
+
+        // Buat Dokumen Sesi Baru di Firestore
+        const initialToken = 'QR-' + Math.random().toString(36).substring(2, 10).toUpperCase();
         const docRef = await addDoc(collection(db, "sesi_absensi"), {
           id_kelas: kelas,
           nama_mapel: mapel,
-          tanggal: new Date().toISOString().split('T')[0],
-          is_active: true,
           current_qr_token: initialToken,
+          is_active: true,
           created_at: serverTimestamp()
         });
 
         currentSesiId = docRef.id;
-        isSesiActive = true;
 
-        // UI Updates
-        panelQr.classList.remove('hidden');
-        inputKelas.disabled = true;
-        inputMapel.disabled = true;
-        btnToggleSesi.disabled = false;
-        btnToggleSesi.innerText = "⛔ Tutup Sesi Absensi";
-        btnToggleSesi.className = "w-full py-3 px-4 bg-red-600/80 hover:bg-red-600 border border-red-500 text-white font-bold text-sm rounded-xl transition shadow-lg shadow-red-500/20";
-        infoSesiAktif.innerText = `Sesi Aktif: ${kelas} - ${mapel}`;
+        // Tampilkan Sesi Aktif
+        btnStopSesi.disabled = false;
+        btnStopSesi.className = 'py-3 px-4 bg-red-500 hover:bg-red-400 text-white font-bold text-sm rounded-xl transition shadow-lg shadow-red-500/20 flex items-center justify-center gap-2 cursor-pointer';
 
-        // Inisialisasi QR Code Render
-        renderQrCode(initialToken);
+        sessionStatus.innerText = `Status: Sesi Aktif [${kelas}]`;
+        sessionStatus.className = 'text-xs text-emerald-400 font-mono font-bold';
 
-        // Mulai Loop Timer QR Dinamis (10 Detik)
-        startQrRotation();
-
-        // Listen Real-time Kehadiran Siswa
-        listenToLogKehadiran(currentSesiId);
-
-      } catch (err) {
-        console.error("Gagal membuat sesi:", err);
-        alert("Terjadi kesalahan saat membuat sesi absensi.");
-        btnToggleSesi.disabled = false;
-        btnToggleSesi.innerText = "🚀 Mulai Sesi Absensi";
-      }
-    }
-
-    // 2. TUTUP SESI ABSENSI
-    async function stopSesi() {
-      if (!confirm("Apakah Anda yakin ingin menutup sesi absensi ini? Siswa tidak akan bisa scan lagi.")) {
-        return;
-      }
-
-      // Hentikan Timer & Listener
-      clearInterval(qrTimerInterval);
-      clearInterval(countdownInterval);
-      if (unsubscribeLogListener) unsubscribeLogListener();
-
-      try {
-        // Update status sesi di Firestore menjadi inactive
-        if (currentSesiId) {
-          await updateDoc(doc(db, "sesi_absensi", currentSesiId), {
-            is_active: false,
-            closed_at: serverTimestamp()
-          });
-        }
-      } catch (e) {
-        console.error("Gagal mengupdate status sesi:", e);
-      }
-
-      // Reset UI State
-      isSesiActive = false;
-      currentSesiId = null;
-      panelQr.classList.add('hidden');
-      inputKelas.disabled = false;
-      inputMapel.disabled = false;
-      btnToggleSesi.innerText = "🚀 Mulai Sesi Absensi Baru";
-      btnToggleSesi.className = "w-full py-3 px-4 bg-gradient-to-r from-teal-400 to-accentCyan text-slate-950 font-bold text-sm rounded-xl hover:opacity-90 active:scale-[0.99] transition shadow-lg shadow-cyan-500/20";
-      infoSesiAktif.innerText = "Sesi telah ditutup.";
-    }
-
-    // 3. RENDER QR CODE FUNCTION
-    function renderQrCode(token) {
-      const qrContainer = document.getElementById('qrcode');
-      qrContainer.innerHTML = ''; // Clear QR lama
-
-      qrcodeObj = new QRCode(qrContainer, {
-        text: token,
-        width: 200,
-        height: 200,
-        colorDark: "#0F172A",
-        colorLight: "#FFFFFF",
-        correctLevel: QRCode.CorrectLevel.H
-      });
-    }
-
-    // 4. LOOPING TIMER ROTASI QR CODE DINAMIS (10s)
-    function startQrRotation() {
-      countdownSec = 10;
-      
-      // Clear Interval sebelumnya jika ada
-      if (qrTimerInterval) clearInterval(qrTimerInterval);
-      if (countdownInterval) clearInterval(countdownInterval);
-
-      // Countdown Progress Visual (Setiap 1 Detik)
-      countdownInterval = setInterval(() => {
-        countdownSec--;
-        timerBadge.innerText = `Refresh: ${countdownSec}s`;
-        progressBar.style.width = `${(countdownSec / 10) * 100}%`;
-
-        if (countdownSec <= 0) {
-          countdownSec = 10;
-        }
-      }, 1000);
-
-      // Rotasi Token di Firestore & Render Ulang (Setiap 10 Detik)
-      qrTimerInterval = setInterval(async () => {
-        if (!isSesiActive || !currentSesiId) return;
-
-        const newToken = generateRandomToken();
-
-        // Render QR Baru di Layar
-        renderQrCode(newToken);
-
-        // Sync Token Baru ke Firestore Server
-        try {
+        // Update QR Token tiap 10 detik
+        updateQRDisplay(initialToken);
+        qrInterval = setInterval(async () => {
+          if (!currentSesiId) return;
+          const newToken = 'QR-' + Math.random().toString(36).substring(2, 10).toUpperCase();
           await updateDoc(doc(db, "sesi_absensi", currentSesiId), {
             current_qr_token: newToken
           });
-        } catch (err) {
-          console.error("Gagal update token QR di server:", err);
-        }
-      }, 10000);
+          updateQRDisplay(newToken);
+        }, 10000);
+
+        // Listen Live Log Kehadiran Siswa
+        listenToLogAbsensi(currentSesiId);
+
+      } catch (e) {
+        alert("Gagal membuka sesi: " + e.message);
+        btnStartSesi.disabled = false;
+      }
+    });
+
+    // 🛑 5. KONTROL TUTUP SESI
+    btnStopSesi.addEventListener('click', async () => {
+      if (currentSesiId) {
+        await updateDoc(doc(db, "sesi_absensi", currentSesiId), {
+          is_active: false
+        });
+        resetSesiState();
+      }
+    });
+
+    // HELPER QR DISPLAY
+    function updateQRDisplay(token) {
+      qrContainer.innerHTML = '';
+      new QRCode(qrContainer, {
+        text: token,
+        width: 160,
+        height: 160
+      });
     }
 
-    // 5. LISTEN LOG KEHADIRAN SISWA REAL-TIME (Firestore onSnapshot)
-    function listenToLogKehadiran(sesiId) {
-      const q = query(
-        collection(db, "log_absensi"),
-        where("id_sesi", "==", sesiId)
-      );
+    // REALTIME LOG KEHADIRAN SISWA
+    function listenToLogAbsensi(sesiId) {
+      if (unsubscribeLog) unsubscribeLog();
 
-      unsubscribeLogListener = onSnapshot(q, (snapshot) => {
-        const total = snapshot.size;
-        counterHadir.innerText = total;
+      const q = query(collection(db, "log_absensi"), where("id_sesi", "==", sesiId));
+      unsubscribeLog = onSnapshot(q, (snapshot) => {
+        logSiswaContainer.innerHTML = '';
+        currentLogData = [];
 
         if (snapshot.empty) {
-          listSiswaHadir.innerHTML = `
-            <div class="p-8 border border-dashed border-slate-700 rounded-2xl text-center text-slate-500 text-xs">
-              Menunggu siswa melakukan scan QR Code...
-            </div>
-          `;
+          logSiswaContainer.innerHTML = '<p class="text-xs text-slate-500 text-center py-4">// Belum ada siswa yang melakukan scan...</p>';
+          logCount.innerText = "Total: 0 Siswa";
           return;
         }
 
-        let htmlList = '';
-        // Urutkan siswa dari yang paling baru scan
-        const docsArray = [];
-        snapshot.forEach(doc => docsArray.push({ id: doc.id, ...doc.data() }));
-        docsArray.sort((a, b) => new Date(b.waktu_scan || 0) - new Date(a.waktu_scan || 0));
+        let count = 0;
+        snapshot.forEach((docSnap) => {
+          count++;
+          const data = docSnap.data();
+          currentLogData.push(data);
 
-        docsArray.forEach((item, index) => {
-          const waktuStr = item.waktu_scan 
-            ? new Date(item.waktu_scan).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', second: '2-digit' }) 
-            : '-';
-
-          htmlList += `
-            <div class="p-3.5 bg-slate-900/80 border border-slate-700/60 rounded-xl flex items-center justify-between transition hover:border-slate-600">
-              <div class="flex items-center space-x-3">
-                <span class="w-7 h-7 rounded-lg bg-cyan-500/10 text-accentCyan border border-accentCyan/30 flex items-center justify-center font-bold text-xs">
-                  ${docsArray.length - index}
-                </span>
-                <div>
-                  <h4 class="text-xs font-bold text-white">${item.nama_siswa || 'Siswa'}</h4>
-                  <p class="text-[10px] text-slate-400">NIS: ${item.nis || '-'} | Status: <span class="text-emerald-400 font-semibold">${item.status || 'Hadir'}</span></p>
-                </div>
-              </div>
-              <span class="text-[11px] font-mono text-slate-400 bg-slate-800 px-2 py-1 rounded-md border border-slate-700">
-                ${waktuStr} WIB
-              </span>
+          const item = document.createElement('div');
+          item.className = 'flex items-center justify-between p-3 bg-slate-950/80 rounded-xl border border-slate-800 text-xs';
+          item.innerHTML = `
+            <div>
+              <p class="font-bold text-white">${data.nama_siswa}</p>
+              <p class="text-[10px] text-slate-400 font-mono">NIS: ${data.nis} | ${data.id_kelas}</p>
             </div>
+            <span class="px-2.5 py-1 rounded-full text-[10px] font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+              ✔ ${data.status || 'Hadir'}
+            </span>
           `;
+          logSiswaContainer.appendChild(item);
         });
 
-        listSiswaHadir.innerHTML = htmlList;
-      }, (error) => {
-        console.error("Realtime listener error:", error);
+        logCount.innerText = `Total: ${count} Siswa`;
       });
+    }
+
+    // EXPORT REKAP KE EXCEL
+    btnExportExcel.addEventListener('click', () => {
+      if (currentLogData.length === 0) {
+        alert("Belum ada data log absensi untuk diexport!");
+        return;
+      }
+
+      const excelRows = currentLogData.map((item, idx) => ({
+        "No": idx + 1,
+        "NIS": item.nis,
+        "Nama Siswa": item.nama_siswa,
+        "Kelas": item.id_kelas,
+        "Waktu Scan": item.waktu_scan || new Date().toLocaleString(),
+        "Status": item.status || "Hadir"
+      }));
+
+      const worksheet = XLSX.utils.json_to_sheet(excelRows);
+      const workbook = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(workbook, worksheet, "Rekap Absensi");
+      XLSX.writeFile(workbook, `Rekap_Absensi_${new Date().toISOString().split('T')[0]}.xlsx`);
+    });
+
+    function resetSesiState() {
+      if (qrInterval) clearInterval(qrInterval);
+      if (unsubscribeLog) unsubscribeLog();
+      currentSesiId = null;
+      btnStartSesi.disabled = false;
+      btnStopSesi.disabled = true;
+      btnStopSesi.className = 'py-3 px-4 bg-slate-800 hover:bg-red-500/20 text-slate-500 border border-slate-700 font-bold text-sm rounded-xl transition flex items-center justify-center gap-2 cursor-not-allowed';
+      sessionStatus.innerText = 'Status: Sesi Nonaktif';
+      sessionStatus.className = 'text-xs text-slate-400 font-mono';
+      qrContainer.innerHTML = '<p class="text-xs text-slate-500 font-sans">Sesi Belum Dibatasi</p>';
     }
   </script>
 </body>
