@@ -101,15 +101,16 @@
     <!-- MAIN PANEL GRID -->
     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
       
-      <!-- KIRI: FORM BUKA SESI -->
+      <!-- KIRI: FORM BUKA SESI (KELAS & MAPEL DROPDOWN) -->
       <div class="bg-slate-900/80 backdrop-blur-md p-6 rounded-2xl border border-slate-800 space-y-4 shadow-xl">
         <h3 class="text-sm font-bold text-cyan-400 border-b border-slate-800 pb-3 flex items-center gap-2">
           <i class="fa-solid fa-circle-play"></i> Buka Sesi Absensi Baru
         </h3>
 
+        <!-- DROPDOWN KELAS -->
         <div class="space-y-1">
           <label for="select-kelas" class="block text-xs font-semibold text-slate-300">Pilih Kelas TEI</label>
-          <select id="select-kelas" class="w-full px-4 py-3 bg-slate-950 border border-slate-800 rounded-xl text-slate-100 text-sm focus:outline-none focus:border-cyan-500">
+          <select id="select-kelas" class="w-full px-4 py-3 bg-slate-950 border border-slate-800 rounded-xl text-slate-100 text-sm focus:outline-none focus:border-cyan-500 cursor-pointer">
             <option value="XI-TEI-1">XI TEI 1</option>
             <option value="XI-TEI-2">XI TEI 2</option>
             <option value="XII-TEI-1">XII TEI 1</option>
@@ -120,9 +121,19 @@
           </select>
         </div>
 
+        <!-- DROPDOWN MATA PELAJARAN TEI -->
         <div class="space-y-1">
-          <label for="input-mapel" class="block text-xs font-semibold text-slate-300">Mata Pelajaran</label>
-          <input type="text" id="input-mapel" placeholder="Contoh: Penerapan Rangkaian Elektronika" class="w-full px-4 py-3 bg-slate-950 border border-slate-800 rounded-xl text-slate-100 text-sm focus:outline-none focus:border-cyan-500">
+          <label for="select-mapel" class="block text-xs font-semibold text-slate-300">Pilih Mata Pelajaran</label>
+          <select id="select-mapel" class="w-full px-4 py-3 bg-slate-950 border border-slate-800 rounded-xl text-slate-100 text-sm focus:outline-none focus:border-cyan-500 cursor-pointer">
+            <option value="Penerapan Rangkaian Elektronika">Penerapan Rangkaian Elektronika (PRE)</option>
+            <option value="Perencanaan & Instalasi Sistem Audio Video">Perencanaan & Instalasi Sistem Audio Video (PISAV)</option>
+            <option value="Penerapan Sistem Radio & Televisi">Penerapan Sistem Radio & Televisi (PSRT)</option>
+            <option value="Mikroprosesor & Mikrokontroler">Mikroprosesor & Mikrokontroler</option>
+            <option value="Pembuatan & Pemeliharaan Peralatan Elektronika">Pembuatan & Pemeliharaan Peralatan Elektronika</option>
+            <option value="Produk Kreatif & Kewirausahaan">Produk Kreatif & Kewirausahaan (PKK)</option>
+            <option value="Dasar-Dasar Teknik Elektronika">Dasar-Dasar Teknik Elektronika</option>
+            <option value="Projek IPAS">Projek IPAS</option>
+          </select>
         </div>
 
         <div class="flex gap-2 pt-2">
@@ -141,7 +152,7 @@
         <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider">QR Code Sesi Absensi</span>
         
         <div id="qrcode-container" class="p-3 bg-white rounded-2xl shadow-2xl min-w-[180px] min-h-[180px] flex items-center justify-center">
-          <p class="text-xs text-slate-500 font-sans">Sesi Belum Dibatasi</p>
+          <p class="text-xs text-slate-500 font-sans">Sesi Belum Aktif</p>
         </div>
 
         <p id="session-status" class="text-xs text-slate-400 font-mono">Status: Sesi Nonaktif</p>
@@ -268,7 +279,7 @@
     // 🚀 4. KONTROL MULAI SESI ABSENSI
     btnStartSesi.addEventListener('click', async () => {
       const kelas = document.getElementById('select-kelas').value;
-      const mapel = document.getElementById('input-mapel').value.trim() || 'Pelajaran TEI';
+      const mapel = document.getElementById('select-mapel').value;
 
       try {
         btnStartSesi.disabled = true;
@@ -402,7 +413,7 @@
       btnStopSesi.className = 'py-3 px-4 bg-slate-800 hover:bg-red-500/20 text-slate-500 border border-slate-700 font-bold text-sm rounded-xl transition flex items-center justify-center gap-2 cursor-not-allowed';
       sessionStatus.innerText = 'Status: Sesi Nonaktif';
       sessionStatus.className = 'text-xs text-slate-400 font-mono';
-      qrContainer.innerHTML = '<p class="text-xs text-slate-500 font-sans">Sesi Belum Dibatasi</p>';
+      qrContainer.innerHTML = '<p class="text-xs text-slate-500 font-sans">Sesi Belum Aktif</p>';
     }
   </script>
 </body>
