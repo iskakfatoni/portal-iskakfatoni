@@ -10,6 +10,54 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   
   <style>
+    /* ========================================== */
+    /* TEMA STANDAR ADMIN (DARK MODE DEFAULT)     */
+    /* ========================================== */
+    :root {
+      --bg-main: #0b0f19;
+      --bg-radial-1: rgba(56, 189, 248, 0.08);
+      --bg-radial-2: rgba(99, 102, 241, 0.08);
+      --text-title: #ffffff;
+      --text-sub: #cbd5e1;
+      --text-muted: #94a3b8;
+      
+      --card-bg: rgba(15, 23, 42, 0.85);
+      --card-border: rgba(255, 255, 255, 0.08);
+      --card-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.5);
+      
+      --input-bg: #030712;
+      --input-border: rgba(255, 255, 255, 0.2);
+      --input-text: #ffffff;
+      
+      --item-bg: rgba(9, 13, 22, 0.7);
+      --item-border: rgba(255, 255, 255, 0.06);
+    }
+
+    /* ========================================== */
+    /* AUTO LIGHT MODE (JIKA HP/LAPTOP LIGHT)     */
+    /* ========================================== */
+    @media (prefers-color-scheme: light) {
+      :root {
+        --bg-main: #f8fafc;
+        --bg-radial-1: rgba(56, 189, 248, 0.15);
+        --bg-radial-2: rgba(99, 102, 241, 0.12);
+        --text-title: #0f172a;
+        --text-sub: #334155;
+        --text-muted: #64748b;
+        
+        --card-bg: rgba(255, 255, 255, 0.8);
+        --card-border: rgba(15, 23, 42, 0.1);
+        --card-shadow: 0 15px 35px -10px rgba(139, 92, 246, 0.12);
+        
+        --input-bg: #ffffff;
+        --input-border: rgba(15, 23, 42, 0.2);
+        --input-text: #0f172a;
+        
+        --item-bg: rgba(241, 245, 249, 0.9);
+        --item-border: rgba(15, 23, 42, 0.08);
+      }
+    }
+
     *, *::before, *::after { 
       box-sizing: border-box; 
       margin: 0; 
@@ -24,17 +72,18 @@
 
     body {
       font-family: 'Plus Jakarta Sans', sans-serif;
-      background-color: #0b0f19;
+      background-color: var(--bg-main);
       background-image: 
-        radial-gradient(circle at 10% 20%, rgba(56, 189, 248, 0.08) 0%, transparent 40%),
-        radial-gradient(circle at 90% 80%, rgba(99, 102, 241, 0.08) 0%, transparent 40%);
+        radial-gradient(circle at 10% 20%, var(--bg-radial-1) 0%, transparent 40%),
+        radial-gradient(circle at 90% 80%, var(--bg-radial-2) 0%, transparent 40%);
       background-attachment: fixed;
-      color: #f8fafc;
+      color: var(--text-title);
       padding: 24px 16px;
       display: flex;
       flex-direction: column;
       justify-content: center;
       align-items: center;
+      transition: background 0.4s ease, color 0.4s ease;
     }
 
     /* CONTAINER LOGIN */
@@ -42,35 +91,37 @@
       width: 100%; 
       max-width: 420px; 
       margin: 20px auto;
-      background: #0f172a; 
-      border: 1px solid rgba(255, 255, 255, 0.12); 
+      background: var(--card-bg); 
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid var(--card-border); 
       border-radius: 20px;
       padding: 32px 24px; 
-      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.6);
+      box-shadow: var(--card-shadow);
       position: relative;
       z-index: 100;
     }
 
     .login-header { text-align: center; margin-bottom: 24px; }
     .login-header i { font-size: 2.5rem; color: #38bdf8; margin-bottom: 12px; }
-    .login-header h2 { font-size: 1.5rem; font-weight: 700; color: #fff; }
+    .login-header h2 { font-size: 1.5rem; font-weight: 700; color: var(--text-title); }
 
     .dashboard-container { width: 100%; max-width: 100%; }
 
     .top-bar {
       display: flex; justify-content: space-between; align-items: center;
-      background: rgba(15, 23, 42, 0.8); backdrop-filter: blur(16px);
-      border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 16px;
-      padding: 20px 32px; margin-bottom: 20px; box-shadow: 0 10px 30px -10px rgba(0,0,0,0.5);
+      background: var(--card-bg); backdrop-filter: blur(16px);
+      border: 1px solid var(--card-border); border-radius: 16px;
+      padding: 20px 32px; margin-bottom: 20px; box-shadow: var(--card-shadow);
     }
-    .top-bar-title h1 { font-size: 1.4rem; font-weight: 800; color: #fff; display: flex; align-items: center; gap: 12px; }
-    .top-bar-title p { font-size: 0.85rem; color: #94a3b8; margin-top: 2px; }
+    .top-bar-title h1 { font-size: 1.4rem; font-weight: 800; color: var(--text-title); display: flex; align-items: center; gap: 12px; }
+    .top-bar-title p { font-size: 0.85rem; color: var(--text-muted); margin-top: 2px; }
 
     /* STATUS CONTROL CARD */
     .status-card {
-      background: rgba(15, 23, 42, 0.8); 
+      background: var(--card-bg); 
       backdrop-filter: blur(16px);
-      border: 1px solid rgba(255, 255, 255, 0.08); 
+      border: 1px solid var(--card-border); 
       border-radius: 16px;
       padding: 16px 24px; 
       margin: 0 auto 24px auto; 
@@ -78,7 +129,7 @@
       display: flex;
       align-items: center; 
       justify-content: space-between;
-      box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.3);
+      box-shadow: var(--card-shadow);
     }
     .status-info { display: flex; align-items: center; gap: 14px; }
     .status-badge {
@@ -90,18 +141,18 @@
 
     .main-grid { display: grid; grid-template-columns: 380px 1fr; gap: 24px; align-items: start; }
     .panel-card {
-      background: rgba(15, 23, 42, 0.8); backdrop-filter: blur(16px);
-      border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 20px;
-      padding: 28px; box-shadow: 0 15px 35px -10px rgba(0, 0, 0, 0.4); width: 100%;
+      background: var(--card-bg); backdrop-filter: blur(16px);
+      border: 1px solid var(--card-border); border-radius: 20px;
+      padding: 28px; box-shadow: var(--card-shadow); width: 100%;
     }
     .panel-title {
       font-size: 1.1rem; font-weight: 700; color: #38bdf8; margin-bottom: 20px;
       display: flex; align-items: center; gap: 10px;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.06); padding-bottom: 14px;
+      border-bottom: 1px solid var(--card-border); padding-bottom: 14px;
     }
 
     .form-group { margin-bottom: 18px; }
-    .form-group label { display: block; font-size: 0.85rem; font-weight: 600; color: #cbd5e1; margin-bottom: 8px; }
+    .form-group label { display: block; font-size: 0.85rem; font-weight: 600; color: var(--text-sub); margin-bottom: 8px; }
 
     input[type="text"],
     input[type="email"],
@@ -112,9 +163,9 @@
       display: block;
       width: 100%; 
       padding: 14px 16px; 
-      background-color: #030712;
-      border: 1.5px solid rgba(255, 255, 255, 0.2); 
-      color: #ffffff;
+      background-color: var(--input-bg);
+      border: 1.5px solid var(--input-border); 
+      color: var(--input-text);
       font-family: inherit; 
       font-size: 16px;
       border-radius: 12px; 
@@ -126,12 +177,11 @@
       touch-action: manipulation;
     }
 
-    select option { background: #0f172a; color: #fff; padding: 10px; }
+    select option { background: var(--input-bg); color: var(--input-text); padding: 10px; }
     
     input:focus, select:focus { 
       border-color: #38bdf8; 
       box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.3); 
-      background-color: #0f172a;
     }
 
     .btn {
@@ -153,13 +203,13 @@
     .link-list { display: flex; flex-direction: column; gap: 12px; }
     .link-item {
       display: flex; align-items: center; justify-content: space-between;
-      background: rgba(9, 13, 22, 0.7); border: 1px solid rgba(255, 255, 255, 0.06);
+      background: var(--item-bg); border: 1px solid var(--item-border);
       border-radius: 12px; padding: 16px 22px; transition: all 0.2s ease;
     }
     .link-info { display: flex; align-items: center; gap: 16px; flex: 1; padding-right: 20px; }
     .badge-order { background: rgba(56, 189, 248, 0.15); color: #38bdf8; font-size: 0.85rem; font-weight: 800; padding: 8px 12px; border-radius: 8px; min-width: 40px; text-align: center; }
-    .link-details h4 { font-size: 1rem; color: #fff; font-weight: 600; }
-    .link-details p { font-size: 0.85rem; color: #64748b; margin-top: 3px; word-break: break-all; }
+    .link-details h4 { font-size: 1rem; color: var(--text-title); font-weight: 600; }
+    .link-details p { font-size: 0.85rem; color: var(--text-muted); margin-top: 3px; word-break: break-all; }
     .actions { display: flex; gap: 10px; }
     .hidden { display: none !important; }
 
@@ -176,7 +226,7 @@
     <div class="login-header">
       <i class="fa-solid fa-user-shield"></i>
       <h2>Admin Login</h2>
-      <p style="font-size:0.85rem; color:#64748b; margin-top:4px;">PORTAL::IskakFatoni</p>
+      <p style="font-size:0.85rem; color:var(--text-muted); margin-top:4px;">PORTAL::IskakFatoni</p>
     </div>
     
     <form id="login-form" action="#" onsubmit="return false;">
@@ -230,8 +280,8 @@
       <div class="status-info">
         <i class="fa-solid fa-power-off" style="font-size: 1.4rem; color: #38bdf8;"></i>
         <div>
-          <h3 style="font-size: 1rem; font-weight: 700; color: #fff;">Status Portal</h3>
-          <p style="font-size: 0.8rem; color: #94a3b8;">Atur apakah portal di mode BUKA atau TUTUP ?</p>
+          <h3 style="font-size: 1rem; font-weight: 700; color: var(--text-title);">Status Portal</h3>
+          <p style="font-size: 0.8rem; color: var(--text-muted);">Atur apakah portal di mode BUKA atau TUTUP ?</p>
         </div>
       </div>
       <div style="display: flex; align-items: center; gap: 16px;">
@@ -242,14 +292,14 @@
       </div>
     </div>
 
-    <!-- PENGATURAN RUNNING TEXT PENGUMUMAN (OPSIONAL DARI ADMIN) -->
+    <!-- PENGATURAN RUNNING TEXT PENGUMUMAN (MANUAL) -->
     <div class="status-card" style="width: 75%; flex-direction: column; align-items: stretch; gap: 10px;">
       <label style="font-size: 0.85rem; font-weight: 700; color: #38bdf8;">
         <i class="fa-solid fa-bullhorn"></i> Teks Pengumuman Running Text (Manual)
       </label>
       <div style="display: flex; gap: 10px;">
         <input type="text" id="custom-announcement" placeholder="Ketik pengumuman baru...">
-        <button id="btn-update-announcement" class="btn btn-primary" style="width: auto; whitespace: nowrap;">
+        <button id="btn-update-announcement" class="btn btn-primary" style="width: auto; white-space: nowrap;">
           Update
         </button>
       </div>
@@ -318,7 +368,7 @@
         </h3>
 
         <div id="admin-links-list" class="link-list">
-          <p style="color:#64748b; font-size:0.9rem;">Memuat daftar link...</p>
+          <p style="color:var(--text-muted); font-size:0.9rem;">Memuat daftar link...</p>
         </div>
       </div>
 
@@ -329,7 +379,7 @@
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
     import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-    import { getFirestore, collection, addDoc, updateDoc, deleteDoc, doc, query, orderBy, onSnapshot, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+    import { getFirestore, collection, addDoc, updateDoc, deleteDoc, doc, query, orderBy, onSnapshot, setDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyDhq4QoCn00GkfpKXSP8PnvSvEKa2yn0ic",
@@ -448,7 +498,7 @@
         listDiv.innerHTML = '';
 
         if (snapshot.empty) {
-          listDiv.innerHTML = '<p style="color:#64748b; font-size:0.85rem;">Belum ada link yang tersimpan.</p>';
+          listDiv.innerHTML = '<p style="color:var(--text-muted); font-size:0.85rem;">Belum ada link yang tersimpan.</p>';
           return;
         }
 
@@ -507,10 +557,9 @@
       if (id) {
         await updateDoc(doc(db, "links", id), { title, url, icon, order });
       } else {
-        // Simpan Link Baru
         await addDoc(collection(db, "links"), { title, url, icon, order });
         
-        // 🚀 KUNCI OTOMATISASI: Update Running Text secara otomatis di Firestore
+        // Auto update running text
         const autoAnnouncement = `📌 TAUTAN BARU DITAMBAHKAN: ${title.toUpperCase()}! Silakan periksa daftar link di bawah ini.`;
         await setDoc(doc(db, "settings", "portal"), {
           announcement: autoAnnouncement
