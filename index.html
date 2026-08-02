@@ -35,16 +35,9 @@
       </div>
     </div>
 
-    <!-- Progress Bar Cyan (LinearProgressIndicator) -->
+    <!-- Progress Bar Cyan -->
     <div id="loading-bar-wrapper" class="progress-bar-container">
       <div class="progress-bar-fill"></div>
-    </div>
-
-    <!-- SEARCH BAR PUBLIK -->
-    <div id="search-wrapper" class="search-box">
-      <i class="fa-solid fa-magnifying-glass search-icon"></i>
-      <input type="text" id="public-search" placeholder="Cari link atau materi..." autocomplete="off">
-      <button id="clear-search" class="clear-btn hidden"><i class="fa-solid fa-xmark"></i></button>
     </div>
 
     <!-- Daftar Link Dinamis dari Firebase / Off Mode Notice -->
@@ -149,12 +142,7 @@
 
     const container = document.getElementById('links-container');
     const progressBar = document.getElementById('loading-bar-wrapper');
-    const searchInput = document.getElementById('public-search');
-    const clearSearchBtn = document.getElementById('clear-search');
-    const searchWrapper = document.getElementById('search-wrapper');
     const announcementText = document.getElementById('announcement-text');
-
-    let allLinksData = []; // Menyimpan semua data link untuk pencarian instan
 
     // Listener Status Portal & Pengumuman Running Text
     onSnapshot(doc(db, "settings", "portal"), (docSnap) => {
@@ -171,7 +159,6 @@
 
       if (!isOnline) {
         if (progressBar) progressBar.style.display = 'none';
-        searchWrapper.style.display = 'none';
         container.innerHTML = `
           <div class="off-card">
             <i class="fa-solid fa-store-slash"></i>
@@ -180,7 +167,6 @@
           </div>
         `;
       } else {
-        searchWrapper.style.display = 'flex';
         loadPublicLinks();
       }
     }, (error) => {
@@ -193,74 +179,32 @@
       const q = query(collection(db, "links"), orderBy("order", "asc"));
       onSnapshot(q, (snapshot) => {
         if (progressBar) progressBar.style.display = 'none';
-        allLinksData = [];
 
         if (snapshot.empty) {
           container.innerHTML = '<p style="color:#64748b; font-size: 0.85rem;">Belum ada link yang aktif.</p>';
           return;
         }
 
+        container.innerHTML = '';
+        let index = 0;
         snapshot.forEach((docSnap) => {
-          allLinksData.push(docSnap.data());
-        });
+          const data = docSnap.data();
+          const colorClass = `card-color-${index % 4}`;
+          index++;
 
-        renderLinks(allLinksData);
+          container.innerHTML += `
+            <a href="${data.url}" target="_blank" rel="noopener noreferrer" class="link-card ${colorClass}">
+              <i class="${data.icon || 'fa-solid fa-link'} icon"></i>
+              <span>${data.title}</span>
+            </a>
+          `;
+        });
       }, (error) => {
         if (progressBar) progressBar.style.display = 'none';
         console.error("Firestore Error:", error);
         container.innerHTML = `<p style="color:#ef4444; font-size:0.8rem;">Gagal memuat link.</p>`;
       });
     }
-
-    // Fungsi Render Tampilan Kartu Link
-    function renderLinks(links) {
-      container.innerHTML = '';
-
-      if (links.length === 0) {
-        container.innerHTML = `
-          <div class="no-results">
-            <i class="fa-solid fa-magnifying-glass-minus"></i>
-            <p>Link yang kamu cari tidak ditemukan.</p>
-          </div>
-        `;
-        return;
-      }
-
-      links.forEach((data, index) => {
-        const colorClass = `card-color-${index % 4}`;
-        container.innerHTML += `
-          <a href="${data.url}" target="_blank" rel="noopener noreferrer" class="link-card ${colorClass}">
-            <i class="${data.icon || 'fa-solid fa-link'} icon"></i>
-            <span>${data.title}</span>
-          </a>
-        `;
-      });
-    }
-
-    // --- LOGIKA PENCARIAN REALTIME ---
-    searchInput.addEventListener('input', (e) => {
-      const keyword = e.target.value.toLowerCase().trim();
-      
-      if (keyword !== '') {
-        clearSearchBtn.classList.remove('hidden');
-      } else {
-        clearSearchBtn.classList.add('hidden');
-      }
-
-      const filteredLinks = allLinksData.filter(item => 
-        item.title.toLowerCase().includes(keyword)
-      );
-
-      renderLinks(filteredLinks);
-    });
-
-    // Tombol Bersihkan Pencarian
-    clearSearchBtn.addEventListener('click', () => {
-      searchInput.value = '';
-      clearSearchBtn.classList.add('hidden');
-      renderLinks(allLinksData);
-      searchInput.focus();
-    });
   </script>
 
 </body>
