@@ -103,12 +103,17 @@
 
     function drawParticles() {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
+      
+      // Cek apakah mode gelap sedang aktif untuk sesuaikan cahaya partikel
+      const isDarkMode = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+      const particleColor = isDarkMode ? "0, 245, 212" : "139, 92, 246";
+
       particles.forEach(p => {
         ctx.beginPath();
         ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
-        ctx.fillStyle = `rgba(0, 245, 212, ${p.opacity})`;
+        ctx.fillStyle = `rgba(${particleColor}, ${p.opacity})`;
         ctx.shadowBlur = 6;
-        ctx.shadowColor = "#00F5D4";
+        ctx.shadowColor = `rgb(${particleColor})`;
         ctx.fill();
 
         p.y += p.speedY;
@@ -181,7 +186,7 @@
         if (progressBar) progressBar.style.display = 'none';
 
         if (snapshot.empty) {
-          container.innerHTML = '<p style="color:#64748b; font-size: 0.85rem;">Belum ada link yang aktif.</p>';
+          container.innerHTML = '<p style="color:var(--text-muted); font-size: 0.85rem;">Belum ada link yang aktif.</p>';
           return;
         }
 
