@@ -2,7 +2,7 @@
 <html lang="id">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
   <title>PORTAL::IskakFatoni</title>
   <link rel="stylesheet" href="style.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -25,9 +25,26 @@
       <p class="bio">I'am certified electronical and computer teacher, also a former Kamen Rider</p>
     </header>
 
-    <!-- Progress Bar Cyan -->
+    <!-- BANNER RUNNING TEXT / PENGUMUMAN -->
+    <div id="announcement-banner" class="announcement-banner">
+      <i class="fa-solid fa-bullhorn banner-icon"></i>
+      <div class="marquee-wrapper">
+        <div id="announcement-text" class="marquee-text">
+          Selamat datang di Portal Resmi Iskak Fatoni! Periksa daftar tugas dan info terbaru di bawah ini.
+        </div>
+      </div>
+    </div>
+
+    <!-- Progress Bar Cyan (LinearProgressIndicator) -->
     <div id="loading-bar-wrapper" class="progress-bar-container">
       <div class="progress-bar-fill"></div>
+    </div>
+
+    <!-- SEARCH BAR PUBLIK -->
+    <div id="search-wrapper" class="search-box">
+      <i class="fa-solid fa-magnifying-glass search-icon"></i>
+      <input type="text" id="public-search" placeholder="Cari link atau materi..." autocomplete="off">
+      <button id="clear-search" class="clear-btn hidden"><i class="fa-solid fa-xmark"></i></button>
     </div>
 
     <!-- Daftar Link Dinamis dari Firebase / Off Mode Notice -->
@@ -70,13 +87,12 @@
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
     import { getFirestore, collection, query, orderBy, onSnapshot, doc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-    // --- SCRIPT PARTIKEL SECURE CANVAS (KUNCI AGAR TIDAK MELER KE KANAN) ---
+    // --- 1. PARTICLE CANVAS SYSTEM ---
     const canvas = document.getElementById('particle-canvas');
     const ctx = canvas.getContext('2d');
     let particles = [];
 
     function initCanvas() {
-      // Ambil ukuran riil viewport
       canvas.width = document.documentElement.clientWidth || window.innerWidth;
       canvas.height = window.innerHeight;
       particles = [];
@@ -117,7 +133,7 @@
     initCanvas();
     drawParticles();
 
-    // --- FIREBASE REALTIME SETUP ---
+    // --- 2. FIREBASE REALTIME SETUP ---
     const firebaseConfig = {
       apiKey: "AIzaSyDhq4QoCn00GkfpKXSP8PnvSvEKa2yn0ic",
       authDomain: "portal-iskakfatoni.firebaseapp.com",
@@ -130,17 +146,32 @@
 
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
+
     const container = document.getElementById('links-container');
     const progressBar = document.getElementById('loading-bar-wrapper');
+    const searchInput = document.getElementById('public-search');
+    const clearSearchBtn = document.getElementById('clear-search');
+    const searchWrapper = document.getElementById('search-wrapper');
+    const announcementText = document.getElementById('announcement-text');
 
+    let allLinksData = []; // Menyimpan semua data link untuk pencarian instan
+
+    // Listener Status Portal & Pengumuman Running Text
     onSnapshot(doc(db, "settings", "portal"), (docSnap) => {
       let isOnline = true;
-      if (docSnap.exists() && docSnap.data().isOnline !== undefined) {
-        isOnline = docSnap.data().isOnline;
+      if (docSnap.exists()) {
+        const data = docSnap.data();
+        if (data.isOnline !== undefined) isOnline = data.isOnline;
+        
+        // Update Running Text jika ada di database
+        if (data.announcement && data.announcement.trim() !== "") {
+          announcementText.innerText = data.announcement;
+        }
       }
 
       if (!isOnline) {
         if (progressBar) progressBar.style.display = 'none';
+        searchWrapper.style.display = 'none';
         container.innerHTML = `
           <div class="off-card">
             <i class="fa-solid fa-store-slash"></i>
@@ -149,6 +180,7 @@
           </div>
         `;
       } else {
+        searchWrapper.style.display = 'flex';
         loadPublicLinks();
       }
     }, (error) => {
@@ -156,36 +188,79 @@
       loadPublicLinks();
     });
 
+    // Memuat daftar link dari Firestore
     function loadPublicLinks() {
       const q = query(collection(db, "links"), orderBy("order", "asc"));
       onSnapshot(q, (snapshot) => {
         if (progressBar) progressBar.style.display = 'none';
-        container.innerHTML = '';
-        
+        allLinksData = [];
+
         if (snapshot.empty) {
           container.innerHTML = '<p style="color:#64748b; font-size: 0.85rem;">Belum ada link yang aktif.</p>';
           return;
         }
 
-        let index = 0;
         snapshot.forEach((docSnap) => {
-          const data = docSnap.data();
-          const colorClass = `card-color-${index % 4}`;
-          index++;
-
-          container.innerHTML += `
-            <a href="${data.url}" target="_blank" rel="noopener noreferrer" class="link-card ${colorClass}">
-              <i class="${data.icon || 'fa-solid fa-link'} icon"></i>
-              <span>${data.title}</span>
-            </a>
-          `;
+          allLinksData.push(docSnap.data());
         });
+
+        renderLinks(allLinksData);
       }, (error) => {
         if (progressBar) progressBar.style.display = 'none';
         console.error("Firestore Error:", error);
         container.innerHTML = `<p style="color:#ef4444; font-size:0.8rem;">Gagal memuat link.</p>`;
       });
     }
+
+    // Fungsi Render Tampilan Kartu Link
+    function renderLinks(links) {
+      container.innerHTML = '';
+
+      if (links.length === 0) {
+        container.innerHTML = `
+          <div class="no-results">
+            <i class="fa-solid fa-magnifying-glass-minus"></i>
+            <p>Link yang kamu cari tidak ditemukan.</p>
+          </div>
+        `;
+        return;
+      }
+
+      links.forEach((data, index) => {
+        const colorClass = `card-color-${index % 4}`;
+        container.innerHTML += `
+          <a href="${data.url}" target="_blank" rel="noopener noreferrer" class="link-card ${colorClass}">
+            <i class="${data.icon || 'fa-solid fa-link'} icon"></i>
+            <span>${data.title}</span>
+          </a>
+        `;
+      });
+    }
+
+    // --- LOGIKA PENCARIAN REALTIME ---
+    searchInput.addEventListener('input', (e) => {
+      const keyword = e.target.value.toLowerCase().trim();
+      
+      if (keyword !== '') {
+        clearSearchBtn.classList.remove('hidden');
+      } else {
+        clearSearchBtn.classList.add('hidden');
+      }
+
+      const filteredLinks = allLinksData.filter(item => 
+        item.title.toLowerCase().includes(keyword)
+      );
+
+      renderLinks(filteredLinks);
+    });
+
+    // Tombol Bersihkan Pencarian
+    clearSearchBtn.addEventListener('click', () => {
+      searchInput.value = '';
+      clearSearchBtn.classList.add('hidden');
+      renderLinks(allLinksData);
+      searchInput.focus();
+    });
   </script>
 
 </body>
