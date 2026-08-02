@@ -3,152 +3,252 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>PORTAL :: Absensi Siswa</title>
+  <title>PORTAL :: Verifikasi & Portal Absensi</title>
   <!-- Tailwind CSS via CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
-  <script>
-    tailwind.config = {
-      theme: {
-        extend: {
-          colors: {
-            darkSlate: '#0F172A',
-            deepIndigo: '#1E1B4B',
-            accentCyan: '#00F5D4'
-          }
-        }
-      }
-    }
-  </script>
 </head>
-<body class="bg-gradient-to-b from-darkSlate to-deepIndigo text-slate-100 min-h-screen flex items-center justify-center p-4">
+<body class="bg-slate-900 text-slate-100 min-h-screen flex items-center justify-center p-4 font-sans">
 
-  <!-- CARD ROUTER INTERAKTIF -->
-  <div class="max-w-md w-full bg-slate-800/80 backdrop-blur-md rounded-2xl p-6 border border-slate-700/50 shadow-2xl">
+  <div class="max-w-md w-full bg-slate-800 rounded-2xl p-6 border border-slate-700 shadow-2xl space-y-6">
     
-    <!-- HEADER BRANDING -->
-    <div class="text-center mb-6">
-      <div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-cyan-500/10 border border-accentCyan/30 mb-3 text-accentCyan">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+    <!-- HEADER -->
+    <div class="text-center">
+      <div class="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-cyan-500/10 text-cyan-400 mb-3 border border-cyan-500/30 shadow-lg shadow-cyan-500/10">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 11c0 3.517-1.009 6.799-2.753 9.571m-3.44-2.04l.054-.09A13.916 13.916 0 008 11a4 4 0 118 0c0 1.017-.07 2.019-.203 3m-2.118 6.844A21.88 21.88 0 0015.171 17m3.839 1.132c.645-2.266.99-4.659.99-7.132A8 8 0 008 4.07M3 15.364c.64-1.319 1-2.8 1-4.364 0-1.457-.39-2.823-1.07-4" />
         </svg>
       </div>
-      <h1 class="text-2xl font-bold tracking-wide text-white">PORTAL ABSENSI</h1>
-      <p class="text-xs text-slate-400 mt-1">Mengalihkan ke modul yang sesuai...</p>
+      <h1 class="text-xl font-bold text-white tracking-wide">PORTAL ABSENSI SISWA</h1>
+      <p class="text-xs text-slate-400 mt-1">Teknik Elektronika Industri (TEI)</p>
     </div>
 
-    <!-- INDIKATOR LOADING / ROUTING STATUS -->
-    <div id="loading-state" class="flex flex-col items-center justify-center py-6 space-y-4">
-      <div class="w-10 h-10 border-4 border-slate-600 border-t-accentCyan rounded-full animate-spin"></div>
-      <p id="status-text" class="text-sm font-medium text-slate-300">Memeriksa Sesi Login...</p>
+    <!-- STATE 1: FORM MASUKKAN NIS -->
+    <div id="section-login" class="space-y-4">
+      <div class="space-y-2">
+        <label for="nis-input" class="block text-xs font-semibold text-slate-300 uppercase tracking-wider">Nomor Induk Siswa (NIS)</label>
+        <input 
+          type="number" 
+          id="nis-input" 
+          placeholder="Masukkan NIS Anda (contoh: 2026101)" 
+          class="w-full px-4 py-3 bg-slate-900 border border-slate-700 rounded-xl text-slate-100 placeholder-slate-500 focus:outline-none focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 font-mono text-sm transition"
+        >
+      </div>
+
+      <!-- Pesan Error -->
+      <div id="error-msg" class="hidden p-3 bg-red-500/10 border border-red-500/30 rounded-xl text-red-400 text-xs text-center font-medium leading-relaxed"></div>
+
+      <button 
+        id="btn-verifikasi" 
+        type="button"
+        class="w-full py-3.5 px-4 bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-bold text-sm rounded-xl transition shadow-lg shadow-cyan-500/20 flex items-center justify-center space-x-2 cursor-pointer"
+      >
+        <span id="btn-text">Verifikasi NIS</span>
+        <div id="btn-spinner" class="hidden w-4 h-4 border-2 border-slate-950 border-t-transparent rounded-full animate-spin"></div>
+      </button>
     </div>
 
-    <!-- NAVIGATION FALLBACK (Tampil jika auto-redirect tidak merespons) -->
-    <div id="fallback-nav" class="hidden space-y-3 pt-4 border-t border-slate-700/50">
-      <p class="text-xs text-center text-slate-400 mb-2">Pilih halaman secara manual:</p>
-      
-      <a href="siswa/index.html" class="flex items-center justify-between w-full px-4 py-3 bg-cyan-500/10 hover:bg-cyan-500/20 border border-accentCyan/40 rounded-xl text-accentCyan font-medium text-sm transition">
-        <span>📱 Portal Siswa (Scanner QR)</span>
+    <!-- STATE 2: TAMPIL PROFIL SISWA -->
+    <div id="section-profile" class="hidden space-y-5">
+      <div class="p-4 bg-slate-900/80 rounded-xl border border-slate-700/80 space-y-3">
+        <div class="flex items-center justify-between border-b border-slate-800 pb-2">
+          <span class="text-[11px] text-slate-400 uppercase tracking-wider font-semibold">Status Perangkat</span>
+          <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-medium bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+            🔒 HP Terikat
+          </span>
+        </div>
+
+        <div class="space-y-1">
+          <p class="text-[11px] text-slate-400">Nama Lengkap</p>
+          <p id="profile-nama" class="text-base font-bold text-white tracking-wide">-</p>
+        </div>
+
+        <div class="grid grid-cols-2 gap-2 pt-1">
+          <div>
+            <p class="text-[11px] text-slate-400">NIS</p>
+            <p id="profile-nis" class="text-sm font-semibold font-mono text-cyan-400">-</p>
+          </div>
+          <div>
+            <p class="text-[11px] text-slate-400">Kelas</p>
+            <p id="profile-kelas" class="text-sm font-semibold text-slate-200">-</p>
+          </div>
+        </div>
+      </div>
+
+      <button 
+        id="btn-masuk-portal" 
+        type="button"
+        class="w-full py-3.5 px-4 bg-gradient-to-r from-teal-400 to-cyan-400 hover:from-teal-300 hover:to-cyan-300 text-slate-950 font-bold text-sm rounded-xl transition shadow-lg shadow-cyan-500/20 flex items-center justify-center gap-2 cursor-pointer"
+      >
+        <span>📷 Buka Scanner QR Absensi</span>
         <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
         </svg>
-      </a>
-
-      <a href="guru/index.html" class="flex items-center justify-between w-full px-4 py-3 bg-slate-700/50 hover:bg-slate-700 border border-slate-600 rounded-xl text-slate-200 font-medium text-sm transition">
-        <span>💻 Dashboard Guru / Sesi QR</span>
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-        </svg>
-      </a>
+      </button>
     </div>
 
-    <!-- FOOTER BRANDING -->
-    <div class="mt-6 text-center border-t border-slate-700/30 pt-4">
-      <p class="text-[11px] text-slate-500 font-mono">Developed by Iskak Fatoni</p>
+    <!-- FOOTER -->
+    <div class="text-center pt-2 border-t border-slate-700/40">
+      <p class="text-[11px] text-slate-500 font-mono">Developed by Iskak Fatoni, S.Pd., Gr.</p>
     </div>
 
   </div>
 
-  <!-- SCRIPT ROUTER LOGIC -->
+  <!-- FIREBASE & AUTH LOGIC WITH DEVICE LOCK -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
-    import { firebaseConfig } from "./assets/js/config/firebase-config.js";
+    import { 
+      getFirestore, 
+      doc, 
+      getDoc,
+      updateDoc 
+    } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
-    // Inisialisasi Firebase Auth untuk pengecekan role Guru
+    // Konfigurasi Firebase portal-iskakfatoni
+    const firebaseConfig = {
+      apiKey: "AIzaSyDhq4QoCn00GkfpKXSP8PnvSvEKa2yn0ic",
+      authDomain: "portal-iskakfatoni.firebaseapp.com",
+      projectId: "portal-iskakfatoni",
+      storageBucket: "portal-iskakfatoni.firebasestorage.app",
+      messagingSenderId: "367350728822",
+      appId: "1:367350728822:web:6b0c6fd4824102d8acf757",
+      measurementId: "G-0BNNKQQ24V"
+    };
+
     const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
+    const db = getFirestore(app);
 
-    const statusText = document.getElementById('status-text');
-    const loadingState = document.getElementById('loading-state');
-    const fallbackNav = document.getElementById('fallback-nav');
+    // Elemen DOM
+    const sectionLogin = document.getElementById('section-login');
+    const sectionProfile = document.getElementById('section-profile');
+    const nisInput = document.getElementById('nis-input');
+    const btnVerifikasi = document.getElementById('btn-verifikasi');
+    const btnText = document.getElementById('btn-text');
+    const btnSpinner = document.getElementById('btn-spinner');
+    const errorMsg = document.getElementById('error-msg');
 
-    // Mencegah pemicuan bertubi-tubi
-    let isRedirecting = false;
+    const profileNama = document.getElementById('profile-nama');
+    const profileNis = document.getElementById('profile-nis');
+    const profileKelas = document.getElementById('profile-kelas');
+    const btnMasukPortal = document.getElementById('btn-masuk-portal');
 
-    function redirectTo(path, message) {
-      if (isRedirecting) return;
-      isRedirecting = true;
-      if (statusText) statusText.innerText = message;
-      
-      setTimeout(() => {
-        window.location.href = path;
-      }, 400); // Penundaan halus 400ms untuk transisi UI
+    // 1. GENERATE / DAPATKAN ID UNIK HP INI
+    function getDeviceId() {
+      let deviceId = localStorage.getItem('portal_device_id');
+      if (!deviceId) {
+        deviceId = 'DEV-' + Math.random().toString(36).substring(2, 15) + '-' + Date.now().toString(36);
+        localStorage.setItem('portal_device_id', deviceId);
+      }
+      return deviceId;
     }
 
-    // Pengecekan Utama (Smart Router)
-    function routeUser() {
-      const urlParams = new URLSearchParams(window.location.search);
-      const forceRole = urlParams.get('role');
+    const currentDeviceId = getDeviceId();
 
-      // 1. Cek Parameter URL (Opsional override: absensi.html?role=guru atau absensi.html?role=siswa)
-      if (forceRole === 'guru') {
-        redirectTo('guru/index.html', 'Mengarahkan ke Dashboard Guru...');
-        return;
-      } else if (forceRole === 'siswa') {
-        redirectTo('siswa/index.html', 'Mengarahkan ke Scanner Siswa...');
-        return;
-      }
-
-      // 2. Cek Sesi Siswa yang Tersimpan di LocalStorage (Digunakan WebView Android)
-      const siswaSession = localStorage.getItem('siswa_session');
-      if (siswaSession) {
-        try {
-          const dataSiswa = JSON.parse(siswaSession);
-          if (dataSiswa && dataSiswa.nis) {
-            redirectTo('siswa/index.html', `Selamat Datang, ${dataSiswa.nama || 'Siswa'}!`);
-            return;
-          }
-        } catch (e) {
-          console.error("Gagal membaca LocalStorage siswa:", e);
-          localStorage.removeItem('siswa_session');
-        }
-      }
-
-      // 3. Cek Sesi Login Guru via Firebase Auth
-      onAuthStateChanged(auth, (user) => {
-        if (user) {
-          // Guru sudah terautentikasi di Firebase Auth
-          redirectTo('guru/index.html', 'Sesi Guru Ditemukan. Membuka Dashboard...');
-        } else {
-          // 4. Default Fallback untuk Akses Baru di WebView Android Siswa
-          // Jika tidak ada sesi guru dan tidak ada sesi siswa, arahkan ke Login Siswa
-          redirectTo('siswa/login.html', 'Mengarahkan ke Halaman Login Siswa...');
-        }
-      });
-    }
-
-    // Jalankan Router setelah DOM siap
+    // 2. AUTO-LOGIN JIKA HP SUDAH TERIKAT
     document.addEventListener('DOMContentLoaded', () => {
-      routeUser();
-
-      // Tampilkan tombol navigasi manual jika alur otomatis tertahan > 3 detik
-      setTimeout(() => {
-        if (!isRedirecting && fallbackNav) {
-          statusText.innerText = "Sesi tidak terdeteksi otomatis.";
-          fallbackNav.classList.remove('hidden');
+      const savedUser = localStorage.getItem('portal_siswa_user');
+      if (savedUser) {
+        try {
+          const user = JSON.parse(savedUser);
+          showProfile(user);
+        } catch (e) {
+          localStorage.removeItem('portal_siswa_user');
         }
-      }, 3000);
+      }
     });
+
+    // 3. VERIFIKASI NIS & DEVICE BINDING
+    btnVerifikasi.addEventListener('click', async () => {
+      const nis = nisInput.value.trim();
+      hideError();
+
+      if (!nis) {
+        showError("Silakan masukkan NIS Anda terlebih dahulu.");
+        return;
+      }
+
+      setLoading(true);
+
+      try {
+        const docRef = doc(db, "siswa", nis);
+        const docSnap = await getDoc(docRef);
+
+        if (!docSnap.exists()) {
+          showError("NIS tidak ditemukan! Pastikan NIS terdaftar.");
+          setLoading(false);
+          return;
+        }
+
+        const dataSiswa = docSnap.data();
+
+        // CEK DEVICE LOCKING
+        if (dataSiswa.device_id && dataSiswa.device_id !== currentDeviceId) {
+          // NIS ini sudah terikat di HP lain!
+          showError("❌ Akun ini sudah terikat di HP lain! Silakan hubungi Guru untuk mereset perangkat Anda.");
+          setLoading(false);
+          return;
+        }
+
+        // BINDING DEVICE JIKA BELUM TERIKAT
+        if (!dataSiswa.device_id) {
+          await updateDoc(docRef, {
+            device_id: currentDeviceId
+          });
+        }
+
+        // SIMPAN KE LOCALSTORAGE (BERHASIL BINDING/MATCH)
+        const userData = {
+          nis: dataSiswa.nis,
+          nama_siswa: dataSiswa.nama_siswa,
+          id_kelas: dataSiswa.id_kelas,
+          nama_kelas: dataSiswa.nama_kelas,
+          device_id: currentDeviceId
+        };
+
+        localStorage.setItem('portal_siswa_user', JSON.stringify(userData));
+        showProfile(userData);
+
+      } catch (err) {
+        console.error(err);
+        showError("Terjadi kesalahan: " + err.message);
+      } finally {
+        setLoading(false);
+      }
+    });
+
+    function showProfile(user) {
+      profileNama.innerText = user.nama_siswa;
+      profileNis.innerText = user.nis;
+      profileKelas.innerText = user.nama_kelas;
+
+      sectionLogin.classList.add('hidden');
+      sectionProfile.classList.remove('hidden');
+    }
+
+    btnMasukPortal.addEventListener('click', () => {
+      window.location.href = "siswa/index.html";
+    });
+
+    function showError(msg) {
+      errorMsg.innerText = msg;
+      errorMsg.classList.remove('hidden');
+    }
+
+    function hideError() {
+      errorMsg.innerText = '';
+      errorMsg.classList.add('hidden');
+    }
+
+    function setLoading(isLoading) {
+      if (isLoading) {
+        btnVerifikasi.disabled = true;
+        btnText.innerText = "Mengecek HP & NIS...";
+        btnSpinner.classList.remove('hidden');
+      } else {
+        btnVerifikasi.disabled = false;
+        btnText.innerText = "Verifikasi NIS";
+        btnSpinner.classList.add('hidden');
+      }
+    }
   </script>
 </body>
 </html>
