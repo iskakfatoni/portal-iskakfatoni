@@ -8,7 +8,6 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   
   <style>
-    /* Custom Styling Master Admin Box agar selaras dengan style.css */
     .admin-box {
       background: var(--card-bg, rgba(15, 23, 42, 0.85));
       border: 1px solid var(--card-border, rgba(255, 255, 255, 0.1));
@@ -214,10 +213,7 @@
     <!-- Profil Header -->
     <header class="profile">
       <div class="avatar-ring">
-        <img 
-          src="foto_asn_profile.png" 
-          alt="Muchamad Iskak Fatoni" 
-          class="avatar">
+        <img src="foto_asn_profile.png" alt="Muchamad Iskak Fatoni" class="avatar">
       </div>
       <h1 class="name">PORTAL::Iskak Fatoni</h1>
       <p class="bio">I'am certified electronical and computer teacher, also a former Kamen Rider</p>
@@ -237,26 +233,12 @@
         <form id="login-form" action="#" onsubmit="return false;">
           <div class="form-group-admin">
             <label for="login-email">Email Admin</label>
-            <input 
-              type="email" 
-              id="login-email" 
-              placeholder="nama@domain.com" 
-              class="input-admin"
-              autocomplete="username"
-              required
-            >
+            <input type="email" id="login-email" placeholder="nama@domain.com" class="input-admin" autocomplete="username" required>
           </div>
 
           <div class="form-group-admin">
             <label for="login-password">Password</label>
-            <input 
-              type="password" 
-              id="login-password" 
-              placeholder="••••••••" 
-              class="input-admin"
-              autocomplete="current-password"
-              required
-            >
+            <input type="password" id="login-password" placeholder="••••••••" class="input-admin" autocomplete="current-password" required>
           </div>
 
           <div id="error-msg" class="error-msg hidden"></div>
@@ -286,9 +268,7 @@
           <!-- Option 1: Kelola Portal Link -->
           <a href="link/index.html" class="menu-card">
             <div class="menu-info">
-              <div class="menu-icon link-icon">
-                <i class="fa-solid fa-link"></i>
-              </div>
+              <div class="menu-icon link-icon"><i class="fa-solid fa-link"></i></div>
               <div class="menu-text">
                 <h2>Kelola Link &amp; Running Text</h2>
                 <p>Tambah/hapus tautan portal &amp; pengumuman</p>
@@ -300,9 +280,7 @@
           <!-- Option 2: Dashboard Absensi Guru -->
           <a href="guru/index.html" class="menu-card">
             <div class="menu-info">
-              <div class="menu-icon absensi-icon">
-                <i class="fa-solid fa-qrcode"></i>
-              </div>
+              <div class="menu-icon absensi-icon"><i class="fa-solid fa-qrcode"></i></div>
               <div class="menu-text">
                 <h2>Dashboard Absensi Guru</h2>
                 <p>Buka sesi QR Absensi &amp; rekap realtime</p>
@@ -311,12 +289,10 @@
             <i class="fa-solid fa-chevron-right arrow-icon"></i>
           </a>
 
-          <!-- Option 3: Manager Database Firebase (BARU) -->
-          <a href="db-manager.html" class="menu-card">
+          <!-- Option 3: Manager Database Firebase (FOLDER TERBARU: /database/db-manager.html) -->
+          <a href="database/db-manager.html" class="menu-card">
             <div class="menu-info">
-              <div class="menu-icon db-icon">
-                <i class="fa-solid fa-database"></i>
-              </div>
+              <div class="menu-icon db-icon"><i class="fa-solid fa-database"></i></div>
               <div class="menu-text">
                 <h2>Database Firestore Manager</h2>
                 <p>CRUD koleksi siswa, reset HP, kelas, &amp; mapel</p>
@@ -334,21 +310,11 @@
     <!-- Footer -->
     <footer class="footer">
       <div class="social-icons">
-        <a href="https://wa.me/085645453111" target="_blank" rel="noopener noreferrer" class="social-btn wa" title="WhatsApp Iskak">
-          <i class="fa-brands fa-whatsapp"></i>
-        </a>
-        <a href="https://facebook.com/iskakfatoni" target="_blank" rel="noopener noreferrer" class="social-btn fb" title="Facebook Iskak">
-          <i class="fa-brands fa-facebook-f"></i>
-        </a>
-        <a href="https://instagram.com/iskakfatoni" target="_blank" rel="noopener noreferrer" class="social-btn ig" title="Instagram Iskak">
-          <i class="fa-brands fa-instagram"></i>
-        </a>
-        <a href="https://youtube.com/iskakfatoni" target="_blank" rel="noopener noreferrer" class="social-btn yt" title="YouTube Iskak">
-          <i class="fa-brands fa-youtube"></i>
-        </a>
-        <a href="https://tiktok.com/@iskakfatoni" target="_blank" rel="noopener noreferrer" class="social-btn tt" title="TikTok">
-          <i class="fa-brands fa-tiktok"></i>
-        </a>
+        <a href="https://wa.me/085645453111" target="_blank" rel="noopener noreferrer" class="social-btn wa"><i class="fa-brands fa-whatsapp"></i></a>
+        <a href="https://facebook.com/iskakfatoni" target="_blank" rel="noopener noreferrer" class="social-btn fb"><i class="fa-brands fa-facebook-f"></i></a>
+        <a href="https://instagram.com/iskakfatoni" target="_blank" rel="noopener noreferrer" class="social-btn ig"><i class="fa-brands fa-instagram"></i></a>
+        <a href="https://youtube.com/iskakfatoni" target="_blank" rel="noopener noreferrer" class="social-btn yt"><i class="fa-brands fa-youtube"></i></a>
+        <a href="https://tiktok.com/@iskakfatoni" target="_blank" rel="noopener noreferrer" class="social-btn tt"><i class="fa-brands fa-tiktok"></i></a>
       </div>
 
       <div class="supported-by">
@@ -359,7 +325,7 @@
 
   </main>
 
-  <!-- PARTICLE CANVAS SCRIPT -->
+  <!-- PARTICLE CANVAS & FIREBASE AUTH -->
   <script>
     const canvas = document.getElementById('particle-canvas');
     const ctx = canvas.getContext('2d');
@@ -394,13 +360,8 @@
         ctx.shadowColor = `rgb(${particleColor})`;
         ctx.fill();
 
-        p.y += p.speedY;
-        p.x += p.speedX;
-
-        if (p.y < 0) {
-          p.y = canvas.height;
-          p.x = Math.random() * canvas.width;
-        }
+        p.y += p.speedY; p.x += p.speedX;
+        if (p.y < 0) { p.y = canvas.height; p.x = Math.random() * canvas.width; }
       });
       requestAnimationFrame(drawParticles);
     }
@@ -410,19 +371,10 @@
     drawParticles();
   </script>
 
-  <!-- LOGIC AUTHENTICATION FIREBASE -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-    import { 
-      getAuth, 
-      signInWithEmailAndPassword, 
-      onAuthStateChanged, 
-      signOut,
-      setPersistence,
-      browserSessionPersistence 
-    } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+    import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut, setPersistence, browserSessionPersistence } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 
-    // Konfigurasi Firebase Portal IskakFatoni
     const firebaseConfig = {
       apiKey: "AIzaSyDhq4QoCn00GkfpKXSP8PnvSvEKa2yn0ic",
       authDomain: "portal-iskakfatoni.firebaseapp.com",
@@ -436,7 +388,6 @@
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
 
-    // DOM Elements
     const sectionLogin = document.getElementById('section-login-admin');
     const sectionDashboard = document.getElementById('section-dashboard-admin');
     const loginForm = document.getElementById('login-form');
@@ -448,7 +399,6 @@
     const userEmailDisplay = document.getElementById('user-email-display');
     const btnLogout = document.getElementById('btn-logout');
 
-    // Monitor Auth State
     onAuthStateChanged(auth, (user) => {
       if (user) {
         sectionLogin.classList.add('hidden');
@@ -460,12 +410,10 @@
       }
     });
 
-    // Handle Login Submit
     loginForm.addEventListener('submit', async () => {
       const email = loginEmail.value.trim();
       const pass = loginPassword.value.trim();
       hideError();
-
       setLoading(true);
 
       try {
@@ -478,31 +426,17 @@
       }
     });
 
-    // Handle Logout
     btnLogout.addEventListener('click', () => {
-      if (confirm("Apakah Anda yakin ingin keluar dari Master Admin?")) {
+      if (confirm("Keluar dari Master Admin?")) {
         signOut(auth);
       }
     });
 
-    function showError(msg) {
-      errorMsg.innerText = msg;
-      errorMsg.classList.remove('hidden');
-    }
-
-    function hideError() {
-      errorMsg.innerText = '';
-      errorMsg.classList.add('hidden');
-    }
-
+    function showError(msg) { errorMsg.innerText = msg; errorMsg.classList.remove('hidden'); }
+    function hideError() { errorMsg.innerText = ''; errorMsg.classList.add('hidden'); }
     function setLoading(isLoading) {
-      if (isLoading) {
-        btnLogin.disabled = true;
-        btnText.innerText = "Memverifikasi...";
-      } else {
-        btnLogin.disabled = false;
-        btnText.innerText = "Masuk Master Dashboard";
-      }
+      if (isLoading) { btnLogin.disabled = true; btnText.innerText = "Memverifikasi..."; }
+      else { btnLogin.disabled = false; btnText.innerText = "Masuk Master Dashboard"; }
     }
   </script>
 </body>
