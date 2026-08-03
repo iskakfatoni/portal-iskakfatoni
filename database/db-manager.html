@@ -306,7 +306,7 @@
       });
     });
 
-    // FORMAT VALUE DARI FIRESTORE KE TAMPILAN TEXT YANNG RAPI
+    // FORMAT VALUE DARI FIRESTORE KE TAMPILAN TEXT YANG RAPI
     function formatCellContent(value) {
       if (value === null || value === undefined) return '<span class="text-slate-600">-</span>';
       
@@ -330,6 +330,15 @@
       return String(value);
     }
 
+    // FUNGSI UNTUK MENGUBAH NAMA HEADER FIELD AGAR LEBIH RAPI
+    function formatHeaderName(fieldKey) {
+      const lower = fieldKey.toLowerCase();
+      if (lower === 'wali_kelas' || lower === 'id_wali_kelas' || lower === 'namawalikelas' || lower === 'nama_wali_kelas') {
+        return 'Guru Kelas';
+      }
+      return fieldKey;
+    }
+
     // MUAT DATA DINAMIS TABEL MATRIKS (KOLOM & BARIS)
     function loadCollectionData(colName) {
       if (unsubscribeCurrent) unsubscribeCurrent();
@@ -346,9 +355,7 @@
         <th class="p-3 w-16 text-center">Aksi</th>
       `;
       
-      // Re-bind listener checkbox header
       document.getElementById('select-all-checkbox').addEventListener('change', handleSelectAll);
-
       tableBody.innerHTML = `<tr><td colspan="10" class="p-8 text-center text-slate-500 font-sans">// Memuat koleksi "${colName}"...</td></tr>`;
 
       unsubscribeCurrent = onSnapshot(collection(db, colName), (snapshot) => {
@@ -360,20 +367,25 @@
           return;
         }
 
-        // 1. KUMPULKAN SELURUH FIELD UNIK SECARA DINAMIS
+        // 1. KUMPULKAN FIELD UNIK & FILTER `created_at`
         const fieldSet = new Set();
         snapshot.docs.forEach(docSnap => {
-          Object.keys(docSnap.data()).forEach(k => fieldSet.add(k));
+          Object.keys(docSnap.data()).forEach(k => {
+            // Sembunyikan field 'created_at' dan variasi penulisannya
+            if (k.toLowerCase() !== 'created_at' && k.toLowerCase() !== 'createdat') {
+              fieldSet.add(k);
+            }
+          });
         });
         const dynamicFields = Array.from(fieldSet);
 
-        // 2. RENDER HEADER TABEL DINAMIS
+        // 2. RENDER HEADER TABEL DINAMIS (DENGAN REPLACEMENT 'Guru Kelas')
         tableHeaderRow.innerHTML = `
           <th class="p-3 w-10 text-center border-r border-slate-800">
             <input type="checkbox" id="select-all-checkbox" class="rounded bg-slate-900 border-slate-700 text-cyan-500 focus:ring-0 cursor-pointer">
           </th>
           <th class="p-3 font-bold text-cyan-400 border-r border-slate-800">Document ID</th>
-          ${dynamicFields.map(f => `<th class="p-3 border-r border-slate-800 text-slate-300 font-semibold">${f}</th>`).join('')}
+          ${dynamicFields.map(f => `<th class="p-3 border-r border-slate-800 text-slate-300 font-semibold">${formatHeaderName(f)}</th>`).join('')}
           <th class="p-3 w-16 text-center">Aksi</th>
         `;
 
@@ -389,7 +401,7 @@
           const tr = document.createElement('tr');
           tr.className = "hover:bg-slate-900/80 transition border-b border-slate-800/40";
           
-          // Render nilai untuk setiap kolom field
+          // Render isi data sel per kolom field
           const fieldCells = dynamicFields.map(fieldKey => {
             const val = dataObj[fieldKey];
             return `<td class="p-3 border-r border-slate-800/60 max-w-xs overflow-hidden text-ellipsis">${formatCellContent(val)}</td>`;
