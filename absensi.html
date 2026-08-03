@@ -91,6 +91,18 @@
       opacity: 0.9;
     }
 
+    .btn-refresh {
+      background: rgba(148, 163, 184, 0.12);
+      color: #cbd5e1;
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      margin-top: 10px;
+    }
+
+    .btn-refresh:hover {
+      background: rgba(255, 255, 255, 0.2);
+      color: #ffffff;
+    }
+
     .profile-info-grid {
       background: rgba(3, 7, 18, 0.6);
       border: 1px solid rgba(255, 255, 255, 0.08);
@@ -200,6 +212,12 @@
         <button id="btn-buka-scanner" type="button" class="btn-absensi btn-emerald">
           <i class="fa-solid fa-camera"></i>
           <span>Buka Scanner QR Absensi</span>
+        </button>
+
+        <!-- TOMBOL REFRESH SESI / PERBARUI DATA -->
+        <button id="btn-refresh-sesi" type="button" class="btn-absensi btn-refresh">
+          <i class="fa-solid fa-arrows-rotate"></i>
+          <span>Refresh Sesi / Perbarui Data</span>
         </button>
       </div>
 
@@ -320,6 +338,7 @@
     const profileNis = document.getElementById('profile-nis');
     const profileKelas = document.getElementById('profile-kelas');
     const btnBukaScanner = document.getElementById('btn-buka-scanner');
+    const btnRefreshSesi = document.getElementById('btn-refresh-sesi');
 
     // Generate Unique Device ID
     function getDeviceId() {
@@ -412,6 +431,12 @@
 
     btnBukaScanner.addEventListener('click', () => {
       window.location.href = "siswa/index.html";
+    });
+
+    // REFRESH SESI / CLEARS CACHE HANYA PADA HP INI
+    btnRefreshSesi.addEventListener('click', () => {
+      localStorage.removeItem('portal_siswa_user');
+      window.location.reload();
     });
 
     function showError(msg) {
