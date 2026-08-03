@@ -15,28 +15,10 @@
   <script src="https://cdn.tailwindcss.com"></script>
 
   <style>
-    :root {
-      --bg-main: #0b0f19;
-      --card-bg: rgba(15, 23, 42, 0.85);
-      --card-border: rgba(255, 255, 255, 0.08);
-      --text-title: #ffffff;
-      --text-muted: #94a3b8;
-    }
-
-    @media (prefers-color-scheme: light) {
-      :root {
-        --bg-main: #f8fafc;
-        --card-bg: rgba(255, 255, 255, 0.85);
-        --card-border: rgba(15, 23, 42, 0.1);
-        --text-title: #0f172a;
-        --text-muted: #64748b;
-      }
-    }
-
     body {
       font-family: 'Plus Jakarta Sans', sans-serif;
-      background-color: var(--bg-main);
-      color: var(--text-title);
+      background-color: #0b0f19;
+      color: #ffffff;
     }
 
     #particle-canvas {
@@ -55,10 +37,10 @@
     }
 
     .glass-card {
-      background: var(--card-bg);
+      background: rgba(15, 23, 42, 0.85);
       backdrop-filter: blur(16px);
       -webkit-backdrop-filter: blur(16px);
-      border: 1px solid var(--card-border);
+      border: 1px solid rgba(255, 255, 255, 0.1);
     }
   </style>
 </head>
@@ -82,7 +64,7 @@
         </div>
       </div>
       <div>
-        <h1 class="text-xl font-extrabold tracking-wide">PORTAL :: Iskak Fatoni</h1>
+        <h1 class="text-xl font-extrabold tracking-wide text-white">PORTAL :: Iskak Fatoni</h1>
         <p class="text-xs text-slate-400 mt-1">Pilih Layanan Portal di Bawah Ini</p>
       </div>
     </header>
@@ -96,11 +78,11 @@
         class="group glass-card p-5 rounded-2xl flex items-center justify-between border border-cyan-500/30 hover:border-cyan-400 transition-all duration-300 hover:scale-[1.02] shadow-lg shadow-cyan-500/5 block"
       >
         <div class="flex items-center gap-4">
-          <div class="w-12 h-12 rounded-xl bg-cyan-500/10 border border-cyan-500/30 flex items-center justify-center text-cyan-400 text-xl group-hover:bg-cyan-500 group-hover:text-slate-950 transition-colors">
+          <div class="w-12 h-12 rounded-xl bg-cyan-500/10 border border-cyan-500/30 flex items-center justify-center text-cyan-400 text-xl group-hover:bg-cyan-500 group-hover:text-slate-950 transition-colors shrink-0">
             <i class="fa-solid fa-link"></i>
           </div>
-          <div>
-            <h2 class="text-sm font-bold text-white group-hover:text-cyan-400 transition-colors">Portal Link & Info</h2>
+          <div class="text-left">
+            <h2 class="text-sm font-bold text-white group-hover:text-cyan-400 transition-colors">Portal Link &amp; Info</h2>
             <p class="text-[11px] text-slate-400 mt-0.5">Daftar tugas, materi, dan tautan resmi</p>
           </div>
         </div>
@@ -113,12 +95,12 @@
         class="group glass-card p-5 rounded-2xl flex items-center justify-between border border-emerald-500/30 hover:border-emerald-400 transition-all duration-300 hover:scale-[1.02] shadow-lg shadow-emerald-500/5 block"
       >
         <div class="flex items-center gap-4">
-          <div class="w-12 h-12 rounded-xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-400 text-xl group-hover:bg-emerald-500 group-hover:text-slate-950 transition-colors">
+          <div class="w-12 h-12 rounded-xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-400 text-xl group-hover:bg-emerald-500 group-hover:text-slate-950 transition-colors shrink-0">
             <i class="fa-solid fa-qrcode"></i>
           </div>
-          <div>
+          <div class="text-left">
             <h2 class="text-sm font-bold text-white group-hover:text-emerald-400 transition-colors">Absensi Siswa TEI</h2>
-            <p class="text-[11px] text-slate-400 mt-0.5">Verifikasi NIS & Scanner QR Absensi</p>
+            <p class="text-[11px] text-slate-400 mt-0.5">Verifikasi NIS &amp; Scanner QR Absensi</p>
           </div>
         </div>
         <i class="fa-solid fa-chevron-right text-xs text-slate-500 group-hover:text-emerald-400 group-hover:translate-x-1 transition-all"></i>
