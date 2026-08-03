@@ -45,10 +45,10 @@
       </button>
     </header>
 
-    <!-- GRID DUA KOLOM BERDAMPINGAN UNTUK DESKTOP -->
+    <!-- GRID DUA KOLOM -->
     <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
       
-      <!-- KOLOM KIRI: SETTING PORTAL, RUNNING TEXT & TAMBAH LINK -->
+      <!-- KOLOM KIRI -->
       <div class="lg:col-span-5 space-y-6">
         
         <!-- CARD KONTROL STATUS PORTAL ON / OFF -->
@@ -68,9 +68,10 @@
               <p class="text-[11px] text-slate-400">Klik tombol sakelar di kanan</p>
             </div>
 
-            <!-- TOMBOL SWITCH TOGGLE SAKELAR -->
-            <button id="btn-toggle-portal" type="button" class="relative inline-flex h-8 w-14 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out bg-emerald-500 focus:outline-none shadow-lg">
-              <span id="toggle-circle" class="pointer-events-none inline-block h-7 w-7 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out translate-x-6"></span>
+            <!-- TOMBOL SWITCH ON / OFF -->
+            <button id="btn-toggle-portal" type="button" class="px-4 py-2 bg-emerald-500 hover:opacity-90 text-slate-950 font-bold text-xs rounded-xl transition flex items-center gap-2 cursor-pointer shadow-lg">
+              <i id="toggle-icon" class="fa-solid fa-toggle-on text-base"></i>
+              <span id="toggle-text">ON</span>
             </button>
           </div>
         </div>
@@ -143,7 +144,7 @@
 
   </main>
 
-  <!-- FIREBASE AUTH & FIRESTORE LOGIC -->
+  <!-- FIREBASE SCRIPT -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
     import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
@@ -167,7 +168,8 @@
     const btnLogout = document.getElementById('btn-logout');
     
     const btnTogglePortal = document.getElementById('btn-toggle-portal');
-    const toggleCircle = document.getElementById('toggle-circle');
+    const toggleIcon = document.getElementById('toggle-icon');
+    const toggleText = document.getElementById('toggle-text');
     const portalStatusBadge = document.getElementById('portal-status-badge');
 
     const inputRunningText = document.getElementById('input-running-text');
@@ -197,7 +199,7 @@
       window.location.href = "../admin.html";
     });
 
-    // 1. LISTEN & CONTROL STATUS PORTAL (ON / OFF)
+    // 1. LISTEN & WRITE SINKRON SAMA DENGAN PORTAL.HTML
     function loadPortalStatus() {
       onSnapshot(doc(db, "settings", "portal_status"), (docSnap) => {
         if (docSnap.exists()) {
@@ -206,47 +208,45 @@
           currentPortalState = true;
         }
         updateStatusUI(currentPortalState);
-      }, (err) => {
-        console.error("Gagal membaca status portal:", err);
       });
     }
 
-    // HANDLER KLIK TOMBOL TOGGLE SAKELAR
-    btnTogglePortal.addEventListener('click', async (e) => {
-      e.preventDefault();
-      
-      const nextState = !currentPortalState;
-      updateStatusUI(nextState);
+    btnTogglePortal.onclick = async () => {
+      const targetState = !currentPortalState;
+      updateStatusUI(targetState);
 
       try {
         await setDoc(doc(db, "settings", "portal_status"), { 
-          is_online: nextState, 
+          is_online: targetState, 
           updated_at: serverTimestamp() 
         }, { merge: true });
 
-        currentPortalState = nextState;
+        currentPortalState = targetState;
       } catch (err) {
-        console.error("Firestore Error:", err);
-        alert("Gagal mengubah status di Firebase: " + err.message + "\n\nPastikan Rules Firestore mengizinkan write pada koleksi 'settings'.");
+        alert("Gagal memperbarui status di Firebase: " + err.message);
         updateStatusUI(currentPortalState);
       }
-    });
+    };
 
     function updateStatusUI(isOnline) {
       if (isOnline) {
-        btnTogglePortal.className = "relative inline-flex h-8 w-14 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out bg-emerald-500 focus:outline-none shadow-lg";
-        toggleCircle.className = "pointer-events-none inline-block h-7 w-7 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out translate-x-6";
+        btnTogglePortal.className = "px-4 py-2 bg-emerald-500 hover:opacity-90 text-slate-950 font-bold text-xs rounded-xl transition flex items-center gap-2 cursor-pointer shadow-lg";
+        toggleIcon.className = "fa-solid fa-toggle-on text-base";
+        toggleText.innerText = "ON";
+
         portalStatusBadge.innerText = "PORTAL ON";
         portalStatusBadge.className = "px-2.5 py-0.5 rounded-full text-[10px] font-bold font-mono bg-emerald-500/15 text-emerald-400 border border-emerald-500/30";
       } else {
-        btnTogglePortal.className = "relative inline-flex h-8 w-14 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out bg-slate-700 focus:outline-none shadow-lg";
-        toggleCircle.className = "pointer-events-none inline-block h-7 w-7 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out translate-x-0";
+        btnTogglePortal.className = "px-4 py-2 bg-red-500 hover:opacity-90 text-white font-bold text-xs rounded-xl transition flex items-center gap-2 cursor-pointer shadow-lg";
+        toggleIcon.className = "fa-solid fa-toggle-off text-base";
+        toggleText.innerText = "OFF";
+
         portalStatusBadge.innerText = "PORTAL OFF (MAINTENANCE)";
         portalStatusBadge.className = "px-2.5 py-0.5 rounded-full text-[10px] font-bold font-mono bg-red-500/15 text-red-400 border border-red-500/30";
       }
     }
 
-    // 2. LISTEN & CONTROL RUNNING TEXT
+    // 2. RUNNING TEXT & LINKS
     function loadRunningText() {
       onSnapshot(doc(db, "settings", "announcement"), (docSnap) => {
         if (docSnap.exists()) {
@@ -265,7 +265,6 @@
       }
     });
 
-    // 3. LISTEN & CONTROL LINKS
     function loadLinksList() {
       onSnapshot(collection(db, "links"), (snapshot) => {
         linkListContainer.innerHTML = '';
