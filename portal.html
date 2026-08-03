@@ -8,7 +8,6 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   
   <style>
-    /* Custom Styling Halaman Portal Tautan */
     .portal-box {
       background: var(--card-bg, rgba(15, 23, 42, 0.85));
       border: 1px solid var(--card-border, rgba(255, 255, 255, 0.1));
@@ -54,7 +53,6 @@
       width: 100%;
     }
 
-    /* CARD ITEM HANYA JUDUL & IKON */
     .link-card-item {
       display: flex;
       align-items: center;
@@ -166,7 +164,7 @@
       <div id="portal-content-view">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; border-bottom: 1px solid rgba(255, 255, 255, 0.08); padding-bottom: 10px;">
           <h2 style="font-size: 0.95rem; font-weight: 800; color: #ffffff; text-transform: uppercase; letter-spacing: 0.05em;">
-            <i class="fa-solid fa-graduation-cap" style="color: #38bdf8; margin-right: 6px;"></i> DAFTAR LINK
+            <i class="fa-solid fa-graduation-cap" style="color: #38bdf8; margin-right: 6px;"></i> Tautan Pembelajaran
           </h2>
           <span id="link-total-badge" style="font-size: 0.7rem; font-weight: 700; color: #38bdf8; background: rgba(56, 189, 248, 0.12); padding: 4px 10px; border-radius: 20px; border: 1px solid rgba(56, 189, 248, 0.3);">
             0 Link
@@ -245,7 +243,7 @@
     drawParticles();
   </script>
 
-  <!-- FIREBASE LOGIC DENGAN DETEKSI IKON OTOMATIS -->
+  <!-- FIREBASE LOGIC LOGIKA FIX ORDER -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
     import { getFirestore, collection, doc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
@@ -270,29 +268,41 @@
     const publicLinksContainer = document.getElementById('public-links-container');
     const linkTotalBadge = document.getElementById('link-total-badge');
 
-    // FUNGSI DETEKSI IKON & WARNA OTOMATIS BERDASARKAN URL / JUDUL
     function getLinkIconConfig(title, url) {
       const t = (title || "").toLowerCase();
       const u = (url || "").toLowerCase();
 
+      // 1. Google Forms / Form Tugas / Upload (DICEK DULUAN AGAR TIDAK TERBACA DOCS/DRIVE)
+      if (u.includes('forms.google.com') || u.includes('forms.gle') || u.includes('/forms/') || t.includes('form') || t.includes('tugas') || t.includes('upload')) {
+        return { icon: 'fa-solid fa-file-pen', color: '#7248b9', bg: 'rgba(114, 72, 185, 0.15)', border: 'rgba(114, 72, 185, 0.3)' };
+      }
+
+      // 2. Canva
       if (u.includes('canva.com') || u.includes('canva.link') || t.includes('canva')) {
         return { icon: 'fa-solid fa-palette', color: '#00c4cc', bg: 'rgba(0, 196, 204, 0.15)', border: 'rgba(0, 196, 204, 0.3)' };
       }
-      if (u.includes('drive.google.com') || u.includes('docs.google.com') || t.includes('drive') || t.includes('modul')) {
+
+      // 3. Google Drive / Documents / Modul / PDF
+      if (u.includes('drive.google.com') || u.includes('docs.google.com') || t.includes('drive') || t.includes('modul') || t.includes('pdf')) {
         return { icon: 'fa-solid fa-file-pdf', color: '#ea4335', bg: 'rgba(234, 67, 53, 0.15)', border: 'rgba(234, 67, 53, 0.3)' };
       }
-      if (u.includes('forms.google.com') || u.includes('forms.gle') || t.includes('form') || t.includes('tugas') || t.includes('upload')) {
-        return { icon: 'fa-solid fa-file-pen', color: '#7248b9', bg: 'rgba(114, 72, 185, 0.15)', border: 'rgba(114, 72, 185, 0.3)' };
-      }
+
+      // 4. YouTube / Video
       if (u.includes('youtube.com') || u.includes('youtu.be') || t.includes('video') || t.includes('youtube')) {
         return { icon: 'fa-brands fa-youtube', color: '#ff0000', bg: 'rgba(255, 0, 0, 0.15)', border: 'rgba(255, 0, 0, 0.3)' };
       }
+
+      // 5. Quizizz / Ujian
       if (u.includes('quizizz.com') || t.includes('quiz') || t.includes('ujian')) {
         return { icon: 'fa-solid fa-gamepad', color: '#8854d0', bg: 'rgba(136, 84, 208, 0.15)', border: 'rgba(136, 84, 208, 0.3)' };
       }
+
+      // 6. WhatsApp
       if (u.includes('wa.me') || u.includes('whatsapp.com') || t.includes('wa') || t.includes('grup')) {
         return { icon: 'fa-brands fa-whatsapp', color: '#25d366', bg: 'rgba(37, 211, 102, 0.15)', border: 'rgba(37, 211, 102, 0.3)' };
       }
+
+      // 7. GitHub / Coding
       if (u.includes('github.com') || t.includes('github') || t.includes('koding') || t.includes('code')) {
         return { icon: 'fa-brands fa-github', color: '#f0f6fc', bg: 'rgba(240, 246, 252, 0.15)', border: 'rgba(240, 246, 252, 0.3)' };
       }
@@ -354,7 +364,6 @@
         a.rel = "noopener noreferrer";
         a.className = "link-card-item";
 
-        // RENDER DENGAN IKON & WARNA OTOMATIS BERDASARKAN JENIS LINK
         a.innerHTML = `
           <div class="link-info">
             <div class="link-icon-box" style="color: ${iconConfig.color}; background: ${iconConfig.bg}; border-color: ${iconConfig.border};">
