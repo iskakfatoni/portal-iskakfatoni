@@ -195,6 +195,43 @@
 
   </main>
 
+  <!-- MODAL EDIT LINK -->
+  <div id="edit-link-modal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-50 hidden flex items-center justify-center p-4">
+    <div class="glass-card max-w-md w-full p-6 rounded-2xl shadow-2xl space-y-4 border border-slate-700">
+      <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+        <h3 class="text-sm font-bold text-cyan-400 flex items-center gap-2 uppercase tracking-wider">
+          <i class="fa-solid fa-pen-to-square"></i> Edit Link Portal
+        </h3>
+        <button id="btn-close-edit-modal" class="text-slate-400 hover:text-white transition">
+          <i class="fa-solid fa-xmark text-lg"></i>
+        </button>
+      </div>
+
+      <form id="form-edit-link" class="space-y-3" onsubmit="return false;">
+        <input type="hidden" id="edit-link-id">
+        
+        <div class="space-y-1">
+          <label class="block text-xs font-semibold text-slate-300">Judul Link / Materi</label>
+          <input type="text" id="edit-link-title" required class="w-full px-3.5 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-slate-100 text-xs focus:outline-none focus:border-cyan-500">
+        </div>
+
+        <div class="space-y-1">
+          <label class="block text-xs font-semibold text-slate-300">URL Destination Link</label>
+          <input type="url" id="edit-link-url" required class="w-full px-3.5 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-slate-100 text-xs focus:outline-none focus:border-cyan-500">
+        </div>
+
+        <div class="flex gap-2 pt-2">
+          <button type="button" id="btn-cancel-edit" class="flex-1 py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold text-xs rounded-xl transition">
+            Batal
+          </button>
+          <button type="submit" id="btn-save-edit" class="flex-1 py-2.5 bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-bold text-xs rounded-xl transition shadow-lg shadow-cyan-500/20">
+            Simpan Perubahan
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
   <!-- PARTICLE CANVAS ANIMATION -->
   <script>
     const canvas = document.getElementById('particle-canvas');
@@ -241,7 +278,7 @@
     drawParticles();
   </script>
 
-  <!-- FIREBASE SCRIPT & DRAG-AND-DROP LOGIC -->
+  <!-- FIREBASE SCRIPT & DRAG-AND-DROP + EDIT MODAL -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
     import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
@@ -277,6 +314,15 @@
     const linkListContainer = document.getElementById('link-list-container');
     const linkCount = document.getElementById('link-count');
     const reorderStatus = document.getElementById('reorder-status');
+
+    // ELEMENT MODAL EDIT
+    const editLinkModal = document.getElementById('edit-link-modal');
+    const formEditLink = document.getElementById('form-edit-link');
+    const editLinkId = document.getElementById('edit-link-id');
+    const editLinkTitle = document.getElementById('edit-link-title');
+    const editLinkUrl = document.getElementById('edit-link-url');
+    const btnCloseEditModal = document.getElementById('btn-close-edit-modal');
+    const btnCancelEdit = document.getElementById('btn-cancel-edit');
 
     let currentPortalState = true;
     let draggedItem = null;
@@ -365,12 +411,11 @@
       }
     });
 
-    // 3. LISTEN & RENDER DAFTAR LINK TERURUT (DENGAN DRAG AND DROP)
+    // 3. LISTEN & RENDER DAFTAR LINK TERURUT
     function loadLinksList() {
       const q = query(collection(db, "links"), orderBy("order", "asc"));
       
       onSnapshot(q, (snapshot) => {
-        // Jangan timpa tampilan jika user sedang melakukan drag-and-drop
         if (isReordering) return;
 
         linkListContainer.innerHTML = '';
@@ -381,7 +426,7 @@
           return;
         }
 
-        snapshot.forEach((docSnap, index) => {
+        snapshot.forEach((docSnap) => {
           const data = docSnap.data();
           const docId = docSnap.id;
 
@@ -400,18 +445,32 @@
                 <a href="${data.url}" target="_blank" class="text-cyan-400 font-mono text-[11px] hover:underline">${data.url}</a>
               </div>
             </div>
-            <button class="btn-del p-2 bg-red-500/15 hover:bg-red-500/30 text-red-400 border border-red-500/30 rounded-lg text-xs font-semibold cursor-pointer transition" title="Hapus Link">
-              <i class="fa-solid fa-trash"></i>
-            </button>
+            <div class="flex items-center gap-1.5">
+              <button class="btn-edit p-2 bg-cyan-500/15 hover:bg-cyan-500/30 text-cyan-400 border border-cyan-500/30 rounded-lg text-xs font-semibold cursor-pointer transition" title="Edit Link">
+                <i class="fa-solid fa-pen-to-square"></i>
+              </button>
+              <button class="btn-del p-2 bg-red-500/15 hover:bg-red-500/30 text-red-400 border border-red-500/30 rounded-lg text-xs font-semibold cursor-pointer transition" title="Hapus Link">
+                <i class="fa-solid fa-trash"></i>
+              </button>
+            </div>
           `;
 
+          // Handler Tombol Edit
+          item.querySelector('.btn-edit').onclick = () => {
+            editLinkId.value = docId;
+            editLinkTitle.value = data.title;
+            editLinkUrl.value = data.url;
+            editLinkModal.classList.remove('hidden');
+          };
+
+          // Handler Tombol Hapus
           item.querySelector('.btn-del').onclick = async () => {
             if (confirm(`Hapus link "${data.title}"?`)) {
               await deleteDoc(doc(db, "links", docId));
             }
           };
 
-          // EVEN LISTENERS DENGAN FITUR NATIVE DRAG & DROP
+          // Drag and Drop Event Listeners
           item.addEventListener('dragstart', handleDragStart);
           item.addEventListener('dragover', handleDragOver);
           item.addEventListener('drop', handleDrop);
@@ -421,6 +480,31 @@
         });
       });
     }
+
+    // HANDLER CLOSE & CANCEL MODAL EDIT
+    btnCloseEditModal.onclick = () => editLinkModal.classList.add('hidden');
+    btnCancelEdit.onclick = () => editLinkModal.classList.add('hidden');
+
+    // SUBMIT FORM EDIT LINK
+    formEditLink.addEventListener('submit', async () => {
+      const id = editLinkId.value;
+      const title = editLinkTitle.value.trim();
+      const url = editLinkUrl.value.trim();
+
+      if (!id || !title || !url) return;
+
+      try {
+        await updateDoc(doc(db, "links", id), {
+          title: title,
+          url: url,
+          updated_at: serverTimestamp()
+        });
+
+        editLinkModal.classList.add('hidden');
+      } catch (err) {
+        alert("Gagal memperbarui link: " + err.message);
+      }
+    });
 
     // HANDLERS DRAG & DROP
     function handleDragStart(e) {
@@ -453,12 +537,11 @@
         draggedItem = null;
       }
       
-      // SIMPAN URUTAN BARU KE FIRESTORE
       await saveNewOrdersToFirestore();
       isReordering = false;
     }
 
-    // SIMPAN FIELD 'ORDER' MASAL KE CLOUD FIRESTORE
+    // SIMPAN URUTAN MASAL KE FIRESTORE
     async function saveNewOrdersToFirestore() {
       reorderStatus.classList.remove('hidden');
       try {
@@ -481,7 +564,7 @@
       }
     }
 
-    // FORM TAMBAH LINK BARU (MENGHITUNG FIELD ORDER OTOMATIS)
+    // FORM TAMBAH LINK BARU
     formAddLink.addEventListener('submit', async () => {
       const title = inputLinkTitle.value.trim();
       const url = inputLinkUrl.value.trim();
