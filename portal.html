@@ -297,7 +297,7 @@
   <!-- FIREBASE LOGIC & HARDWARE DEVICE CHECK FOR GREETING -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-    import { getFirestore, collection, doc, onSnapshot, query, where, getDocs } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+    import { getFirestore, collection, doc, onSnapshot, query, where, getDocs, orderBy } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyDhq4QoCn00GkfpKXSP8PnvSvEKa2yn0ic",
@@ -454,8 +454,10 @@
       marqueeWrapper.classList.add('hidden');
     });
 
-    // 3. LISTEN REALTIME DAFTAR LINK
-    onSnapshot(collection(db, "links"), (snapshot) => {
+    // 3. LISTEN REALTIME DAFTAR LINK TERURUT (DENGAN SINKRONISASI FIELD 'ORDER')
+    const qLinks = query(collection(db, "links"), orderBy("order", "asc"));
+
+    onSnapshot(qLinks, (snapshot) => {
       publicLinksContainer.innerHTML = '';
       linkTotalBadge.innerText = `${snapshot.size} Link`;
 
