@@ -13,12 +13,12 @@
   <!-- SheetJS Library (Excel Export) -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 </head>
-<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col justify-center items-center p-4 font-sans">
+<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col justify-start items-center p-4 md:p-8 font-sans">
 
   <!-- ========================================== -->
   <!-- SECTION 1: FORM LOGIN GURU                -->
   <!-- ========================================== -->
-  <div id="login-section" class="max-w-md w-full bg-slate-900/90 backdrop-blur-xl rounded-2xl p-6 border border-slate-800 shadow-2xl space-y-6">
+  <div id="login-section" class="max-w-md w-full my-auto bg-slate-900/90 backdrop-blur-xl rounded-2xl p-6 md:p-8 border border-slate-800 shadow-2xl space-y-6">
     <div class="text-center">
       <div class="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-cyan-500/10 text-cyan-400 mb-3 border border-cyan-500/30">
         <i class="fa-solid fa-user-shield text-2xl"></i>
@@ -50,155 +50,189 @@
   <!-- ========================================== -->
   <!-- SECTION 2: DASHBOARD KONTROL ABSENSI       -->
   <!-- ========================================== -->
-  <div id="dashboard-section" class="max-w-md w-full hidden space-y-4 my-4">
+  <!-- Kontainer diperlebar di layar desktop (max-w-6xl) -->
+  <div id="dashboard-section" class="max-w-6xl w-full hidden space-y-6 my-auto">
     
     <!-- TOP BAR (HEADER & LOGOUT) -->
-    <header class="flex items-center justify-between bg-slate-900/90 backdrop-blur-md p-4 rounded-2xl border border-slate-800 shadow-xl">
-      <div class="flex items-center gap-3">
-        <div class="w-10 h-10 rounded-xl bg-cyan-500/10 border border-cyan-500/30 flex items-center justify-center text-cyan-400 font-bold">
-          <i class="fa-solid fa-qrcode text-lg"></i>
+    <header class="flex items-center justify-between bg-slate-900/90 backdrop-blur-md p-4 md:p-5 rounded-2xl border border-slate-800 shadow-xl">
+      <div class="flex items-center gap-3.5">
+        <div class="w-11 h-11 rounded-xl bg-cyan-500/10 border border-cyan-500/30 flex items-center justify-center text-cyan-400 font-bold">
+          <i class="fa-solid fa-qrcode text-xl"></i>
         </div>
         <div>
-          <h2 class="text-sm font-bold text-white tracking-wide">Absensi HP Guru</h2>
-          <p id="user-email-display" class="text-[11px] text-slate-400 font-mono">guru@sekolah.sch.id</p>
+          <h2 class="text-base font-bold text-white tracking-wide">Dashboard Kontrol Absensi Guru</h2>
+          <p id="user-email-display" class="text-xs text-slate-400 font-mono">guru@sekolah.sch.id</p>
         </div>
       </div>
 
-      <button id="btn-logout" title="Logout" class="p-2.5 bg-red-500/15 hover:bg-red-500/30 text-red-400 border border-red-500/40 font-bold text-xs rounded-xl transition shadow-md shadow-red-500/10 flex items-center gap-1 cursor-pointer">
-        <i class="fa-solid fa-power-off"></i>
+      <!-- TAB SWITCHER NAVIGASI (DESKTOP FIT) -->
+      <div class="hidden sm:flex items-center gap-2 p-1.5 bg-slate-950/80 rounded-xl border border-slate-800">
+        <button id="tab-sesi-qr-desktop" class="py-2 px-4 rounded-lg font-bold text-xs bg-cyan-500 text-slate-950 transition flex items-center gap-2 cursor-pointer">
+          <i class="fa-solid fa-qrcode"></i> Sesi QR Aktif
+        </button>
+        <button id="tab-db-rekap-desktop" class="py-2 px-4 rounded-lg font-bold text-xs text-slate-400 hover:text-white transition flex items-center gap-2 cursor-pointer">
+          <i class="fa-solid fa-database"></i> Database Rekap
+        </button>
+      </div>
+
+      <button id="btn-logout" title="Logout" class="py-2.5 px-4 bg-red-500/15 hover:bg-red-500/30 text-red-400 border border-red-500/40 font-bold text-xs rounded-xl transition shadow-md shadow-red-500/10 flex items-center gap-2 cursor-pointer">
+        <i class="fa-solid fa-power-off"></i> <span class="hidden sm:inline">Keluar</span>
       </button>
     </header>
 
-    <!-- TAB SWITCHER: KONTROL SESI VS DATABASE REKAP -->
-    <div class="grid grid-cols-2 gap-2 p-1.5 bg-slate-900/90 rounded-xl border border-slate-800">
-      <button id="tab-sesi-qr" class="py-2 px-3 rounded-lg font-bold text-xs bg-cyan-500 text-slate-950 transition flex items-center justify-center gap-2">
+    <!-- TAB SWITCHER MOBILE ONLY -->
+    <div class="grid grid-cols-2 gap-2 p-1.5 bg-slate-900/90 rounded-xl border border-slate-800 sm:hidden">
+      <button id="tab-sesi-qr-mobile" class="py-2 px-3 rounded-lg font-bold text-xs bg-cyan-500 text-slate-950 transition flex items-center justify-center gap-2">
         <i class="fa-solid fa-qrcode"></i> Sesi QR Aktif
       </button>
-      <button id="tab-db-rekap" class="py-2 px-3 rounded-lg font-bold text-xs text-slate-400 hover:text-white transition flex items-center justify-center gap-2">
+      <button id="tab-db-rekap-mobile" class="py-2 px-3 rounded-lg font-bold text-xs text-slate-400 hover:text-white transition flex items-center justify-center gap-2">
         <i class="fa-solid fa-database"></i> Database Rekap
       </button>
     </div>
 
     <!-- MODUL A: KONTROL SESI ABSENSI REALTIME -->
-    <div id="modul-sesi-qr" class="space-y-4">
+    <div id="modul-sesi-qr" class="space-y-6">
       
-      <!-- FORM KONTROL KELAS & MAPEL -->
-      <div class="bg-slate-900/80 backdrop-blur-md p-5 rounded-2xl border border-slate-800 space-y-3 shadow-xl">
-        <h3 class="text-xs font-bold text-cyan-400 border-b border-slate-800 pb-2 flex items-center gap-2 uppercase tracking-wider">
-          <i class="fa-solid fa-sliders"></i> Konfigurasi Sesi
-        </h3>
-
-        <div class="space-y-1">
-          <label for="select-kelas" class="block text-[11px] font-semibold text-slate-300">Pilih Kelas TEI</label>
-          <select id="select-kelas" class="w-full px-3.5 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-slate-100 text-xs focus:outline-none focus:border-cyan-500 cursor-pointer">
-            <option value="">-- Memuat Daftar Kelas... --</option>
-          </select>
-        </div>
-
-        <div class="space-y-1">
-          <label for="select-mapel" class="block text-[11px] font-semibold text-slate-300">Pilih Mata Pelajaran</label>
-          <select id="select-mapel" class="w-full px-3.5 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-slate-100 text-xs focus:outline-none focus:border-cyan-500 cursor-pointer">
-            <option value="">-- Memuat Mata Pelajaran... --</option>
-          </select>
-        </div>
-
-        <div class="flex gap-2 pt-1">
-          <button id="btn-start-sesi" class="flex-1 py-3 px-4 bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-xs rounded-xl transition shadow-lg shadow-emerald-500/20 flex items-center justify-center gap-2 cursor-pointer">
-            <i class="fa-solid fa-play"></i> Mulai Sesi Absensi
-          </button>
-          
-          <button id="btn-stop-sesi" disabled class="py-3 px-4 bg-slate-800 hover:bg-red-500/20 text-slate-500 border border-slate-700 font-bold text-xs rounded-xl transition flex items-center justify-center gap-2 cursor-not-allowed">
-            <i class="fa-solid fa-stop"></i> Tutup
-          </button>
-        </div>
-      </div>
-
-      <!-- TAMPILAN QR CARD -->
-      <div class="bg-slate-900/80 backdrop-blur-md p-5 rounded-2xl border border-slate-800 flex flex-col items-center justify-center text-center space-y-3 shadow-xl">
-        <div class="flex items-center justify-between w-full border-b border-slate-800 pb-2">
-          <span class="text-[11px] font-bold text-cyan-400 uppercase tracking-wider">Tampilan QR Ponsel</span>
-          <span id="session-status" class="text-[10px] text-slate-400 font-mono">Off</span>
-        </div>
+      <!-- DESKTOP GRID 2 KOLOM BERDAMPINGAN -->
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
         
-        <div id="qrcode-container" class="p-3 bg-white rounded-2xl shadow-xl min-w-[180px] min-h-[180px] flex items-center justify-center">
-          <p class="text-xs text-slate-500 font-sans">Sesi Belum Aktif</p>
+        <!-- KOLOM KIRI (KONFIGURASI & TAMPILAN QR) - 5 SPAN -->
+        <div class="lg:col-span-5 space-y-6">
+          
+          <!-- FORM KONFIGURASI -->
+          <div class="bg-slate-900/80 backdrop-blur-md p-6 rounded-2xl border border-slate-800 space-y-4 shadow-xl">
+            <h3 class="text-xs font-bold text-cyan-400 border-b border-slate-800 pb-2 flex items-center gap-2 uppercase tracking-wider">
+              <i class="fa-solid fa-sliders"></i> Konfigurasi Sesi
+            </h3>
+
+            <div class="space-y-1">
+              <label for="select-kelas" class="block text-xs font-semibold text-slate-300">Pilih Kelas TEI</label>
+              <select id="select-kelas" class="w-full px-3.5 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-slate-100 text-xs focus:outline-none focus:border-cyan-500 cursor-pointer">
+                <option value="">-- Memuat Daftar Kelas... --</option>
+              </select>
+            </div>
+
+            <div class="space-y-1">
+              <label for="select-mapel" class="block text-xs font-semibold text-slate-300">Pilih Mata Pelajaran</label>
+              <select id="select-mapel" class="w-full px-3.5 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-slate-100 text-xs focus:outline-none focus:border-cyan-500 cursor-pointer">
+                <option value="">-- Memuat Mata Pelajaran... --</option>
+              </select>
+            </div>
+
+            <div class="flex gap-2 pt-2">
+              <button id="btn-start-sesi" class="flex-1 py-3 px-4 bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-xs rounded-xl transition shadow-lg shadow-emerald-500/20 flex items-center justify-center gap-2 cursor-pointer">
+                <i class="fa-solid fa-play"></i> Mulai Sesi Absensi
+              </button>
+              
+              <button id="btn-stop-sesi" disabled class="py-3 px-4 bg-slate-800 hover:bg-red-500/20 text-slate-500 border border-slate-700 font-bold text-xs rounded-xl transition flex items-center justify-center gap-2 cursor-not-allowed">
+                <i class="fa-solid fa-stop"></i> Tutup Sesi
+              </button>
+            </div>
+          </div>
+
+          <!-- TAMPILAN QR CARD -->
+          <div class="bg-slate-900/80 backdrop-blur-md p-6 rounded-2xl border border-slate-800 flex flex-col items-center justify-center text-center space-y-4 shadow-xl">
+            <div class="flex items-center justify-between w-full border-b border-slate-800 pb-2">
+              <span class="text-xs font-bold text-cyan-400 uppercase tracking-wider">Tampilan QR Ponsel</span>
+              <span id="session-status" class="text-xs text-slate-400 font-mono">Off</span>
+            </div>
+            
+            <div id="qrcode-container" class="p-4 bg-white rounded-2xl shadow-xl min-w-[200px] min-h-[200px] flex items-center justify-center">
+              <p class="text-xs text-slate-500 font-sans">Sesi Belum Aktif</p>
+            </div>
+
+            <button 
+              id="btn-fullscreen-qr" 
+              disabled 
+              class="w-full py-3 px-4 bg-slate-800 text-slate-500 border border-slate-700 font-bold text-xs rounded-xl transition flex items-center justify-center gap-2 cursor-not-allowed"
+            >
+              <i class="fa-solid fa-expand"></i> Perbesar QR (Layar Penuh HP)
+            </button>
+          </div>
+
         </div>
 
-        <button 
-          id="btn-fullscreen-qr" 
-          disabled 
-          class="w-full py-2.5 px-4 bg-slate-800 text-slate-500 border border-slate-700 font-bold text-xs rounded-xl transition flex items-center justify-center gap-2 cursor-not-allowed"
-        >
-          <i class="fa-solid fa-expand"></i> Perbesar QR (Layar Penuh HP)
-        </button>
-      </div>
+        <!-- KOLOM KANAN (LIVE LOG ATTENDANCE SISWA) - 7 SPAN -->
+        <div class="lg:col-span-7">
+          <div class="bg-slate-900/80 backdrop-blur-md p-6 rounded-2xl border border-slate-800 space-y-4 shadow-xl h-full flex flex-col justify-between">
+            <div>
+              <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+                <h3 class="text-xs font-bold text-cyan-400 flex items-center gap-2 uppercase tracking-wider">
+                  <i class="fa-solid fa-list-check"></i> Realtime Attendance Log
+                </h3>
+                <span id="log-count" class="text-xs text-slate-400 font-mono font-bold bg-slate-950 px-3 py-1 rounded-full border border-slate-800">0 Siswa</span>
+              </div>
 
-      <!-- LIVE LOG KEHADIRAN SISWA -->
-      <div class="bg-slate-900/80 backdrop-blur-md p-5 rounded-2xl border border-slate-800 space-y-3 shadow-xl">
-        <div class="flex items-center justify-between border-b border-slate-800 pb-2">
-          <h3 class="text-xs font-bold text-cyan-400 flex items-center gap-2 uppercase tracking-wider">
-            <i class="fa-solid fa-list-check"></i> Realtime Attendance
-          </h3>
-          <span id="log-count" class="text-[11px] text-slate-400 font-mono">0 Siswa</span>
+              <!-- Tabel/List Log Siswa Realtime -->
+              <div id="log-siswa-container" class="space-y-2.5 mt-4 max-h-[460px] overflow-y-auto pr-2">
+                <p class="text-xs text-slate-500 text-center py-10">// Siswa yang melakukan scan akan tampil otomatis di sini secara realtime...</p>
+              </div>
+            </div>
+
+            <div class="pt-4 border-t border-slate-800/80 text-right">
+              <span class="text-[11px] text-slate-500 font-mono">Status Sistem: <span class="text-emerald-400">Monitoring Aktif</span></span>
+            </div>
+          </div>
         </div>
 
-        <div id="log-siswa-container" class="space-y-2 max-h-48 overflow-y-auto pr-1">
-          <p class="text-xs text-slate-500 text-center py-3">// Log siswa scan akan tampil di sini...</p>
-        </div>
       </div>
 
     </div>
 
     <!-- MODUL B: RIWAYAT DATABASE ABSENSI & EXPORT -->
     <div id="modul-db-rekap" class="hidden space-y-4">
-      <div class="bg-slate-900/80 backdrop-blur-md p-5 rounded-2xl border border-slate-800 space-y-4 shadow-xl">
+      <div class="bg-slate-900/80 backdrop-blur-md p-6 rounded-2xl border border-slate-800 space-y-6 shadow-xl">
         
-        <div class="flex items-center justify-between border-b border-slate-800 pb-2">
-          <h3 class="text-xs font-bold text-emerald-400 flex items-center gap-2 uppercase tracking-wider">
-            <i class="fa-solid fa-database"></i> Database Log Absensi
-          </h3>
-          <button id="btn-export-excel-db" class="py-1.5 px-3 bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-xs rounded-lg transition flex items-center gap-1 cursor-pointer">
-            <i class="fa-solid fa-file-excel"></i> Export Excel
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between border-b border-slate-800 pb-4 gap-4">
+          <div>
+            <h3 class="text-sm font-bold text-emerald-400 flex items-center gap-2 uppercase tracking-wider">
+              <i class="fa-solid fa-database"></i> Database Riwayat Absensi
+            </h3>
+            <p class="text-xs text-slate-400 mt-1">Seluruh data kehadiran siswa tersimpan rapi secara tersentralisasi</p>
+          </div>
+
+          <button id="btn-export-excel-db" class="py-2.5 px-4 bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-xs rounded-xl transition flex items-center justify-center gap-2 cursor-pointer shadow-lg shadow-emerald-500/20">
+            <i class="fa-solid fa-file-excel text-sm"></i> Download File Excel
           </button>
         </div>
 
         <!-- FILTER KELAS DARI DATABASE -->
-        <div class="space-y-2">
-          <label for="filter-kelas-db" class="block text-[11px] font-semibold text-slate-300">Filter Berdasarkan Kelas</label>
-          <select id="filter-kelas-db" class="w-full px-3.5 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-slate-100 text-xs focus:outline-none focus:border-emerald-500 cursor-pointer">
-            <option value="ALL">-- Tampilkan Semua Kelas --</option>
-          </select>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div class="space-y-1">
+            <label for="filter-kelas-db" class="block text-xs font-semibold text-slate-300">Filter Berdasarkan Kelas</label>
+            <select id="filter-kelas-db" class="w-full px-3.5 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-slate-100 text-xs focus:outline-none focus:border-emerald-500 cursor-pointer">
+              <option value="ALL">-- Tampilkan Semua Kelas --</option>
+            </select>
+          </div>
+
+          <div class="flex items-end justify-between sm:justify-end gap-2 text-xs text-slate-400 pb-1">
+            <span>Total Catatan:</span>
+            <span id="db-total-count" class="font-mono text-emerald-400 font-bold text-sm bg-slate-950 px-3 py-1 rounded-lg border border-slate-800">0 Record</span>
+          </div>
         </div>
 
         <!-- TABEL HASIL REKAP DATABASE -->
-        <div class="space-y-2">
-          <div class="flex items-center justify-between text-[11px] text-slate-400">
-            <span>Riwayat Kehadiran</span>
-            <span id="db-total-count" class="font-mono text-emerald-400">0 Record</span>
-          </div>
-
-          <div id="db-rekap-container" class="space-y-2 max-h-80 overflow-y-auto pr-1">
-            <p class="text-xs text-slate-500 text-center py-4">// Memuat data riwayat absensi...</p>
-          </div>
+        <div id="db-rekap-container" class="space-y-2.5 max-h-[500px] overflow-y-auto pr-2">
+          <p class="text-xs text-slate-500 text-center py-10">// Memuat data riwayat absensi dari Cloud Firestore...</p>
         </div>
 
       </div>
     </div>
 
     <!-- FOOTER -->
-    <div class="text-center pt-1">
-      <p class="text-[11px] text-slate-500 font-mono">Developed by Iskak Fatoni, S.Pd., Gr.</p>
+    <div class="text-center pt-2">
+      <p class="text-xs text-slate-500 font-mono">Developed by Iskak Fatoni, S.Pd., Gr.</p>
     </div>
 
   </div>
 
 
   <!-- MODAL FULLSCREEN QR CODE -->
-  <div id="qr-fullscreen-modal" class="fixed inset-0 bg-slate-950/95 backdrop-blur-2xl z-50 hidden flex flex-col items-center justify-between p-6 text-center">
+  <div id="qr-fullscreen-modal" class="fixed inset-0 bg-slate-950/95 backdrop-blur-2xl z-50 hidden flex flex-col items-center justify-between p-6 md:p-10 text-center">
     
-    <div class="w-full flex items-center justify-between border-b border-slate-800 pb-4">
+    <div class="w-full max-w-lg flex items-center justify-between border-b border-slate-800 pb-4">
       <div>
-        <h3 id="modal-kelas-title" class="text-base font-bold text-white text-left">-</h3>
+        <h3 id="modal-kelas-title" class="text-lg font-bold text-white text-left">-</h3>
         <p id="modal-mapel-title" class="text-xs text-cyan-400 text-left">-</p>
       </div>
       <button id="btn-close-modal" class="w-10 h-10 bg-slate-800 hover:bg-slate-700 text-white rounded-full flex items-center justify-center font-bold text-sm cursor-pointer border border-slate-700">
@@ -206,13 +240,13 @@
       </button>
     </div>
 
-    <div class="my-auto p-5 bg-white rounded-3xl shadow-2xl flex items-center justify-center">
+    <div class="my-auto p-6 bg-white rounded-3xl shadow-2xl flex items-center justify-center">
       <div id="qrcode-modal-container"></div>
     </div>
 
-    <div class="w-full space-y-1">
-      <p class="text-xs text-slate-300 font-semibold">Tunjukkan Layar HP Ini ke Siswa untuk Di-Scan</p>
-      <p class="text-[10px] text-slate-500 font-mono">QR Code Diperbarui Otomatis Setiap 10 Detik</p>
+    <div class="w-full max-w-lg space-y-1">
+      <p class="text-sm text-slate-300 font-semibold">Tunjukkan Layar Ini ke Siswa untuk Di-Scan</p>
+      <p class="text-xs text-slate-500 font-mono">QR Code Diperbarui Otomatis Setiap 10 Detik</p>
     </div>
 
   </div>
@@ -266,8 +300,10 @@
     const userEmailDisplay = document.getElementById('user-email-display');
     const btnLogout = document.getElementById('btn-logout');
 
-    const tabSesiQr = document.getElementById('tab-sesi-qr');
-    const tabDbRekap = document.getElementById('tab-db-rekap');
+    const tabSesiDesktop = document.getElementById('tab-sesi-qr-desktop');
+    const tabDbDesktop = document.getElementById('tab-db-rekap-desktop');
+    const tabSesiMobile = document.getElementById('tab-sesi-qr-mobile');
+    const tabDbMobile = document.getElementById('tab-db-rekap-mobile');
     const modulSesiQr = document.getElementById('modul-sesi-qr');
     const modulDbRekap = document.getElementById('modul-db-rekap');
 
@@ -334,21 +370,30 @@
       }
     });
 
-    // 🔀 4. TAB SWITCHER (SESI QR vs DATABASE REKAP)
-    tabSesiQr.addEventListener('click', () => {
-      tabSesiQr.className = "py-2 px-3 rounded-lg font-bold text-xs bg-cyan-500 text-slate-950 transition flex items-center justify-center gap-2";
-      tabDbRekap.className = "py-2 px-3 rounded-lg font-bold text-xs text-slate-400 hover:text-white transition flex items-center justify-center gap-2";
-      modulSesiQr.classList.remove('hidden');
-      modulDbRekap.classList.add('hidden');
-    });
+    // 🔀 4. TAB SWITCHER (DESKTOP & MOBILE HANDLERS)
+    function switchTab(target) {
+      if (target === 'sesi') {
+        tabSesiDesktop.className = "py-2 px-4 rounded-lg font-bold text-xs bg-cyan-500 text-slate-950 transition flex items-center gap-2 cursor-pointer";
+        tabDbDesktop.className = "py-2 px-4 rounded-lg font-bold text-xs text-slate-400 hover:text-white transition flex items-center gap-2 cursor-pointer";
+        tabSesiMobile.className = "py-2 px-3 rounded-lg font-bold text-xs bg-cyan-500 text-slate-950 transition flex items-center justify-center gap-2";
+        tabDbMobile.className = "py-2 px-3 rounded-lg font-bold text-xs text-slate-400 hover:text-white transition flex items-center justify-center gap-2";
+        modulSesiQr.classList.remove('hidden');
+        modulDbRekap.classList.add('hidden');
+      } else {
+        tabDbDesktop.className = "py-2 px-4 rounded-lg font-bold text-xs bg-emerald-500 text-slate-950 transition flex items-center gap-2 cursor-pointer";
+        tabSesiDesktop.className = "py-2 px-4 rounded-lg font-bold text-xs text-slate-400 hover:text-white transition flex items-center gap-2 cursor-pointer";
+        tabDbMobile.className = "py-2 px-3 rounded-lg font-bold text-xs bg-emerald-500 text-slate-950 transition flex items-center justify-center gap-2";
+        tabSesiMobile.className = "py-2 px-3 rounded-lg font-bold text-xs text-slate-400 hover:text-white transition flex items-center justify-center gap-2";
+        modulDbRekap.classList.remove('hidden');
+        modulSesiQr.classList.add('hidden');
+        loadDatabaseAbsensi();
+      }
+    }
 
-    tabDbRekap.addEventListener('click', () => {
-      tabDbRekap.className = "py-2 px-3 rounded-lg font-bold text-xs bg-emerald-500 text-slate-950 transition flex items-center justify-center gap-2";
-      tabSesiQr.className = "py-2 px-3 rounded-lg font-bold text-xs text-slate-400 hover:text-white transition flex items-center justify-center gap-2";
-      modulDbRekap.classList.remove('hidden');
-      modulSesiQr.classList.add('hidden');
-      loadDatabaseAbsensi();
-    });
+    tabSesiDesktop.addEventListener('click', () => switchTab('sesi'));
+    tabDbDesktop.addEventListener('click', () => switchTab('db'));
+    tabSesiMobile.addEventListener('click', () => switchTab('sesi'));
+    tabDbMobile.addEventListener('click', () => switchTab('db'));
 
     // 📚 5. LOAD DROPDOWNS
     async function loadKelasDropdown() {
@@ -425,10 +470,10 @@
         btnStopSesi.className = 'py-3 px-4 bg-red-500 hover:bg-red-400 text-white font-bold text-xs rounded-xl transition shadow-lg shadow-red-500/20 flex items-center justify-center gap-2 cursor-pointer';
 
         btnFullscreenQr.disabled = false;
-        btnFullscreenQr.className = 'w-full py-2.5 px-4 bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-bold text-xs rounded-xl transition flex items-center justify-center gap-2 cursor-pointer shadow-lg shadow-cyan-500/20';
+        btnFullscreenQr.className = 'w-full py-3 px-4 bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-bold text-xs rounded-xl transition flex items-center justify-center gap-2 cursor-pointer shadow-lg shadow-cyan-500/20';
 
         sessionStatus.innerText = `Aktif [${kelas}]`;
-        sessionStatus.className = 'text-[10px] text-emerald-400 font-mono font-bold';
+        sessionStatus.className = 'text-xs text-emerald-400 font-mono font-bold';
 
         document.getElementById('modal-kelas-title').innerText = kelas;
         document.getElementById('modal-mapel-title').innerText = mapel;
@@ -468,8 +513,8 @@
     function updateQRDisplay(token) {
       qrContainer.innerHTML = '';
       qrModalContainer.innerHTML = '';
-      new QRCode(qrContainer, { text: token, width: 160, height: 160 });
-      new QRCode(qrModalContainer, { text: token, width: 240, height: 240 });
+      new QRCode(qrContainer, { text: token, width: 180, height: 180 });
+      new QRCode(qrModalContainer, { text: token, width: 280, height: 280 });
     }
 
     // REALTIME LOG SESI SEKARANG
@@ -481,7 +526,7 @@
         logSiswaContainer.innerHTML = '';
 
         if (snapshot.empty) {
-          logSiswaContainer.innerHTML = '<p class="text-xs text-slate-500 text-center py-3">// Belum ada siswa scan...</p>';
+          logSiswaContainer.innerHTML = '<p class="text-xs text-slate-500 text-center py-10">// Belum ada siswa scan...</p>';
           logCount.innerText = "0 Siswa";
           return;
         }
@@ -491,13 +536,18 @@
           count++;
           const data = docSnap.data();
           const item = document.createElement('div');
-          item.className = 'flex items-center justify-between p-2.5 bg-slate-950/80 rounded-xl border border-slate-800 text-xs';
+          item.className = 'flex items-center justify-between p-3 bg-slate-950/90 rounded-xl border border-slate-800 text-xs hover:border-cyan-500/30 transition';
           item.innerHTML = `
-            <div>
-              <p class="font-bold text-white">${data.nama_siswa}</p>
-              <p class="text-[10px] text-slate-400 font-mono">NIS: ${data.nis} | ${data.id_kelas}</p>
+            <div class="flex items-center gap-3">
+              <div class="w-8 h-8 rounded-lg bg-cyan-500/10 text-cyan-400 font-bold flex items-center justify-center">
+                ${count}
+              </div>
+              <div>
+                <p class="font-bold text-white text-sm">${data.nama_siswa}</p>
+                <p class="text-[11px] text-slate-400 font-mono">NIS: ${data.nis} | ${data.id_kelas}</p>
+              </div>
             </div>
-            <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+            <span class="px-3 py-1 rounded-full text-xs font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
               ✔ ${data.status || 'Hadir'}
             </span>
           `;
@@ -544,20 +594,25 @@
       dbTotalCount.innerText = `${records.length} Record`;
 
       if (records.length === 0) {
-        dbRekapContainer.innerHTML = '<p class="text-xs text-slate-500 text-center py-4">// Tidak ada data absensi untuk kelas ini...</p>';
+        dbRekapContainer.innerHTML = '<p class="text-xs text-slate-500 text-center py-10">// Tidak ada data absensi untuk kelas ini...</p>';
         return;
       }
 
-      records.forEach((data) => {
+      records.forEach((data, idx) => {
         const item = document.createElement('div');
-        item.className = 'flex items-center justify-between p-3 bg-slate-950/80 rounded-xl border border-slate-800 text-xs';
+        item.className = 'flex items-center justify-between p-3.5 bg-slate-950/90 rounded-xl border border-slate-800 text-xs hover:border-emerald-500/30 transition';
         item.innerHTML = `
-          <div>
-            <p class="font-bold text-white">${data.nama_siswa}</p>
-            <p class="text-[10px] text-slate-400 font-mono">NIS: ${data.nis} | ${data.id_kelas}</p>
-            <p class="text-[10px] text-cyan-400 font-mono mt-0.5">${data.waktu_scan || '-'}</p>
+          <div class="flex items-center gap-3">
+            <div class="w-8 h-8 rounded-lg bg-emerald-500/10 text-emerald-400 font-bold flex items-center justify-center font-mono">
+              ${idx + 1}
+            </div>
+            <div>
+              <p class="font-bold text-white text-sm">${data.nama_siswa}</p>
+              <p class="text-[11px] text-slate-400 font-mono">NIS: ${data.nis} | Kelas: ${data.id_kelas}</p>
+              <p class="text-[10px] text-cyan-400 font-mono mt-0.5"><i class="fa-regular fa-clock"></i> ${data.waktu_scan || '-'}</p>
+            </div>
           </div>
-          <span class="px-2.5 py-1 rounded-full text-[10px] font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+          <span class="px-3 py-1 rounded-full text-xs font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
             ${data.status || 'Hadir'}
           </span>
         `;
@@ -602,9 +657,9 @@
       btnStopSesi.disabled = true;
       btnStopSesi.className = 'py-3 px-4 bg-slate-800 hover:bg-red-500/20 text-slate-500 border border-slate-700 font-bold text-xs rounded-xl transition flex items-center justify-center gap-2 cursor-not-allowed';
       btnFullscreenQr.disabled = true;
-      btnFullscreenQr.className = 'w-full py-2.5 px-4 bg-slate-800 text-slate-500 border border-slate-700 font-bold text-xs rounded-xl transition flex items-center justify-center gap-2 cursor-not-allowed';
+      btnFullscreenQr.className = 'w-full py-3 px-4 bg-slate-800 text-slate-500 border border-slate-700 font-bold text-xs rounded-xl transition flex items-center justify-center gap-2 cursor-not-allowed';
       sessionStatus.innerText = 'Off';
-      sessionStatus.className = 'text-[10px] text-slate-400 font-mono';
+      sessionStatus.className = 'text-xs text-slate-400 font-mono';
       qrContainer.innerHTML = '<p class="text-xs text-slate-500 font-sans">Sesi Belum Aktif</p>';
       qrModal.classList.add('hidden');
     }
