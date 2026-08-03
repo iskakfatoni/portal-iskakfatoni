@@ -35,8 +35,8 @@
         </button>
       </div>
 
-      <!-- TOMBOL LOGOUT KE ADMIN PUSAT -->
-      <button id="btn-logout" title="Keluar ke Master Admin Pusat" class="py-2.5 px-4 bg-red-500/15 hover:bg-red-500/30 text-red-400 border border-red-500/40 font-bold text-xs rounded-xl transition flex items-center gap-2 cursor-pointer">
+      <!-- TOMBOL KEMBALI KE ADMIN PUSAT -->
+      <button id="btn-logout" title="Kembali ke Master Admin" class="py-2.5 px-4 bg-red-500/15 hover:bg-red-500/30 text-red-400 border border-red-500/40 font-bold text-xs rounded-xl transition flex items-center gap-2 cursor-pointer">
         <i class="fa-solid fa-arrow-left"></i> <span class="hidden sm:inline">Hub Admin</span>
       </button>
     </header>
@@ -198,7 +198,7 @@
   <!-- FIREBASE AUTH & LOGIC -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-    import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
     import { getFirestore, collection, addDoc, doc, updateDoc, query, where, orderBy, getDocs, onSnapshot, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
     const firebaseConfig = {
@@ -261,17 +261,9 @@
       }
     });
 
-    // 🚪 LOGOUT: Sign out dan redirect paksa ke ../admin.html
-    btnLogout.addEventListener('click', async () => {
-      if (confirm("Kembali ke Master Admin Hub Pusat?")) {
-        try {
-          await signOut(auth);
-        } catch (err) {
-          console.error("Signout error:", err);
-        } finally {
-          window.location.href = "../admin.html";
-        }
-      }
+    // ↩️ KEMBALI KE HUB ADMIN (TANPA LOGOUT)
+    btnLogout.addEventListener('click', () => {
+      window.location.href = "../admin.html";
     });
 
     function switchTab(target) {
