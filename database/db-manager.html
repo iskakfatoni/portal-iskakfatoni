@@ -35,7 +35,7 @@
       border: 1px solid rgba(255, 255, 255, 0.1);
     }
 
-    /* Custom Scrollbar untuk Table Horizontal/Vertical */
+    /* Custom Scrollbar */
     ::-webkit-scrollbar {
       width: 6px;
       height: 6px;
@@ -141,25 +141,25 @@
             </div>
           </div>
 
-          <!-- TABEL FIRESTORE DINAMIS (MATRIKS KOLOM & BARIS DENGAN SORTING) -->
+          <!-- TABEL FIRESTORE DINAMIS -->
           <div class="overflow-x-auto max-h-[560px] overflow-y-auto rounded-xl border border-slate-800 bg-slate-950/70">
             <table class="w-full text-left border-collapse text-xs whitespace-nowrap">
               <thead class="sticky top-0 bg-slate-900/95 backdrop-blur border-b border-slate-800 text-slate-300 uppercase tracking-wider font-mono text-[11px] z-10">
                 <tr id="table-header-row">
-                  <th class="p-3 w-10 text-center border-r border-slate-800">
-                    <input type="checkbox" id="select-all-checkbox" class="rounded bg-slate-900 border-slate-700 text-cyan-500 focus:ring-0 cursor-pointer">
-                  </th>
                   <th class="p-3 w-12 text-center border-r border-slate-800 font-bold text-slate-400">NO</th>
                   <th class="p-3 font-bold text-cyan-400 border-r border-slate-800 cursor-pointer hover:bg-slate-800/60 select-none" data-sort="id">
                     Document ID <span class="sort-icon text-[10px] ml-1">⇅</span>
                   </th>
-                  <!-- HEADER FIELD DIBUAT DINAMIS BERIKUT LISTENER SORTING -->
+                  <!-- FIELD DINAMIS -->
+                  <th class="p-3 w-10 text-center border-r border-slate-800">
+                    <input type="checkbox" id="select-all-checkbox" class="rounded bg-slate-900 border-slate-700 text-cyan-500 focus:ring-0 cursor-pointer" title="Pilih Semua">
+                  </th>
                   <th class="p-3 w-16 text-center">Aksi</th>
                 </tr>
               </thead>
               <tbody id="table-body" class="divide-y divide-slate-800/60 text-slate-300 font-mono">
                 <tr>
-                  <td colspan="3" class="p-8 text-center text-slate-500 font-sans">// Memuat data koleksi...</td>
+                  <td colspan="4" class="p-8 text-center text-slate-500 font-sans">// Memuat data koleksi...</td>
                 </tr>
               </tbody>
             </table>
@@ -268,7 +268,7 @@
     
     // STATE UNTUK SORTING (PENGURUTAN)
     let currentSortField = null;
-    let currentSortOrder = 'asc'; // 'asc' atau 'desc'
+    let currentSortOrder = 'asc';
     let currentDynamicFields = [];
 
     // 🔒 PROTEKSI ROUTE
@@ -309,14 +309,14 @@
         btn.className = "btn-col w-full text-left px-3.5 py-2.5 rounded-xl text-xs font-bold transition flex items-center justify-between cursor-pointer bg-cyan-500/20 text-cyan-300 border border-cyan-500/40";
 
         currentCollection = targetCol;
-        currentSortField = null; // Reset sort saat ganti koleksi
+        currentSortField = null;
         currentSortOrder = 'asc';
         activeCollectionTitle.innerHTML = `<i class="fa-solid fa-table-list text-cyan-400"></i> Koleksi: <span class="text-cyan-400 font-mono">${currentCollection}</span>`;
         loadCollectionData(currentCollection);
       });
     });
 
-    // FORMAT VALUE DARI FIRESTORE KE TAMPILAN TEXT YANG RAPI
+    // FORMAT VALUE DARI FIRESTORE KE TAMPILAN TEXT
     function formatCellContent(value) {
       if (value === null || value === undefined) return '<span class="text-slate-600">-</span>';
       
@@ -352,7 +352,6 @@
 
       selectedDocIds.clear();
       updateSelectedUI();
-      selectAllCheckbox.checked = false;
       
       tableBody.innerHTML = `<tr><td colspan="12" class="p-8 text-center text-slate-500 font-sans">// Memuat koleksi "${colName}"...</td></tr>`;
 
@@ -376,7 +375,7 @@
         });
         currentDynamicFields = Array.from(fieldSet);
 
-        // 2. RENDER HEADER TABEL DINAMIS DENGAN FITUR SORTING
+        // 2. RENDER HEADER TABEL DINAMIS
         renderTableHeaders();
 
         // 3. RENDER ISI TABEL DATA
@@ -384,7 +383,7 @@
       });
     }
 
-    // RENDER HEADER DENGAN EVENT LISTENER SORTING
+    // RENDER HEADER DENGAN POSISI CHECKBOX DI SISI KANAN (SEBELUM AKSI)
     function renderTableHeaders() {
       const getSortIcon = (field) => {
         if (currentSortField !== field) return '<span class="text-[10px] text-slate-600 ml-1">⇅</span>';
@@ -406,19 +405,20 @@
       const idHeaderClass = currentSortField === '__id__' ? 'bg-cyan-950/40 text-cyan-300 font-bold' : 'text-cyan-400 font-bold';
 
       tableHeaderRow.innerHTML = `
-        <th class="p-3 w-10 text-center border-r border-slate-800">
-          <input type="checkbox" id="select-all-checkbox" class="rounded bg-slate-900 border-slate-700 text-cyan-500 focus:ring-0 cursor-pointer">
-        </th>
         <th class="p-3 w-12 text-center border-r border-slate-800 font-bold text-slate-400">NO</th>
         <th class="p-3 ${idHeaderClass} border-r border-slate-800 cursor-pointer hover:bg-slate-800/80 transition select-none sort-header" data-sort="__id__">
           Document ID ${getSortIcon('__id__')}
         </th>
         ${fieldsHeaderHTML}
+        <th class="p-3 w-10 text-center border-r border-slate-800">
+          <input type="checkbox" id="select-all-checkbox" class="rounded bg-slate-900 border-slate-700 text-cyan-500 focus:ring-0 cursor-pointer" title="Pilih Semua">
+        </th>
         <th class="p-3 w-16 text-center">Aksi</th>
       `;
 
       // BIND EVENT LISTENERS PADA HEADER
-      document.getElementById('select-all-checkbox').addEventListener('change', handleSelectAll);
+      const headerChk = document.getElementById('select-all-checkbox');
+      if (headerChk) headerChk.addEventListener('change', handleSelectAll);
 
       document.querySelectorAll('.sort-header').forEach(th => {
         th.addEventListener('click', () => {
@@ -439,7 +439,6 @@
     function renderSortedTableBody() {
       if (currentDocsList.length === 0) return;
 
-      // Copy array dokumen untuk disortir
       let sortedDocs = [...currentDocsList];
 
       if (currentSortField) {
@@ -457,7 +456,6 @@
           if (valA === undefined || valA === null) valA = '';
           if (valB === undefined || valB === null) valB = '';
 
-          // Jika tipe data Timestamp
           if (typeof valA === 'object' && valA.seconds !== undefined) valA = valA.seconds;
           if (typeof valB === 'object' && valB.seconds !== undefined) valB = valB.seconds;
 
@@ -470,7 +468,7 @@
         });
       }
 
-      // RENDER BARIS & KOLOM DENGAN NOMOR URUT
+      // RENDER BARIS TABEL
       tableBody.innerHTML = '';
       sortedDocs.forEach((docSnap, index) => {
         const docId = docSnap.id;
@@ -480,19 +478,18 @@
         const tr = document.createElement('tr');
         tr.className = "hover:bg-slate-900/80 transition border-b border-slate-800/40";
         
-        // Sel data sesuai kolom
         const fieldCells = currentDynamicFields.map(fieldKey => {
           const val = dataObj[fieldKey];
           return `<td class="p-3 border-r border-slate-800/60 max-w-xs overflow-hidden text-ellipsis">${formatCellContent(val)}</td>`;
         }).join('');
 
         tr.innerHTML = `
-          <td class="p-3 text-center border-r border-slate-800/60">
-            <input type="checkbox" data-id="${docId}" ${isChecked ? 'checked' : ''} class="row-checkbox rounded bg-slate-900 border-slate-700 text-cyan-500 focus:ring-0 cursor-pointer">
-          </td>
           <td class="p-3 text-center border-r border-slate-800/60 font-mono text-slate-400 font-bold">${index + 1}</td>
           <td class="p-3 font-bold text-cyan-400 border-r border-slate-800/60 font-mono">${docId}</td>
           ${fieldCells}
+          <td class="p-3 text-center border-r border-slate-800/60">
+            <input type="checkbox" data-id="${docId}" ${isChecked ? 'checked' : ''} class="row-checkbox rounded bg-slate-900 border-slate-700 text-cyan-500 focus:ring-0 cursor-pointer">
+          </td>
           <td class="p-3 text-center">
             <button class="btn-del-single p-2 bg-red-500/15 hover:bg-red-500/30 text-red-400 border border-red-500/30 rounded-lg text-xs font-semibold cursor-pointer transition" title="Hapus Dokumen Ini">
               <i class="fa-solid fa-trash-can"></i>
