@@ -93,7 +93,7 @@
             <input type="text" id="input-extra" placeholder="..." class="w-full px-3.5 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-slate-100 text-xs focus:outline-none focus:border-cyan-500">
           </div>
 
-          <div class="pt-2 flex gap-2">
+          <div id="group-form-actions" class="pt-2 flex gap-2">
             <button type="submit" id="btn-save-doc" class="flex-1 py-3 px-4 bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-bold text-xs rounded-xl transition shadow-lg shadow-cyan-500/20 flex items-center justify-center gap-2 cursor-pointer">
               <i class="fa-solid fa-floppy-disk"></i> Simpan Data
             </button>
@@ -163,6 +163,7 @@
     const editDocId = document.getElementById('edit-doc-id');
     const btnCancelEdit = document.getElementById('btn-cancel-edit');
     const crudForm = document.getElementById('crud-form');
+    const groupFormActions = document.getElementById('group-form-actions');
 
     const inputNis = document.getElementById('input-nis');
     const inputNamaSiswa = document.getElementById('input-nama-siswa');
@@ -217,6 +218,7 @@
         document.getElementById('group-siswa-nama').classList.remove('hidden');
         document.getElementById('group-siswa-kelas').classList.remove('hidden');
         groupExtraField.classList.add('hidden');
+        groupFormActions.classList.remove('hidden');
       } else if (colName === 'kelas') {
         formTitle.innerHTML = '<i class="fa-solid fa-plus-circle"></i> Tambah Dokumen Kelas';
         document.getElementById('group-siswa-nis').classList.remove('hidden');
@@ -224,6 +226,7 @@
         document.getElementById('group-siswa-kelas').classList.remove('hidden');
         groupExtraField.classList.remove('hidden');
         labelExtra.innerText = "Wali Kelas";
+        groupFormActions.classList.remove('hidden');
       } else if (colName === 'mapel') {
         formTitle.innerHTML = '<i class="fa-solid fa-plus-circle"></i> Tambah Dokumen Mapel';
         document.getElementById('group-siswa-nis').classList.remove('hidden');
@@ -231,8 +234,14 @@
         document.getElementById('group-siswa-kelas').classList.remove('hidden');
         groupExtraField.classList.remove('hidden');
         labelExtra.innerText = "Kategori Mapel";
+        groupFormActions.classList.remove('hidden');
       } else {
-        formTitle.innerHTML = '<i class="fa-solid fa-info-circle"></i> Log Absensi (Read Only)';
+        formTitle.innerHTML = '<i class="fa-solid fa-info-circle"></i> Log Absensi Viewer';
+        document.getElementById('group-siswa-nis').classList.add('hidden');
+        document.getElementById('group-siswa-nama').classList.add('hidden');
+        document.getElementById('group-siswa-kelas').classList.add('hidden');
+        groupExtraField.classList.add('hidden');
+        groupFormActions.classList.add('hidden');
       }
     }
 
@@ -269,7 +278,10 @@
           } else if (colName === 'mapel') {
             detailsHTML += `<p class="text-slate-400 font-mono mt-0.5">${data.nama_mapel || docId} (${data.kategori || 'Wajib'})</p>`;
           } else if (colName === 'log_absensi') {
-            detailsHTML += `<p class="text-slate-400 font-mono mt-0.5">${data.nama_siswa || '-'} | ${data.waktu_scan || '-'}</p>`;
+            detailsHTML += `
+              <p class="font-bold text-white text-sm">${data.nama_siswa || 'Siswa'} (NIS: ${data.nis || '-'})</p>
+              <p class="text-slate-400 font-mono text-[11px] mt-0.5">Kelas: ${data.id_kelas || '-'} | Waktu: ${data.waktu_scan || '-'}</p>
+            `;
           }
 
           item.innerHTML = `
@@ -280,14 +292,13 @@
                   <i class="fa-solid fa-mobile-screen-button"></i> Reset HP
                 </button>
               ` : ''}
-              ${colName !== 'log_absensi' ? `
-                <button class="btn-delete-doc p-2 bg-red-500/15 hover:bg-red-500/30 text-red-400 border border-red-500/30 rounded-lg text-xs font-semibold cursor-pointer" title="Hapus Dokumen">
-                  <i class="fa-solid fa-trash"></i>
-                </button>
-              ` : ''}
+              <button class="btn-delete-doc p-2 bg-red-500/15 hover:bg-red-500/30 text-red-400 border border-red-500/30 rounded-lg text-xs font-semibold cursor-pointer" title="Hapus Dokumen">
+                <i class="fa-solid fa-trash"></i>
+              </button>
             </div>
           `;
 
+          // Event Reset Device Locking
           const btnReset = item.querySelector('.btn-reset-device');
           if (btnReset) {
             btnReset.onclick = async () => {
@@ -297,10 +308,12 @@
             };
           }
 
+          // Event Hapus Dokumen (Tersedia untuk SEMUA Koleksi termasuk Log Absensi)
           const btnDelete = item.querySelector('.btn-delete-doc');
           if (btnDelete) {
             btnDelete.onclick = async () => {
-              if (confirm(`Hapus dokumen "${docId}" dari koleksi ${colName}?`)) {
+              const infoName = data.nama_siswa ? `${data.nama_siswa} (${docId})` : docId;
+              if (confirm(`Apakah Anda yakin ingin MENGHAPUS dokumen "${infoName}" dari koleksi ${colName.toUpperCase()}?`)) {
                 await deleteDoc(doc(db, colName, docId));
               }
             };
