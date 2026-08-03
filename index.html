@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
-  <title>PORTAL :: Iskak Fatoni (Link & Absensi TEI)</title>
+  <title>PORTAL :: Iskak Fatoni - Menu Utama</title>
   
   <!-- Font & Icons -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -39,7 +39,6 @@
       color: var(--text-title);
     }
 
-    /* Canvas Particle Background */
     #particle-canvas {
       position: fixed;
       top: 0;
@@ -55,175 +54,80 @@
       z-index: 10;
     }
 
-    /* Custom Glassmorphism Cards */
     .glass-card {
       background: var(--card-bg);
       backdrop-filter: blur(16px);
       -webkit-backdrop-filter: blur(16px);
       border: 1px solid var(--card-border);
     }
-
-    /* Running Text Banner Animation */
-    .marquee-wrapper {
-      overflow: hidden;
-      white-space: nowrap;
-    }
-    .marquee-text {
-      display: inline-block;
-      animation: marquee 18s linear infinite;
-    }
-    @keyframes marquee {
-      0% { transform: translateX(100%); }
-      100% { transform: translateX(-100%); }
-    }
-
-    /* Dynamic Card Gradient Colors for Portal Links */
-    .card-color-0 { background: linear-gradient(135deg, rgba(56,189,248,0.15), rgba(59,130,246,0.05)); border-color: rgba(56,189,248,0.3); }
-    .card-color-1 { background: linear-gradient(135deg, rgba(168,85,247,0.15), rgba(236,72,153,0.05)); border-color: rgba(168,85,247,0.3); }
-    .card-color-2 { background: linear-gradient(135deg, rgba(16,185,129,0.15), rgba(20,184,166,0.05)); border-color: rgba(16,185,129,0.3); }
-    .card-color-3 { background: linear-gradient(135deg, rgba(245,158,11,0.15), rgba(239,68,68,0.05)); border-color: rgba(245,158,11,0.3); }
   </style>
 </head>
-<body class="min-h-screen flex flex-col items-center justify-between p-4 selection:bg-cyan-500 selection:text-slate-950">
+<body class="min-h-screen flex flex-col items-center justify-center p-4 selection:bg-cyan-500 selection:text-slate-950">
 
   <!-- PARTICLE CANVAS BACKGROUND -->
   <canvas id="particle-canvas"></canvas>
 
-  <main class="main-container w-full max-w-md my-auto space-y-6">
+  <main class="main-container w-full max-w-sm my-auto space-y-6">
     
     <!-- HEADER PROFIL -->
-    <header class="text-center space-y-3 pt-2">
+    <header class="text-center space-y-3">
       <div class="relative inline-block">
         <div class="w-24 h-24 rounded-full p-1 bg-gradient-to-tr from-cyan-400 via-indigo-500 to-emerald-400 shadow-xl shadow-cyan-500/20">
-          <img src="foto_asn_profile.png" alt="Muchamad Iskak Fatoni" class="w-full h-full object-cover rounded-full border-2 border-slate-900" onerror="this.src='https://ui-avatars.com/api/?name=Iskak+Fatoni&background=0284c7&color=fff'">
+          <img 
+            src="foto_asn_profile.png" 
+            alt="Muchamad Iskak Fatoni" 
+            class="w-full h-full object-cover rounded-full border-2 border-slate-900"
+            onerror="this.src='https://ui-avatars.com/api/?name=Iskak+Fatoni&background=0284c7&color=fff'"
+          >
         </div>
       </div>
       <div>
         <h1 class="text-xl font-extrabold tracking-wide">PORTAL :: Iskak Fatoni</h1>
-        <p class="text-xs text-slate-400 mt-0.5">Certified Electrical & Computer Teacher</p>
+        <p class="text-xs text-slate-400 mt-1">Pilih Layanan Portal di Bawah Ini</p>
       </div>
     </header>
 
-    <!-- BANNER RUNNING TEXT / PENGUMUMAN -->
-    <div id="announcement-banner" class="glass-card rounded-xl p-3 flex items-center gap-3 text-xs text-cyan-300 shadow-lg">
-      <i class="fa-solid fa-bullhorn text-cyan-400 shrink-0"></i>
-      <div class="marquee-wrapper w-full">
-        <div id="announcement-text" class="marquee-text font-medium">
-          Selamat datang di Portal Resmi Iskak Fatoni! Periksa daftar tugas dan modul absensi di bawah ini.
-        </div>
-      </div>
-    </div>
-
-    <!-- 🔀 NAVIGASI DUA MODUL (TAB SWITCHER) -->
-    <div class="grid grid-cols-2 gap-2 p-1.5 glass-card rounded-2xl">
-      <button id="tab-portal" class="py-2.5 px-3 rounded-xl font-bold text-xs transition flex items-center justify-center gap-2 bg-cyan-500 text-slate-950 shadow-md">
-        <i class="fa-solid fa-link"></i>
-        <span>1. Portal Link</span>
-      </button>
-
-      <button id="tab-absensi" class="py-2.5 px-3 rounded-xl font-bold text-xs text-slate-400 hover:text-white transition flex items-center justify-center gap-2">
-        <i class="fa-solid fa-qrcode"></i>
-        <span>2. Absensi Siswa</span>
-      </button>
-    </div>
-
-
-    <!-- ============================================================= -->
-    <!-- 📌 MODUL 1: PORTAL LINK UTAMA                                -->
-    <!-- ============================================================= -->
-    <section id="modul-portal-links" class="space-y-3">
+    <!-- MENU UTAMA DUA MODUL -->
+    <div class="space-y-4">
       
-      <!-- Progress Bar Loading -->
-      <div id="loading-bar-wrapper" class="w-full bg-slate-800 h-1 rounded-full overflow-hidden">
-        <div class="bg-cyan-400 h-full w-1/2 animate-pulse"></div>
-      </div>
-
-      <!-- Container Tautan Dinamis -->
-      <div id="links-container" class="space-y-3">
-        <!-- Skeleton Card Default -->
-        <div class="h-14 glass-card rounded-xl animate-pulse"></div>
-        <div class="h-14 glass-card rounded-xl animate-pulse"></div>
-        <div class="h-14 glass-card rounded-xl animate-pulse"></div>
-      </div>
-    </section>
-
-
-    <!-- ============================================================= -->
-    <!-- 📷 MODUL 2: ABSENSI SISWA & AUTO-LOGIN HP                    -->
-    <!-- ============================================================= -->
-    <section id="modul-absensi-siswa" class="hidden space-y-4">
-      
-      <!-- STATE A: FORM VERIFIKASI NIS & DEVICE BINDING -->
-      <div id="section-login-absensi" class="glass-card rounded-2xl p-5 space-y-4 shadow-xl">
-        <div class="border-b border-slate-800 pb-3">
-          <h3 class="text-sm font-bold text-white flex items-center gap-2">
-            <i class="fa-solid fa-mobile-screen-button text-cyan-400"></i> Verifikasi Perangkat Siswa
-          </h3>
-          <p class="text-[11px] text-slate-400 mt-1">Masukkan NIS Anda untuk mengikat akun di ponsel ini.</p>
-        </div>
-
-        <div class="space-y-2">
-          <label for="nis-input" class="block text-[11px] font-semibold text-slate-300 uppercase tracking-wider">Nomor Induk Siswa (NIS)</label>
-          <input 
-            type="number" 
-            id="nis-input" 
-            placeholder="Contoh: 2026001" 
-            class="w-full px-4 py-3 bg-slate-950 border border-slate-800 rounded-xl text-slate-100 placeholder-slate-600 focus:outline-none focus:border-cyan-500 font-mono text-sm transition"
-          >
-        </div>
-
-        <div id="error-msg-absensi" class="hidden p-3 bg-red-500/10 border border-red-500/30 rounded-xl text-red-400 text-xs text-center font-medium leading-relaxed"></div>
-
-        <button 
-          id="btn-verifikasi-nis" 
-          type="button"
-          class="w-full py-3.5 px-4 bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-bold text-xs rounded-xl transition shadow-lg shadow-cyan-500/20 flex items-center justify-center gap-2 cursor-pointer"
-        >
-          <span id="btn-verifikasi-text">Verifikasi NIS & Ikat HP</span>
-          <div id="btn-verifikasi-spinner" class="hidden w-4 h-4 border-2 border-slate-950 border-t-transparent rounded-full animate-spin"></div>
-        </button>
-      </div>
-
-      <!-- STATE B: KARTU PROFIL SISWA (JIKA SUDAH TERIKAT / AUTO-LOGIN) -->
-      <div id="section-profile-absensi" class="hidden glass-card rounded-2xl p-5 space-y-4 shadow-xl">
-        <div class="flex items-center justify-between border-b border-slate-800 pb-2">
-          <span class="text-[11px] text-slate-400 uppercase tracking-wider font-semibold">Status Perangkat</span>
-          <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-medium bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
-            🔒 HP Terikat
-          </span>
-        </div>
-
-        <div class="space-y-1">
-          <p class="text-[11px] text-slate-400">Nama Siswa</p>
-          <p id="profile-nama" class="text-base font-bold text-white tracking-wide">-</p>
-        </div>
-
-        <div class="grid grid-cols-2 gap-2 pt-1">
-          <div>
-            <p class="text-[11px] text-slate-400">NIS</p>
-            <p id="profile-nis" class="text-xs font-semibold font-mono text-cyan-400">-</p>
+      <!-- CARD MODUL 1: PORTAL LINK UTAMA -->
+      <a 
+        href="link.html" 
+        class="group glass-card p-5 rounded-2xl flex items-center justify-between border border-cyan-500/30 hover:border-cyan-400 transition-all duration-300 hover:scale-[1.02] shadow-lg shadow-cyan-500/5 block"
+      >
+        <div class="flex items-center gap-4">
+          <div class="w-12 h-12 rounded-xl bg-cyan-500/10 border border-cyan-500/30 flex items-center justify-center text-cyan-400 text-xl group-hover:bg-cyan-500 group-hover:text-slate-950 transition-colors">
+            <i class="fa-solid fa-link"></i>
           </div>
           <div>
-            <p class="text-[11px] text-slate-400">Kelas</p>
-            <p id="profile-kelas" class="text-xs font-semibold text-slate-200">-</p>
+            <h2 class="text-sm font-bold text-white group-hover:text-cyan-400 transition-colors">Portal Link & Info</h2>
+            <p class="text-[11px] text-slate-400 mt-0.5">Daftar tugas, materi, dan tautan resmi</p>
           </div>
         </div>
+        <i class="fa-solid fa-chevron-right text-xs text-slate-500 group-hover:text-cyan-400 group-hover:translate-x-1 transition-all"></i>
+      </a>
 
-        <button 
-          id="btn-buka-scanner" 
-          type="button"
-          class="w-full py-3.5 px-4 bg-gradient-to-r from-teal-400 to-cyan-400 hover:opacity-90 text-slate-950 font-bold text-xs rounded-xl transition shadow-lg shadow-cyan-500/20 flex items-center justify-center gap-2 cursor-pointer"
-        >
-          <i class="fa-solid fa-camera text-sm"></i>
-          <span>Buka Scanner QR Absensi</span>
-        </button>
-      </div>
+      <!-- CARD MODUL 2: ABSENSI SISWA TEI -->
+      <a 
+        href="absensi.html" 
+        class="group glass-card p-5 rounded-2xl flex items-center justify-between border border-emerald-500/30 hover:border-emerald-400 transition-all duration-300 hover:scale-[1.02] shadow-lg shadow-emerald-500/5 block"
+      >
+        <div class="flex items-center gap-4">
+          <div class="w-12 h-12 rounded-xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-400 text-xl group-hover:bg-emerald-500 group-hover:text-slate-950 transition-colors">
+            <i class="fa-solid fa-qrcode"></i>
+          </div>
+          <div>
+            <h2 class="text-sm font-bold text-white group-hover:text-emerald-400 transition-colors">Absensi Siswa TEI</h2>
+            <p class="text-[11px] text-slate-400 mt-0.5">Verifikasi NIS & Scanner QR Absensi</p>
+          </div>
+        </div>
+        <i class="fa-solid fa-chevron-right text-xs text-slate-500 group-hover:text-emerald-400 group-hover:translate-x-1 transition-all"></i>
+      </a>
 
-    </section>
+    </div>
 
     <!-- FOOTER MEDIA SOSIAL & SUPPORT -->
     <footer class="pt-4 text-center space-y-3 border-t border-slate-800/60">
-      <!-- Media Sosial -->
       <div class="flex items-center justify-center gap-3">
         <a href="https://wa.me/085645453111" target="_blank" class="w-8 h-8 rounded-full bg-slate-800 hover:bg-emerald-500 hover:text-slate-950 text-slate-300 transition flex items-center justify-center text-xs">
           <i class="fa-brands fa-whatsapp"></i>
@@ -247,63 +151,8 @@
 
   </main>
 
-
-  <!-- SCRIPT FIREBASE & UNIFIED LOGIC -->
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-    import { 
-      getFirestore, 
-      collection, 
-      query, 
-      orderBy, 
-      onSnapshot, 
-      doc, 
-      getDoc, 
-      updateDoc 
-    } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
-
-    // Kredensial Firebase Portal IskakFatoni
-    const firebaseConfig = {
-      apiKey: "AIzaSyDhq4QoCn00GkfpKXSP8PnvSvEKa2yn0ic",
-      authDomain: "portal-iskakfatoni.firebaseapp.com",
-      projectId: "portal-iskakfatoni",
-      storageBucket: "portal-iskakfatoni.firebasestorage.app",
-      messagingSenderId: "367350728822",
-      appId: "1:367350728822:web:6b0c6fd4824102d8acf757",
-      measurementId: "G-0BNNKQQ24V"
-    };
-
-    const app = initializeApp(firebaseConfig);
-    const db = getFirestore(app);
-
-    // DOM Elements - Navigasi Modul
-    const tabPortal = document.getElementById('tab-portal');
-    const tabAbsensi = document.getElementById('tab-absensi');
-    const modulPortalLinks = document.getElementById('modul-portal-links');
-    const modulAbsensiSiswa = document.getElementById('modul-absensi-siswa');
-
-    // DOM Elements - Modul Portal
-    const linksContainer = document.getElementById('links-container');
-    const progressBar = document.getElementById('loading-bar-wrapper');
-    const announcementText = document.getElementById('announcement-text');
-
-    // DOM Elements - Modul Absensi
-    const sectionLoginAbsensi = document.getElementById('section-login-absensi');
-    const sectionProfileAbsensi = document.getElementById('section-profile-absensi');
-    const nisInput = document.getElementById('nis-input');
-    const btnVerifikasiNis = document.getElementById('btn-verifikasi-nis');
-    const btnVerifikasiText = document.getElementById('btn-verifikasi-text');
-    const btnVerifikasiSpinner = document.getElementById('btn-verifikasi-spinner');
-    const errorMsgAbsensi = document.getElementById('error-msg-absensi');
-    
-    const profileNama = document.getElementById('profile-nama');
-    const profileNis = document.getElementById('profile-nis');
-    const profileKelas = document.getElementById('profile-kelas');
-    const btnBukaScanner = document.getElementById('btn-buka-scanner');
-
-    // -----------------------------------------------------------------
-    // 1. PARTICLE CANVAS ANIMATION
-    // -----------------------------------------------------------------
+  <!-- PARTICLE ANIMATION SCRIPT -->
+  <script>
     const canvas = document.getElementById('particle-canvas');
     const ctx = canvas.getContext('2d');
     let particles = [];
@@ -312,7 +161,7 @@
       canvas.width = window.innerWidth;
       canvas.height = window.innerHeight;
       particles = [];
-      for (let i = 0; i < 30; i++) {
+      for (let i = 0; i < 25; i++) {
         particles.push({
           x: Math.random() * canvas.width,
           y: Math.random() * canvas.height,
@@ -345,193 +194,6 @@
     window.addEventListener('resize', initCanvas);
     initCanvas();
     drawParticles();
-
-    // -----------------------------------------------------------------
-    // 2. NAVIGASI TAB SWITCHER (PORTAL vs ABSENSI)
-    // -----------------------------------------------------------------
-    tabPortal.addEventListener('click', () => {
-      tabPortal.className = "py-2.5 px-3 rounded-xl font-bold text-xs transition flex items-center justify-center gap-2 bg-cyan-500 text-slate-950 shadow-md";
-      tabAbsensi.className = "py-2.5 px-3 rounded-xl font-bold text-xs text-slate-400 hover:text-white transition flex items-center justify-center gap-2";
-      modulPortalLinks.classList.remove('hidden');
-      modulAbsensiSiswa.classList.add('hidden');
-    });
-
-    tabAbsensi.addEventListener('click', () => {
-      tabAbsensi.className = "py-2.5 px-3 rounded-xl font-bold text-xs transition flex items-center justify-center gap-2 bg-cyan-500 text-slate-950 shadow-md";
-      tabPortal.className = "py-2.5 px-3 rounded-xl font-bold text-xs text-slate-400 hover:text-white transition flex items-center justify-center gap-2";
-      modulAbsensiSiswa.classList.remove('hidden');
-      modulPortalLinks.classList.add('hidden');
-    });
-
-    // -----------------------------------------------------------------
-    // 3. LOGIC MODUL 1: REALTIME PORTAL LINKS & ANNOUNCEMENT
-    // -----------------------------------------------------------------
-    onSnapshot(doc(db, "settings", "portal"), (docSnap) => {
-      let isOnline = true;
-      if (docSnap.exists()) {
-        const data = docSnap.data();
-        if (data.isOnline !== undefined) isOnline = data.isOnline;
-        if (data.announcement && data.announcement.trim() !== "") {
-          announcementText.innerText = data.announcement;
-        }
-      }
-
-      if (!isOnline) {
-        if (progressBar) progressBar.style.display = 'none';
-        linksContainer.innerHTML = `
-          <div class="glass-card rounded-2xl p-6 text-center space-y-2">
-            <i class="fa-solid fa-store-slash text-2xl text-amber-400"></i>
-            <h3 class="text-sm font-bold text-white uppercase">Portal Offline</h3>
-            <p class="text-xs text-slate-400">Belum ada tugas atau informasi terbaru.</p>
-          </div>
-        `;
-      } else {
-        loadPublicLinks();
-      }
-    });
-
-    function loadPublicLinks() {
-      const q = query(collection(db, "links"), orderBy("order", "asc"));
-      onSnapshot(q, (snapshot) => {
-        if (progressBar) progressBar.style.display = 'none';
-
-        if (snapshot.empty) {
-          linksContainer.innerHTML = '<p class="text-xs text-slate-400 text-center py-4">Belum ada link yang aktif.</p>';
-          return;
-        }
-
-        linksContainer.innerHTML = '';
-        let index = 0;
-        snapshot.forEach((docSnap) => {
-          const data = docSnap.data();
-          const colorClass = `card-color-${index % 4}`;
-          index++;
-
-          linksContainer.innerHTML += `
-            <a href="${data.url}" target="_blank" rel="noopener noreferrer" class="glass-card ${colorClass} p-4 rounded-xl flex items-center gap-3 transition hover:scale-[1.02] cursor-pointer">
-              <i class="${data.icon || 'fa-solid fa-link'} text-cyan-400 text-lg shrink-0"></i>
-              <span class="text-xs font-bold text-white tracking-wide">${data.title}</span>
-            </a>
-          `;
-        });
-      });
-    }
-
-    // -----------------------------------------------------------------
-    // 4. LOGIC MODUL 2: ABSENSI SISWA & DEVICE BINDING
-    // -----------------------------------------------------------------
-    function getDeviceId() {
-      let deviceId = localStorage.getItem('portal_device_id');
-      if (!deviceId) {
-        deviceId = 'DEV-' + Math.random().toString(36).substring(2, 15) + '-' + Date.now().toString(36);
-        localStorage.setItem('portal_device_id', deviceId);
-      }
-      return deviceId;
-    }
-
-    const currentDeviceId = getDeviceId();
-
-    // Auto-login saat halaman dibuka
-    document.addEventListener('DOMContentLoaded', () => {
-      const savedUser = localStorage.getItem('portal_siswa_user');
-      if (savedUser) {
-        try {
-          const user = JSON.parse(savedUser);
-          showProfileAbsensi(user);
-        } catch (e) {
-          localStorage.removeItem('portal_siswa_user');
-        }
-      }
-    });
-
-    btnVerifikasiNis.addEventListener('click', async () => {
-      const nis = nisInput.value.trim();
-      hideErrorAbsensi();
-
-      if (!nis) {
-        showErrorAbsensi("Silakan masukkan NIS Anda.");
-        return;
-      }
-
-      setLoadingAbsensi(true);
-
-      try {
-        const docRef = doc(db, "siswa", nis);
-        const docSnap = await getDoc(docRef);
-
-        if (!docSnap.exists()) {
-          showErrorAbsensi("NIS tidak ditemukan! Pastikan Anda sudah terdaftar.");
-          setLoadingAbsensi(false);
-          return;
-        }
-
-        const dataSiswa = docSnap.data();
-
-        // Device Locking Check
-        if (dataSiswa.device_id && dataSiswa.device_id !== currentDeviceId) {
-          showErrorAbsensi("❌ Akun ini terikat di HP lain! Minta Guru untuk mereset perangkat Anda.");
-          setLoadingAbsensi(false);
-          return;
-        }
-
-        // Binding jika belum terikat
-        if (!dataSiswa.device_id) {
-          await updateDoc(docRef, { device_id: currentDeviceId });
-        }
-
-        const userData = {
-          nis: dataSiswa.nis,
-          nama_siswa: dataSiswa.nama_siswa,
-          id_kelas: dataSiswa.id_kelas,
-          nama_kelas: dataSiswa.nama_kelas,
-          device_id: currentDeviceId
-        };
-
-        localStorage.setItem('portal_siswa_user', JSON.stringify(userData));
-        showProfileAbsensi(userData);
-
-      } catch (err) {
-        console.error(err);
-        showErrorAbsensi("Error: " + err.message);
-      } finally {
-        setLoadingAbsensi(false);
-      }
-    });
-
-    function showProfileAbsensi(user) {
-      profileNama.innerText = user.nama_siswa;
-      profileNis.innerText = user.nis;
-      profileKelas.innerText = user.nama_kelas;
-
-      sectionLoginAbsensi.classList.add('hidden');
-      sectionProfileAbsensi.classList.remove('hidden');
-    }
-
-    btnBukaScanner.addEventListener('click', () => {
-      window.location.href = "siswa/index.html";
-    });
-
-    function showErrorAbsensi(msg) {
-      errorMsgAbsensi.innerText = msg;
-      errorMsgAbsensi.classList.remove('hidden');
-    }
-
-    function hideErrorAbsensi() {
-      errorMsgAbsensi.innerText = '';
-      errorMsgAbsensi.classList.add('hidden');
-    }
-
-    function setLoadingAbsensi(isLoading) {
-      if (isLoading) {
-        btnVerifikasiNis.disabled = true;
-        btnVerifikasiText.innerText = "Mengecek NIS...";
-        btnVerifikasiSpinner.classList.remove('hidden');
-      } else {
-        btnVerifikasiNis.disabled = false;
-        btnVerifikasiText.innerText = "Verifikasi NIS & Ikat HP";
-        btnVerifikasiSpinner.classList.add('hidden');
-      }
-    }
   </script>
 </body>
 </html>
