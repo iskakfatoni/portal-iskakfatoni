@@ -82,7 +82,7 @@
     <!-- DASHBOARD PANEL FULL WIDTH -->
     <div class="grid grid-cols-1 lg:grid-cols-12 gap-4 w-full">
       
-      <!-- NAVIGASI KOLEKSI DATABASE (KOLOM KIRI - 2 KOLOM GRID) -->
+      <!-- NAVIGASI KOLEKSI DATABASE (KOLOM KIRI) -->
       <aside class="lg:col-span-2 space-y-3">
         <div class="glass-card p-4 rounded-2xl shadow-xl space-y-2">
           <h2 class="text-xs font-bold text-cyan-400 border-b border-slate-800 pb-2 flex items-center gap-2 uppercase tracking-wider">
@@ -117,7 +117,7 @@
         </div>
       </aside>
 
-      <!-- KONTEN TABEL MATRIKS DINAMIS (KOLOM KANAN - 10 KOLOM GRID DENGAN AREA MAKSIMAL) -->
+      <!-- KONTEN TABEL MATRIKS DINAMIS (KOLOM KANAN) -->
       <section class="lg:col-span-10 space-y-4">
         <div class="glass-card p-4 md:p-5 rounded-2xl shadow-xl space-y-4 w-full">
           
@@ -155,12 +155,12 @@
                   <th class="p-3 w-10 text-center border-r border-slate-800">
                     <input type="checkbox" id="select-all-checkbox" class="rounded bg-slate-900 border-slate-700 text-cyan-500 focus:ring-0 cursor-pointer" title="Pilih Semua">
                   </th>
-                  <th class="p-3 w-16 text-center">Aksi</th>
+                  <th class="p-3 w-28 text-center">Aksi</th>
                 </tr>
               </thead>
               <tbody id="table-body" class="divide-y divide-slate-800/60 text-slate-300 font-mono">
                 <tr>
-                  <td colspan="4" class="p-8 text-center text-slate-500 font-sans">// Memuat data koleksi...</td>
+                  <td colspan="5" class="p-8 text-center text-slate-500 font-sans">// Memuat data koleksi...</td>
                 </tr>
               </tbody>
             </table>
@@ -234,7 +234,7 @@
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
     import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
-    import { getFirestore, collection, doc, deleteDoc, onSnapshot, writeBatch } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+    import { getFirestore, collection, doc, deleteDoc, updateDoc, deleteField, onSnapshot, writeBatch } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyDhq4QoCn00GkfpKXSP8PnvSvEKa2yn0ic",
@@ -414,7 +414,7 @@
         <th class="p-3 w-10 text-center border-r border-slate-800">
           <input type="checkbox" id="select-all-checkbox" class="rounded bg-slate-900 border-slate-700 text-cyan-500 focus:ring-0 cursor-pointer" title="Pilih Semua">
         </th>
-        <th class="p-3 w-16 text-center">Aksi</th>
+        <th class="p-3 w-28 text-center">Aksi</th>
       `;
 
       // BIND EVENT LISTENERS PADA HEADER
@@ -484,6 +484,14 @@
           return `<td class="p-3 border-r border-slate-800/60 max-w-xs overflow-hidden text-ellipsis">${formatCellContent(val)}</td>`;
         }).join('');
 
+        // Tombol Reset Device khusus untuk koleksi 'siswa'
+        const isSiswaCollection = currentCollection === 'siswa';
+        const btnResetDeviceHTML = isSiswaCollection ? `
+          <button class="btn-reset-device p-2 bg-amber-500/15 hover:bg-amber-500/30 text-amber-400 border border-amber-500/30 rounded-lg text-xs font-semibold cursor-pointer transition mr-1" title="Reset Perangkat Siswa">
+            <i class="fa-solid fa-mobile-screen-button"></i>
+          </button>
+        ` : '';
+
         tr.innerHTML = `
           <td class="p-3 text-center border-r border-slate-800/60 font-mono text-slate-400 font-bold">${index + 1}</td>
           <td class="p-3 font-bold text-cyan-400 border-r border-slate-800/60 font-mono">${docId}</td>
@@ -491,7 +499,8 @@
           <td class="p-3 text-center border-r border-slate-800/60">
             <input type="checkbox" data-id="${docId}" ${isChecked ? 'checked' : ''} class="row-checkbox rounded bg-slate-900 border-slate-700 text-cyan-500 focus:ring-0 cursor-pointer">
           </td>
-          <td class="p-3 text-center">
+          <td class="p-3 text-center whitespace-nowrap">
+            ${btnResetDeviceHTML}
             <button class="btn-del-single p-2 bg-red-500/15 hover:bg-red-500/30 text-red-400 border border-red-500/30 rounded-lg text-xs font-semibold cursor-pointer transition" title="Hapus Dokumen Ini">
               <i class="fa-solid fa-trash-can"></i>
             </button>
@@ -508,6 +517,29 @@
           }
           updateSelectedUI();
         });
+
+        // Reset Device Handler (Khusus Siswa)
+        if (isSiswaCollection) {
+          const btnReset = tr.querySelector('.btn-reset-device');
+          if (btnReset) {
+            btnReset.onclick = async () => {
+              const studentName = dataObj.nama_siswa || docId;
+              if (confirm(`Reset pendaftaran perangkat (HP) untuk siswa "${studentName}" (${docId})? Siswa dapat melakukan registrasi di HP baru.`)) {
+                try {
+                  await updateDoc(doc(db, "siswa", docId), {
+                    device_id: deleteField(),
+                    device_token: deleteField(),
+                    mac_address: deleteField(),
+                    registered_at: deleteField()
+                  });
+                  alert(`Perangkat siswa "${studentName}" berhasil di-reset!`);
+                } catch (err) {
+                  alert("Gagal mereset perangkat: " + err.message);
+                }
+              }
+            };
+          }
+        }
 
         // Delete handler
         tr.querySelector('.btn-del-single').onclick = async () => {
