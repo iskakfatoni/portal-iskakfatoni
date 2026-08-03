@@ -35,7 +35,7 @@
       border: 1px solid rgba(255, 255, 255, 0.1);
     }
 
-    /* Custom Scrollbar */
+    /* Custom Scrollbar untuk Table Horizontal/Vertical */
     ::-webkit-scrollbar {
       width: 6px;
       height: 6px;
@@ -116,7 +116,7 @@
         </div>
       </aside>
 
-      <!-- KONTEN TABEL DATA (KOLOM KANAN) -->
+      <!-- KONTEN TABEL MATRIKS DINAMIS (KOLOM KANAN) -->
       <section class="lg:col-span-9 space-y-4">
         <div class="glass-card p-5 md:p-6 rounded-2xl shadow-xl space-y-4">
           
@@ -141,22 +141,22 @@
             </div>
           </div>
 
-          <!-- TABEL FIRESTORE -->
+          <!-- TABEL FIRESTORE DINAMIS (MATRIKS KOLOM & BARIS) -->
           <div class="overflow-x-auto max-h-[560px] overflow-y-auto rounded-xl border border-slate-800 bg-slate-950/70">
-            <table class="w-full text-left border-collapse text-xs">
+            <table class="w-full text-left border-collapse text-xs whitespace-nowrap">
               <thead class="sticky top-0 bg-slate-900/95 backdrop-blur border-b border-slate-800 text-slate-300 uppercase tracking-wider font-mono text-[11px] z-10">
                 <tr id="table-header-row">
-                  <th class="p-3 w-10 text-center">
+                  <th class="p-3 w-10 text-center border-r border-slate-800">
                     <input type="checkbox" id="select-all-checkbox" class="rounded bg-slate-900 border-slate-700 text-cyan-500 focus:ring-0 cursor-pointer">
                   </th>
-                  <th class="p-3 font-bold text-cyan-400">Document ID</th>
-                  <th class="p-3">Data Documents</th>
+                  <th class="p-3 font-bold text-cyan-400 border-r border-slate-800">Document ID</th>
+                  <!-- HEADER FIELD AKAN DIBUAT DINAMIS LEWAT JAVASCRIPT -->
                   <th class="p-3 w-16 text-center">Aksi</th>
                 </tr>
               </thead>
               <tbody id="table-body" class="divide-y divide-slate-800/60 text-slate-300 font-mono">
                 <tr>
-                  <td colspan="4" class="p-8 text-center text-slate-500 font-sans">// Memuat data koleksi...</td>
+                  <td colspan="3" class="p-8 text-center text-slate-500 font-sans">// Memuat data koleksi...</td>
                 </tr>
               </tbody>
             </table>
@@ -251,6 +251,7 @@
 
     const activeCollectionTitle = document.getElementById('active-collection-title');
     const totalDocCount = document.getElementById('total-doc-count');
+    const tableHeaderRow = document.getElementById('table-header-row');
     const tableBody = document.getElementById('table-body');
     const selectAllCheckbox = document.getElementById('select-all-checkbox');
     const btnDeleteSelected = document.getElementById('btn-delete-selected');
@@ -277,7 +278,7 @@
       window.location.href = "../admin.html";
     });
 
-    // AMBIL HITUNGAN DATA UNTUK BADGE NAVIGASI SIDEBAR
+    // HITUNG DATA DI BADGE NAVIGASI SIDEBAR
     function initBadgesCount() {
       const collections = ['siswa', 'kelas', 'mapel', 'sesi_absensi', 'log_absensi', 'links'];
       collections.forEach(colName => {
@@ -288,13 +289,12 @@
       });
     }
 
-    // LISTENER TOMBOL NAVIGASI KOLEKSI
+    // NAVIGASI GANTI KOLEKSI
     document.querySelectorAll('.btn-col').forEach(btn => {
-      btn.addEventListener('click', (e) => {
+      btn.addEventListener('click', () => {
         const targetCol = btn.getAttribute('data-collection');
         if (targetCol === currentCollection) return;
 
-        // Reset UI active button
         document.querySelectorAll('.btn-col').forEach(b => {
           b.className = "btn-col w-full text-left px-3.5 py-2.5 rounded-xl text-xs font-bold transition flex items-center justify-between cursor-pointer bg-slate-900/60 text-slate-400 hover:bg-slate-800 border border-slate-800";
         });
@@ -306,48 +306,109 @@
       });
     });
 
-    // MUAT DATA REALTIME SESUAI KOLEKSI DIPILIH
+    // FORMAT VALUE DARI FIRESTORE KE TAMPILAN TEXT YANNG RAPI
+    function formatCellContent(value) {
+      if (value === null || value === undefined) return '<span class="text-slate-600">-</span>';
+      
+      // Jika tipe data Timestamp dari Firestore
+      if (typeof value === 'object' && value.seconds !== undefined) {
+        return `<span class="text-emerald-400">${new Date(value.seconds * 1000).toLocaleString('id-ID')}</span>`;
+      }
+      
+      // Jika tipe data Object/Array
+      if (typeof value === 'object') {
+        return `<span class="text-amber-300/80">${JSON.stringify(value)}</span>`;
+      }
+
+      // Tipe data Boolean
+      if (typeof value === 'boolean') {
+        return value 
+          ? '<span class="text-emerald-400 font-bold">true</span>' 
+          : '<span class="text-rose-400 font-bold">false</span>';
+      }
+
+      return String(value);
+    }
+
+    // MUAT DATA DINAMIS TABEL MATRIKS (KOLOM & BARIS)
     function loadCollectionData(colName) {
       if (unsubscribeCurrent) unsubscribeCurrent();
 
       selectedDocIds.clear();
       updateSelectedUI();
       selectAllCheckbox.checked = false;
-      tableBody.innerHTML = `<tr><td colspan="4" class="p-8 text-center text-slate-500 font-sans">// Memuat koleksi "${colName}"...</td></tr>`;
+      
+      tableHeaderRow.innerHTML = `
+        <th class="p-3 w-10 text-center border-r border-slate-800">
+          <input type="checkbox" id="select-all-checkbox" class="rounded bg-slate-900 border-slate-700 text-cyan-500 focus:ring-0 cursor-pointer">
+        </th>
+        <th class="p-3 font-bold text-cyan-400 border-r border-slate-800">Document ID</th>
+        <th class="p-3 w-16 text-center">Aksi</th>
+      `;
+      
+      // Re-bind listener checkbox header
+      document.getElementById('select-all-checkbox').addEventListener('change', handleSelectAll);
+
+      tableBody.innerHTML = `<tr><td colspan="10" class="p-8 text-center text-slate-500 font-sans">// Memuat koleksi "${colName}"...</td></tr>`;
 
       unsubscribeCurrent = onSnapshot(collection(db, colName), (snapshot) => {
         currentDocsList = snapshot.docs;
         totalDocCount.innerText = snapshot.size;
-        tableBody.innerHTML = '';
 
         if (snapshot.empty) {
-          tableBody.innerHTML = `<tr><td colspan="4" class="p-8 text-center text-slate-500 font-sans">// Koleksi "${colName}" masih kosong.</td></tr>`;
+          tableBody.innerHTML = `<tr><td colspan="10" class="p-8 text-center text-slate-500 font-sans">// Koleksi "${colName}" masih kosong.</td></tr>`;
           return;
         }
 
+        // 1. KUMPULKAN SELURUH FIELD UNIK SECARA DINAMIS
+        const fieldSet = new Set();
+        snapshot.docs.forEach(docSnap => {
+          Object.keys(docSnap.data()).forEach(k => fieldSet.add(k));
+        });
+        const dynamicFields = Array.from(fieldSet);
+
+        // 2. RENDER HEADER TABEL DINAMIS
+        tableHeaderRow.innerHTML = `
+          <th class="p-3 w-10 text-center border-r border-slate-800">
+            <input type="checkbox" id="select-all-checkbox" class="rounded bg-slate-900 border-slate-700 text-cyan-500 focus:ring-0 cursor-pointer">
+          </th>
+          <th class="p-3 font-bold text-cyan-400 border-r border-slate-800">Document ID</th>
+          ${dynamicFields.map(f => `<th class="p-3 border-r border-slate-800 text-slate-300 font-semibold">${f}</th>`).join('')}
+          <th class="p-3 w-16 text-center">Aksi</th>
+        `;
+
+        document.getElementById('select-all-checkbox').addEventListener('change', handleSelectAll);
+
+        // 3. RENDER BARIS & KOLOM MATRIKS
+        tableBody.innerHTML = '';
         snapshot.forEach((docSnap) => {
           const docId = docSnap.id;
           const dataObj = docSnap.data();
           const isChecked = selectedDocIds.has(docId);
 
           const tr = document.createElement('tr');
-          tr.className = "hover:bg-slate-900/70 transition border-b border-slate-800/40";
+          tr.className = "hover:bg-slate-900/80 transition border-b border-slate-800/40";
+          
+          // Render nilai untuk setiap kolom field
+          const fieldCells = dynamicFields.map(fieldKey => {
+            const val = dataObj[fieldKey];
+            return `<td class="p-3 border-r border-slate-800/60 max-w-xs overflow-hidden text-ellipsis">${formatCellContent(val)}</td>`;
+          }).join('');
+
           tr.innerHTML = `
-            <td class="p-3 text-center">
+            <td class="p-3 text-center border-r border-slate-800/60">
               <input type="checkbox" data-id="${docId}" ${isChecked ? 'checked' : ''} class="row-checkbox rounded bg-slate-900 border-slate-700 text-cyan-500 focus:ring-0 cursor-pointer">
             </td>
-            <td class="p-3 font-bold text-cyan-400 whitespace-nowrap">${docId}</td>
-            <td class="p-3 max-w-xl overflow-hidden text-ellipsis">
-              <pre class="text-[11px] text-slate-300 font-mono bg-slate-900/80 p-2 rounded-lg border border-slate-800/80 whitespace-pre-wrap">${JSON.stringify(dataObj, null, 2)}</pre>
-            </td>
-            <td class="p-3 text-center whitespace-nowrap">
+            <td class="p-3 font-bold text-cyan-400 border-r border-slate-800/60 font-mono">${docId}</td>
+            ${fieldCells}
+            <td class="p-3 text-center">
               <button class="btn-del-single p-2 bg-red-500/15 hover:bg-red-500/30 text-red-400 border border-red-500/30 rounded-lg text-xs font-semibold cursor-pointer transition" title="Hapus Dokumen Ini">
                 <i class="fa-solid fa-trash-can"></i>
               </button>
             </td>
           `;
 
-          // Checkbox handler per row
+          // Checkbox handler per baris
           const chk = tr.querySelector('.row-checkbox');
           chk.addEventListener('change', (e) => {
             if (e.target.checked) {
@@ -375,12 +436,14 @@
         });
 
         // Update status Checkbox Select All
-        selectAllCheckbox.checked = currentDocsList.length > 0 && selectedDocIds.size === currentDocsList.length;
+        const headerChk = document.getElementById('select-all-checkbox');
+        if (headerChk) {
+          headerChk.checked = currentDocsList.length > 0 && selectedDocIds.size === currentDocsList.length;
+        }
       });
     }
 
-    // HANDLER SELECT ALL
-    selectAllCheckbox.addEventListener('change', (e) => {
+    function handleSelectAll(e) {
       const isChecked = e.target.checked;
       const rowCheckboxes = document.querySelectorAll('.row-checkbox');
 
@@ -392,7 +455,7 @@
         }
       });
       updateSelectedUI();
-    });
+    }
 
     function updateSelectedUI() {
       const count = selectedDocIds.size;
@@ -415,7 +478,8 @@
           await batch.commit();
           selectedDocIds.clear();
           updateSelectedUI();
-          selectAllCheckbox.checked = false;
+          const headerChk = document.getElementById('select-all-checkbox');
+          if (headerChk) headerChk.checked = false;
           alert(`Berhasil menghapus ${count} dokumen!`);
         } catch (err) {
           alert("Gagal menghapus dokumen terpilih: " + err.message);
@@ -442,7 +506,8 @@
           await batch.commit();
           selectedDocIds.clear();
           updateSelectedUI();
-          selectAllCheckbox.checked = false;
+          const headerChk = document.getElementById('select-all-checkbox');
+          if (headerChk) headerChk.checked = false;
           alert(`Koleksi "${currentCollection}" berhasil dikosongkan!`);
         } catch (err) {
           alert("Gagal mengosongkan koleksi: " + err.message);
