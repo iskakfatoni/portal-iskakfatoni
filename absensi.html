@@ -164,12 +164,14 @@
 
         <div class="form-group-absensi">
           <label for="nis-input">Nomor Induk Siswa (NIS)</label>
+          <!-- ✅ FIX: type="text" & inputmode="text" agar bisa mengetik '/' di ponsel -->
           <input 
-            type="number" 
+            type="text" 
             id="nis-input" 
-            placeholder="Contoh: 2026001" 
+            placeholder="Contoh: 1234/123" 
             class="input-absensi"
-            inputmode="numeric"
+            inputmode="text"
+            autocomplete="off"
           >
         </div>
 
@@ -275,7 +277,7 @@
     drawParticles();
   </script>
 
-  <!-- LOGIC FIREBASE, AUTO-CLEAR CACHE & DUAL DEVICE LOCKING VALIDATION -->
+  <!-- LOGIC FIREBASE & DUAL VALIDATION -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
     import { 
@@ -326,7 +328,7 @@
 
     const currentDeviceId = getDeviceId();
 
-    // AUTO-CLEAR CACHE & AUTO-SYNC DENGAN FIRESTORE SAAT HALAMAN DIMUAT
+    // AUTO-CLEAR CACHE & SYNC FIRESTORE SAAT PAGE LOAD
     document.addEventListener('DOMContentLoaded', async () => {
       const savedUserJson = localStorage.getItem('portal_siswa_user');
 
@@ -337,24 +339,22 @@
 
       try {
         const localUser = JSON.parse(savedUserJson);
+        const safeDocId = (localUser.doc_id || localUser.nis || '').replace(/\//g, '-');
 
-        // Ambil data terbaru langsung dari Firestore
-        const docRef = doc(db, "siswa", localUser.nis);
+        const docRef = doc(db, "siswa", safeDocId);
         const docSnap = await getDoc(docRef);
 
         if (docSnap.exists()) {
           const dbData = docSnap.data();
 
-          // KONDISI CACHE EXPIRED / TELAH DI-RESET:
-          // Jika device_id di Firestore sudah kosong ATAU berbeda dengan HP ini
           if (!dbData.device_id || dbData.device_id !== currentDeviceId) {
             localStorage.removeItem('portal_siswa_user');
             showLoginForm();
             return;
           }
 
-          // SYNC DATA TERBARU:
           const updatedUser = {
+            doc_id: safeDocId,
             nis: dbData.nis || localUser.nis,
             nama_siswa: dbData.nama_siswa || localUser.nama_siswa,
             id_kelas: dbData.id_kelas || localUser.id_kelas,
@@ -366,7 +366,6 @@
           showProfile(updatedUser);
 
         } else {
-          // Dokumen NIS dihapus dari database oleh Admin
           localStorage.removeItem('portal_siswa_user');
           showLoginForm();
         }
@@ -376,12 +375,12 @@
       }
     });
 
-    // VERIFIKASI DUA ARAH (DUAL VALIDATION)
+    // VERIFIKASI DENGAN SANITASI SLASH & QUERY FALLBACK
     btnVerifikasi.addEventListener('click', async () => {
-      const nis = nisInput.value.trim();
+      const rawNis = nisInput.value.trim();
       hideError();
 
-      if (!nis) {
+      if (!rawNis) {
         showError("Silakan masukkan NIS Anda terlebih dahulu.");
         return;
       }
@@ -389,33 +388,50 @@
       setLoading(true);
 
       try {
-        // 1. CEK DOKUMEN NIS SISWA
-        const docRef = doc(db, "siswa", nis);
-        const docSnap = await getDoc(docRef);
+        // Safe ID Dokumen (Ganti / dengan -)
+        const safeDocId = rawNis.replace(/\//g, '-');
+        
+        let docSnap = await getDoc(doc(db, "siswa", safeDocId));
+        let dataSiswa = null;
+        let actualDocId = safeDocId;
 
-        if (!docSnap.exists()) {
-          showError("NIS tidak ditemukan! Pastikan NIS terdaftar.");
+        if (docSnap.exists()) {
+          dataSiswa = docSnap.data();
+        } else {
+          // Fallback Query berdasarkan field 'nis' jika ID dokumen berbeda
+          const qNis = query(collection(db, "siswa"), where("nis", "==", rawNis));
+          const querySnap = await getDocs(qNis);
+
+          if (!querySnap.empty) {
+            docSnap = querySnap.docs[0];
+            dataSiswa = docSnap.data();
+            actualDocId = docSnap.id;
+          }
+        }
+
+        if (!dataSiswa) {
+          showError(`NIS "${rawNis}" tidak ditemukan! Pastikan terdaftar.`);
           setLoading(false);
           return;
         }
 
-        const dataSiswa = docSnap.data();
-
-        // VALIDASI 1: Apakah NIS ini sudah terikat di HP LAIN?
+        // VALIDASI 1: Akun NIS terikat di HP lain?
         if (dataSiswa.device_id && dataSiswa.device_id !== currentDeviceId) {
           showError("❌ Akun NIS ini sudah terikat di HP lain! Minta Guru/Admin untuk mereset perangkat.");
           setLoading(false);
           return;
         }
 
-        // VALIDASI 2: Apakah HP FISIK INI sudah terikat ke SISWA LAIN di Firestore?
+        // VALIDASI 2: HP ini terikat siswa lain?
         const qDevice = query(collection(db, "siswa"), where("device_id", "==", currentDeviceId));
         const deviceSnap = await getDocs(qDevice);
 
         if (!deviceSnap.empty) {
           let activeOwner = null;
           deviceSnap.forEach(d => {
-            if (d.id !== nis) activeOwner = d.data();
+            if (d.id !== actualDocId && d.data().nis !== rawNis) {
+              activeOwner = d.data();
+            }
           });
 
           if (activeOwner) {
@@ -425,16 +441,17 @@
           }
         }
 
-        // JIKA KEDUA VALIDASI LOLOS: Ikat HP jika belum ada
+        // Ikat HP jika belum terikat
         if (!dataSiswa.device_id) {
-          await updateDoc(docRef, { device_id: currentDeviceId });
+          await updateDoc(doc(db, "siswa", actualDocId), { device_id: currentDeviceId });
         }
 
         const userData = {
-          nis: dataSiswa.nis,
+          doc_id: actualDocId,
+          nis: dataSiswa.nis || rawNis,
           nama_siswa: dataSiswa.nama_siswa,
           id_kelas: dataSiswa.id_kelas,
-          nama_kelas: dataSiswa.nama_kelas,
+          nama_kelas: dataSiswa.nama_kelas || dataSiswa.id_kelas,
           device_id: currentDeviceId
         };
 
@@ -452,7 +469,7 @@
     function showProfile(user) {
       profileNama.innerText = user.nama_siswa;
       profileNis.innerText = user.nis;
-      profileKelas.innerText = user.nama_kelas;
+      profileKelas.innerText = user.nama_kelas || user.id_kelas;
 
       sectionLoading.classList.add('hidden');
       sectionLogin.classList.add('hidden');
