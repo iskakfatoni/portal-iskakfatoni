@@ -92,8 +92,9 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 1.1rem;
+      font-size: 1.15rem;
       flex-shrink: 0;
+      transition: all 0.2s ease;
     }
 
     .link-text h3 {
@@ -172,7 +173,7 @@
           </span>
         </div>
 
-        <!-- CONTAINER DAFTAR LINK FIRESTORE (JUDUL & IKON SAJA) -->
+        <!-- CONTAINER DAFTAR LINK FIRESTORE -->
         <div id="public-links-container" class="links-grid">
           <p style="font-size: 0.8rem; color: #64748b; text-align: center; padding: 20px 0;">// Memuat daftar tautan portal...</p>
         </div>
@@ -244,7 +245,7 @@
     drawParticles();
   </script>
 
-  <!-- FIREBASE LOGIC -->
+  <!-- FIREBASE LOGIC DENGAN DETEKSI IKON OTOMATIS -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
     import { getFirestore, collection, doc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
@@ -268,6 +269,37 @@
     const portalContentView = document.getElementById('portal-content-view');
     const publicLinksContainer = document.getElementById('public-links-container');
     const linkTotalBadge = document.getElementById('link-total-badge');
+
+    // FUNGSI DETEKSI IKON & WARNA OTOMATIS BERDASARKAN URL / JUDUL
+    function getLinkIconConfig(title, url) {
+      const t = (title || "").toLowerCase();
+      const u = (url || "").toLowerCase();
+
+      if (u.includes('canva.com') || u.includes('canva.link') || t.includes('canva')) {
+        return { icon: 'fa-solid fa-palette', color: '#00c4cc', bg: 'rgba(0, 196, 204, 0.15)', border: 'rgba(0, 196, 204, 0.3)' };
+      }
+      if (u.includes('drive.google.com') || u.includes('docs.google.com') || t.includes('drive') || t.includes('modul')) {
+        return { icon: 'fa-solid fa-file-pdf', color: '#ea4335', bg: 'rgba(234, 67, 53, 0.15)', border: 'rgba(234, 67, 53, 0.3)' };
+      }
+      if (u.includes('forms.google.com') || u.includes('forms.gle') || t.includes('form') || t.includes('tugas') || t.includes('upload')) {
+        return { icon: 'fa-solid fa-file-pen', color: '#7248b9', bg: 'rgba(114, 72, 185, 0.15)', border: 'rgba(114, 72, 185, 0.3)' };
+      }
+      if (u.includes('youtube.com') || u.includes('youtu.be') || t.includes('video') || t.includes('youtube')) {
+        return { icon: 'fa-brands fa-youtube', color: '#ff0000', bg: 'rgba(255, 0, 0, 0.15)', border: 'rgba(255, 0, 0, 0.3)' };
+      }
+      if (u.includes('quizizz.com') || t.includes('quiz') || t.includes('ujian')) {
+        return { icon: 'fa-solid fa-gamepad', color: '#8854d0', bg: 'rgba(136, 84, 208, 0.15)', border: 'rgba(136, 84, 208, 0.3)' };
+      }
+      if (u.includes('wa.me') || u.includes('whatsapp.com') || t.includes('wa') || t.includes('grup')) {
+        return { icon: 'fa-brands fa-whatsapp', color: '#25d366', bg: 'rgba(37, 211, 102, 0.15)', border: 'rgba(37, 211, 102, 0.3)' };
+      }
+      if (u.includes('github.com') || t.includes('github') || t.includes('koding') || t.includes('code')) {
+        return { icon: 'fa-brands fa-github', color: '#f0f6fc', bg: 'rgba(240, 246, 252, 0.15)', border: 'rgba(240, 246, 252, 0.3)' };
+      }
+
+      // Default Icon Pembelajaran
+      return { icon: 'fa-solid fa-link', color: '#38bdf8', bg: 'rgba(56, 189, 248, 0.15)', border: 'rgba(56, 189, 248, 0.3)' };
+    }
 
     // 1. LISTEN REALTIME STATUS PORTAL ON / OFF
     onSnapshot(doc(db, "settings", "portal_status"), (docSnap) => {
@@ -302,7 +334,7 @@
       marqueeWrapper.classList.add('hidden');
     });
 
-    // 3. LISTEN REALTIME DAFTAR LINK (RENDER HANYA JUDUL & IKON)
+    // 3. LISTEN REALTIME DAFTAR LINK
     onSnapshot(collection(db, "links"), (snapshot) => {
       publicLinksContainer.innerHTML = '';
       linkTotalBadge.innerText = `${snapshot.size} Link`;
@@ -314,6 +346,7 @@
 
       snapshot.forEach((docSnap) => {
         const data = docSnap.data();
+        const iconConfig = getLinkIconConfig(data.title, data.url);
 
         const a = document.createElement('a');
         a.href = data.url;
@@ -321,11 +354,11 @@
         a.rel = "noopener noreferrer";
         a.className = "link-card-item";
 
-        // RENDER: HANYA IKON + JUDUL LINK
+        // RENDER DENGAN IKON & WARNA OTOMATIS BERDASARKAN JENIS LINK
         a.innerHTML = `
           <div class="link-info">
-            <div class="link-icon-box">
-              <i class="fa-solid fa-link"></i>
+            <div class="link-icon-box" style="color: ${iconConfig.color}; background: ${iconConfig.bg}; border-color: ${iconConfig.border};">
+              <i class="${iconConfig.icon}"></i>
             </div>
             <div class="link-text">
               <h3>${data.title}</h3>
