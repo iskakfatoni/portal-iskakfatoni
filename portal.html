@@ -249,7 +249,7 @@
     drawParticles();
   </script>
 
-  <!-- FIREBASE LOGIC LOGIKA PERBAIKAN -->
+  <!-- FIREBASE LOGIC PERBAIKAN RUNNING TEXT -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
     import { getFirestore, collection, doc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
@@ -276,11 +276,11 @@
 
     // 1. LISTEN REALTIME STATUS PORTAL ON / OFF
     onSnapshot(doc(db, "settings", "portal_status"), (docSnap) => {
-      let isOnline = true; // Default ON jika dokumen belum dibuat
+      let isOnline = true;
 
       if (docSnap.exists()) {
         const data = docSnap.data();
-        isOnline = data.is_online !== false; // False hanya jika eksplisit diset false
+        isOnline = data.is_online !== false;
       }
 
       if (isOnline) {
@@ -292,14 +292,21 @@
       }
     });
 
-    // 2. LISTEN REALTIME RUNNING TEXT
+    // 2. LISTEN REALTIME RUNNING TEXT (PERBAIKAN BISA BACA BERBAGAI FIELD)
     onSnapshot(doc(db, "settings", "announcement"), (docSnap) => {
-      if (docSnap.exists() && docSnap.data().text && docSnap.data().text.trim() !== "") {
-        runningTextContent.innerText = docSnap.data().text;
-        marqueeWrapper.classList.remove('hidden');
-      } else {
-        marqueeWrapper.classList.add('hidden');
+      if (docSnap.exists()) {
+        const data = docSnap.data();
+        // Cek kandidat isi running text dari field 'text', 'announcement', atau 'content'
+        const textVal = data.text || data.announcement || data.content || "";
+
+        if (textVal && textVal.trim() !== "") {
+          runningTextContent.innerText = textVal;
+          marqueeWrapper.classList.remove('hidden');
+          return;
+        }
       }
+      // Sembunyikan jika tidak ada isi teks
+      marqueeWrapper.classList.add('hidden');
     });
 
     // 3. LISTEN REALTIME DAFTAR LINK
