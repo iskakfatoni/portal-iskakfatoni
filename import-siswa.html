@@ -58,7 +58,7 @@
         disabled
         class="w-full py-3 px-4 bg-gradient-to-r from-teal-400 to-cyan-400 text-slate-950 font-bold text-sm rounded-xl hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed transition shadow-lg shadow-cyan-500/10 flex items-center justify-center space-x-2 cursor-pointer"
       >
-        <span id="btn-text">🚀 Proses & Simpan ke Firestore</span>
+        <span id="btn-text">🚀 Proses &amp; Simpan ke Firestore</span>
         <div id="btn-spinner" class="hidden w-4 h-4 border-2 border-slate-950 border-t-transparent rounded-full animate-spin"></div>
       </button>
     </div>
@@ -129,13 +129,9 @@
         }
 
         const sampleData = [
-          { "NIS": "2026101", "Nama Siswa": "Ahmad Rizky", "ID Kelas": "XI-TEI-1", "Nama Kelas": "XI TEI 1" },
-          { "NIS": "2026102", "Nama Siswa": "Bagus Setiawan", "ID Kelas": "XI-TEI-2", "Nama Kelas": "XI TEI 2" },
-          { "NIS": "2026103", "Nama Siswa": "Cahya Kamila", "ID Kelas": "XII-TEI-1", "Nama Kelas": "XII TEI 1" },
-          { "NIS": "2026104", "Nama Siswa": "Doni Pratama", "ID Kelas": "XII-TEI-2", "Nama Kelas": "XII TEI 2" },
-          { "NIS": "2026105", "Nama Siswa": "Eka Saputra", "ID Kelas": "XI-TEI-1-MUTU", "Nama Kelas": "XI TEI 1 MUTU" },
-          { "NIS": "2026106", "Nama Siswa": "Fajar Nugraha", "ID Kelas": "XI-TEI-2-MUTU", "Nama Kelas": "XI TEI 2 MUTU" },
-          { "NIS": "2026107", "Nama Siswa": "Gita Gutawa", "ID Kelas": "XII-TEI-MUTU", "Nama Kelas": "XII TEI MUTU" }
+          { "NIS": "9177/413", "Nama Siswa": "ACHMAD HAMDHANI", "ID Kelas": "XI-TEI-1", "Nama Kelas": "XI TEI 1" },
+          { "NIS": "9178/414", "Nama Siswa": "Bagus Setiawan", "ID Kelas": "XI-TEI-2", "Nama Kelas": "XI TEI 2" },
+          { "NIS": "9179/415", "Nama Siswa": "Cahya Kamila", "ID Kelas": "XII-TEI-1", "Nama Kelas": "XII TEI 1" }
         ];
 
         const worksheet = XLSX.utils.json_to_sheet(sampleData);
@@ -204,7 +200,7 @@
       reader.readAsArrayBuffer(file);
     });
 
-    // 3. SIMPAN DATA KE CLOUD FIRESTORE
+    // 3. SIMPAN DATA KE CLOUD FIRESTORE DENGAN SANITASI DOCUMENT ID
     btnImport.addEventListener('click', async () => {
       if (parsedSiswaData.length === 0) return;
 
@@ -219,8 +215,12 @@
 
       for (const siswa of parsedSiswaData) {
         try {
-          await setDoc(doc(db, "siswa", siswa.nis), {
-            nis: siswa.nis,
+          // ✅ SANITASI ID DOKUMEN: Ganti karakter '/' menjadi '-' agar tidak dianggap sub-koleksi
+          // Contoh: "9177/413" -> docId menjadi "9177-413"
+          const safeDocId = siswa.nis.replace(/\//g, '-');
+
+          await setDoc(doc(db, "siswa", safeDocId), {
+            nis: siswa.nis,               // NIS Asli (misal: "9177/413") tetap utuh di sini
             nama_siswa: siswa.nama_siswa,
             id_kelas: siswa.id_kelas,
             nama_kelas: siswa.nama_kelas,
