@@ -8,7 +8,7 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   
   <style>
-    /* Styling khusus Form & Profil Absensi agar padu dengan style.css */
+    /* Styling khusus Form & Profil Absensi */
     .absensi-box {
       background: var(--card-bg, rgba(15, 23, 42, 0.85));
       border: 1px solid var(--card-border, rgba(255, 255, 255, 0.1));
@@ -226,21 +226,11 @@
     <!-- Footer -->
     <footer class="footer">
       <div class="social-icons">
-        <a href="https://wa.me/085645453111" target="_blank" rel="noopener noreferrer" class="social-btn wa" title="WhatsApp Iskak">
-          <i class="fa-brands fa-whatsapp"></i>
-        </a>
-        <a href="https://facebook.com/iskakfatoni" target="_blank" rel="noopener noreferrer" class="social-btn fb" title="Facebook Iskak">
-          <i class="fa-brands fa-facebook-f"></i>
-        </a>
-        <a href="https://instagram.com/iskakfatoni" target="_blank" rel="noopener noreferrer" class="social-btn ig" title="Instagram Iskak">
-          <i class="fa-brands fa-instagram"></i>
-        </a>
-        <a href="https://youtube.com/iskakfatoni" target="_blank" rel="noopener noreferrer" class="social-btn yt" title="YouTube Iskak">
-          <i class="fa-brands fa-youtube"></i>
-        </a>
-        <a href="https://tiktok.com/@iskakfatoni" target="_blank" rel="noopener noreferrer" class="social-btn tt" title="TikTok">
-          <i class="fa-brands fa-tiktok"></i>
-        </a>
+        <a href="https://wa.me/085645453111" target="_blank" rel="noopener noreferrer" class="social-btn wa"><i class="fa-brands fa-whatsapp"></i></a>
+        <a href="https://facebook.com/iskakfatoni" target="_blank" rel="noopener noreferrer" class="social-btn fb"><i class="fa-brands fa-facebook-f"></i></a>
+        <a href="https://instagram.com/iskakfatoni" target="_blank" rel="noopener noreferrer" class="social-btn ig"><i class="fa-brands fa-instagram"></i></a>
+        <a href="https://youtube.com/iskakfatoni" target="_blank" rel="noopener noreferrer" class="social-btn yt"><i class="fa-brands fa-youtube"></i></a>
+        <a href="https://tiktok.com/@iskakfatoni" target="_blank" rel="noopener noreferrer" class="social-btn tt"><i class="fa-brands fa-tiktok"></i></a>
       </div>
 
       <div class="supported-by">
@@ -251,7 +241,7 @@
 
   </main>
 
-  <!-- PARTICLE CANVAS SCRIPT -->
+  <!-- PARTICLE CANVAS -->
   <script>
     const canvas = document.getElementById('particle-canvas');
     const ctx = canvas.getContext('2d');
@@ -286,13 +276,8 @@
         ctx.shadowColor = `rgb(${particleColor})`;
         ctx.fill();
 
-        p.y += p.speedY;
-        p.x += p.speedX;
-
-        if (p.y < 0) {
-          p.y = canvas.height;
-          p.x = Math.random() * canvas.width;
-        }
+        p.y += p.speedY; p.x += p.speedX;
+        if (p.y < 0) { p.y = canvas.height; p.x = Math.random() * canvas.width; }
       });
       requestAnimationFrame(drawParticles);
     }
@@ -302,17 +287,20 @@
     drawParticles();
   </script>
 
-  <!-- LOGIC FIREBASE & DEVICE LOCKING -->
+  <!-- LOGIC FIREBASE & DUAL DEVICE LOCKING VALIDATION -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
     import { 
       getFirestore, 
       doc, 
       getDoc, 
-      updateDoc 
+      updateDoc,
+      collection,
+      query,
+      where,
+      getDocs 
     } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
-    // Konfigurasi Firebase Portal IskakFatoni
     const firebaseConfig = {
       apiKey: "AIzaSyDhq4QoCn00GkfpKXSP8PnvSvEKa2yn0ic",
       authDomain: "portal-iskakfatoni.firebaseapp.com",
@@ -326,7 +314,6 @@
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
 
-    // DOM Elements
     const sectionLogin = document.getElementById('section-login-absensi');
     const sectionProfile = document.getElementById('section-profile-absensi');
     const nisInput = document.getElementById('nis-input');
@@ -340,7 +327,6 @@
     const btnBukaScanner = document.getElementById('btn-buka-scanner');
     const btnRefreshSesi = document.getElementById('btn-refresh-sesi');
 
-    // Generate Unique Device ID
     function getDeviceId() {
       let deviceId = localStorage.getItem('portal_device_id');
       if (!deviceId) {
@@ -365,7 +351,7 @@
       }
     });
 
-    // Proses Verifikasi & Device Binding
+    // VERIFIKASI DUA ARAH (DUAL VALIDATION)
     btnVerifikasi.addEventListener('click', async () => {
       const nis = nisInput.value.trim();
       hideError();
@@ -378,6 +364,7 @@
       setLoading(true);
 
       try {
+        // 1. CEK DOKUMEN NIS SISWA
         const docRef = doc(db, "siswa", nis);
         const docSnap = await getDoc(docRef);
 
@@ -389,14 +376,32 @@
 
         const dataSiswa = docSnap.data();
 
-        // Check Device Binding
+        // VALIDASI 1: Apakah NIS ini sudah terikat di HP LAIN?
         if (dataSiswa.device_id && dataSiswa.device_id !== currentDeviceId) {
-          showError("❌ Akun ini sudah terikat di HP lain! Silakan minta Guru/Admin untuk mereset perangkat Anda.");
+          showError("❌ Akun NIS ini sudah terikat di HP lain! Minta Guru/Admin untuk mereset perangkat.");
           setLoading(false);
           return;
         }
 
-        // Bind Device ID jika belum ada
+        // VALIDASI 2: Apakah HP FISIK INI sudah terikat ke SISWA LAIN di Firestore?
+        const qDevice = query(collection(db, "siswa"), where("device_id", "==", currentDeviceId));
+        const deviceSnap = await getDocs(qDevice);
+
+        if (!deviceSnap.empty) {
+          // Ada siswa lain yang menggunakan device_id ini
+          let activeOwner = null;
+          deviceSnap.forEach(d => {
+            if (d.id !== nis) activeOwner = d.data();
+          });
+
+          if (activeOwner) {
+            showError(`❌ HP ini sudah terikat dengan siswa: ${activeOwner.nama_siswa} (${activeOwner.nis}). 1 HP hanya untuk 1 siswa!`);
+            setLoading(false);
+            return;
+          }
+        }
+
+        // JIKA KEDUA VALIDASI LOLOS: Ikat HP jika belum ada
         if (!dataSiswa.device_id) {
           await updateDoc(docRef, { device_id: currentDeviceId });
         }
@@ -433,10 +438,9 @@
       window.location.href = "siswa/index.html";
     });
 
-    // REFRESH SESI: Cek status Device ID di Firestore tanpa perlu hapus data jika masih valid
+    // REFRESH SESI LOGIC
     btnRefreshSesi.addEventListener('click', async () => {
       const savedUserJson = localStorage.getItem('portal_siswa_user');
-      
       if (!savedUserJson) {
         window.location.reload();
         return;
@@ -448,14 +452,12 @@
       btnRefreshSesi.disabled = true;
 
       try {
-        // Ambil data siswa terbaru langsung dari Firestore
         const docRef = doc(db, "siswa", user.nis);
         const docSnap = await getDoc(docRef);
 
         if (docSnap.exists()) {
           const dataSiswa = docSnap.data();
 
-          // Jika pautan HP di database sudah di-reset oleh Admin (kosong / beda)
           if (!dataSiswa.device_id || dataSiswa.device_id !== currentDeviceId) {
             alert("Pautan HP Anda telah di-reset oleh Guru/Admin. Silakan verifikasi NIS kembali.");
             localStorage.removeItem('portal_siswa_user');
@@ -463,14 +465,12 @@
             return;
           }
           
-          // Jika masih valid, update data nama/kelas terbaru jika ada perubahan
           user.nama_siswa = dataSiswa.nama_siswa;
           user.nama_kelas = dataSiswa.nama_kelas;
           localStorage.setItem('portal_siswa_user', JSON.stringify(user));
           showProfile(user);
           alert("Sesi dan data profil berhasil diperbarui!");
         } else {
-          // Jika akun NIS dihapus dari database
           alert("Akun NIS ini tidak ditemukan lagi di database.");
           localStorage.removeItem('portal_siswa_user');
           window.location.reload();
@@ -496,7 +496,7 @@
     function setLoading(isLoading) {
       if (isLoading) {
         btnVerifikasi.disabled = true;
-        btnText.innerText = "Mengecek NIS & HP...";
+        btnText.innerText = "Mengecek NIS & Validasi HP...";
       } else {
         btnVerifikasi.disabled = false;
         btnText.innerText = "Verifikasi NIS & Ikat HP";
