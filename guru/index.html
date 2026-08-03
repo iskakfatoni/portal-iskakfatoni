@@ -4,54 +4,14 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>PORTAL :: Dashboard Admin & Guru Absensi</title>
-  <!-- Tailwind CSS via CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
-  <!-- FontAwesome Icons -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  <!-- QRCode.js Library -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
-  <!-- SheetJS Library (Excel Export) -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 </head>
 <body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col justify-start items-center p-4 md:p-8 font-sans">
 
-  <!-- ========================================== -->
-  <!-- SECTION 1: FORM LOGIN GURU                -->
-  <!-- ========================================== -->
-  <div id="login-section" class="max-w-md w-full my-auto bg-slate-900/90 backdrop-blur-xl rounded-2xl p-6 md:p-8 border border-slate-800 shadow-2xl space-y-6">
-    <div class="text-center">
-      <div class="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-cyan-500/10 text-cyan-400 mb-3 border border-cyan-500/30">
-        <i class="fa-solid fa-user-shield text-2xl"></i>
-      </div>
-      <h1 class="text-xl font-bold text-white tracking-wide">LOGIN GURU / ADMIN</h1>
-      <p class="text-xs text-slate-400 mt-1">Portal Absensi TEI :: IskakFatoni</p>
-    </div>
-
-    <form id="login-form" class="space-y-4" onsubmit="return false;">
-      <div class="space-y-1">
-        <label for="login-email" class="block text-xs font-semibold text-slate-300">Email Guru</label>
-        <input type="email" id="login-email" placeholder="guru@sekolah.sch.id" required class="w-full px-4 py-3 bg-slate-950 border border-slate-800 rounded-xl text-slate-100 focus:outline-none focus:border-cyan-500 text-sm">
-      </div>
-
-      <div class="space-y-1">
-        <label for="login-password" class="block text-xs font-semibold text-slate-300">Password</label>
-        <input type="password" id="login-password" placeholder="••••••••" required class="w-full px-4 py-3 bg-slate-950 border border-slate-800 rounded-xl text-slate-100 focus:outline-none focus:border-cyan-500 text-sm">
-      </div>
-
-      <p id="login-error" class="text-red-400 text-xs font-semibold text-center hidden"></p>
-
-      <button type="submit" id="btn-login" class="w-full py-3.5 px-4 bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-bold text-sm rounded-xl transition shadow-lg shadow-cyan-500/20 flex items-center justify-center gap-2 cursor-pointer">
-        <i class="fa-solid fa-right-to-bracket"></i> Masuk Dashboard Guru
-      </button>
-    </form>
-  </div>
-
-
-  <!-- ========================================== -->
-  <!-- SECTION 2: DASHBOARD KONTROL ABSENSI       -->
-  <!-- ========================================== -->
-  <!-- Kontainer diperlebar di layar desktop (max-w-6xl) -->
-  <div id="dashboard-section" class="max-w-6xl w-full hidden space-y-6 my-auto">
+  <div id="dashboard-section" class="max-w-6xl w-full space-y-6 my-auto">
     
     <!-- TOP BAR (HEADER & LOGOUT) -->
     <header class="flex items-center justify-between bg-slate-900/90 backdrop-blur-md p-4 md:p-5 rounded-2xl border border-slate-800 shadow-xl">
@@ -65,7 +25,7 @@
         </div>
       </div>
 
-      <!-- TAB SWITCHER NAVIGASI (DESKTOP FIT) -->
+      <!-- TAB SWITCHER NAVIGASI (DESKTOP) -->
       <div class="hidden sm:flex items-center gap-2 p-1.5 bg-slate-950/80 rounded-xl border border-slate-800">
         <button id="tab-sesi-qr-desktop" class="py-2 px-4 rounded-lg font-bold text-xs bg-cyan-500 text-slate-950 transition flex items-center gap-2 cursor-pointer">
           <i class="fa-solid fa-qrcode"></i> Sesi QR Aktif
@@ -75,12 +35,12 @@
         </button>
       </div>
 
-      <button id="btn-logout" title="Logout" class="py-2.5 px-4 bg-red-500/15 hover:bg-red-500/30 text-red-400 border border-red-500/40 font-bold text-xs rounded-xl transition shadow-md shadow-red-500/10 flex items-center gap-2 cursor-pointer">
-        <i class="fa-solid fa-power-off"></i> <span class="hidden sm:inline">Keluar</span>
+      <button id="btn-logout" title="Keluar ke Master Admin Pusat" class="py-2.5 px-4 bg-red-500/15 hover:bg-red-500/30 text-red-400 border border-red-500/40 font-bold text-xs rounded-xl transition flex items-center gap-2 cursor-pointer">
+        <i class="fa-solid fa-arrow-left"></i> <span class="hidden sm:inline">Hub Admin</span>
       </button>
     </header>
 
-    <!-- TAB SWITCHER MOBILE ONLY -->
+    <!-- TAB SWITCHER MOBILE -->
     <div class="grid grid-cols-2 gap-2 p-1.5 bg-slate-900/90 rounded-xl border border-slate-800 sm:hidden">
       <button id="tab-sesi-qr-mobile" class="py-2 px-3 rounded-lg font-bold text-xs bg-cyan-500 text-slate-950 transition flex items-center justify-center gap-2">
         <i class="fa-solid fa-qrcode"></i> Sesi QR Aktif
@@ -93,13 +53,10 @@
     <!-- MODUL A: KONTROL SESI ABSENSI REALTIME -->
     <div id="modul-sesi-qr" class="space-y-6">
       
-      <!-- DESKTOP GRID 2 KOLOM BERDAMPINGAN -->
       <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
         
-        <!-- KOLOM KIRI (KONFIGURASI & TAMPILAN QR) - 5 SPAN -->
+        <!-- KOLOM KIRI (KONFIGURASI & QR) -->
         <div class="lg:col-span-5 space-y-6">
-          
-          <!-- FORM KONFIGURASI -->
           <div class="bg-slate-900/80 backdrop-blur-md p-6 rounded-2xl border border-slate-800 space-y-4 shadow-xl">
             <h3 class="text-xs font-bold text-cyan-400 border-b border-slate-800 pb-2 flex items-center gap-2 uppercase tracking-wider">
               <i class="fa-solid fa-sliders"></i> Konfigurasi Sesi
@@ -130,7 +87,6 @@
             </div>
           </div>
 
-          <!-- TAMPILAN QR CARD -->
           <div class="bg-slate-900/80 backdrop-blur-md p-6 rounded-2xl border border-slate-800 flex flex-col items-center justify-center text-center space-y-4 shadow-xl">
             <div class="flex items-center justify-between w-full border-b border-slate-800 pb-2">
               <span class="text-xs font-bold text-cyan-400 uppercase tracking-wider">Tampilan QR Ponsel</span>
@@ -141,18 +97,13 @@
               <p class="text-xs text-slate-500 font-sans">Sesi Belum Aktif</p>
             </div>
 
-            <button 
-              id="btn-fullscreen-qr" 
-              disabled 
-              class="w-full py-3 px-4 bg-slate-800 text-slate-500 border border-slate-700 font-bold text-xs rounded-xl transition flex items-center justify-center gap-2 cursor-not-allowed"
-            >
+            <button id="btn-fullscreen-qr" disabled class="w-full py-3 px-4 bg-slate-800 text-slate-500 border border-slate-700 font-bold text-xs rounded-xl transition flex items-center justify-center gap-2 cursor-not-allowed">
               <i class="fa-solid fa-expand"></i> Perbesar QR (Layar Penuh HP)
             </button>
           </div>
-
         </div>
 
-        <!-- KOLOM KANAN (LIVE LOG ATTENDANCE SISWA) - 7 SPAN -->
+        <!-- KOLOM KANAN (LOG REALTIME) -->
         <div class="lg:col-span-7">
           <div class="bg-slate-900/80 backdrop-blur-md p-6 rounded-2xl border border-slate-800 space-y-4 shadow-xl h-full flex flex-col justify-between">
             <div>
@@ -163,7 +114,6 @@
                 <span id="log-count" class="text-xs text-slate-400 font-mono font-bold bg-slate-950 px-3 py-1 rounded-full border border-slate-800">0 Siswa</span>
               </div>
 
-              <!-- Tabel/List Log Siswa Realtime -->
               <div id="log-siswa-container" class="space-y-2.5 mt-4 max-h-[460px] overflow-y-auto pr-2">
                 <p class="text-xs text-slate-500 text-center py-10">// Siswa yang melakukan scan akan tampil otomatis di sini secara realtime...</p>
               </div>
@@ -179,7 +129,7 @@
 
     </div>
 
-    <!-- MODUL B: RIWAYAT DATABASE ABSENSI & EXPORT -->
+    <!-- MODUL B: DATABASE LOG & EXPORT -->
     <div id="modul-db-rekap" class="hidden space-y-4">
       <div class="bg-slate-900/80 backdrop-blur-md p-6 rounded-2xl border border-slate-800 space-y-6 shadow-xl">
         
@@ -196,7 +146,6 @@
           </button>
         </div>
 
-        <!-- FILTER KELAS DARI DATABASE -->
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div class="space-y-1">
             <label for="filter-kelas-db" class="block text-xs font-semibold text-slate-300">Filter Berdasarkan Kelas</label>
@@ -211,7 +160,6 @@
           </div>
         </div>
 
-        <!-- TABEL HASIL REKAP DATABASE -->
         <div id="db-rekap-container" class="space-y-2.5 max-h-[500px] overflow-y-auto pr-2">
           <p class="text-xs text-slate-500 text-center py-10">// Memuat data riwayat absensi dari Cloud Firestore...</p>
         </div>
@@ -226,18 +174,14 @@
 
   </div>
 
-
   <!-- MODAL FULLSCREEN QR CODE -->
   <div id="qr-fullscreen-modal" class="fixed inset-0 bg-slate-950/95 backdrop-blur-2xl z-50 hidden flex flex-col items-center justify-between p-6 md:p-10 text-center">
-    
     <div class="w-full max-w-lg flex items-center justify-between border-b border-slate-800 pb-4">
       <div>
         <h3 id="modal-kelas-title" class="text-lg font-bold text-white text-left">-</h3>
         <p id="modal-mapel-title" class="text-xs text-cyan-400 text-left">-</p>
       </div>
-      <button id="btn-close-modal" class="w-10 h-10 bg-slate-800 hover:bg-slate-700 text-white rounded-full flex items-center justify-center font-bold text-sm cursor-pointer border border-slate-700">
-        ✕
-      </button>
+      <button id="btn-close-modal" class="w-10 h-10 bg-slate-800 hover:bg-slate-700 text-white rounded-full flex items-center justify-center font-bold text-sm cursor-pointer border border-slate-700">✕</button>
     </div>
 
     <div class="my-auto p-6 bg-white rounded-3xl shadow-2xl flex items-center justify-center">
@@ -248,36 +192,14 @@
       <p class="text-sm text-slate-300 font-semibold">Tunjukkan Layar Ini ke Siswa untuk Di-Scan</p>
       <p class="text-xs text-slate-500 font-mono">QR Code Diperbarui Otomatis Setiap 10 Detik</p>
     </div>
-
   </div>
 
-
-  <!-- SCRIPT AUTHENTICATION & DATABASE LOGIC -->
+  <!-- FIREBASE AUTH & LOGIC -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-    import { 
-      getAuth, 
-      signInWithEmailAndPassword, 
-      onAuthStateChanged, 
-      signOut,
-      setPersistence,
-      browserSessionPersistence 
-    } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
-    import { 
-      getFirestore, 
-      collection, 
-      addDoc, 
-      doc, 
-      updateDoc, 
-      query, 
-      where, 
-      orderBy,
-      getDocs,
-      onSnapshot, 
-      serverTimestamp 
-    } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+    import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+    import { getFirestore, collection, addDoc, doc, updateDoc, query, where, orderBy, getDocs, onSnapshot, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
-    // Kredensial Firebase Portal IskakFatoni
     const firebaseConfig = {
       apiKey: "AIzaSyDhq4QoCn00GkfpKXSP8PnvSvEKa2yn0ic",
       authDomain: "portal-iskakfatoni.firebaseapp.com",
@@ -292,11 +214,6 @@
     const auth = getAuth(app);
     const db = getFirestore(app);
 
-    // DOM Elements
-    const loginSection = document.getElementById('login-section');
-    const dashboardSection = document.getElementById('dashboard-section');
-    const loginForm = document.getElementById('login-form');
-    const loginError = document.getElementById('login-error');
     const userEmailDisplay = document.getElementById('user-email-display');
     const btnLogout = document.getElementById('btn-logout');
 
@@ -331,46 +248,27 @@
     let activeToken = "";
     let fullDbRecords = [];
 
-    // 🔒 1. MONITORING AUTHENTICATION
+    // 🔒 PROTEKSI ROUTE
     onAuthStateChanged(auth, (user) => {
-      if (user) {
-        loginSection.classList.add('hidden');
-        dashboardSection.classList.remove('hidden');
+      if (!user) {
+        window.location.href = "../admin.html";
+      } else {
         userEmailDisplay.innerText = user.email;
-
         loadKelasDropdown();
         loadMapelDropdown();
         loadDatabaseAbsensi();
-      } else {
-        loginSection.classList.remove('hidden');
-        dashboardSection.classList.add('hidden');
-        resetSesiState();
       }
     });
 
-    // 🔒 2. LOGIN GURU
-    loginForm.addEventListener('submit', async () => {
-      const email = document.getElementById('login-email').value.trim();
-      const pass = document.getElementById('login-password').value.trim();
-      loginError.classList.add('hidden');
-
-      try {
-        await setPersistence(auth, browserSessionPersistence);
-        await signInWithEmailAndPassword(auth, email, pass);
-      } catch (err) {
-        loginError.innerText = "Login gagal: Email atau password salah!";
-        loginError.classList.remove('hidden');
-      }
-    });
-
-    // 🚪 3. LOGOUT GURU
+    // 🚪 LOGOUT KEMBALI KE ADMIN PUSAT
     btnLogout.addEventListener('click', () => {
-      if (confirm("Apakah Anda yakin ingin keluar?")) {
-        signOut(auth);
+      if (confirm("Kembali ke Master Admin Pusat?")) {
+        signOut(auth).then(() => {
+          window.location.href = "../admin.html";
+        });
       }
     });
 
-    // 🔀 4. TAB SWITCHER (DESKTOP & MOBILE HANDLERS)
     function switchTab(target) {
       if (target === 'sesi') {
         tabSesiDesktop.className = "py-2 px-4 rounded-lg font-bold text-xs bg-cyan-500 text-slate-950 transition flex items-center gap-2 cursor-pointer";
@@ -395,7 +293,6 @@
     tabSesiMobile.addEventListener('click', () => switchTab('sesi'));
     tabDbMobile.addEventListener('click', () => switchTab('db'));
 
-    // 📚 5. LOAD DROPDOWNS
     async function loadKelasDropdown() {
       selectKelas.innerHTML = '<option value="">-- Pilih Kelas TEI --</option>';
       filterKelasDb.innerHTML = '<option value="ALL">-- Tampilkan Semua Kelas --</option>';
@@ -408,19 +305,15 @@
             const kName = data.nama_kelas || docSnap.id;
             
             const opt1 = document.createElement('option');
-            opt1.value = kName;
-            opt1.textContent = kName;
+            opt1.value = kName; opt1.textContent = kName;
             selectKelas.appendChild(opt1);
 
             const opt2 = document.createElement('option');
-            opt2.value = kName;
-            opt2.textContent = kName;
+            opt2.value = kName; opt2.textContent = kName;
             filterKelasDb.appendChild(opt2);
           });
         }
-      } catch (err) {
-        console.error("Gagal load kelas:", err);
-      }
+      } catch (err) { console.error("Gagal load kelas:", err); }
     }
 
     async function loadMapelDropdown() {
@@ -437,12 +330,9 @@
             selectMapel.appendChild(option);
           });
         }
-      } catch (err) {
-        console.error("Gagal load mapel:", err);
-      }
+      } catch (err) { console.error("Gagal load mapel:", err); }
     }
 
-    // 🚀 6. MULAI SESI ABSENSI
     btnStartSesi.addEventListener('click', async () => {
       const kelas = selectKelas.value;
       const mapel = selectMapel.value;
@@ -497,12 +387,9 @@
       }
     });
 
-    // 🛑 7. TUTUP SESI
     btnStopSesi.addEventListener('click', async () => {
       if (currentSesiId) {
-        await updateDoc(doc(db, "sesi_absensi", currentSesiId), {
-          is_active: false
-        });
+        await updateDoc(doc(db, "sesi_absensi", currentSesiId), { is_active: false });
         resetSesiState();
       }
     });
@@ -517,7 +404,6 @@
       new QRCode(qrModalContainer, { text: token, width: 280, height: 280 });
     }
 
-    // REALTIME LOG SESI SEKARANG
     function listenToLogAbsensi(sesiId) {
       if (unsubscribeLog) unsubscribeLog();
 
@@ -539,9 +425,7 @@
           item.className = 'flex items-center justify-between p-3 bg-slate-950/90 rounded-xl border border-slate-800 text-xs hover:border-cyan-500/30 transition';
           item.innerHTML = `
             <div class="flex items-center gap-3">
-              <div class="w-8 h-8 rounded-lg bg-cyan-500/10 text-cyan-400 font-bold flex items-center justify-center">
-                ${count}
-              </div>
+              <div class="w-8 h-8 rounded-lg bg-cyan-500/10 text-cyan-400 font-bold flex items-center justify-center">${count}</div>
               <div>
                 <p class="font-bold text-white text-sm">${data.nama_siswa}</p>
                 <p class="text-[11px] text-slate-400 font-mono">NIS: ${data.nis} | ${data.id_kelas}</p>
@@ -558,20 +442,12 @@
       });
     }
 
-    // 📊 8. LOAD ALL DATABASE LOG ABSENSI
     function loadDatabaseAbsensi() {
       const q = query(collection(db, "log_absensi"));
       onSnapshot(q, (snapshot) => {
         fullDbRecords = [];
-        if (snapshot.empty) {
-          renderDbRekap([]);
-          return;
-        }
-
-        snapshot.forEach(docSnap => {
-          fullDbRecords.push(docSnap.data());
-        });
-
+        if (snapshot.empty) { renderDbRekap([]); return; }
+        snapshot.forEach(docSnap => fullDbRecords.push(docSnap.data()));
         filterAndRenderDb();
       });
     }
@@ -581,11 +457,7 @@
     function filterAndRenderDb() {
       const selectedKelas = filterKelasDb.value;
       let filtered = fullDbRecords;
-
-      if (selectedKelas !== "ALL") {
-        filtered = fullDbRecords.filter(r => r.id_kelas === selectedKelas);
-      }
-
+      if (selectedKelas !== "ALL") filtered = fullDbRecords.filter(r => r.id_kelas === selectedKelas);
       renderDbRekap(filtered);
     }
 
@@ -603,9 +475,7 @@
         item.className = 'flex items-center justify-between p-3.5 bg-slate-950/90 rounded-xl border border-slate-800 text-xs hover:border-emerald-500/30 transition';
         item.innerHTML = `
           <div class="flex items-center gap-3">
-            <div class="w-8 h-8 rounded-lg bg-emerald-500/10 text-emerald-400 font-bold flex items-center justify-center font-mono">
-              ${idx + 1}
-            </div>
+            <div class="w-8 h-8 rounded-lg bg-emerald-500/10 text-emerald-400 font-bold flex items-center justify-center font-mono">${idx + 1}</div>
             <div>
               <p class="font-bold text-white text-sm">${data.nama_siswa}</p>
               <p class="text-[11px] text-slate-400 font-mono">NIS: ${data.nis} | Kelas: ${data.id_kelas}</p>
@@ -620,14 +490,10 @@
       });
     }
 
-    // 📥 EXPORT DATABASE REKAP KE EXCEL
     btnExportExcelDb.addEventListener('click', () => {
       const selectedKelas = filterKelasDb.value;
       let dataToExport = fullDbRecords;
-
-      if (selectedKelas !== "ALL") {
-        dataToExport = fullDbRecords.filter(r => r.id_kelas === selectedKelas);
-      }
+      if (selectedKelas !== "ALL") dataToExport = fullDbRecords.filter(r => r.id_kelas === selectedKelas);
 
       if (dataToExport.length === 0) {
         alert("Tidak ada data untuk diexport!");
