@@ -3,391 +3,165 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
-  <title>PORTAL::IskakFatoni - Admin Dashboard</title>
+  <title>PORTAL :: Master Admin Dashboard</title>
+  
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  
+  <script src="https://cdn.tailwindcss.com"></script>
+
   <style>
-    /* ========================================== */
-    /* TEMA STANDAR ADMIN (DARK MODE DEFAULT)     */
-    /* ========================================== */
-    :root {
-      --bg-main: #0b0f19;
-      --bg-radial-1: rgba(56, 189, 248, 0.08);
-      --bg-radial-2: rgba(99, 102, 241, 0.08);
-      --text-title: #ffffff;
-      --text-sub: #cbd5e1;
-      --text-muted: #94a3b8;
-      
-      --card-bg: rgba(15, 23, 42, 0.85);
-      --card-border: rgba(255, 255, 255, 0.08);
-      --card-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.5);
-      
-      --input-bg: #030712;
-      --input-border: rgba(255, 255, 255, 0.2);
-      --input-text: #ffffff;
-      
-      --item-bg: rgba(9, 13, 22, 0.7);
-      --item-border: rgba(255, 255, 255, 0.06);
-    }
-
-    /* ========================================== */
-    /* AUTO LIGHT MODE (JIKA HP/LAPTOP LIGHT)     */
-    /* ========================================== */
-    @media (prefers-color-scheme: light) {
-      :root {
-        --bg-main: #f8fafc;
-        --bg-radial-1: rgba(56, 189, 248, 0.15);
-        --bg-radial-2: rgba(99, 102, 241, 0.12);
-        --text-title: #0f172a;
-        --text-sub: #334155;
-        --text-muted: #64748b;
-        
-        --card-bg: rgba(255, 255, 255, 0.8);
-        --card-border: rgba(15, 23, 42, 0.1);
-        --card-shadow: 0 15px 35px -10px rgba(139, 92, 246, 0.12);
-        
-        --input-bg: #ffffff;
-        --input-border: rgba(15, 23, 42, 0.2);
-        --input-text: #0f172a;
-        
-        --item-bg: rgba(241, 245, 249, 0.9);
-        --item-border: rgba(15, 23, 42, 0.08);
-      }
-    }
-
-    *, *::before, *::after { 
-      box-sizing: border-box; 
-      margin: 0; 
-      padding: 0; 
-    }
-
-    html, body {
-      width: 100%;
-      min-height: 100vh;
-      min-height: 100dvh;
-    }
-
     body {
       font-family: 'Plus Jakarta Sans', sans-serif;
-      background-color: var(--bg-main);
-      background-image: 
-        radial-gradient(circle at 10% 20%, var(--bg-radial-1) 0%, transparent 40%),
-        radial-gradient(circle at 90% 80%, var(--bg-radial-2) 0%, transparent 40%);
-      background-attachment: fixed;
-      color: var(--text-title);
-      padding: 24px 16px;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-      transition: background 0.4s ease, color 0.4s ease;
+      background-color: #0b0f19;
+      color: #ffffff;
     }
 
-    /* CONTAINER LOGIN */
-    .login-container {
-      width: 100%; 
-      max-width: 420px; 
-      margin: 20px auto;
-      background: var(--card-bg); 
+    #particle-canvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 0;
+      pointer-events: none;
+    }
+
+    .main-container {
+      position: relative;
+      z-index: 10;
+    }
+
+    .glass-card {
+      background: rgba(15, 23, 42, 0.85);
       backdrop-filter: blur(16px);
       -webkit-backdrop-filter: blur(16px);
-      border: 1px solid var(--card-border); 
-      border-radius: 20px;
-      padding: 32px 24px; 
-      box-shadow: var(--card-shadow);
-      position: relative;
-      z-index: 100;
-    }
-
-    .login-header { text-align: center; margin-bottom: 24px; }
-    .login-header i { font-size: 2.5rem; color: #38bdf8; margin-bottom: 12px; }
-    .login-header h2 { font-size: 1.5rem; font-weight: 700; color: var(--text-title); }
-
-    .dashboard-container { width: 100%; max-width: 100%; }
-
-    .top-bar {
-      display: flex; justify-content: space-between; align-items: center;
-      background: var(--card-bg); backdrop-filter: blur(16px);
-      border: 1px solid var(--card-border); border-radius: 16px;
-      padding: 20px 32px; margin-bottom: 20px; box-shadow: var(--card-shadow);
-    }
-    .top-bar-title h1 { font-size: 1.4rem; font-weight: 800; color: var(--text-title); display: flex; align-items: center; gap: 12px; }
-    .top-bar-title p { font-size: 0.85rem; color: var(--text-muted); margin-top: 2px; }
-
-    /* STATUS CONTROL CARD */
-    .status-card {
-      background: var(--card-bg); 
-      backdrop-filter: blur(16px);
-      border: 1px solid var(--card-border); 
-      border-radius: 16px;
-      padding: 16px 24px; 
-      margin: 0 auto 24px auto; 
-      width: 75%; 
-      display: flex;
-      align-items: center; 
-      justify-content: space-between;
-      box-shadow: var(--card-shadow);
-    }
-    .status-info { display: flex; align-items: center; gap: 14px; }
-    .status-badge {
-      padding: 6px 14px; border-radius: 20px; font-weight: 800; font-size: 0.85rem;
-      text-transform: uppercase; letter-spacing: 0.05em;
-    }
-    .status-on { background: rgba(16, 185, 129, 0.2); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.4); }
-    .status-off { background: rgba(239, 68, 68, 0.2); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.4); }
-
-    .main-grid { display: grid; grid-template-columns: 380px 1fr; gap: 24px; align-items: start; }
-    .panel-card {
-      background: var(--card-bg); backdrop-filter: blur(16px);
-      border: 1px solid var(--card-border); border-radius: 20px;
-      padding: 28px; box-shadow: var(--card-shadow); width: 100%;
-    }
-    .panel-title {
-      font-size: 1.1rem; font-weight: 700; color: #38bdf8; margin-bottom: 20px;
-      display: flex; align-items: center; gap: 10px;
-      border-bottom: 1px solid var(--card-border); padding-bottom: 14px;
-    }
-
-    .form-group { margin-bottom: 18px; }
-    .form-group label { display: block; font-size: 0.85rem; font-weight: 600; color: var(--text-sub); margin-bottom: 8px; }
-
-    input[type="text"],
-    input[type="email"],
-    input[type="password"],
-    input[type="url"],
-    input[type="number"],
-    select {
-      display: block;
-      width: 100%; 
-      padding: 14px 16px; 
-      background-color: var(--input-bg);
-      border: 1.5px solid var(--input-border); 
-      color: var(--input-text);
-      font-family: inherit; 
-      font-size: 16px;
-      border-radius: 12px; 
-      outline: none;
-      -webkit-appearance: none;
-      appearance: none;
-      -webkit-user-select: text !important;
-      user-select: text !important;
-      touch-action: manipulation;
-    }
-
-    select option { background: var(--input-bg); color: var(--input-text); padding: 10px; }
-    
-    input:focus, select:focus { 
-      border-color: #38bdf8; 
-      box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.3); 
-    }
-
-    .btn {
-      display: inline-flex; align-items: center; justify-content: center; gap: 8px;
-      padding: 14px 22px; font-family: inherit; font-size: 0.95rem; font-weight: 700;
-      border-radius: 12px; border: none; cursor: pointer; transition: all 0.2s ease;
-      touch-action: manipulation;
-    }
-    .btn-primary { background: #38bdf8; color: #090d16; width: 100%; }
-    .btn-primary:hover { background: #0284c7; color: #fff; box-shadow: 0 4px 15px rgba(56, 189, 248, 0.3); }
-    .btn-secondary { background: #475569; color: #fff; width: 100%; margin-top: 8px; }
-    .btn-danger { background: rgba(239, 68, 68, 0.15); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.3); padding: 8px 16px; font-size: 0.85rem; }
-    .btn-danger:hover { background: #ef4444; color: #fff; }
-    .btn-edit { background: rgba(56, 189, 248, 0.15); color: #38bdf8; border: 1px solid rgba(56, 189, 248, 0.3); padding: 8px 16px; font-size: 0.85rem; }
-    .btn-edit:hover { background: #38bdf8; color: #090d16; }
-    .btn-toggle { background: #10b981; color: #fff; }
-    .btn-toggle.is-off { background: #ef4444; }
-
-    .link-list { display: flex; flex-direction: column; gap: 12px; }
-    .link-item {
-      display: flex; align-items: center; justify-content: space-between;
-      background: var(--item-bg); border: 1px solid var(--item-border);
-      border-radius: 12px; padding: 16px 22px; transition: all 0.2s ease;
-    }
-    .link-info { display: flex; align-items: center; gap: 16px; flex: 1; padding-right: 20px; }
-    .badge-order { background: rgba(56, 189, 248, 0.15); color: #38bdf8; font-size: 0.85rem; font-weight: 800; padding: 8px 12px; border-radius: 8px; min-width: 40px; text-align: center; }
-    .link-details h4 { font-size: 1rem; color: var(--text-title); font-weight: 600; }
-    .link-details p { font-size: 0.85rem; color: var(--text-muted); margin-top: 3px; word-break: break-all; }
-    .actions { display: flex; gap: 10px; }
-    .hidden { display: none !important; }
-
-    @media (max-width: 900px) { 
-      .main-grid { grid-template-columns: 1fr; } 
-      .status-card { width: 100%; flex-direction: column; gap: 14px; text-align: center; }
+      border: 1px solid rgba(255, 255, 255, 0.1);
     }
   </style>
 </head>
-<body>
+<body class="min-h-screen flex flex-col items-center justify-center p-4 selection:bg-cyan-500 selection:text-slate-950">
 
-  <!-- SECTION LOGIN -->
-  <div id="login-section" class="login-container">
-    <div class="login-header">
-      <i class="fa-solid fa-user-shield"></i>
-      <h2>Admin Login</h2>
-      <p style="font-size:0.85rem; color:var(--text-muted); margin-top:4px;">PORTAL::IskakFatoni</p>
-    </div>
+  <!-- PARTICLE CANVAS BACKGROUND -->
+  <canvas id="particle-canvas"></canvas>
+
+  <main class="main-container w-full max-w-md my-auto space-y-6">
     
-    <form id="login-form" action="#" onsubmit="return false;">
-      <div class="form-group">
-        <label for="login-email">Email Admin</label>
-        <input 
-          type="email" 
-          id="login-email" 
-          name="email"
-          placeholder="nama@domain.com" 
-          inputmode="email"
-          autocomplete="username"
-          required>
-      </div>
-
-      <div class="form-group">
-        <label for="login-password">Password</label>
-        <input 
-          type="password" 
-          id="login-password" 
-          name="password"
-          placeholder="••••••••" 
-          autocomplete="current-password"
-          required>
-      </div>
-
-      <button type="submit" id="btn-login" class="btn btn-primary" style="margin-top: 10px;">
-        <i class="fa-solid fa-right-to-bracket"></i> Masuk Dashboard
-      </button>
-    </form>
-
-    <p id="login-error" style="color:#ef4444; margin-top:12px; font-size:0.85rem; text-align:center;"></p>
-  </div>
-
-
-  <!-- SECTION DASHBOARD -->
-  <div id="dashboard-section" class="dashboard-container hidden">
-    
-    <header class="top-bar">
-      <div class="top-bar-title">
-        <h1><i class="fa-solid fa-sliders" style="color: #38bdf8;"></i> Dashboard Admin Portal</h1>
-        <p>Kelola daftar link di PORTAL secara penuh dan realtime</p>
-      </div>
-      <button id="btn-logout" class="btn btn-danger">
-        <i class="fa-solid fa-power-off"></i> Logout
-      </button>
-    </header>
-
-    <!-- KARTU SAKLAR MODE PORTAL -->
-    <div class="status-card">
-      <div class="status-info">
-        <i class="fa-solid fa-power-off" style="font-size: 1.4rem; color: #38bdf8;"></i>
-        <div>
-          <h3 style="font-size: 1rem; font-weight: 700; color: var(--text-title);">Status Portal</h3>
-          <p style="font-size: 0.8rem; color: var(--text-muted);">Atur apakah portal di mode BUKA atau TUTUP ?</p>
+    <!-- ========================================== -->
+    <!-- SECTION 1: FORM LOGIN ADMIN HUB            -->
+    <!-- ========================================== -->
+    <div id="login-section" class="glass-card rounded-2xl p-6 border border-slate-800 shadow-2xl space-y-6">
+      <div class="text-center">
+        <div class="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-cyan-500/10 text-cyan-400 mb-3 border border-cyan-500/30">
+          <i class="fa-solid fa-user-gear text-2xl"></i>
         </div>
+        <h1 class="text-xl font-bold text-white tracking-wide">MASTER ADMIN PORTAL</h1>
+        <p class="text-xs text-slate-400 mt-1">Iskak Fatoni :: Control Panel</p>
       </div>
-      <div style="display: flex; align-items: center; gap: 16px;">
-        <span id="portal-status-badge" class="status-badge status-on">ONLINE</span>
-        <button id="btn-toggle-portal" class="btn btn-toggle">
-          <i class="fa-solid fa-toggle-on"></i> Ubah Ke OFFLINE MODE
+
+      <form id="login-form" class="space-y-4" onsubmit="return false;">
+        <div class="space-y-1">
+          <label for="login-email" class="block text-xs font-semibold text-slate-300">Email Admin</label>
+          <input type="email" id="login-email" placeholder="nama@domain.com" required class="w-full px-4 py-3 bg-slate-950 border border-slate-800 rounded-xl text-slate-100 focus:outline-none focus:border-cyan-500 text-sm">
+        </div>
+
+        <div class="space-y-1">
+          <label for="login-password" class="block text-xs font-semibold text-slate-300">Password</label>
+          <input type="password" id="login-password" placeholder="••••••••" required class="w-full px-4 py-3 bg-slate-950 border border-slate-800 rounded-xl text-slate-100 focus:outline-none focus:border-cyan-500 text-sm">
+        </div>
+
+        <p id="login-error" class="text-red-400 text-xs font-semibold text-center hidden"></p>
+
+        <button type="submit" id="btn-login" class="w-full py-3.5 px-4 bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-bold text-sm rounded-xl transition shadow-lg shadow-cyan-500/20 flex items-center justify-center gap-2 cursor-pointer">
+          <i class="fa-solid fa-right-to-bracket"></i> Masuk Master Dashboard
         </button>
-      </div>
+      </form>
     </div>
 
-    <!-- PENGATURAN RUNNING TEXT PENGUMUMAN -->
-    <div class="status-card" style="width: 75%; flex-direction: column; align-items: stretch; gap: 10px;">
-      <label style="font-size: 0.85rem; font-weight: 700; color: #38bdf8;">
-        <i class="fa-solid fa-bullhorn"></i> Teks Pengumuman Running Text (Manual)
-      </label>
-      <div style="display: flex; gap: 10px;">
-        <input type="text" id="custom-announcement" placeholder="Ketik pengumuman baru...">
-        <button id="btn-update-announcement" class="btn btn-primary" style="width: auto; white-space: nowrap;">
-          Update
-        </button>
-      </div>
-    </div>
-
-    <div class="main-grid">
+    <!-- ========================================== -->
+    <!-- SECTION 2: MENU UTAMA ADMIN HUB            -->
+    <!-- ========================================== -->
+    <div id="dashboard-section" class="hidden space-y-6">
       
-      <!-- Kolom Kiri: Form Input -->
-      <div class="panel-card">
-        <h3 id="form-title" class="panel-title">
-          <i class="fa-solid fa-plus-circle"></i> Tambah Link Baru
-        </h3>
-
-        <input type="hidden" id="link-id">
-
-        <div class="form-group">
-          <label for="link-title">Judul Link</label>
-          <input type="text" id="link-title" placeholder="Contoh: GitHub Repositories">
+      <!-- TOP BAR HEADER -->
+      <header class="flex items-center justify-between glass-card p-4 rounded-2xl shadow-xl">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-xl bg-cyan-500/10 border border-cyan-500/30 flex items-center justify-center text-cyan-400 font-bold">
+            <i class="fa-solid fa-sliders text-lg"></i>
+          </div>
+          <div>
+            <h2 class="text-sm font-bold text-white tracking-wide">Master Control Hub</h2>
+            <p id="user-email-display" class="text-[11px] text-slate-400 font-mono">admin@domain.com</p>
+          </div>
         </div>
 
-        <div class="form-group">
-          <label for="link-url">URL Tujuan</label>
-          <input type="url" id="link-url" placeholder="https://github.com/username" inputmode="url">
-        </div>
-
-        <div class="form-group">
-          <label for="link-icon">Pilih Ikon Link</label>
-          <select id="link-icon">
-            <option value="fa-solid fa-link">🔗 Default Link (Tautan Umum)</option>
-            <option value="fa-solid fa-clipboard-list">📋 Google Form / Formulir</option>
-            <option value="fa-solid fa-table-cells">📊 Google Sheet / Spreadsheet</option>
-            <option value="fa-brands fa-google-drive">📁 Google Drive</option>
-            <option value="fa-solid fa-file-lines">📝 Google Doc / Dokumen Teks</option>
-            <option value="fa-brands fa-github">🐙 GitHub</option>
-            <option value="fa-brands fa-youtube">▶️ YouTube</option>
-            <option value="fa-brands fa-linkedin">💼 LinkedIn</option>
-            <option value="fa-brands fa-instagram">📸 Instagram</option>
-            <option value="fa-brands fa-whatsapp">💬 WhatsApp</option>
-            <option value="fa-brands fa-facebook">📘 Facebook</option>
-            <option value="fa-brands fa-x-twitter">🐦 X / Twitter</option>
-            <option value="fa-brands fa-tiktok">🎵 TikTok</option>
-            <option value="fa-solid fa-globe">🌐 Website / Blog</option>
-            <option value="fa-solid fa-envelope">✉️ Email / Kontak</option>
-            <option value="fa-solid fa-file-pdf">📄 PDF / Dokumen</option>
-            <option value="fa-solid fa-download">📥 Download / File</option>
-          </select>
-        </div>
-
-        <div class="form-group">
-          <label for="link-order">Urutan Tampil (Order)</label>
-          <input type="number" id="link-order" placeholder="1, 2, 3..." inputmode="numeric">
-        </div>
-
-        <button id="btn-save" class="btn btn-primary">
-          <i class="fa-solid fa-floppy-disk"></i> Simpan Link
+        <button id="btn-logout" title="Logout" class="p-2.5 bg-red-500/15 hover:bg-red-500/30 text-red-400 border border-red-500/40 font-bold text-xs rounded-xl transition shadow-md shadow-red-500/10 flex items-center gap-1 cursor-pointer">
+          <i class="fa-solid fa-power-off"></i>
         </button>
-        <button id="btn-cancel" class="btn btn-secondary hidden">
-          Batal Edit
-        </button>
+      </header>
+
+      <!-- CARD PILIHAN MODUL KONTROL -->
+      <div class="space-y-4">
+        
+        <!-- MODUL 1: KELOLA PORTAL LINK -->
+        <a 
+          href="link/index.html" 
+          class="group glass-card p-5 rounded-2xl flex items-center justify-between border border-cyan-500/30 hover:border-cyan-400 transition-all duration-300 hover:scale-[1.02] shadow-lg shadow-cyan-500/5 block"
+        >
+          <div class="flex items-center gap-4">
+            <div class="w-12 h-12 rounded-xl bg-cyan-500/10 border border-cyan-500/30 flex items-center justify-center text-cyan-400 text-xl group-hover:bg-cyan-500 group-hover:text-slate-950 transition-colors shrink-0">
+              <i class="fa-solid fa-link"></i>
+            </div>
+            <div class="text-left">
+              <h2 class="text-sm font-bold text-white group-hover:text-cyan-400 transition-colors">Kelola Link &amp; Running Text</h2>
+              <p class="text-[11px] text-slate-400 mt-0.5">Tambah/hapus tautan portal &amp; teks pengumuman</p>
+            </div>
+          </div>
+          <i class="fa-solid fa-arrow-right text-xs text-slate-500 group-hover:text-cyan-400 group-hover:translate-x-1 transition-all"></i>
+        </a>
+
+        <!-- MODUL 2: DASHBOARD GURU ABSENSI -->
+        <a 
+          href="guru/index.html" 
+          class="group glass-card p-5 rounded-2xl flex items-center justify-between border border-emerald-500/30 hover:border-emerald-400 transition-all duration-300 hover:scale-[1.02] shadow-lg shadow-emerald-500/5 block"
+        >
+          <div class="flex items-center gap-4">
+            <div class="w-12 h-12 rounded-xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-400 text-xl group-hover:bg-emerald-500 group-hover:text-slate-950 transition-colors shrink-0">
+              <i class="fa-solid fa-qrcode"></i>
+            </div>
+            <div class="text-left">
+              <h2 class="text-sm font-bold text-white group-hover:text-emerald-400 transition-colors">Dashboard Absensi Guru</h2>
+              <p class="text-[11px] text-slate-400 mt-0.5">Buka sesi QR Absensi &amp; rekap realtime</p>
+            </div>
+          </div>
+          <i class="fa-solid fa-arrow-right text-xs text-slate-500 group-hover:text-emerald-400 group-hover:translate-x-1 transition-all"></i>
+        </a>
+
       </div>
 
-      <!-- Kolom Kanan: Daftar Link Aktif -->
-      <div class="panel-card">
-        <h3 class="panel-title">
-          <i class="fa-solid fa-list-check"></i> Daftar Link Aktif
-        </h3>
-
-        <div id="admin-links-list" class="link-list">
-          <p style="color:var(--text-muted); font-size:0.9rem;">Memuat daftar link...</p>
-        </div>
-      </div>
+      <!-- FOOTER SIMPLE -->
+      <footer class="pt-2 text-center border-t border-slate-800/60">
+        <p class="text-[11px] text-slate-500 font-mono">Developed by Iskak Fatoni, S.Pd., Gr.</p>
+      </footer>
 
     </div>
 
-  </div>
+  </main>
 
+  <!-- SCRIPT AUTHENTICATION & PARTICLES -->
   <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
     import { 
       getAuth, 
       signInWithEmailAndPassword, 
       onAuthStateChanged, 
-      signOut, 
-      setPersistence, 
+      signOut,
+      setPersistence,
       browserSessionPersistence 
-    } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-    import { getFirestore, collection, addDoc, updateDoc, deleteDoc, doc, query, orderBy, onSnapshot, setDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+    } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 
+    // Kredensial Firebase Portal IskakFatoni
     const firebaseConfig = {
       apiKey: "AIzaSyDhq4QoCn00GkfpKXSP8PnvSvEKa2yn0ic",
       authDomain: "portal-iskakfatoni.firebaseapp.com",
@@ -400,197 +174,90 @@
 
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
-    const db = getFirestore(app);
 
     const loginSection = document.getElementById('login-section');
     const dashboardSection = document.getElementById('dashboard-section');
-    const loginError = document.getElementById('login-error');
     const loginForm = document.getElementById('login-form');
+    const loginError = document.getElementById('login-error');
+    const userEmailDisplay = document.getElementById('user-email-display');
+    const btnLogout = document.getElementById('btn-logout');
 
-    let isPortalOnline = true;
-
-    // FOKUS MENCEGAH KEYBOARD TERSUMBAT DI HP
-    document.querySelectorAll('input').forEach(input => {
-      input.addEventListener('touchstart', function() {
-        this.focus();
-      }, { passive: true });
-    });
-
+    // 🔒 MONITORING AUTHENTICATION STATUS
     onAuthStateChanged(auth, (user) => {
       if (user) {
         loginSection.classList.add('hidden');
         dashboardSection.classList.remove('hidden');
-        listenPortalStatus();
-        loadAdminLinks();
+        userEmailDisplay.innerText = user.email;
       } else {
         loginSection.classList.remove('hidden');
         dashboardSection.classList.add('hidden');
       }
     });
 
-    // PROSES SUBMIT LOGIN (DENGAN SESSION PERSISTENCE)
-    loginForm.addEventListener('submit', async (e) => {
-      e.preventDefault();
-      const email = document.getElementById('login-email').value;
-      const pass = document.getElementById('login-password').value;
-      loginError.innerText = '';
+    // 🔒 LOGIN PROCESS
+    loginForm.addEventListener('submit', async () => {
+      const email = document.getElementById('login-email').value.trim();
+      const pass = document.getElementById('login-password').value.trim();
+      loginError.classList.add('hidden');
 
       try {
-        // 🔒 PAKSA SESI HANYA BERLAKU SELAMA TAB/BROWSER DIBUKA
         await setPersistence(auth, browserSessionPersistence);
         await signInWithEmailAndPassword(auth, email, pass);
       } catch (err) {
-        loginError.innerText = 'Login gagal: Periksa email dan password.';
+        loginError.innerText = "Login gagal: Email atau password salah!";
+        loginError.classList.remove('hidden');
       }
     });
 
-    document.getElementById('btn-logout').addEventListener('click', () => signOut(auth));
-
-    // KONTROL MODE PORTAL (ON/OFF & ANNOUNCEMENT)
-    function listenPortalStatus() {
-      onSnapshot(doc(db, "settings", "portal"), (docSnap) => {
-        const badge = document.getElementById('portal-status-badge');
-        const btnToggle = document.getElementById('btn-toggle-portal');
-        const customAnnounceInput = document.getElementById('custom-announcement');
-        
-        if (docSnap.exists()) {
-          isPortalOnline = docSnap.data().isOnline;
-          if (docSnap.data().announcement) {
-            customAnnounceInput.value = docSnap.data().announcement;
-          }
-        } else {
-          isPortalOnline = true;
-        }
-
-        if (isPortalOnline) {
-          badge.innerText = 'ONLINE';
-          badge.className = 'status-badge status-on';
-          btnToggle.className = 'btn btn-toggle is-off';
-          btnToggle.innerHTML = '<i class="fa-solid fa-toggle-off"></i> Ubah Ke OFFLINE MODE';
-        } else {
-          badge.innerText = 'OFFLINE';
-          badge.className = 'status-badge status-off';
-          btnToggle.className = 'btn btn-toggle';
-          btnToggle.innerHTML = '<i class="fa-solid fa-toggle-on"></i> Ubah Ke ONLINE MODE';
-        }
-      });
-    }
-
-    document.getElementById('btn-toggle-portal').addEventListener('click', async () => {
-      await setDoc(doc(db, "settings", "portal"), {
-        isOnline: !isPortalOnline
-      }, { merge: true });
-    });
-
-    // UPDATE MANUAL RUNNING TEXT
-    document.getElementById('btn-update-announcement').addEventListener('click', async () => {
-      const text = document.getElementById('custom-announcement').value.trim();
-      if (text) {
-        await setDoc(doc(db, "settings", "portal"), {
-          announcement: text
-        }, { merge: true });
-        alert('Teks Pengumuman Berhasil Diperbarui!');
+    // 🚪 LOGOUT
+    btnLogout.addEventListener('click', () => {
+      if (confirm("Apakah Anda yakin ingin keluar?")) {
+        signOut(auth);
       }
     });
 
-    // CRUD LINKS
-    const linkIdInput = document.getElementById('link-id');
-    const linkTitleInput = document.getElementById('link-title');
-    const linkUrlInput = document.getElementById('link-url');
-    const linkIconInput = document.getElementById('link-icon');
-    const linkOrderInput = document.getElementById('link-order');
-    const btnSave = document.getElementById('btn-save');
-    const btnCancel = document.getElementById('btn-cancel');
+    // PARTICLE ANIMATION SCRIPT
+    const canvas = document.getElementById('particle-canvas');
+    const ctx = canvas.getContext('2d');
+    let particles = [];
 
-    function loadAdminLinks() {
-      const q = query(collection(db, "links"), orderBy("order", "asc"));
-      onSnapshot(q, (snapshot) => {
-        const listDiv = document.getElementById('admin-links-list');
-        listDiv.innerHTML = '';
-
-        if (snapshot.empty) {
-          listDiv.innerHTML = '<p style="color:var(--text-muted); font-size:0.85rem;">Belum ada link yang tersimpan.</p>';
-          return;
-        }
-
-        snapshot.forEach((docSnap) => {
-          const data = docSnap.data();
-          const row = document.createElement('div');
-          row.className = 'link-item';
-          row.innerHTML = `
-            <div class="link-info">
-              <span class="badge-order">#${data.order || 1}</span>
-              <div class="link-details">
-                <h4><i class="${data.icon || 'fa-solid fa-link'}" style="color:#38bdf8; margin-right:6px;"></i> ${data.title}</h4>
-                <p>${data.url}</p>
-              </div>
-            </div>
-            <div class="actions">
-              <button class="btn btn-edit"><i class="fa-solid fa-pen"></i> Edit</button>
-              <button class="btn btn-danger"><i class="fa-solid fa-trash"></i> Hapus</button>
-            </div>
-          `;
-          
-          row.querySelector('.btn-edit').onclick = () => {
-            linkIdInput.value = docSnap.id;
-            linkTitleInput.value = data.title;
-            linkUrlInput.value = data.url;
-            linkIconInput.value = data.icon || 'fa-solid fa-link';
-            linkOrderInput.value = data.order || 1;
-            document.getElementById('form-title').innerHTML = '<i class="fa-solid fa-pen-to-square"></i> Edit Link';
-            btnCancel.classList.remove('hidden');
-          };
-
-          row.querySelector('.btn-danger').onclick = async () => {
-            if (confirm(`Yakin ingin menghapus "${data.title}"?`)) {
-              await deleteDoc(doc(db, "links", docSnap.id));
-            }
-          };
-
-          listDiv.appendChild(row);
+    function initCanvas() {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+      particles = [];
+      for (let i = 0; i < 25; i++) {
+        particles.push({
+          x: Math.random() * canvas.width,
+          y: Math.random() * canvas.height,
+          radius: Math.random() * 2 + 1,
+          speedY: Math.random() * -0.5 - 0.2,
+          speedX: (Math.random() - 0.5) * 0.3,
+          opacity: Math.random() * 0.5 + 0.2
         });
+      }
+    }
+
+    function drawParticles() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      particles.forEach(p => {
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(56, 189, 248, ${p.opacity})`;
+        ctx.fill();
+
+        p.y += p.speedY;
+        p.x += p.speedX;
+        if (p.y < 0) {
+          p.y = canvas.height;
+          p.x = Math.random() * canvas.width;
+        }
       });
+      requestAnimationFrame(drawParticles);
     }
 
-    // OTOMATISASI RUNNING TEXT SAAT SIMPAN LINK BARU
-    btnSave.addEventListener('click', async () => {
-      const id = linkIdInput.value;
-      const title = linkTitleInput.value.trim();
-      const url = linkUrlInput.value.trim();
-      const icon = linkIconInput.value;
-      const order = parseInt(linkOrderInput.value) || 1;
-
-      if (!title || !url) {
-        alert('Judul dan URL wajib diisi!');
-        return;
-      }
-
-      if (id) {
-        await updateDoc(doc(db, "links", id), { title, url, icon, order });
-      } else {
-        await addDoc(collection(db, "links"), { title, url, icon, order });
-        
-        // Auto update running text
-        const autoAnnouncement = `📌 TAUTAN BARU DITAMBAHKAN: ${title.toUpperCase()}! Silakan periksa daftar link di bawah ini.`;
-        await setDoc(doc(db, "settings", "portal"), {
-          announcement: autoAnnouncement
-        }, { merge: true });
-      }
-
-      resetForm();
-    });
-
-    btnCancel.addEventListener('click', resetForm);
-
-    function resetForm() {
-      linkIdInput.value = '';
-      linkTitleInput.value = '';
-      linkUrlInput.value = '';
-      linkIconInput.value = 'fa-solid fa-link';
-      linkOrderInput.value = '';
-      document.getElementById('form-title').innerHTML = '<i class="fa-solid fa-plus-circle"></i> Tambah Link Baru';
-      btnCancel.classList.add('hidden');
-    }
+    window.addEventListener('resize', initCanvas);
+    initCanvas();
+    drawParticles();
   </script>
 </body>
 </html>
