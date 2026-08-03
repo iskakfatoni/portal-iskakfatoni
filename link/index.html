@@ -50,6 +50,21 @@
     ::-webkit-scrollbar-thumb:hover {
       background: rgba(56, 189, 248, 0.6);
     }
+
+    /* STYLING ITEM SAAT DRAGGING */
+    .link-drag-item {
+      cursor: grab;
+      user-select: none;
+      transition: background-color 0.2s, border-color 0.2s, transform 0.15s;
+    }
+    .link-drag-item:active {
+      cursor: grabbing;
+    }
+    .link-drag-item.dragging {
+      opacity: 0.4;
+      background-color: rgba(56, 189, 248, 0.15) !important;
+      border-color: #38bdf8 !important;
+    }
   </style>
 </head>
 <body class="min-h-screen flex flex-col justify-start items-center p-3 md:p-6 relative">
@@ -149,19 +164,24 @@
         <div class="glass-card p-5 rounded-2xl shadow-xl h-full flex flex-col justify-between w-full">
           <div>
             <div class="flex items-center justify-between border-b border-slate-800 pb-3">
-              <h3 class="text-xs font-bold text-cyan-400 flex items-center gap-2 uppercase tracking-wider">
-                <i class="fa-solid fa-list-ul"></i> Daftar Tautan Portal Aktif
-              </h3>
+              <div>
+                <h3 class="text-xs font-bold text-cyan-400 flex items-center gap-2 uppercase tracking-wider">
+                  <i class="fa-solid fa-list-ul"></i> Daftar Tautan Portal Aktif
+                </h3>
+                <p class="text-[11px] text-slate-400 mt-0.5">Tarik/geser ikon <i class="fa-solid fa-grip-vertical text-cyan-400 mx-1"></i> untuk mengubah urutan tampilan</p>
+              </div>
               <span id="link-count" class="text-xs text-slate-400 font-mono font-bold bg-slate-950 px-3 py-1 rounded-full border border-slate-800">0 Link</span>
             </div>
 
+            <!-- CONTAINER DAFTAR LINK DRAGGABLE -->
             <div id="link-list-container" class="space-y-2.5 mt-4 max-h-[600px] overflow-y-auto pr-2">
               <p class="text-xs text-slate-500 text-center py-10">// Memuat daftar link dari Firestore...</p>
             </div>
           </div>
 
-          <div class="pt-4 border-t border-slate-800/80 text-right">
-            <span class="text-[11px] text-slate-500 font-mono">Status Portal: <span class="text-emerald-400">Sinkronisasi Realtime</span></span>
+          <div class="pt-4 border-t border-slate-800/80 flex items-center justify-between text-[11px] text-slate-500 font-mono">
+            <span id="reorder-status" class="text-cyan-400 hidden">💾 Menyimpan urutan baru...</span>
+            <span class="ml-auto">Status Portal: <span class="text-emerald-400">Sinkronisasi Realtime</span></span>
           </div>
         </div>
       </div>
@@ -221,11 +241,11 @@
     drawParticles();
   </script>
 
-  <!-- FIREBASE SCRIPT -->
+  <!-- FIREBASE SCRIPT & DRAG-AND-DROP LOGIC -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
     import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
-    import { getFirestore, collection, doc, setDoc, addDoc, deleteDoc, onSnapshot, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+    import { getFirestore, collection, doc, setDoc, addDoc, deleteDoc, updateDoc, onSnapshot, query, orderBy, writeBatch, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyDhq4QoCn00GkfpKXSP8PnvSvEKa2yn0ic",
@@ -256,8 +276,11 @@
     const inputLinkUrl = document.getElementById('input-link-url');
     const linkListContainer = document.getElementById('link-list-container');
     const linkCount = document.getElementById('link-count');
+    const reorderStatus = document.getElementById('reorder-status');
 
     let currentPortalState = true;
+    let draggedItem = null;
+    let isReordering = false;
 
     // 🔒 PROTEKSI ROUTE
     onAuthStateChanged(auth, (user) => {
@@ -271,12 +294,12 @@
       }
     });
 
-    // ↩️ KEMBALI KE HUB ADMIN (TANPA LOGOUT)
+    // ↩️ KEMBALI KE HUB ADMIN
     btnLogout.addEventListener('click', () => {
       window.location.href = "../admin.html";
     });
 
-    // 1. LISTEN & WRITE SINKRON SAMA DENGAN PORTAL.HTML
+    // 1. LISTEN & WRITE STATUS PORTAL
     function loadPortalStatus() {
       onSnapshot(doc(db, "settings", "portal_status"), (docSnap) => {
         if (docSnap.exists()) {
@@ -323,7 +346,7 @@
       }
     }
 
-    // 2. RUNNING TEXT & LINKS
+    // 2. RUNNING TEXT
     function loadRunningText() {
       onSnapshot(doc(db, "settings", "announcement"), (docSnap) => {
         if (docSnap.exists()) {
@@ -342,8 +365,14 @@
       }
     });
 
+    // 3. LISTEN & RENDER DAFTAR LINK TERURUT (DENGAN DRAG AND DROP)
     function loadLinksList() {
-      onSnapshot(collection(db, "links"), (snapshot) => {
+      const q = query(collection(db, "links"), orderBy("order", "asc"));
+      
+      onSnapshot(q, (snapshot) => {
+        // Jangan timpa tampilan jika user sedang melakukan drag-and-drop
+        if (isReordering) return;
+
         linkListContainer.innerHTML = '';
         linkCount.innerText = `${snapshot.size} Link`;
 
@@ -352,18 +381,26 @@
           return;
         }
 
-        snapshot.forEach((docSnap) => {
+        snapshot.forEach((docSnap, index) => {
           const data = docSnap.data();
           const docId = docSnap.id;
 
           const item = document.createElement('div');
-          item.className = 'flex items-center justify-between p-3.5 bg-slate-950/90 rounded-xl border border-slate-800 text-xs hover:border-cyan-500/30 transition';
+          item.draggable = true;
+          item.dataset.id = docId;
+          item.className = 'link-drag-item flex items-center justify-between p-3 bg-slate-950/90 rounded-xl border border-slate-800 text-xs hover:border-cyan-500/30 transition';
+          
           item.innerHTML = `
-            <div class="space-y-0.5">
-              <p class="font-bold text-white text-sm">${data.title}</p>
-              <a href="${data.url}" target="_blank" class="text-cyan-400 font-mono text-[11px] hover:underline">${data.url}</a>
+            <div class="flex items-center gap-3">
+              <div class="drag-handle cursor-grab text-slate-500 hover:text-cyan-400 p-1" title="Geser untuk mengubah urutan">
+                <i class="fa-solid fa-grip-vertical text-sm"></i>
+              </div>
+              <div class="space-y-0.5">
+                <p class="font-bold text-white text-sm">${data.title}</p>
+                <a href="${data.url}" target="_blank" class="text-cyan-400 font-mono text-[11px] hover:underline">${data.url}</a>
+              </div>
             </div>
-            <button class="btn-del p-2 bg-red-500/15 hover:bg-red-500/30 text-red-400 border border-red-500/30 rounded-lg text-xs font-semibold cursor-pointer" title="Hapus Link">
+            <button class="btn-del p-2 bg-red-500/15 hover:bg-red-500/30 text-red-400 border border-red-500/30 rounded-lg text-xs font-semibold cursor-pointer transition" title="Hapus Link">
               <i class="fa-solid fa-trash"></i>
             </button>
           `;
@@ -374,11 +411,77 @@
             }
           };
 
+          // EVEN LISTENERS DENGAN FITUR NATIVE DRAG & DROP
+          item.addEventListener('dragstart', handleDragStart);
+          item.addEventListener('dragover', handleDragOver);
+          item.addEventListener('drop', handleDrop);
+          item.addEventListener('dragend', handleDragEnd);
+
           linkListContainer.appendChild(item);
         });
       });
     }
 
+    // HANDLERS DRAG & DROP
+    function handleDragStart(e) {
+      isReordering = true;
+      draggedItem = this;
+      this.classList.add('dragging');
+      e.dataTransfer.effectAllowed = 'move';
+    }
+
+    function handleDragOver(e) {
+      e.preventDefault();
+      e.dataTransfer.dropEffect = 'move';
+      
+      const targetItem = e.target.closest('.link-drag-item');
+      if (targetItem && targetItem !== draggedItem) {
+        const rect = targetItem.getBoundingClientRect();
+        const next = (e.clientY - rect.top) / (rect.bottom - rect.top) > 0.5;
+        linkListContainer.insertBefore(draggedItem, next ? targetItem.nextSibling : targetItem);
+      }
+    }
+
+    async function handleDrop(e) {
+      e.stopPropagation();
+      return false;
+    }
+
+    async function handleDragEnd() {
+      if (draggedItem) {
+        draggedItem.classList.remove('dragging');
+        draggedItem = null;
+      }
+      
+      // SIMPAN URUTAN BARU KE FIRESTORE
+      await saveNewOrdersToFirestore();
+      isReordering = false;
+    }
+
+    // SIMPAN FIELD 'ORDER' MASAL KE CLOUD FIRESTORE
+    async function saveNewOrdersToFirestore() {
+      reorderStatus.classList.remove('hidden');
+      try {
+        const items = linkListContainer.querySelectorAll('.link-drag-item');
+        const batch = writeBatch(db);
+
+        items.forEach((item, newIndex) => {
+          const docId = item.dataset.id;
+          if (docId) {
+            batch.update(doc(db, "links", docId), { order: newIndex + 1 });
+          }
+        });
+
+        await batch.commit();
+        reorderStatus.innerText = "✔ Urutan berhasil disimpan!";
+        setTimeout(() => reorderStatus.classList.add('hidden'), 2000);
+      } catch (err) {
+        console.error(err);
+        reorderStatus.innerText = "❌ Gagal menyimpan urutan: " + err.message;
+      }
+    }
+
+    // FORM TAMBAH LINK BARU (MENGHITUNG FIELD ORDER OTOMATIS)
     formAddLink.addEventListener('submit', async () => {
       const title = inputLinkTitle.value.trim();
       const url = inputLinkUrl.value.trim();
@@ -386,7 +489,15 @@
       if (!title || !url) return;
 
       try {
-        await addDoc(collection(db, "links"), { title, url, created_at: serverTimestamp() });
+        const currentCount = linkListContainer.querySelectorAll('.link-drag-item').length;
+        
+        await addDoc(collection(db, "links"), { 
+          title, 
+          url, 
+          order: currentCount + 1,
+          created_at: serverTimestamp() 
+        });
+        
         inputLinkTitle.value = '';
         inputLinkUrl.value = '';
       } catch (err) {
