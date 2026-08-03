@@ -52,15 +52,16 @@
     }
   </style>
 </head>
-<body class="min-h-screen flex flex-col justify-start items-center p-4 md:p-8 relative">
+<body class="min-h-screen flex flex-col justify-start items-center p-3 md:p-6 relative">
 
   <!-- BACKGROUND PARTICLE CANVAS -->
   <canvas id="particle-canvas"></canvas>
 
-  <main class="max-w-7xl w-full space-y-6 my-auto relative z-10">
+  <!-- KONTEN UTAMA DIBUAT FULL SCREEN (W-FULL) -->
+  <main class="w-full space-y-4 relative z-10">
     
     <!-- TOP BAR HEADER -->
-    <header class="flex flex-col sm:flex-row items-start sm:items-center justify-between glass-card p-4 md:p-5 rounded-2xl shadow-xl gap-4">
+    <header class="flex flex-col sm:flex-row items-start sm:items-center justify-between glass-card p-4 rounded-2xl shadow-xl gap-4 w-full">
       <div class="flex items-center gap-3.5">
         <div class="w-11 h-11 rounded-xl bg-cyan-500/10 border border-cyan-500/30 flex items-center justify-center text-cyan-400 font-bold">
           <i class="fa-solid fa-database text-xl"></i>
@@ -78,11 +79,11 @@
       </div>
     </header>
 
-    <!-- DASHBOARD PANEL -->
-    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+    <!-- DASHBOARD PANEL FULL WIDTH -->
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-4 w-full">
       
-      <!-- NAVIGASI KOLEKSI DATABASE (KOLOM KIRI) -->
-      <aside class="lg:col-span-3 space-y-3">
+      <!-- NAVIGASI KOLEKSI DATABASE (KOLOM KIRI - 2 KOLOM GRID) -->
+      <aside class="lg:col-span-2 space-y-3">
         <div class="glass-card p-4 rounded-2xl shadow-xl space-y-2">
           <h2 class="text-xs font-bold text-cyan-400 border-b border-slate-800 pb-2 flex items-center gap-2 uppercase tracking-wider">
             <i class="fa-solid fa-folder-tree"></i> Koleksi Database
@@ -116,12 +117,12 @@
         </div>
       </aside>
 
-      <!-- KONTEN TABEL MATRIKS DINAMIS (KOLOM KANAN) -->
-      <section class="lg:col-span-9 space-y-4">
-        <div class="glass-card p-5 md:p-6 rounded-2xl shadow-xl space-y-4">
+      <!-- KONTEN TABEL MATRIKS DINAMIS (KOLOM KANAN - 10 KOLOM GRID DENGAN AREA MAKSIMAL) -->
+      <section class="lg:col-span-10 space-y-4">
+        <div class="glass-card p-4 md:p-5 rounded-2xl shadow-xl space-y-4 w-full">
           
           <!-- TOOLBAR TABLE -->
-          <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 border-b border-slate-800 pb-4">
+          <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 border-b border-slate-800 pb-3">
             <div>
               <h2 id="active-collection-title" class="text-sm font-extrabold text-white flex items-center gap-2 uppercase tracking-wide">
                 <i class="fa-solid fa-table-list text-cyan-400"></i> Koleksi: <span class="text-cyan-400 font-mono">siswa</span>
@@ -141,8 +142,8 @@
             </div>
           </div>
 
-          <!-- TABEL FIRESTORE DINAMIS -->
-          <div class="overflow-x-auto max-h-[560px] overflow-y-auto rounded-xl border border-slate-800 bg-slate-950/70">
+          <!-- TABEL FIRESTORE DINAMIS WIDE -->
+          <div class="overflow-x-auto max-h-[640px] overflow-y-auto rounded-xl border border-slate-800 bg-slate-950/70 w-full">
             <table class="w-full text-left border-collapse text-xs whitespace-nowrap">
               <thead class="sticky top-0 bg-slate-900/95 backdrop-blur border-b border-slate-800 text-slate-300 uppercase tracking-wider font-mono text-[11px] z-10">
                 <tr id="table-header-row">
@@ -177,7 +178,7 @@
     </div>
 
     <!-- FOOTER -->
-    <div class="text-center pt-2">
+    <div class="text-center pt-1">
       <p class="text-xs text-slate-500 font-mono">Developed by Iskak Fatoni, S.Pd., Gr.</p>
     </div>
 
@@ -266,7 +267,7 @@
     let selectedDocIds = new Set();
     let currentDocsList = [];
     
-    // STATE UNTUK SORTING (PENGURUTAN)
+    // STATE UNTUK SORTING
     let currentSortField = null;
     let currentSortOrder = 'asc';
     let currentDynamicFields = [];
@@ -383,7 +384,7 @@
       });
     }
 
-    // RENDER HEADER DENGAN POSISI CHECKBOX DI SISI KANAN (SEBELUM AKSI)
+    // RENDER HEADER DENGAN POSISI CHECKBOX DI SISI KANAN
     function renderTableHeaders() {
       const getSortIcon = (field) => {
         if (currentSortField !== field) return '<span class="text-[10px] text-slate-600 ml-1">⇅</span>';
