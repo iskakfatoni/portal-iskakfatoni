@@ -2,107 +2,291 @@
 <html lang="id">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>PORTAL :: Scanner QR Absensi Siswa</title>
-  
-  <!-- Tailwind CSS & FontAwesome -->
-  <script src="https://cdn.tailwindcss.com"></script>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+  <title>PORTAL::IskakFatoni - Absensi Siswa</title>
+  <link rel="stylesheet" href="style.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   
-  <!-- HTML5 QR Code Scanner Library -->
-  <script src="https://unpkg.com/html5-qrcode"></script>
-
   <style>
-    body {
-      font-family: 'Plus Jakarta Sans', sans-serif;
-      background-color: #0b0f19;
+    /* Styling khusus Form & Profil Absensi */
+    .absensi-box {
+      background: var(--card-bg, rgba(15, 23, 42, 0.85));
+      border: 1px solid var(--card-border, rgba(255, 255, 255, 0.1));
+      border-radius: 20px;
+      padding: 24px 20px;
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      margin: 20px 0;
+      width: 100%;
+      box-shadow: 0 15px 35px -10px rgba(0, 0, 0, 0.4);
+    }
+
+    .form-group-absensi {
+      margin-bottom: 16px;
+      text-align: left;
+    }
+
+    .form-group-absensi label {
+      display: block;
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: #94a3b8;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 6px;
+    }
+
+    .input-absensi {
+      width: 100%;
+      padding: 14px 16px;
+      background: rgba(3, 7, 18, 0.7);
+      border: 1.5px solid rgba(255, 255, 255, 0.15);
+      border-radius: 12px;
+      color: #ffffff;
+      font-family: inherit;
+      font-size: 0.95rem;
+      outline: none;
+      transition: all 0.2s ease;
+    }
+
+    .input-absensi:focus {
+      border-color: #38bdf8;
+      box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.25);
+    }
+
+    .btn-absensi {
+      width: 100%;
+      padding: 14px 20px;
+      border: none;
+      border-radius: 12px;
+      font-family: inherit;
+      font-size: 0.9rem;
+      font-weight: 800;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: all 0.2s ease;
+    }
+
+    .btn-cyan {
+      background: #38bdf8;
+      color: #090d16;
+      box-shadow: 0 8px 20px -4px rgba(56, 189, 248, 0.3);
+    }
+
+    .btn-cyan:hover {
+      background: #0284c7;
       color: #ffffff;
     }
-    .glass-card {
-      background: rgba(15, 23, 42, 0.85);
-      backdrop-filter: blur(16px);
-      -webkit-backdrop-filter: blur(16px);
-      border: 1px solid rgba(255, 255, 255, 0.1);
+
+    .btn-emerald {
+      background: linear-gradient(135deg, #10b981, #14b8a6);
+      color: #090d16;
+      box-shadow: 0 8px 20px -4px rgba(16, 185, 129, 0.3);
     }
-    /* Custom style overlay area scanner */
-    #reader video {
-      object-fit: cover !important;
-      border-radius: 16px;
+
+    .btn-emerald:hover {
+      opacity: 0.9;
     }
+
+    .profile-info-grid {
+      background: rgba(3, 7, 18, 0.6);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 14px;
+      padding: 16px;
+      text-align: left;
+      margin-bottom: 18px;
+    }
+
+    .badge-status {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 4px 10px;
+      border-radius: 20px;
+      font-size: 0.7rem;
+      font-weight: 700;
+      background: rgba(16, 185, 129, 0.15);
+      color: #34d399;
+      border: 1px solid rgba(16, 185, 129, 0.3);
+    }
+
+    .error-msg {
+      background: rgba(239, 68, 68, 0.15);
+      border: 1px solid rgba(239, 68, 68, 0.3);
+      color: #f87171;
+      padding: 10px;
+      border-radius: 10px;
+      font-size: 0.8rem;
+      text-align: center;
+      margin-bottom: 14px;
+    }
+
+    .hidden { display: none !important; }
   </style>
 </head>
-<body class="min-h-screen flex flex-col justify-between items-center p-4">
+<body>
 
-  <!-- TOP BAR HEADER PROFILE SISWA -->
-  <header class="max-w-md w-full glass-card p-4 rounded-2xl shadow-xl flex items-center justify-between">
-    <div class="flex items-center gap-3">
-      <div class="w-10 h-10 rounded-xl bg-cyan-500/15 border border-cyan-500/30 flex items-center justify-center text-cyan-400 font-bold">
-        <i class="fa-solid fa-user-graduate text-lg"></i>
-      </div>
-      <div>
-        <h2 id="siswa-nama-display" class="text-sm font-bold text-white leading-tight">Memuat...</h2>
-        <p class="text-[11px] text-slate-400 font-mono"><span id="siswa-nis-display">-</span> | <span id="siswa-kelas-display">-</span></p>
-      </div>
-    </div>
+  <!-- PARTICLE CANVAS -->
+  <canvas id="particle-canvas"></canvas>
 
-    <!-- HANYA BADGE STATUS TERIKAT (TANPA TOMBOL LOGOFF/RESET) -->
-    <span class="px-2.5 py-1 rounded-full text-[10px] font-bold bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 flex items-center gap-1">
-      <i class="fa-solid fa-lock text-[9px]"></i> HP Terikat
-    </span>
-  </header>
-
-  <!-- MAIN SCANNER CAMERA CONTAINER -->
-  <main class="max-w-md w-full my-auto space-y-4">
+  <main class="container">
     
-    <div class="glass-card p-4 rounded-3xl shadow-2xl space-y-3 text-center">
-      <div class="flex items-center justify-between border-b border-slate-800 pb-2.5 px-1">
-        <span class="text-xs font-bold text-cyan-400 uppercase tracking-wider flex items-center gap-2">
-          <i class="fa-solid fa-camera"></i> Scan QR Absensi Kelas
-        </span>
-        <span id="scan-status-badge" class="text-[10px] font-mono px-2.5 py-0.5 rounded-full bg-cyan-500/10 text-cyan-400 border border-cyan-500/20">
-          Kamera Aktif
-        </span>
+    <!-- Header Profil -->
+    <header class="profile">
+      <div class="avatar-ring">
+        <img 
+          src="foto_asn_profile.png" 
+          alt="Muchamad Iskak Fatoni" 
+          class="avatar">
+      </div>
+      <h1 class="name">PORTAL::Iskak Fatoni</h1>
+      <p class="bio">I'am certified electronical and computer teacher, also a former Kamen Rider</p>
+    </header>
+
+    <!-- SECTION ABSENSI SISWA -->
+    <section class="absensi-box">
+      
+      <!-- LOADING STATE INITIALIZATION -->
+      <div id="section-loading-absensi" class="text-center py-6">
+        <i class="fa-solid fa-spinner fa-spin text-2xl text-cyan-400"></i>
+        <p class="text-xs text-slate-400 mt-2 font-mono">Memeriksa status perangkat &amp; database...</p>
       </div>
 
-      <!-- VIEWPORT KAMERA -->
-      <div class="relative w-full aspect-square bg-slate-950 rounded-2xl overflow-hidden border border-slate-800 flex items-center justify-center">
-        <div id="reader" class="w-full h-full"></div>
+      <!-- STATE 1: FORM INPUT NIS & DEVICE BINDING -->
+      <div id="section-login-absensi" class="hidden">
+        <div style="text-align:center; margin-bottom: 20px;">
+          <h2 style="font-size: 1.1rem; font-weight: 800; color: #ffffff;">VERIFIKASI ABSENSI SISWA</h2>
+          <p style="font-size: 0.8rem; color: #94a3b8; margin-top: 4px;">Masukkan NIS Anda untuk mengikat akun di HP ini</p>
+        </div>
+
+        <div class="form-group-absensi">
+          <label for="nis-input">Nomor Induk Siswa (NIS)</label>
+          <input 
+            type="number" 
+            id="nis-input" 
+            placeholder="Contoh: 2026001" 
+            class="input-absensi"
+            inputmode="numeric"
+          >
+        </div>
+
+        <div id="error-msg" class="error-msg hidden"></div>
+
+        <button id="btn-verifikasi" type="button" class="btn-absensi btn-cyan">
+          <span id="btn-text">Verifikasi NIS &amp; Ikat HP</span>
+        </button>
       </div>
 
-      <p class="text-[11px] text-slate-400 font-mono pt-1">
-        Arahkan kamera ke QR Code yang ditampilkan oleh Guru di depan kelas
-      </p>
-    </div>
+      <!-- STATE 2: PROFIL SISWA TERIKAT -->
+      <div id="section-profile-absensi" class="hidden">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
+          <span style="font-size: 0.75rem; color: #94a3b8; font-weight: 700;">STATUS PERANGKAT</span>
+          <span class="badge-status">🔒 HP Terikat Resmi</span>
+        </div>
 
-    <!-- NOTIFIKASI / FEEDBACK SUCCESS ERROR -->
-    <div id="scan-feedback" class="hidden p-4 rounded-2xl text-xs font-bold text-center border transition"></div>
+        <div class="profile-info-grid">
+          <p style="font-size: 0.75rem; color: #94a3b8;">Nama Siswa</p>
+          <p id="profile-nama" style="font-size: 1rem; font-weight: 800; color: #ffffff; margin-bottom: 10px;">-</p>
+
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+            <div>
+              <p style="font-size: 0.7rem; color: #94a3b8;">NIS</p>
+              <p id="profile-nis" style="font-size: 0.85rem; font-weight: 700; color: #38bdf8; font-family: monospace;">-</p>
+            </div>
+            <div>
+              <p style="font-size: 0.7rem; color: #94a3b8;">Kelas</p>
+              <p id="profile-kelas" style="font-size: 0.85rem; font-weight: 700; color: #cbd5e1;">-</p>
+            </div>
+          </div>
+        </div>
+
+        <button id="btn-buka-scanner" type="button" class="btn-absensi btn-emerald">
+          <i class="fa-solid fa-camera"></i>
+          <span>Buka Scanner QR Absensi</span>
+        </button>
+      </div>
+
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+      <div class="social-icons">
+        <a href="https://wa.me/085645453111" target="_blank" rel="noopener noreferrer" class="social-btn wa"><i class="fa-brands fa-whatsapp"></i></a>
+        <a href="https://facebook.com/iskakfatoni" target="_blank" rel="noopener noreferrer" class="social-btn fb"><i class="fa-brands fa-facebook-f"></i></a>
+        <a href="https://instagram.com/iskakfatoni" target="_blank" rel="noopener noreferrer" class="social-btn ig"><i class="fa-brands fa-instagram"></i></a>
+        <a href="https://youtube.com/iskakfatoni" target="_blank" rel="noopener noreferrer" class="social-btn yt"><i class="fa-brands fa-youtube"></i></a>
+        <a href="https://tiktok.com/@iskakfatoni" target="_blank" rel="noopener noreferrer" class="social-btn tt"><i class="fa-brands fa-tiktok"></i></a>
+      </div>
+
+      <div class="supported-by">
+        <img src="nisnas_logo_colorful.png" alt="Logo NisNas Computer" class="supporter-logo">
+        <p>Supported by <span>NisNas Computer</span></p>
+      </div>
+    </footer>
 
   </main>
 
-  <!-- FOOTER & NAVIGASI KEMBALI -->
-  <footer class="max-w-md w-full space-y-3">
-    <a href="../absensi.html" class="w-full py-3.5 px-4 bg-slate-900 hover:bg-slate-800 text-slate-300 border border-slate-800 font-bold text-xs rounded-xl transition flex items-center justify-center gap-2 cursor-pointer shadow-lg">
-      <i class="fa-solid fa-arrow-left"></i> Kembali ke Dashboard Absensi
-    </a>
+  <!-- PARTICLE CANVAS -->
+  <script>
+    const canvas = document.getElementById('particle-canvas');
+    const ctx = canvas.getContext('2d');
+    let particles = [];
 
-    <p class="text-[11px] text-slate-500 text-center font-mono">Developed by Iskak Fatoni, S.Pd., Gr.</p>
-  </footer>
+    function initCanvas() {
+      canvas.width = document.documentElement.clientWidth || window.innerWidth;
+      canvas.height = window.innerHeight;
+      particles = [];
+      for (let i = 0; i < 35; i++) {
+        particles.push({
+          x: Math.random() * canvas.width,
+          y: Math.random() * canvas.height,
+          radius: Math.random() * 2 + 1,
+          speedY: Math.random() * -0.5 - 0.2,
+          speedX: (Math.random() - 0.5) * 0.3,
+          opacity: Math.random() * 0.6 + 0.3
+        });
+      }
+    }
 
+    function drawParticles() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      const isDarkMode = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+      const particleColor = isDarkMode ? "0, 245, 212" : "139, 92, 246";
 
-  <!-- LOGIC FIREBASE & QR SCANNER -->
+      particles.forEach(p => {
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(${particleColor}, ${p.opacity})`;
+        ctx.shadowBlur = 6;
+        ctx.shadowColor = `rgb(${particleColor})`;
+        ctx.fill();
+
+        p.y += p.speedY; p.x += p.speedX;
+        if (p.y < 0) { p.y = canvas.height; p.x = Math.random() * canvas.width; }
+      });
+      requestAnimationFrame(drawParticles);
+    }
+
+    window.addEventListener('resize', initCanvas);
+    initCanvas();
+    drawParticles();
+  </script>
+
+  <!-- LOGIC FIREBASE, AUTO-CLEAR CACHE & DUAL DEVICE LOCKING VALIDATION -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
     import { 
       getFirestore, 
-      collection, 
-      addDoc, 
-      query, 
-      where, 
-      getDocs, 
-      serverTimestamp 
+      doc, 
+      getDoc, 
+      updateDoc,
+      collection,
+      query,
+      where,
+      getDocs 
     } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
     const firebaseConfig = {
@@ -118,153 +302,190 @@
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
 
-    const namaDisplay = document.getElementById('siswa-nama-display');
-    const nisDisplay = document.getElementById('siswa-nis-display');
-    const kelasDisplay = document.getElementById('siswa-kelas-display');
-    const scanFeedback = document.getElementById('scan-feedback');
-    const scanStatusBadge = document.getElementById('scan-status-badge');
+    const sectionLoading = document.getElementById('section-loading-absensi');
+    const sectionLogin = document.getElementById('section-login-absensi');
+    const sectionProfile = document.getElementById('section-profile-absensi');
+    const nisInput = document.getElementById('nis-input');
+    const btnVerifikasi = document.getElementById('btn-verifikasi');
+    const btnText = document.getElementById('btn-text');
+    const errorMsg = document.getElementById('error-msg');
 
-    let currentSiswa = null;
-    let html5QrCode = null;
-    let isProcessing = false;
+    const profileNama = document.getElementById('profile-nama');
+    const profileNis = document.getElementById('profile-nis');
+    const profileKelas = document.getElementById('profile-kelas');
+    const btnBukaScanner = document.getElementById('btn-buka-scanner');
 
-    // 1. CEK PROFIL SISWA DARI LOCALSTORAGE
-    document.addEventListener('DOMContentLoaded', () => {
-      const savedUser = localStorage.getItem('portal_siswa_user');
-      if (!savedUser) {
-        window.location.href = "../absensi.html";
+    function getDeviceId() {
+      let deviceId = localStorage.getItem('portal_device_id');
+      if (!deviceId) {
+        deviceId = 'DEV-' + Math.random().toString(36).substring(2, 15) + '-' + Date.now().toString(36);
+        localStorage.setItem('portal_device_id', deviceId);
+      }
+      return deviceId;
+    }
+
+    const currentDeviceId = getDeviceId();
+
+    // AUTO-CLEAR CACHE & AUTO-SYNC DENGAN FIRESTORE SAAT HALAMAN DIMUAT
+    document.addEventListener('DOMContentLoaded', async () => {
+      const savedUserJson = localStorage.getItem('portal_siswa_user');
+
+      if (!savedUserJson) {
+        showLoginForm();
         return;
       }
 
       try {
-        currentSiswa = JSON.parse(savedUser);
-        namaDisplay.innerText = currentSiswa.nama_siswa;
-        nisDisplay.innerText = currentSiswa.nis;
-        kelasDisplay.innerText = currentSiswa.nama_kelas;
+        const localUser = JSON.parse(savedUserJson);
 
-        startScanner();
+        // Ambil data terbaru langsung dari Firestore
+        const docRef = doc(db, "siswa", localUser.nis);
+        const docSnap = await getDoc(docRef);
+
+        if (docSnap.exists()) {
+          const dbData = docSnap.data();
+
+          // KONDISI CACHE EXPIRED / TELAH DI-RESET:
+          // Jika device_id di Firestore sudah kosong ATAU berbeda dengan HP ini
+          if (!dbData.device_id || dbData.device_id !== currentDeviceId) {
+            localStorage.removeItem('portal_siswa_user');
+            showLoginForm();
+            return;
+          }
+
+          // SYNC DATA TERBARU:
+          const updatedUser = {
+            nis: dbData.nis || localUser.nis,
+            nama_siswa: dbData.nama_siswa || localUser.nama_siswa,
+            id_kelas: dbData.id_kelas || localUser.id_kelas,
+            nama_kelas: dbData.nama_kelas || localUser.nama_kelas,
+            device_id: currentDeviceId
+          };
+
+          localStorage.setItem('portal_siswa_user', JSON.stringify(updatedUser));
+          showProfile(updatedUser);
+
+        } else {
+          // Dokumen NIS dihapus dari database oleh Admin
+          localStorage.removeItem('portal_siswa_user');
+          showLoginForm();
+        }
       } catch (e) {
-        window.location.href = "../absensi.html";
+        console.error("Gagal verifikasi status:", e);
+        showLoginForm();
       }
     });
 
-    // 2. JALANKAN KAMERA SCANNER
-    function startScanner() {
-      html5QrCode = new Html5Qrcode("reader");
+    // VERIFIKASI DUA ARAH (DUAL VALIDATION)
+    btnVerifikasi.addEventListener('click', async () => {
+      const nis = nisInput.value.trim();
+      hideError();
 
-      const config = { 
-        fps: 10, 
-        qrbox: { width: 220, height: 220 },
-        aspectRatio: 1.0
-      };
+      if (!nis) {
+        showError("Silakan masukkan NIS Anda terlebih dahulu.");
+        return;
+      }
 
-      html5QrCode.start(
-        { facingMode: "environment" }, 
-        config, 
-        onScanSuccess
-      ).catch(err => {
-        showFeedback("Gagal mengakses kamera HP. Pastikan izin kamera telah diberikan!", "error");
-      });
-    }
-
-    // 3. LOGIKA KETIKA SCANNER BERHASIL MEMBACA QR
-    async function onScanSuccess(decodedText) {
-      if (isProcessing) return;
-      isProcessing = true;
-
-      scanStatusBadge.innerText = "Memproses...";
-      scanStatusBadge.className = "text-[10px] font-mono px-2.5 py-0.5 rounded-full bg-amber-500/10 text-amber-400 border border-amber-500/20";
+      setLoading(true);
 
       try {
-        // A. Cek Sesi Absensi Aktif berdasarkan Token QR
-        const qSesi = query(
-          collection(db, "sesi_absensi"), 
-          where("current_qr_token", "==", decodedText),
-          where("is_active", "==", true)
-        );
-        const sesiSnap = await getDocs(qSesi);
+        // 1. CEK DOKUMEN NIS SISWA
+        const docRef = doc(db, "siswa", nis);
+        const docSnap = await getDoc(docRef);
 
-        if (sesiSnap.empty) {
-          showFeedback("❌ QR Code tidak valid atau sesi absensi sudah ditutup oleh Guru!", "error");
-          resumeScanning(3000);
+        if (!docSnap.exists()) {
+          showError("NIS tidak ditemukan! Pastikan NIS terdaftar.");
+          setLoading(false);
           return;
         }
 
-        let activeSesiData = null;
-        let activeSesiId = null;
+        const dataSiswa = docSnap.data();
 
-        sesiSnap.forEach(d => {
-          activeSesiId = d.id;
-          activeSesiData = d.data();
-        });
-
-        // B. Cek Kesesuaian Kelas Siswa dengan Sesi Guru
-        if (activeSesiData.id_kelas !== currentSiswa.nama_kelas && activeSesiData.id_kelas !== currentSiswa.id_kelas) {
-          showFeedback(`❌ QR Code ini khusus untuk kelas ${activeSesiData.id_kelas}!`, "error");
-          resumeScanning(3000);
+        // VALIDASI 1: Apakah NIS ini sudah terikat di HP LAIN?
+        if (dataSiswa.device_id && dataSiswa.device_id !== currentDeviceId) {
+          showError("❌ Akun NIS ini sudah terikat di HP lain! Minta Guru/Admin untuk mereset perangkat.");
+          setLoading(false);
           return;
         }
 
-        // C. Cek Apakah Siswa Sudah Pernah Scan di Sesi Ini
-        const qLog = query(
-          collection(db, "log_absensi"),
-          where("id_sesi", "==", activeSesiId),
-          where("nis", "==", currentSiswa.nis)
-        );
-        const logSnap = await getDocs(qLog);
+        // VALIDASI 2: Apakah HP FISIK INI sudah terikat ke SISWA LAIN di Firestore?
+        const qDevice = query(collection(db, "siswa"), where("device_id", "==", currentDeviceId));
+        const deviceSnap = await getDocs(qDevice);
 
-        if (!logSnap.empty) {
-          showFeedback("ℹ️ Anda sudah melakukan absensi untuk sesi pelajaran ini!", "info");
-          resumeScanning(4000);
-          return;
+        if (!deviceSnap.empty) {
+          let activeOwner = null;
+          deviceSnap.forEach(d => {
+            if (d.id !== nis) activeOwner = d.data();
+          });
+
+          if (activeOwner) {
+            showError(`❌ HP ini sudah terikat dengan siswa: ${activeOwner.nama_siswa} (${activeOwner.nis}). 1 HP hanya untuk 1 siswa!`);
+            setLoading(false);
+            return;
+          }
         }
 
-        // D. Catat Kehadiran ke Firestore
-        const now = new Date();
-        const waktuFormat = now.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', second: '2-digit' }) + ' WIB';
+        // JIKA KEDUA VALIDASI LOLOS: Ikat HP jika belum ada
+        if (!dataSiswa.device_id) {
+          await updateDoc(docRef, { device_id: currentDeviceId });
+        }
 
-        await addDoc(collection(db, "log_absensi"), {
-          id_sesi: activeSesiId,
-          nis: currentSiswa.nis,
-          nama_siswa: currentSiswa.nama_siswa,
-          id_kelas: currentSiswa.nama_kelas,
-          nama_mapel: activeSesiData.nama_mapel,
-          waktu_scan: waktuFormat,
-          status: "Hadir",
-          created_at: serverTimestamp()
-        });
+        const userData = {
+          nis: dataSiswa.nis,
+          nama_siswa: dataSiswa.nama_siswa,
+          id_kelas: dataSiswa.id_kelas,
+          nama_kelas: dataSiswa.nama_kelas,
+          device_id: currentDeviceId
+        };
 
-        showFeedback(`🎉 ABSENSI BERHASIL!\nTerima kasih ${currentSiswa.nama_siswa}, kehadiran Anda telah dicatat pada ${waktuFormat}.`, "success");
-
-        // Vibrasi HP jika mendukung
-        if (navigator.vibrate) navigator.vibrate(200);
-
-        resumeScanning(5000);
+        localStorage.setItem('portal_siswa_user', JSON.stringify(userData));
+        showProfile(userData);
 
       } catch (err) {
-        showFeedback("Terjadi kesalahan sistem: " + err.message, "error");
-        resumeScanning(3000);
+        console.error(err);
+        showError("Terjadi kesalahan: " + err.message);
+      } finally {
+        setLoading(false);
       }
+    });
+
+    function showProfile(user) {
+      profileNama.innerText = user.nama_siswa;
+      profileNis.innerText = user.nis;
+      profileKelas.innerText = user.nama_kelas;
+
+      sectionLoading.classList.add('hidden');
+      sectionLogin.classList.add('hidden');
+      sectionProfile.classList.remove('hidden');
     }
 
-    function resumeScanning(delayMs) {
-      setTimeout(() => {
-        isProcessing = false;
-        scanStatusBadge.innerText = "Kamera Aktif";
-        scanStatusBadge.className = "text-[10px] font-mono px-2.5 py-0.5 rounded-full bg-cyan-500/10 text-cyan-400 border border-cyan-500/20";
-      }, delayMs);
+    function showLoginForm() {
+      sectionLoading.classList.add('hidden');
+      sectionProfile.classList.add('hidden');
+      sectionLogin.classList.remove('hidden');
     }
 
-    function showFeedback(msg, type) {
-      scanFeedback.innerText = msg;
-      scanFeedback.classList.remove('hidden', 'bg-red-500/15', 'text-red-400', 'border-red-500/30', 'bg-emerald-500/15', 'text-emerald-400', 'border-emerald-500/30', 'bg-amber-500/15', 'text-amber-400', 'border-amber-500/30');
+    btnBukaScanner.addEventListener('click', () => {
+      window.location.href = "siswa/index.html";
+    });
 
-      if (type === 'error') {
-        scanFeedback.classList.add('bg-red-500/15', 'text-red-400', 'border-red-500/30');
-      } else if (type === 'success') {
-        scanFeedback.classList.add('bg-emerald-500/15', 'text-emerald-400', 'border-emerald-500/30');
+    function showError(msg) {
+      errorMsg.innerText = msg;
+      errorMsg.classList.remove('hidden');
+    }
+
+    function hideError() {
+      errorMsg.innerText = '';
+      errorMsg.classList.add('hidden');
+    }
+
+    function setLoading(isLoading) {
+      if (isLoading) {
+        btnVerifikasi.disabled = true;
+        btnText.innerText = "Mengecek NIS & Validasi HP...";
       } else {
-        scanFeedback.classList.add('bg-amber-500/15', 'text-amber-400', 'border-amber-500/30');
+        btnVerifikasi.disabled = false;
+        btnText.innerText = "Verifikasi NIS & Ikat HP";
       }
     }
   </script>
