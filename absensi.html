@@ -433,10 +433,54 @@
       window.location.href = "siswa/index.html";
     });
 
-    // REFRESH SESI / CLEARS CACHE HANYA PADA HP INI
-    btnRefreshSesi.addEventListener('click', () => {
-      localStorage.removeItem('portal_siswa_user');
-      window.location.reload();
+    // REFRESH SESI: Cek status Device ID di Firestore tanpa perlu hapus data jika masih valid
+    btnRefreshSesi.addEventListener('click', async () => {
+      const savedUserJson = localStorage.getItem('portal_siswa_user');
+      
+      if (!savedUserJson) {
+        window.location.reload();
+        return;
+      }
+
+      const user = JSON.parse(savedUserJson);
+      const btnTextOri = btnRefreshSesi.innerHTML;
+      btnRefreshSesi.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Memeriksa Status...';
+      btnRefreshSesi.disabled = true;
+
+      try {
+        // Ambil data siswa terbaru langsung dari Firestore
+        const docRef = doc(db, "siswa", user.nis);
+        const docSnap = await getDoc(docRef);
+
+        if (docSnap.exists()) {
+          const dataSiswa = docSnap.data();
+
+          // Jika pautan HP di database sudah di-reset oleh Admin (kosong / beda)
+          if (!dataSiswa.device_id || dataSiswa.device_id !== currentDeviceId) {
+            alert("Pautan HP Anda telah di-reset oleh Guru/Admin. Silakan verifikasi NIS kembali.");
+            localStorage.removeItem('portal_siswa_user');
+            window.location.reload();
+            return;
+          }
+          
+          // Jika masih valid, update data nama/kelas terbaru jika ada perubahan
+          user.nama_siswa = dataSiswa.nama_siswa;
+          user.nama_kelas = dataSiswa.nama_kelas;
+          localStorage.setItem('portal_siswa_user', JSON.stringify(user));
+          showProfile(user);
+          alert("Sesi dan data profil berhasil diperbarui!");
+        } else {
+          // Jika akun NIS dihapus dari database
+          alert("Akun NIS ini tidak ditemukan lagi di database.");
+          localStorage.removeItem('portal_siswa_user');
+          window.location.reload();
+        }
+      } catch (err) {
+        alert("Gagal memperbarui data: " + err.message);
+      } finally {
+        btnRefreshSesi.innerHTML = btnTextOri;
+        btnRefreshSesi.disabled = false;
+      }
     });
 
     function showError(msg) {
