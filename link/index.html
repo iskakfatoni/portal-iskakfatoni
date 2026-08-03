@@ -52,7 +52,7 @@
       <div class="lg:col-span-5 space-y-6">
         
         <!-- CARD KONTROL STATUS PORTAL ON / OFF -->
-        <div class="glass-card p-6 rounded-2xl space-y-3 shadow-xl">
+        <div class="glass-card p-6 rounded-2xl space-y-4 shadow-xl">
           <div class="flex items-center justify-between border-b border-slate-800 pb-3">
             <h3 class="text-xs font-bold text-cyan-400 flex items-center gap-2 uppercase tracking-wider">
               <i class="fa-solid fa-power-off"></i> Status Akses Portal Siswa
@@ -64,15 +64,14 @@
 
           <div class="flex items-center justify-between pt-1">
             <div>
-              <p class="text-xs font-bold text-white">Aktifkan Portal Utama</p>
-              <p class="text-[11px] text-slate-400">Jika OFF, siswa dialihkan ke Maintenance</p>
+              <p class="text-xs font-bold text-white">Akses Portal Utama</p>
+              <p class="text-[11px] text-slate-400">Klik tombol sakelar di kanan</p>
             </div>
 
-            <!-- TOGGLE SWITCH ON / OFF FIX -->
-            <label for="toggle-portal-status" class="relative inline-flex items-center cursor-pointer">
-              <input type="checkbox" id="toggle-portal-status" class="sr-only peer">
-              <div class="w-11 h-6 bg-slate-800 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-500"></div>
-            </label>
+            <!-- TOMBOL SWITCH TOGGLE SAKELAR -->
+            <button id="btn-toggle-portal" type="button" class="relative inline-flex h-8 w-14 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out bg-emerald-500 focus:outline-none shadow-lg">
+              <span id="toggle-circle" class="pointer-events-none inline-block h-7 w-7 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out translate-x-6"></span>
+            </button>
           </div>
         </div>
 
@@ -167,7 +166,8 @@
     const userEmailDisplay = document.getElementById('user-email-display');
     const btnLogout = document.getElementById('btn-logout');
     
-    const togglePortalStatus = document.getElementById('toggle-portal-status');
+    const btnTogglePortal = document.getElementById('btn-toggle-portal');
+    const toggleCircle = document.getElementById('toggle-circle');
     const portalStatusBadge = document.getElementById('portal-status-badge');
 
     const inputRunningText = document.getElementById('input-running-text');
@@ -177,6 +177,8 @@
     const inputLinkUrl = document.getElementById('input-link-url');
     const linkListContainer = document.getElementById('link-list-container');
     const linkCount = document.getElementById('link-count');
+
+    let currentPortalState = true;
 
     // 🔒 PROTEKSI ROUTE
     onAuthStateChanged(auth, (user) => {
@@ -199,31 +201,46 @@
     function loadPortalStatus() {
       onSnapshot(doc(db, "settings", "portal_status"), (docSnap) => {
         if (docSnap.exists()) {
-          const isOnline = docSnap.data().is_online !== false;
-          togglePortalStatus.checked = isOnline;
-          updateStatusBadgeUI(isOnline);
+          currentPortalState = docSnap.data().is_online !== false;
         } else {
-          togglePortalStatus.checked = true;
-          updateStatusBadgeUI(true);
+          currentPortalState = true;
         }
+        updateStatusUI(currentPortalState);
+      }, (err) => {
+        console.error("Gagal membaca status portal:", err);
       });
     }
 
-    togglePortalStatus.addEventListener('change', async (e) => {
-      const isOnline = e.target.checked;
-      updateStatusBadgeUI(isOnline);
+    // HANDLER KLIK TOMBOL TOGGLE SAKELAR
+    btnTogglePortal.addEventListener('click', async (e) => {
+      e.preventDefault();
+      
+      const nextState = !currentPortalState;
+      updateStatusUI(nextState);
+
       try {
-        await setDoc(doc(db, "settings", "portal_status"), { is_online: isOnline, updated_at: serverTimestamp() }, { merge: true });
+        await setDoc(doc(db, "settings", "portal_status"), { 
+          is_online: nextState, 
+          updated_at: serverTimestamp() 
+        }, { merge: true });
+
+        currentPortalState = nextState;
       } catch (err) {
-        alert("Gagal mengubah status portal: " + err.message);
+        console.error("Firestore Error:", err);
+        alert("Gagal mengubah status di Firebase: " + err.message + "\n\nPastikan Rules Firestore mengizinkan write pada koleksi 'settings'.");
+        updateStatusUI(currentPortalState);
       }
     });
 
-    function updateStatusBadgeUI(isOnline) {
+    function updateStatusUI(isOnline) {
       if (isOnline) {
+        btnTogglePortal.className = "relative inline-flex h-8 w-14 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out bg-emerald-500 focus:outline-none shadow-lg";
+        toggleCircle.className = "pointer-events-none inline-block h-7 w-7 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out translate-x-6";
         portalStatusBadge.innerText = "PORTAL ON";
         portalStatusBadge.className = "px-2.5 py-0.5 rounded-full text-[10px] font-bold font-mono bg-emerald-500/15 text-emerald-400 border border-emerald-500/30";
       } else {
+        btnTogglePortal.className = "relative inline-flex h-8 w-14 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out bg-slate-700 focus:outline-none shadow-lg";
+        toggleCircle.className = "pointer-events-none inline-block h-7 w-7 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out translate-x-0";
         portalStatusBadge.innerText = "PORTAL OFF (MAINTENANCE)";
         portalStatusBadge.className = "px-2.5 py-0.5 rounded-full text-[10px] font-bold font-mono bg-red-500/15 text-red-400 border border-red-500/30";
       }
