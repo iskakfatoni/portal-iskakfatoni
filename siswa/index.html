@@ -36,7 +36,6 @@
       border: 1px solid rgba(255, 255, 255, 0.1);
     }
 
-    /* Pastikan elemen video tidak meluap & wajib playsinline */
     #reader {
       width: 100% !important;
       height: 100% !important;
@@ -82,11 +81,11 @@
           <i class="fa-solid fa-camera"></i> Scan QR Absensi Guru
         </span>
         <span id="scan-status-badge" class="px-2.5 py-0.5 rounded-full text-[10px] font-bold font-mono bg-cyan-500/15 text-cyan-400 border border-cyan-500/30">
-          Mengarahkan Kamera...
+          Siap
         </span>
       </div>
 
-      <!-- VIEWPORT KAMERA MAKSIMAL -->
+      <!-- VIEWPORT KAMERA -->
       <div class="relative w-full aspect-square bg-slate-950 rounded-2xl overflow-hidden border-2 border-dashed border-cyan-500/40 flex items-center justify-center shadow-inner">
         
         <div id="reader"></div>
@@ -98,14 +97,19 @@
 
         <div id="camera-loading" class="absolute inset-0 bg-slate-950 flex flex-col items-center justify-center gap-2 z-20">
           <i class="fa-solid fa-circle-notch fa-spin text-3xl text-cyan-400"></i>
-          <p class="text-xs text-slate-400 font-mono">Menyiapkan Lensa Kamera HP...</p>
+          <p class="text-xs text-slate-400 font-mono">Membuka Kamera HP...</p>
         </div>
       </div>
 
-      <!-- TOMBOL MANUAL RESTART KAMERA JIKA DIBUTUHKAN -->
-      <button id="btn-restart-cam" class="w-full py-2.5 bg-slate-800 hover:bg-slate-700 text-cyan-400 font-bold text-xs rounded-xl transition border border-slate-700 hidden flex items-center justify-center gap-2 cursor-pointer">
-        <i class="fa-solid fa-arrows-rotate"></i> Muat Ulang Kamera HP
-      </button>
+      <!-- TOMBOL DUKUNGAN KHUSUS (SWITCH KAMERA / RESTART) -->
+      <div class="grid grid-cols-2 gap-2 pt-1">
+        <button id="btn-switch-camera" class="py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold text-xs rounded-xl transition border border-slate-700 flex items-center justify-center gap-2 cursor-pointer">
+          <i class="fa-solid fa-camera-rotate"></i> Putar Kamera
+        </button>
+        <button id="btn-restart-cam" class="py-2.5 bg-slate-800 hover:bg-slate-700 text-cyan-400 font-bold text-xs rounded-xl transition border border-slate-700 flex items-center justify-center gap-2 cursor-pointer">
+          <i class="fa-solid fa-arrows-rotate"></i> Reset Kamera
+        </button>
+      </div>
 
       <p class="text-xs text-slate-400 font-mono">Arahkan kamera ke QR Code di layar Ponsel/Laptop Guru</p>
 
@@ -167,7 +171,7 @@
     drawParticles();
   </script>
 
-  <!-- FIREBASE SCRIPT & STABLE CAMERA CONTROLLER -->
+  <!-- FIREBASE SCRIPT & KAMERA CONTROLLER HARD-RESET -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
     import { getFirestore, collection, addDoc, query, where, getDocs, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
@@ -188,6 +192,7 @@
     const siswaNama = document.getElementById('siswa-nama');
     const siswaNisKelas = document.getElementById('siswa-nis-kelas');
     const btnKembali = document.getElementById('btn-kembali');
+    const btnSwitchCamera = document.getElementById('btn-switch-camera');
     const btnRestartCam = document.getElementById('btn-restart-cam');
     const cameraLoading = document.getElementById('camera-loading');
     const notifBox = document.getElementById('notif-box');
@@ -196,8 +201,8 @@
     let html5QrCode = null;
     let isProcessingScan = false;
     let currentSiswaUser = null;
+    let currentFacingMode = "environment"; // Default Kamera Belakang
 
-    // CEK SESI USER SISWA
     const savedUserJson = localStorage.getItem('portal_siswa_user');
     if (!savedUserJson) {
       window.location.href = "../absensi.html";
@@ -206,62 +211,71 @@
       siswaNama.innerText = currentSiswaUser.nama_siswa || "Siswa";
       siswaNisKelas.innerText = `NIS: ${currentSiswaUser.nis} | ${currentSiswaUser.nama_kelas || currentSiswaUser.id_kelas}`;
       
-      // Berikan jeda 600ms agar DOM elemen selesaikan rendering sepenuhnya
       setTimeout(() => {
-        initCameraStable();
-      }, 600);
+        startCameraEngine();
+      }, 500);
     }
 
     btnKembali.addEventListener('click', async () => {
-      await stopCameraSafely();
+      await hardReleaseCamera();
       window.location.href = "../absensi.html";
     });
 
     btnRestartCam.addEventListener('click', () => {
-      btnRestartCam.classList.add('hidden');
       cameraLoading.classList.remove('hidden');
-      initCameraStable();
+      startCameraEngine();
     });
 
-    // METODE PERBAIKAN: INISIALISASI SPESIFIK DEVICE KAMERA
-    async function initCameraStable() {
+    btnSwitchCamera.addEventListener('click', () => {
+      currentFacingMode = currentFacingMode === "environment" ? "user" : "environment";
+      cameraLoading.classList.remove('hidden');
+      startCameraEngine();
+    });
+
+    // FUNGSI HARD RELEASE MEDIA TRACK BROWSER (MENGATASI CAMERA LOCK/FREEZE)
+    async function hardReleaseCamera() {
+      if (html5QrCode) {
+        try {
+          if (html5QrCode.isScanning) {
+            await html5QrCode.stop();
+          }
+          await html5QrCode.clear();
+        } catch (e) {
+          console.log("Cleanup scanner:", e);
+        }
+      }
+
+      // Hentikan paksa seluruh aliran video media track yang masih nyangkut di browser HP
+      if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+        try {
+          const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+          if (stream) {
+            stream.getTracks().forEach(track => track.stop());
+          }
+        } catch (e) {}
+      }
+    }
+
+    // ENGINE KAMERA TAHAN BANTING
+    async function startCameraEngine() {
       try {
-        await stopCameraSafely();
+        await hardReleaseCamera();
 
         html5QrCode = new Html5Qrcode("reader");
-
-        // Dapatkan daftar kamera fisik yang tersedia di HP
-        const devices = await Html5Qrcode.getCameras();
-
-        if (!devices || devices.length === 0) {
-          throw new Error("Kamera tidak ditemukan pada perangkat ini.");
-        }
-
-        // Cari kamera belakang (back / environment / rear)
-        let backCamera = devices.find(d => 
-          d.label.toLowerCase().includes('back') || 
-          d.label.toLowerCase().includes('rear') || 
-          d.label.toLowerCase().includes('environment') ||
-          d.label.toLowerCase().includes('belakang')
-        );
-
-        // Jika tidak ketemu kata kunci 'back', gunakan kamera terakhir di array
-        let targetCameraId = backCamera ? backCamera.id : devices[devices.length - 1].id;
 
         const config = {
           fps: 10,
           qrbox: { width: 220, height: 220 }
         };
 
-        // Jalankan kamera dengan Device ID yang pasti
         await html5QrCode.start(
-          targetCameraId,
+          { facingMode: currentFacingMode },
           config,
           onScanSuccess,
           onScanError
         );
 
-        // Paksa Atribut playsinline pada video tag agar iOS/Android Chrome tidak auto-close
+        // Tambahkan atribut playsinline secara langsung ke tag <video>
         const videoElement = document.querySelector("#reader video");
         if (videoElement) {
           videoElement.setAttribute("playsinline", "true");
@@ -273,45 +287,14 @@
         scanStatusBadge.className = "px-2.5 py-0.5 rounded-full text-[10px] font-bold font-mono bg-emerald-500/15 text-emerald-400 border border-emerald-500/30";
 
       } catch (err) {
-        console.error("Gagal kamera direct ID, mencoba mode fallback:", err);
-        try {
-          // Fallback kedua menggunakan facingMode string murni
-          await html5QrCode.start(
-            { facingMode: "environment" },
-            { fps: 10, qrbox: { width: 220, height: 220 } },
-            onScanSuccess,
-            onScanError
-          );
-
-          const videoElement = document.querySelector("#reader video");
-          if (videoElement) videoElement.setAttribute("playsinline", "true");
-
-          cameraLoading.classList.add('hidden');
-          scanStatusBadge.innerText = "Siap Scan";
-          scanStatusBadge.className = "px-2.5 py-0.5 rounded-full text-[10px] font-bold font-mono bg-emerald-500/15 text-emerald-400 border border-emerald-500/30";
-        } catch (fallbackErr) {
-          cameraLoading.classList.add('hidden');
-          btnRestartCam.classList.remove('hidden');
-          showNotif("❌ Akses Kamera Ditolak / Bermasalah. Pastikan izin kamera pada browser sudah 'Izinkan' (Allow).", "error");
-        }
-      }
-    }
-
-    async function stopCameraSafely() {
-      if (html5QrCode) {
-        try {
-          if (html5QrCode.isScanning) {
-            await html5QrCode.stop();
-          }
-          await html5QrCode.clear();
-        } catch (e) {
-          console.log("Status stop camera:", e);
-        }
+        console.error("Gagal membuka kamera:", err);
+        cameraLoading.classList.add('hidden');
+        showNotif("❌ Gagal Membuka Kamera! Pastikan Izin Kamera Diberikan di Browser HP.", "error");
       }
     }
 
     function onScanError(error) {
-      // Abaikan error per-frame
+      // Ignore frame errors
     }
 
     async function onScanSuccess(decodedText) {
@@ -374,8 +357,7 @@
           created_at: serverTimestamp()
         });
 
-        // Hentikan kamera setelah presensi berhasil
-        await stopCameraSafely();
+        await hardReleaseCamera();
 
         showNotif(`🎉 ABSENSI BERHASIL!\n${currentSiswaUser.nama_siswa}\n[${sesiData.id_kelas} - ${sesiData.nama_mapel}]`, "success");
 
