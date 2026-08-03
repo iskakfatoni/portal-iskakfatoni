@@ -8,25 +8,26 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   
   <style>
+    /* STYLING RINGKAS / COMPACT PADA PORTAL BOX (VERTIKAL SPACING DIPERKECIL) */
     .portal-box {
       background: var(--card-bg, rgba(15, 23, 42, 0.85));
       border: 1px solid var(--card-border, rgba(255, 255, 255, 0.1));
-      border-radius: 20px;
-      padding: 24px 20px;
+      border-radius: 18px;
+      padding: 16px 14px;
       backdrop-filter: blur(12px);
       -webkit-backdrop-filter: blur(12px);
-      margin: 20px 0;
+      margin: 10px 0;
       width: 100%;
       box-shadow: 0 15px 35px -10px rgba(0, 0, 0, 0.4);
     }
 
-    /* BADGE UCAPAN SALAM SISWA */
+    /* BADGE UCAPAN SALAM SISWA COMPACT */
     .greeting-badge {
       background: rgba(56, 189, 248, 0.12);
       border: 1px solid rgba(56, 189, 248, 0.3);
-      border-radius: 14px;
-      padding: 12px 16px;
-      margin-bottom: 18px;
+      border-radius: 12px;
+      padding: 8px 12px;
+      margin-bottom: 10px;
       display: flex;
       align-items: center;
       justify-content: space-between;
@@ -34,12 +35,12 @@
     }
 
     .greeting-text {
-      font-size: 0.9rem;
+      font-size: 0.85rem;
       font-weight: 700;
       color: #ffffff;
       display: flex;
       align-items: center;
-      gap: 8px;
+      gap: 6px;
     }
 
     .greeting-text span {
@@ -47,32 +48,33 @@
     }
 
     .greeting-kelas {
-      font-size: 0.7rem;
+      font-size: 0.65rem;
       font-weight: 700;
       font-family: monospace;
       color: #34d399;
       background: rgba(16, 185, 129, 0.15);
       border: 1px solid rgba(16, 185, 129, 0.3);
-      padding: 3px 8px;
-      border-radius: 20px;
+      padding: 2px 7px;
+      border-radius: 16px;
     }
 
+    /* MARQUEE COMPACT */
     .marquee-container {
       background: rgba(3, 7, 18, 0.7);
       border: 1px solid rgba(56, 189, 248, 0.2);
-      border-radius: 12px;
-      padding: 10px 14px;
+      border-radius: 10px;
+      padding: 6px 10px;
       overflow: hidden;
       white-space: nowrap;
-      margin-bottom: 20px;
+      margin-bottom: 12px;
       display: flex;
       align-items: center;
-      gap: 10px;
+      gap: 8px;
     }
 
     .marquee-text {
       display: inline-block;
-      font-size: 0.85rem;
+      font-size: 0.8rem;
       color: #38bdf8;
       font-family: monospace;
       animation: marquee 18s linear infinite;
@@ -83,10 +85,11 @@
       100% { transform: translateX(-100%); }
     }
 
+    /* DAFTAR LINK GRID COMPACT (GAP 8PX) */
     .links-grid {
       display: flex;
       flex-direction: column;
-      gap: 12px;
+      gap: 8px;
       width: 100%;
     }
 
@@ -94,74 +97,74 @@
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: 14px 18px;
+      padding: 10px 12px;
       background: rgba(3, 7, 18, 0.6);
       border: 1px solid rgba(255, 255, 255, 0.08);
-      border-radius: 14px;
+      border-radius: 12px;
       text-decoration: none;
       color: #ffffff;
-      transition: all 0.25s ease;
+      transition: all 0.2s ease;
       text-align: left;
     }
 
     .link-card-item:hover {
-      transform: translateY(-2px);
+      transform: translateY(-1px);
       border-color: #38bdf8;
       background: rgba(56, 189, 248, 0.08);
-      box-shadow: 0 8px 20px -4px rgba(56, 189, 248, 0.2);
+      box-shadow: 0 6px 16px -4px rgba(56, 189, 248, 0.2);
     }
 
     .link-info {
       display: flex;
       align-items: center;
-      gap: 14px;
+      gap: 10px;
     }
 
     .link-icon-box {
-      width: 42px;
-      height: 42px;
-      border-radius: 12px;
+      width: 36px;
+      height: 36px;
+      border-radius: 10px;
       background: rgba(56, 189, 248, 0.15);
       color: #38bdf8;
       border: 1px solid rgba(56, 189, 248, 0.3);
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 1.15rem;
+      font-size: 1rem;
       flex-shrink: 0;
       transition: all 0.2s ease;
     }
 
     .link-text h3 {
-      font-size: 0.95rem;
+      font-size: 0.85rem;
       font-weight: 700;
       color: #ffffff;
       margin: 0;
-      line-height: 1.3;
+      line-height: 1.25;
     }
 
     .arrow-icon {
       color: #64748b;
-      font-size: 0.85rem;
+      font-size: 0.75rem;
       transition: transform 0.2s ease, color 0.2s ease;
     }
 
     .link-card-item:hover .arrow-icon {
       color: #38bdf8;
-      transform: translateX(4px);
+      transform: translateX(3px);
     }
 
     .maintenance-box {
       text-align: center;
-      padding: 30px 15px;
+      padding: 20px 10px;
       background: rgba(239, 68, 68, 0.1);
       border: 1px solid rgba(239, 68, 68, 0.3);
-      border-radius: 16px;
+      border-radius: 14px;
       color: #f87171;
     }
 
     @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(-6px); }
+      from { opacity: 0; transform: translateY(-4px); }
       to { opacity: 1; transform: translateY(0); }
     }
 
@@ -184,7 +187,7 @@
       <p class="bio">I'am certified electronical and computer teacher, also a former Kamen Rider</p>
     </header>
 
-    <!-- SECTION KONTEN PORTAL UTAMA -->
+    <!-- SECTION KONTEN PORTAL UTAMA COMPACT -->
     <section class="portal-box">
       
       <!-- UCAPAN SALAM SISWA TERIKAT -->
@@ -198,7 +201,7 @@
 
       <!-- RUNNING TEXT PENGUMUMAN -->
       <div id="marquee-wrapper" class="marquee-container hidden">
-        <i class="fa-solid fa-bullhorn" style="color: #38bdf8; font-size: 0.9rem;"></i>
+        <i class="fa-solid fa-bullhorn" style="color: #38bdf8; font-size: 0.8rem;"></i>
         <div style="overflow: hidden; width: 100%;">
           <span id="running-text-content" class="marquee-text">Stand By....</span>
         </div>
@@ -206,25 +209,25 @@
 
       <!-- KONDISI A: PORTAL MAINTENANCE (OFF) -->
       <div id="maintenance-view" class="maintenance-box hidden">
-        <i class="fa-solid fa-screwdriver-wrench" style="font-size: 2.5rem; margin-bottom: 12px; color: #f87171;"></i>
-        <h2 style="font-size: 1.1rem; font-weight: 800; color: #ffffff; margin-bottom: 6px;">PORTAL SEDANG DITUTUP</h2>
-        <p style="font-size: 0.8rem; color: #cbd5e1;">PORTAL TUTUP. Belum ada tugas atau info terbaru.</p>
+        <i class="fa-solid fa-screwdriver-wrench" style="font-size: 2rem; margin-bottom: 8px; color: #f87171;"></i>
+        <h2 style="font-size: 1rem; font-weight: 800; color: #ffffff; margin-bottom: 4px;">PORTAL SEDANG DITUTUP</h2>
+        <p style="font-size: 0.75rem; color: #cbd5e1;">PORTAL TUTUP. Belum ada tugas atau info terbaru.</p>
       </div>
 
       <!-- KONDISI B: LIST LINK PORTAL AKTIF (ON) -->
       <div id="portal-content-view">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; border-bottom: 1px solid rgba(255, 255, 255, 0.08); padding-bottom: 10px;">
-          <h2 style="font-size: 0.95rem; font-weight: 800; color: #ffffff; text-transform: uppercase; letter-spacing: 0.05em;">
-            <i class="fa-solid fa-graduation-cap" style="color: #38bdf8; margin-right: 6px;"></i> Daftar Link:
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; border-bottom: 1px solid rgba(255, 255, 255, 0.08); padding-bottom: 6px;">
+          <h2 style="font-size: 0.85rem; font-weight: 800; color: #ffffff; text-transform: uppercase; letter-spacing: 0.05em;">
+            <i class="fa-solid fa-graduation-cap" style="color: #38bdf8; margin-right: 4px;"></i> Daftar Link:
           </h2>
-          <span id="link-total-badge" style="font-size: 0.7rem; font-weight: 700; color: #38bdf8; background: rgba(56, 189, 248, 0.12); padding: 4px 10px; border-radius: 20px; border: 1px solid rgba(56, 189, 248, 0.3);">
+          <span id="link-total-badge" style="font-size: 0.65rem; font-weight: 700; color: #38bdf8; background: rgba(56, 189, 248, 0.12); padding: 2px 8px; border-radius: 16px; border: 1px solid rgba(56, 189, 248, 0.3);">
             0 Link
           </span>
         </div>
 
         <!-- CONTAINER DAFTAR LINK FIRESTORE -->
         <div id="public-links-container" class="links-grid">
-          <p style="font-size: 0.8rem; color: #64748b; text-align: center; padding: 20px 0;">// Memuat daftar tautan portal...</p>
+          <p style="font-size: 0.75rem; color: #64748b; text-align: center; padding: 12px 0;">// Memuat daftar tautan portal...</p>
         </div>
       </div>
 
@@ -495,7 +498,7 @@
       linkTotalBadge.innerText = `${activeCount} Link`;
 
       if (activeCount === 0) {
-        publicLinksContainer.innerHTML = '<p style="font-size: 0.8rem; color: #64748b; text-align: center; padding: 20px 0;">// Belum ada tautan aktif yang dibagikan.</p>';
+        publicLinksContainer.innerHTML = '<p style="font-size: 0.75rem; color: #64748b; text-align: center; padding: 12px 0;">// Belum ada tautan aktif yang dibagikan.</p>';
       }
     });
   </script>
