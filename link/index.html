@@ -22,14 +22,6 @@
       -webkit-backdrop-filter: blur(16px);
       border: 1px solid rgba(255, 255, 255, 0.1);
     }
-    /* Style custom toggle switch */
-    .toggle-checkbox:checked {
-      right: 0;
-      border-color: #10b981;
-    }
-    .toggle-checkbox:checked + .toggle-label {
-      background-color: #10b981;
-    }
   </style>
 </head>
 <body class="min-h-screen flex flex-col justify-start items-center p-4 md:p-8 font-sans">
@@ -73,13 +65,13 @@
           <div class="flex items-center justify-between pt-1">
             <div>
               <p class="text-xs font-bold text-white">Aktifkan Portal Utama</p>
-              <p class="text-[11px] text-slate-400">Jika OFF, siswa akan dialihkan ke mode Maintenance</p>
+              <p class="text-[11px] text-slate-400">Jika OFF, siswa dialihkan ke Maintenance</p>
             </div>
 
-            <!-- TOGGLE SWITCH ON / OFF -->
-            <label class="relative inline-flex items-center cursor-pointer">
+            <!-- TOGGLE SWITCH ON / OFF FIX -->
+            <label for="toggle-portal-status" class="relative inline-flex items-center cursor-pointer">
               <input type="checkbox" id="toggle-portal-status" class="sr-only peer">
-              <div class="w-11 h-6 bg-slate-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-500"></div>
+              <div class="w-11 h-6 bg-slate-800 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-500"></div>
             </label>
           </div>
         </div>
@@ -217,8 +209,8 @@
       });
     }
 
-    togglePortalStatus.addEventListener('change', async () => {
-      const isOnline = togglePortalStatus.checked;
+    togglePortalStatus.addEventListener('change', async (e) => {
+      const isOnline = e.target.checked;
       updateStatusBadgeUI(isOnline);
       try {
         await setDoc(doc(db, "settings", "portal_status"), { is_online: isOnline, updated_at: serverTimestamp() }, { merge: true });
