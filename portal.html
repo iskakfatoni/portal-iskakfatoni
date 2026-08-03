@@ -54,11 +54,12 @@
       width: 100%;
     }
 
+    /* CARD ITEM HANYA JUDUL & IKON */
     .link-card-item {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: 16px;
+      padding: 14px 18px;
       background: rgba(3, 7, 18, 0.6);
       border: 1px solid rgba(255, 255, 255, 0.08);
       border-radius: 14px;
@@ -78,13 +79,13 @@
     .link-info {
       display: flex;
       align-items: center;
-      gap: 12px;
+      gap: 14px;
     }
 
     .link-icon-box {
-      width: 40px;
-      height: 40px;
-      border-radius: 10px;
+      width: 42px;
+      height: 42px;
+      border-radius: 12px;
       background: rgba(56, 189, 248, 0.15);
       color: #38bdf8;
       border: 1px solid rgba(56, 189, 248, 0.3);
@@ -96,22 +97,16 @@
     }
 
     .link-text h3 {
-      font-size: 0.9rem;
+      font-size: 0.95rem;
       font-weight: 700;
       color: #ffffff;
-      margin-bottom: 2px;
-    }
-
-    .link-text p {
-      font-size: 0.72rem;
-      color: #94a3b8;
-      font-family: monospace;
-      word-break: break-all;
+      margin: 0;
+      line-height: 1.3;
     }
 
     .arrow-icon {
       color: #64748b;
-      font-size: 0.8rem;
+      font-size: 0.85rem;
       transition: transform 0.2s ease, color 0.2s ease;
     }
 
@@ -177,7 +172,7 @@
           </span>
         </div>
 
-        <!-- CONTAINER DAFTAR LINK FIRESTORE -->
+        <!-- CONTAINER DAFTAR LINK FIRESTORE (JUDUL & IKON SAJA) -->
         <div id="public-links-container" class="links-grid">
           <p style="font-size: 0.8rem; color: #64748b; text-align: center; padding: 20px 0;">// Memuat daftar tautan portal...</p>
         </div>
@@ -249,7 +244,7 @@
     drawParticles();
   </script>
 
-  <!-- FIREBASE LOGIC PERBAIKAN RUNNING TEXT -->
+  <!-- FIREBASE LOGIC -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
     import { getFirestore, collection, doc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
@@ -292,11 +287,10 @@
       }
     });
 
-    // 2. LISTEN REALTIME RUNNING TEXT (PERBAIKAN BISA BACA BERBAGAI FIELD)
+    // 2. LISTEN REALTIME RUNNING TEXT
     onSnapshot(doc(db, "settings", "announcement"), (docSnap) => {
       if (docSnap.exists()) {
         const data = docSnap.data();
-        // Cek kandidat isi running text dari field 'text', 'announcement', atau 'content'
         const textVal = data.text || data.announcement || data.content || "";
 
         if (textVal && textVal.trim() !== "") {
@@ -305,11 +299,10 @@
           return;
         }
       }
-      // Sembunyikan jika tidak ada isi teks
       marqueeWrapper.classList.add('hidden');
     });
 
-    // 3. LISTEN REALTIME DAFTAR LINK
+    // 3. LISTEN REALTIME DAFTAR LINK (RENDER HANYA JUDUL & IKON)
     onSnapshot(collection(db, "links"), (snapshot) => {
       publicLinksContainer.innerHTML = '';
       linkTotalBadge.innerText = `${snapshot.size} Link`;
@@ -328,6 +321,7 @@
         a.rel = "noopener noreferrer";
         a.className = "link-card-item";
 
+        // RENDER: HANYA IKON + JUDUL LINK
         a.innerHTML = `
           <div class="link-info">
             <div class="link-icon-box">
@@ -335,10 +329,9 @@
             </div>
             <div class="link-text">
               <h3>${data.title}</h3>
-              <p>${data.url}</p>
             </div>
           </div>
-          <i class="fa-solid fa-chevron-right arrow-icon"></i>
+          <i class="fa-solid fa-arrow-up-right-from-square arrow-icon"></i>
         `;
 
         publicLinksContainer.appendChild(a);
