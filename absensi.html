@@ -8,7 +8,6 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   
   <style>
-    /* Styling khusus Form & Profil Absensi */
     .absensi-box {
       background: var(--card-bg, rgba(15, 23, 42, 0.85));
       border: 1px solid var(--card-border, rgba(255, 255, 255, 0.1));
@@ -152,7 +151,7 @@
       <!-- LOADING STATE INITIALIZATION -->
       <div id="section-loading-absensi" class="text-center py-6">
         <i class="fa-solid fa-spinner fa-spin text-2xl text-cyan-400"></i>
-        <p class="text-xs text-slate-400 mt-2 font-mono">Memeriksa status perangkat &amp; database...</p>
+        <p class="text-xs text-slate-400 mt-2 font-mono">Memeriksa hardware fingerprint &amp; status HP...</p>
       </div>
 
       <!-- STATE 1: FORM INPUT NIS & DEVICE BINDING -->
@@ -164,11 +163,10 @@
 
         <div class="form-group-absensi">
           <label for="nis-input">Nomor Induk Siswa (NIS)</label>
-          <!-- ✅ FIX: type="text" & inputmode="text" agar bisa mengetik '/' di ponsel -->
           <input 
             type="text" 
             id="nis-input" 
-            placeholder="Contoh: 1234/123" 
+            placeholder="Contoh: 9177/413" 
             class="input-absensi"
             inputmode="text"
             autocomplete="off"
@@ -277,7 +275,7 @@
     drawParticles();
   </script>
 
-  <!-- LOGIC FIREBASE & DUAL VALIDATION -->
+  <!-- LOGIC FIREBASE & HARDWARE FINGERPRINTING -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
     import { 
@@ -317,65 +315,76 @@
     const profileKelas = document.getElementById('profile-kelas');
     const btnBukaScanner = document.getElementById('btn-buka-scanner');
 
-    function getDeviceId() {
-      let deviceId = localStorage.getItem('portal_device_id');
-      if (!deviceId) {
-        deviceId = 'DEV-' + Math.random().toString(36).substring(2, 15) + '-' + Date.now().toString(36);
-        localStorage.setItem('portal_device_id', deviceId);
+    // FUNGSI FINGERPRINT HARDWARE HP (TAHAN HAPUS CACHE BROWSER)
+    async function getHardwareFingerprint() {
+      const gl = document.createElement('canvas').getContext('webgl');
+      let gpuVendor = '';
+      if (gl) {
+        const debugInfo = gl.getExtension('WEBGL_debug_renderer_info');
+        if (debugInfo) {
+          gpuVendor = gl.getParameter(debugInfo.UNMASKED_RENDERER_WEBGL) || '';
+        }
       }
-      return deviceId;
+
+      const rawString = [
+        navigator.userAgent,
+        screen.width + 'x' + screen.height,
+        screen.colorDepth,
+        navigator.hardwareConcurrency || 2,
+        gpuVendor,
+        Intl.DateTimeFormat().resolvedOptions().timeZone
+      ].join('||');
+
+      // Hash string menggunakan SHA-256 bawaan Crypto API browser
+      const msgBuffer = new TextEncoder().encode(rawString);
+      const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
+      const hashArray = Array.from(new Uint8Array(hashBuffer));
+      const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+      
+      return 'HW-' + hashHex.substring(0, 16).toUpperCase();
     }
 
-    const currentDeviceId = getDeviceId();
+    let currentDeviceId = '';
 
-    // AUTO-CLEAR CACHE & SYNC FIRESTORE SAAT PAGE LOAD
+    // INISIALISASI APLIKASI
     document.addEventListener('DOMContentLoaded', async () => {
-      const savedUserJson = localStorage.getItem('portal_siswa_user');
+      // Hitung Hardware Fingerprint HP secara konsisten
+      currentDeviceId = await getHardwareFingerprint();
+      localStorage.setItem('portal_device_id', currentDeviceId);
 
-      if (!savedUserJson) {
-        showLoginForm();
-        return;
-      }
-
+      // 1. DULUAN CEK FIRESTORE BERDASARKAN DEVICE_ID PERANGKAT INI
       try {
-        const localUser = JSON.parse(savedUserJson);
-        const safeDocId = (localUser.doc_id || localUser.nis || '').replace(/\//g, '-');
+        const qDevice = query(collection(db, "siswa"), where("device_id", "==", currentDeviceId));
+        const deviceSnap = await getDocs(qDevice);
 
-        const docRef = doc(db, "siswa", safeDocId);
-        const docSnap = await getDoc(docRef);
-
-        if (docSnap.exists()) {
+        if (!deviceSnap.empty) {
+          // HP ini SUDAH TERIKAT di Firestore! Langsung tampilkan profilnya meski cache pernah di-clear!
+          const docSnap = deviceSnap.docs[0];
           const dbData = docSnap.data();
 
-          if (!dbData.device_id || dbData.device_id !== currentDeviceId) {
-            localStorage.removeItem('portal_siswa_user');
-            showLoginForm();
-            return;
-          }
-
           const updatedUser = {
-            doc_id: safeDocId,
-            nis: dbData.nis || localUser.nis,
-            nama_siswa: dbData.nama_siswa || localUser.nama_siswa,
-            id_kelas: dbData.id_kelas || localUser.id_kelas,
-            nama_kelas: dbData.nama_kelas || localUser.nama_kelas,
+            doc_id: docSnap.id,
+            nis: dbData.nis,
+            nama_siswa: dbData.nama_siswa,
+            id_kelas: dbData.id_kelas,
+            nama_kelas: dbData.nama_kelas || dbData.id_kelas,
             device_id: currentDeviceId
           };
 
           localStorage.setItem('portal_siswa_user', JSON.stringify(updatedUser));
           showProfile(updatedUser);
-
-        } else {
-          localStorage.removeItem('portal_siswa_user');
-          showLoginForm();
+          return;
         }
       } catch (e) {
-        console.error("Gagal verifikasi status:", e);
-        showLoginForm();
+        console.error("Gagal auto-restore via hardware ID:", e);
       }
+
+      // 2. JIKA CHIP DOKUMEN BELUM TERIKAT PADA FIRESTORE, TAMPILKAN FORM LOGIN
+      localStorage.removeItem('portal_siswa_user');
+      showLoginForm();
     });
 
-    // VERIFIKASI DENGAN SANITASI SLASH & QUERY FALLBACK
+    // VERIFIKASI SISWA & IKAT HP
     btnVerifikasi.addEventListener('click', async () => {
       const rawNis = nisInput.value.trim();
       hideError();
@@ -388,7 +397,6 @@
       setLoading(true);
 
       try {
-        // Safe ID Dokumen (Ganti / dengan -)
         const safeDocId = rawNis.replace(/\//g, '-');
         
         let docSnap = await getDoc(doc(db, "siswa", safeDocId));
@@ -398,7 +406,6 @@
         if (docSnap.exists()) {
           dataSiswa = docSnap.data();
         } else {
-          // Fallback Query berdasarkan field 'nis' jika ID dokumen berbeda
           const qNis = query(collection(db, "siswa"), where("nis", "==", rawNis));
           const querySnap = await getDocs(qNis);
 
@@ -415,14 +422,14 @@
           return;
         }
 
-        // VALIDASI 1: Akun NIS terikat di HP lain?
+        // VALIDASI 1: Akun NIS ini sudah terikat di HP lain?
         if (dataSiswa.device_id && dataSiswa.device_id !== currentDeviceId) {
           showError("❌ Akun NIS ini sudah terikat di HP lain! Minta Guru/Admin untuk mereset perangkat.");
           setLoading(false);
           return;
         }
 
-        // VALIDASI 2: HP ini terikat siswa lain?
+        // VALIDASI 2: HP ini terikat ke akun NIS siswa lain?
         const qDevice = query(collection(db, "siswa"), where("device_id", "==", currentDeviceId));
         const deviceSnap = await getDocs(qDevice);
 
@@ -441,10 +448,8 @@
           }
         }
 
-        // Ikat HP jika belum terikat
-        if (!dataSiswa.device_id) {
-          await updateDoc(doc(db, "siswa", actualDocId), { device_id: currentDeviceId });
-        }
+        // Ikat HP ke Firestore
+        await updateDoc(doc(db, "siswa", actualDocId), { device_id: currentDeviceId });
 
         const userData = {
           doc_id: actualDocId,
