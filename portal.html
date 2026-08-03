@@ -20,6 +20,43 @@
       box-shadow: 0 15px 35px -10px rgba(0, 0, 0, 0.4);
     }
 
+    /* BADGE UCAPAN SALAM SISWA */
+    .greeting-badge {
+      background: rgba(56, 189, 248, 0.12);
+      border: 1px solid rgba(56, 189, 248, 0.3);
+      border-radius: 14px;
+      padding: 12px 16px;
+      margin-bottom: 18px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      animation: fadeIn 0.4s ease;
+    }
+
+    .greeting-text {
+      font-size: 0.9rem;
+      font-weight: 700;
+      color: #ffffff;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .greeting-text span {
+      color: #38bdf8;
+    }
+
+    .greeting-kelas {
+      font-size: 0.7rem;
+      font-weight: 700;
+      font-family: monospace;
+      color: #34d399;
+      background: rgba(16, 185, 129, 0.15);
+      border: 1px solid rgba(16, 185, 129, 0.3);
+      padding: 3px 8px;
+      border-radius: 20px;
+    }
+
     .marquee-container {
       background: rgba(3, 7, 18, 0.7);
       border: 1px solid rgba(56, 189, 248, 0.2);
@@ -123,6 +160,11 @@
       color: #f87171;
     }
 
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(-6px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
     .hidden { display: none !important; }
   </style>
 </head>
@@ -145,6 +187,15 @@
     <!-- SECTION KONTEN PORTAL UTAMA -->
     <section class="portal-box">
       
+      <!-- UCAPAN SALAM SISWA TERIKAT -->
+      <div id="greeting-wrapper" class="greeting-badge hidden">
+        <div class="greeting-text">
+          <i class="fa-solid fa-hand-wave" style="color: #38bdf8;"></i>
+          <span>Hai, <strong id="greeting-student-name">Siswa</strong>!</span>
+        </div>
+        <span id="greeting-student-class" class="greeting-kelas">-</span>
+      </div>
+
       <!-- RUNNING TEXT PENGUMUMAN -->
       <div id="marquee-wrapper" class="marquee-container hidden">
         <i class="fa-solid fa-bullhorn" style="color: #38bdf8; font-size: 0.9rem;"></i>
@@ -243,10 +294,10 @@
     drawParticles();
   </script>
 
-  <!-- FIREBASE LOGIC LOGIKA FIX ORDER -->
+  <!-- FIREBASE LOGIC & HARDWARE DEVICE CHECK FOR GREETING -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-    import { getFirestore, collection, doc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+    import { getFirestore, collection, doc, onSnapshot, query, where, getDocs } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyDhq4QoCn00GkfpKXSP8PnvSvEKa2yn0ic",
@@ -268,46 +319,105 @@
     const publicLinksContainer = document.getElementById('public-links-container');
     const linkTotalBadge = document.getElementById('link-total-badge');
 
+    const greetingWrapper = document.getElementById('greeting-wrapper');
+    const greetingStudentName = document.getElementById('greeting-student-name');
+    const greetingStudentClass = document.getElementById('greeting-student-class');
+
+    // FUNGSI HARDWARE FINGERPRINT KONSISTEN
+    async function getHardwareFingerprint() {
+      const gl = document.createElement('canvas').getContext('webgl');
+      let gpuVendor = '';
+      if (gl) {
+        const debugInfo = gl.getExtension('WEBGL_debug_renderer_info');
+        if (debugInfo) {
+          gpuVendor = gl.getParameter(debugInfo.UNMASKED_RENDERER_WEBGL) || '';
+        }
+      }
+
+      const rawString = [
+        navigator.userAgent,
+        screen.width + 'x' + screen.height,
+        screen.colorDepth,
+        navigator.hardwareConcurrency || 2,
+        gpuVendor,
+        Intl.DateTimeFormat().resolvedOptions().timeZone
+      ].join('||');
+
+      const msgBuffer = new TextEncoder().encode(rawString);
+      const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
+      const hashArray = Array.from(new Uint8Array(hashBuffer));
+      const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+      
+      return 'HW-' + hashHex.substring(0, 16).toUpperCase();
+    }
+
+    // MEMERIKSA STATUS IKATAN DEVICE UNTUK TAMPILKAN "Hai, [Nama]"
+    document.addEventListener('DOMContentLoaded', async () => {
+      try {
+        const currentDeviceId = await getHardwareFingerprint();
+        
+        // Cek data di LocalStorage terlebih dahulu
+        const savedUserJson = localStorage.getItem('portal_siswa_user');
+        if (savedUserJson) {
+          const user = JSON.parse(savedUserJson);
+          if (user && user.nama_siswa) {
+            showStudentGreeting(user.nama_siswa, user.nama_kelas || user.id_kelas);
+            return;
+          }
+        }
+
+        // Jika LocalStorage kosong, verifikasi langsung ke Firestore via device_id
+        const qDevice = query(collection(db, "siswa"), where("device_id", "==", currentDeviceId));
+        const deviceSnap = await getDocs(qDevice);
+
+        if (!deviceSnap.empty) {
+          const studentData = deviceSnap.docs[0].data();
+          showStudentGreeting(studentData.nama_siswa, studentData.nama_kelas || studentData.id_kelas);
+        }
+      } catch (err) {
+        console.error("Gagal memuat salam siswa:", err);
+      }
+    });
+
+    function showStudentGreeting(name, kelas) {
+      if (!name) return;
+      greetingStudentName.innerText = name;
+      greetingStudentClass.innerText = kelas || 'TEI';
+      greetingWrapper.classList.remove('hidden');
+    }
+
     function getLinkIconConfig(title, url) {
       const t = (title || "").toLowerCase();
       const u = (url || "").toLowerCase();
 
-      // 1. Google Forms / Form Tugas / Upload (DICEK DULUAN AGAR TIDAK TERBACA DOCS/DRIVE)
       if (u.includes('forms.google.com') || u.includes('forms.gle') || u.includes('/forms/') || t.includes('form') || t.includes('tugas') || t.includes('upload')) {
         return { icon: 'fa-solid fa-file-pen', color: '#7248b9', bg: 'rgba(114, 72, 185, 0.15)', border: 'rgba(114, 72, 185, 0.3)' };
       }
 
-      // 2. Canva
       if (u.includes('canva.com') || u.includes('canva.link') || t.includes('canva')) {
         return { icon: 'fa-solid fa-palette', color: '#00c4cc', bg: 'rgba(0, 196, 204, 0.15)', border: 'rgba(0, 196, 204, 0.3)' };
       }
 
-      // 3. Google Drive / Documents / Modul / PDF
       if (u.includes('drive.google.com') || u.includes('docs.google.com') || t.includes('drive') || t.includes('modul') || t.includes('pdf')) {
         return { icon: 'fa-solid fa-file-pdf', color: '#ea4335', bg: 'rgba(234, 67, 53, 0.15)', border: 'rgba(234, 67, 53, 0.3)' };
       }
 
-      // 4. YouTube / Video
       if (u.includes('youtube.com') || u.includes('youtu.be') || t.includes('video') || t.includes('youtube')) {
         return { icon: 'fa-brands fa-youtube', color: '#ff0000', bg: 'rgba(255, 0, 0, 0.15)', border: 'rgba(255, 0, 0, 0.3)' };
       }
 
-      // 5. Quizizz / Ujian
       if (u.includes('quizizz.com') || t.includes('quiz') || t.includes('ujian')) {
         return { icon: 'fa-solid fa-gamepad', color: '#8854d0', bg: 'rgba(136, 84, 208, 0.15)', border: 'rgba(136, 84, 208, 0.3)' };
       }
 
-      // 6. WhatsApp
       if (u.includes('wa.me') || u.includes('whatsapp.com') || t.includes('wa') || t.includes('grup')) {
         return { icon: 'fa-brands fa-whatsapp', color: '#25d366', bg: 'rgba(37, 211, 102, 0.15)', border: 'rgba(37, 211, 102, 0.3)' };
       }
 
-      // 7. GitHub / Coding
       if (u.includes('github.com') || t.includes('github') || t.includes('koding') || t.includes('code')) {
         return { icon: 'fa-brands fa-github', color: '#f0f6fc', bg: 'rgba(240, 246, 252, 0.15)', border: 'rgba(240, 246, 252, 0.3)' };
       }
 
-      // Default Icon Pembelajaran
       return { icon: 'fa-solid fa-link', color: '#38bdf8', bg: 'rgba(56, 189, 248, 0.15)', border: 'rgba(56, 189, 248, 0.3)' };
     }
 
