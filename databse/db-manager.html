@@ -4,8 +4,6 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>PORTAL :: Firestore Database CRUD Manager</title>
-  
-  <!-- Tailwind CSS & FontAwesome -->
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -28,47 +26,12 @@
 </head>
 <body class="min-h-screen flex flex-col justify-start items-center p-4 md:p-8">
 
-  <!-- ========================================== -->
-  <!-- SECTION 1: FORM LOGIN ADMIN                -->
-  <!-- ========================================== -->
-  <div id="login-section" class="max-w-md w-full my-auto glass-card rounded-2xl p-6 md:p-8 shadow-2xl space-y-6">
-    <div class="text-center">
-      <div class="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-cyan-500/10 text-cyan-400 mb-3 border border-cyan-500/30">
-        <i class="fa-solid fa-database text-2xl"></i>
-      </div>
-      <h1 class="text-xl font-bold text-white tracking-wide">FIRESTORE DATABASE MANAGER</h1>
-      <p class="text-xs text-slate-400 mt-1">Portal Manager :: IskakFatoni</p>
-    </div>
-
-    <form id="login-form" class="space-y-4" onsubmit="return false;">
-      <div class="space-y-1">
-        <label for="login-email" class="block text-xs font-semibold text-slate-300">Email Admin</label>
-        <input type="email" id="login-email" placeholder="admin@domain.com" required class="w-full px-4 py-3 bg-slate-950 border border-slate-800 rounded-xl text-slate-100 focus:outline-none focus:border-cyan-500 text-sm">
-      </div>
-
-      <div class="space-y-1">
-        <label for="login-password" class="block text-xs font-semibold text-slate-300">Password</label>
-        <input type="password" id="login-password" placeholder="••••••••" required class="w-full px-4 py-3 bg-slate-950 border border-slate-800 rounded-xl text-slate-100 focus:outline-none focus:border-cyan-500 text-sm">
-      </div>
-
-      <p id="login-error" class="text-red-400 text-xs font-semibold text-center hidden"></p>
-
-      <button type="submit" id="btn-login" class="w-full py-3.5 px-4 bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-bold text-sm rounded-xl transition shadow-lg shadow-cyan-500/20 flex items-center justify-center gap-2 cursor-pointer">
-        <i class="fa-solid fa-right-to-bracket"></i> Masuk Manager Database
-      </button>
-    </form>
-  </div>
-
-
-  <!-- ========================================== -->
-  <!-- SECTION 2: CRUD DATABASE DASHBOARD         -->
-  <!-- ========================================== -->
-  <div id="dashboard-section" class="max-w-6xl w-full hidden space-y-6 my-auto">
+  <div id="dashboard-section" class="max-w-6xl w-full space-y-6 my-auto">
     
     <!-- TOP BAR HEADER -->
     <header class="flex items-center justify-between glass-card p-4 md:p-5 rounded-2xl shadow-xl">
       <div class="flex items-center gap-3.5">
-        <div class="w-11 h-11 rounded-xl bg-cyan-500/10 border border-cyan-500/30 flex items-center justify-center text-cyan-400 font-bold">
+        <div class="w-11 h-11 rounded-xl bg-purple-500/10 border border-purple-500/30 flex items-center justify-center text-purple-400 font-bold">
           <i class="fa-solid fa-database text-xl"></i>
         </div>
         <div>
@@ -77,8 +40,8 @@
         </div>
       </div>
 
-      <button id="btn-logout" title="Logout" class="py-2.5 px-4 bg-red-500/15 hover:bg-red-500/30 text-red-400 border border-red-500/40 font-bold text-xs rounded-xl transition flex items-center gap-2 cursor-pointer">
-        <i class="fa-solid fa-power-off"></i> <span>Keluar</span>
+      <button id="btn-logout" title="Keluar ke Master Admin Pusat" class="py-2.5 px-4 bg-red-500/15 hover:bg-red-500/30 text-red-400 border border-red-500/40 font-bold text-xs rounded-xl transition flex items-center gap-2 cursor-pointer">
+        <i class="fa-solid fa-arrow-left"></i> <span>Kembali ke Hub Admin</span>
       </button>
     </header>
 
@@ -98,10 +61,10 @@
       </button>
     </div>
 
-    <!-- UTMAIN GRID: FORM EDITOR (KIRI) vs DATA VIEWER (KANAN) -->
+    <!-- MAIN GRID: FORM EDITOR (KIRI) vs DATA VIEWER (KANAN) -->
     <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
       
-      <!-- FORM INPUT / EDIT DOCUMENT (4 SPAN) -->
+      <!-- FORM INPUT / EDIT DOCUMENT -->
       <div class="lg:col-span-4 glass-card p-6 rounded-2xl space-y-4 shadow-xl h-fit">
         <h3 id="form-title" class="text-xs font-bold text-cyan-400 border-b border-slate-800 pb-2 flex items-center gap-2 uppercase tracking-wider">
           <i class="fa-solid fa-plus-circle"></i> Tambah Dokumen Siswa
@@ -110,7 +73,6 @@
         <form id="crud-form" class="space-y-3" onsubmit="return false;">
           <input type="hidden" id="edit-doc-id">
 
-          <!-- FIELD SISWA -->
           <div id="group-siswa-nis" class="space-y-1">
             <label class="block text-[11px] font-semibold text-slate-300">NIS (ID Dokumen)</label>
             <input type="text" id="input-nis" placeholder="Contoh: 2026001" class="w-full px-3.5 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-slate-100 text-xs focus:outline-none focus:border-cyan-500">
@@ -126,7 +88,6 @@
             <input type="text" id="input-nama-kelas" placeholder="XI TEI 1" class="w-full px-3.5 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-slate-100 text-xs focus:outline-none focus:border-cyan-500">
           </div>
 
-          <!-- FIELD MAPEL / KELAS DYNAMIC -->
           <div id="group-extra-field" class="space-y-1 hidden">
             <label id="label-extra" class="block text-[11px] font-semibold text-slate-300">Wali Kelas / Kategori</label>
             <input type="text" id="input-extra" placeholder="..." class="w-full px-3.5 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-slate-100 text-xs focus:outline-none focus:border-cyan-500">
@@ -144,7 +105,7 @@
         </form>
       </div>
 
-      <!-- DATA LIST VIEWER (8 SPAN) -->
+      <!-- DATA LIST VIEWER -->
       <div class="lg:col-span-8 glass-card p-6 rounded-2xl space-y-4 shadow-xl">
         <div class="flex items-center justify-between border-b border-slate-800 pb-3">
           <h3 id="collection-title" class="text-xs font-bold text-cyan-400 flex items-center gap-2 uppercase tracking-wider">
@@ -167,30 +128,12 @@
 
   </div>
 
-
-  <!-- SCRIPT FIREBASE LOGIC -->
+  <!-- FIREBASE LOGIC -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-    import { 
-      getAuth, 
-      signInWithEmailAndPassword, 
-      onAuthStateChanged, 
-      signOut,
-      setPersistence,
-      browserSessionPersistence 
-    } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
-    import { 
-      getFirestore, 
-      collection, 
-      doc, 
-      setDoc, 
-      deleteDoc, 
-      updateDoc,
-      onSnapshot, 
-      serverTimestamp 
-    } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+    import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+    import { getFirestore, collection, doc, setDoc, deleteDoc, updateDoc, onSnapshot, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
-    // Konfigurasi Firebase Project Portal IskakFatoni
     const firebaseConfig = {
       apiKey: "AIzaSyDhq4QoCn00GkfpKXSP8PnvSvEKa2yn0ic",
       authDomain: "portal-iskakfatoni.firebaseapp.com",
@@ -205,11 +148,6 @@
     const auth = getAuth(app);
     const db = getFirestore(app);
 
-    // DOM Elements
-    const loginSection = document.getElementById('login-section');
-    const dashboardSection = document.getElementById('dashboard-section');
-    const loginForm = document.getElementById('login-form');
-    const loginError = document.getElementById('login-error');
     const userEmailDisplay = document.getElementById('user-email-display');
     const btnLogout = document.getElementById('btn-logout');
 
@@ -236,40 +174,25 @@
     let activeCollection = 'siswa';
     let unsubscribeCollection = null;
 
-    // 🔒 1. MONITORING AUTH
+    // 🔒 PROTEKSI ROUTE
     onAuthStateChanged(auth, (user) => {
-      if (user) {
-        loginSection.classList.add('hidden');
-        dashboardSection.classList.remove('hidden');
+      if (!user) {
+        window.location.href = "../admin.html";
+      } else {
         userEmailDisplay.innerText = user.email;
         loadCollection('siswa');
-      } else {
-        loginSection.classList.remove('hidden');
-        dashboardSection.classList.add('hidden');
-        if (unsubscribeCollection) unsubscribeCollection();
       }
     });
 
-    // 🔒 2. LOGIN PROCESS
-    loginForm.addEventListener('submit', async () => {
-      const email = document.getElementById('login-email').value.trim();
-      const pass = document.getElementById('login-password').value.trim();
-      loginError.classList.add('hidden');
-
-      try {
-        await setPersistence(auth, browserSessionPersistence);
-        await signInWithEmailAndPassword(auth, email, pass);
-      } catch (err) {
-        loginError.innerText = "Login gagal: Email atau password salah!";
-        loginError.classList.remove('hidden');
-      }
-    });
-
+    // 🚪 LOGOUT KEMBALI KE ADMIN PUSAT
     btnLogout.addEventListener('click', () => {
-      if (confirm("Logout dari Database Manager?")) signOut(auth);
+      if (confirm("Kembali ke Master Admin Hub Pusat?")) {
+        signOut(auth).then(() => {
+          window.location.href = "../admin.html";
+        });
+      }
     });
 
-    // 🔀 3. TAB SWITCHER KOLEKSI
     function setTabActive(tabBtn, colName) {
       [tabSiswa, tabKelas, tabMapel, tabLog].forEach(b => {
         b.className = "py-2.5 px-4 rounded-lg font-bold text-xs text-slate-400 hover:text-white transition flex items-center gap-2 whitespace-nowrap cursor-pointer";
@@ -313,7 +236,6 @@
       }
     }
 
-    // 📖 4. READ REALTIME DATA DARI FIRESTORE
     function loadCollection(colName) {
       collectionTitle.innerText = `Daftar Dokumen Koleksi: ${colName.toUpperCase()}`;
       if (unsubscribeCollection) unsubscribeCollection();
@@ -366,7 +288,6 @@
             </div>
           `;
 
-          // Reset Device Locking Event
           const btnReset = item.querySelector('.btn-reset-device');
           if (btnReset) {
             btnReset.onclick = async () => {
@@ -376,7 +297,6 @@
             };
           }
 
-          // Delete Document Event
           const btnDelete = item.querySelector('.btn-delete-doc');
           if (btnDelete) {
             btnDelete.onclick = async () => {
@@ -391,7 +311,6 @@
       });
     }
 
-    // ✏️ 5. CREATE / UPDATE DOCUMENT
     crudForm.addEventListener('submit', async () => {
       if (activeCollection === 'log_absensi') return;
 
