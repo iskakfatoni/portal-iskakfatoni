@@ -454,20 +454,21 @@
       marqueeWrapper.classList.add('hidden');
     });
 
-    // 3. LISTEN REALTIME DAFTAR LINK TERURUT (DENGAN SINKRONISASI FIELD 'ORDER')
+    // 3. LISTEN REALTIME DAFTAR LINK TERURUT (FILTER HANYA YANG AKTIF)
     const qLinks = query(collection(db, "links"), orderBy("order", "asc"));
 
     onSnapshot(qLinks, (snapshot) => {
       publicLinksContainer.innerHTML = '';
-      linkTotalBadge.innerText = `${snapshot.size} Link`;
 
-      if (snapshot.empty) {
-        publicLinksContainer.innerHTML = '<p style="font-size: 0.8rem; color: #64748b; text-align: center; padding: 20px 0;">// Belum ada tautan yang dibagikan.</p>';
-        return;
-      }
+      let activeCount = 0;
 
       snapshot.forEach((docSnap) => {
         const data = docSnap.data();
+
+        // Filter tautan: Hanya tampilkan jika status is_active !== false
+        if (data.is_active === false) return;
+
+        activeCount++;
         const iconConfig = getLinkIconConfig(data.title, data.url);
 
         const a = document.createElement('a');
@@ -490,6 +491,12 @@
 
         publicLinksContainer.appendChild(a);
       });
+
+      linkTotalBadge.innerText = `${activeCount} Link`;
+
+      if (activeCount === 0) {
+        publicLinksContainer.innerHTML = '<p style="font-size: 0.8rem; color: #64748b; text-align: center; padding: 20px 0;">// Belum ada tautan aktif yang dibagikan.</p>';
+      }
     });
   </script>
 </body>
