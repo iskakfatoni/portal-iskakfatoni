@@ -58,7 +58,7 @@
       border-radius: 16px;
     }
 
-    /* MARQUEE RUNNING TEXT INSTAN (TANPA DELAY / TANPA EFEK JEDA) */
+    /* MARQUEE RUNNING TEXT SAMA SEKALI TANPA JEDA (0% TRANSFORMX = 0) */
     .marquee-container {
       background: rgba(239, 68, 68, 0.12);
       border: 1px solid rgba(239, 68, 68, 0.3);
@@ -70,7 +70,6 @@
       display: flex;
       align-items: center;
       gap: 8px;
-      opacity: 1; /* LANGSUNG TAMPIL DENGAN WARNA MERAH */
     }
 
     .marquee-text {
@@ -79,11 +78,12 @@
       color: #f87171; /* WARNA MERAH MERONA */
       font-weight: 600;
       font-family: monospace;
-      animation: marquee 18s linear infinite; /* LANGSUNG JALAN INSTAN */
+      animation: marquee 16s linear infinite;
     }
 
+    /* ZERO-DELAY MARQUEE KEYFRAMES */
     @keyframes marquee {
-      0% { transform: translateX(100%); }
+      0% { transform: translateX(0); } /* Buka halaman langsung berada di tengah layar tanpa nunggu */
       100% { transform: translateX(-100%); }
     }
 
@@ -201,9 +201,9 @@
         <span id="greeting-student-class" class="greeting-kelas">-</span>
       </div>
 
-      <!-- RUNNING TEXT PENGUMUMAN (WARNA MERAH, LANGSUNG MUNCUL & SCROLLING) -->
+      <!-- RUNNING TEXT PENGUMUMAN (WARNA MERAH, INSTAN ZERO-DELAY) -->
       <div id="marquee-wrapper" class="marquee-container hidden">
-        <i class="fa-solid fa-bullhorn" style="color: #ef4444; font-size: 0.85rem;"></i>
+        <i class="fa-solid fa-bullhorn" style="color: #ef4444; font-size: 0.85rem; flex-shrink: 0;"></i>
         <div style="overflow: hidden; width: 100%;">
           <span id="running-text-content" class="marquee-text">Stand By....</span>
         </div>
