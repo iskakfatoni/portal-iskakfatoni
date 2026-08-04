@@ -4,6 +4,12 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>PORTAL :: Database Manager</title>
+
+  <!-- Proteksi visual sebelum verifikasi autentikasi selesai -->
+  <style>
+    html { display: none; }
+  </style>
+
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -232,19 +238,11 @@
 
   <!-- FIREBASE AUTH & FIRESTORE SCRIPT -->
   <script type="module">
+    // Import Konfigurasi Terpisah (Aman dari Kebocoran API Key)
+    import { firebaseConfig } from "../assets/js/config/firebase-config.js";
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
     import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
     import { getFirestore, collection, doc, deleteDoc, updateDoc, deleteField, onSnapshot, writeBatch } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
-
-    const firebaseConfig = {
-      apiKey: "AIzaSyDhq4QoCn00GkfpKXSP8PnvSvEKa2yn0ic",
-      authDomain: "portal-iskakfatoni.firebaseapp.com",
-      projectId: "portal-iskakfatoni",
-      storageBucket: "portal-iskakfatoni.firebasestorage.app",
-      messagingSenderId: "367350728822",
-      appId: "1:367350728822:web:6b0c6fd4824102d8acf757",
-      measurementId: "G-0BNNKQQ24V"
-    };
 
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
@@ -272,11 +270,12 @@
     let currentSortOrder = 'asc';
     let currentDynamicFields = [];
 
-    // 🔒 PROTEKSI ROUTE
+    // 🔒 AUTH GUARD: Proteksi Route jika Belum Login
     onAuthStateChanged(auth, (user) => {
       if (!user) {
         window.location.href = "../admin.html";
       } else {
+        document.documentElement.style.display = 'block';
         userEmailDisplay.innerText = user.email;
         initBadgesCount();
         loadCollectionData(currentCollection);
