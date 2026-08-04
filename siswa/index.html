@@ -69,7 +69,7 @@
       </div>
 
       <button id="btn-kembali" class="py-2 px-3 bg-slate-800 hover:bg-slate-700 text-slate-300 font-semibold text-xs rounded-xl transition border border-slate-700 flex items-center gap-1.5 cursor-pointer">
-        <i class="fa-solid fa-arrow-left"></i> <span>Kembali</span>
+        <i class="fa-solid fa-right-from-bracket"></i> <span>Keluar</span>
       </button>
     </header>
 
@@ -173,18 +173,10 @@
 
   <!-- FIREBASE SCRIPT & KAMERA CONTROLLER HARD-RESET -->
   <script type="module">
+    // Import Konfigurasi Terpisah (Aman dari Kebocoran API Key)
+    import { firebaseConfig } from "../assets/js/config/firebase-config.js";
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
     import { getFirestore, collection, addDoc, query, where, getDocs, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
-
-    const firebaseConfig = {
-      apiKey: "AIzaSyDhq4QoCn00GkfpKXSP8PnvSvEKa2yn0ic",
-      authDomain: "portal-iskakfatoni.firebaseapp.com",
-      projectId: "portal-iskakfatoni",
-      storageBucket: "portal-iskakfatoni.firebasestorage.app",
-      messagingSenderId: "367350728822",
-      appId: "1:367350728822:web:6b0c6fd4824102d8acf757",
-      measurementId: "G-0BNNKQQ24V"
-    };
 
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
@@ -203,22 +195,38 @@
     let currentSiswaUser = null;
     let currentFacingMode = "environment"; // Default Kamera Belakang
 
-    const savedUserJson = localStorage.getItem('portal_siswa_user');
+    // PROSES CEK SESI SISWA (SINKRON DENGAN 'siswa_session' & 'portal_siswa_user')
+    const savedUserJson = localStorage.getItem('siswa_session') || localStorage.getItem('portal_siswa_user');
+    
     if (!savedUserJson) {
-      window.location.href = "../absensi.html";
+      window.location.href = "login.html";
     } else {
-      currentSiswaUser = JSON.parse(savedUserJson);
-      siswaNama.innerText = currentSiswaUser.nama_siswa || "Siswa";
-      siswaNisKelas.innerText = `NIS: ${currentSiswaUser.nis} | ${currentSiswaUser.nama_kelas || currentSiswaUser.id_kelas}`;
-      
-      setTimeout(() => {
-        startCameraEngine();
-      }, 500);
+      try {
+        currentSiswaUser = JSON.parse(savedUserJson);
+        const namaSiswa = currentSiswaUser.nama_siswa || currentSiswaUser.nama || "Siswa";
+        const kelasSiswa = currentSiswaUser.nama_kelas || currentSiswaUser.id_kelas || "-";
+        
+        siswaNama.innerText = namaSiswa;
+        siswaNisKelas.innerText = `NIS: ${currentSiswaUser.nis} | ${kelasSiswa}`;
+        
+        setTimeout(() => {
+          startCameraEngine();
+        }, 500);
+      } catch (e) {
+        localStorage.removeItem('siswa_session');
+        localStorage.removeItem('portal_siswa_user');
+        window.location.href = "login.html";
+      }
     }
 
+    // HANDLER KELUAR / LOGOUT SISWA
     btnKembali.addEventListener('click', async () => {
-      await hardReleaseCamera();
-      window.location.href = "../absensi.html";
+      if (confirm("Apakah Anda yakin ingin keluar dari sesi siswa ini?")) {
+        await hardReleaseCamera();
+        localStorage.removeItem('siswa_session');
+        localStorage.removeItem('portal_siswa_user');
+        window.location.href = "login.html";
+      }
     });
 
     btnRestartCam.addEventListener('click', () => {
@@ -326,6 +334,8 @@
         const sesiData = activeSesiDoc.data();
         const idSesi = activeSesiDoc.id;
 
+        const namaSiswaVal = currentSiswaUser.nama_siswa || currentSiswaUser.nama || "Siswa";
+
         // 2. CEK APABILA SISWA SUDAH PRESENSI
         const qLog = query(
           collection(db, "log_absensi"),
@@ -336,7 +346,7 @@
         const logSnap = await getDocs(qLog);
 
         if (!logSnap.empty) {
-          showNotif(`⚠️ ${currentSiswaUser.nama_siswa}, Anda sudah presensi sebelumnya!`, "warn");
+          showNotif(`⚠️ ${namaSiswaVal}, Anda sudah presensi sebelumnya!`, "warn");
           resetProcessingLock(3000);
           return;
         }
@@ -350,7 +360,7 @@
           id_kelas: sesiData.id_kelas,
           nama_mapel: sesiData.nama_mapel,
           nis: currentSiswaUser.nis,
-          nama_siswa: currentSiswaUser.nama_siswa,
+          nama_siswa: namaSiswaVal,
           device_id: currentSiswaUser.device_id || 'UNKNOWN',
           status: 'Hadir',
           waktu_scan: waktuScanStr,
@@ -359,14 +369,15 @@
 
         await hardReleaseCamera();
 
-        showNotif(`🎉 ABSENSI BERHASIL!\n${currentSiswaUser.nama_siswa}\n[${sesiData.id_kelas} - ${sesiData.nama_mapel}]`, "success");
+        showNotif(`🎉 ABSENSI BERHASIL!\n${namaSiswaVal}\n[${sesiData.id_kelas} - ${sesiData.nama_mapel}]`, "success");
 
         scanStatusBadge.innerText = "Sukses";
         scanStatusBadge.className = "px-2.5 py-0.5 rounded-full text-[10px] font-bold font-mono bg-emerald-500/15 text-emerald-400 border border-emerald-500/30";
 
         setTimeout(() => {
-          window.location.href = "../absensi.html";
-        }, 3000);
+          resetProcessingLock(1000);
+          startCameraEngine();
+        }, 3500);
 
       } catch (err) {
         console.error(err);
@@ -378,6 +389,7 @@
     function resetProcessingLock(delayMs) {
       setTimeout(() => {
         isProcessingScan = false;
+        notifBox.classList.add('hidden');
         scanStatusBadge.innerText = "Siap Scan";
         scanStatusBadge.className = "px-2.5 py-0.5 rounded-full text-[10px] font-bold font-mono bg-cyan-500/15 text-cyan-400 border border-cyan-500/30";
       }, delayMs);
