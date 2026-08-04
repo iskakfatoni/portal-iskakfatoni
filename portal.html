@@ -219,11 +219,11 @@
 
       <!-- KONDISI B: LIST LINK PORTAL AKTIF (ON) -->
       <div id="portal-content-view">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; border-bottom: 1px solid rgba(255, 255, 255, 0.08); padding-bottom: 6px;">
-          <h2 style="font-size: 0.85rem; font-weight: 800; color: #ffffff; text-transform: uppercase; letter-spacing: 0.05em;">
-            <i class="fa-solid fa-graduation-cap" style="color: #38bdf8; margin-right: 4px;"></i> Daftar Link:
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; border-bottom: 1px solid rgba(255, 255, 255, 0.12); padding-bottom: 10px;">
+          <h2 style="font-size: 1.1rem; font-weight: 800; color: #ffffff; text-transform: uppercase; letter-spacing: 0.06em; display: flex; align-items: center; gap: 8px;">
+            <i class="fa-solid fa-graduation-cap" style="color: #38bdf8; font-size: 1.2rem;"></i> DAFTAR LINK
           </h2>
-          <span id="link-total-badge" style="font-size: 0.65rem; font-weight: 700; color: #38bdf8; background: rgba(56, 189, 248, 0.12); padding: 2px 8px; border-radius: 16px; border: 1px solid rgba(56, 189, 248, 0.3);">
+          <span id="link-total-badge" style="font-size: 0.72rem; font-weight: 700; color: #38bdf8; background: rgba(56, 189, 248, 0.15); padding: 4px 10px; border-radius: 16px; border: 1px solid rgba(56, 189, 248, 0.35);">
             0 Link
           </span>
         </div>
@@ -302,18 +302,9 @@
 
   <!-- FIREBASE LOGIC & HARDWARE DEVICE CHECK FOR GREETING -->
   <script type="module">
+    import { firebaseConfig } from "./assets/js/config/firebase-config.js";
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
     import { getFirestore, collection, doc, onSnapshot, query, where, getDocs, orderBy } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
-
-    const firebaseConfig = {
-      apiKey: "AIzaSyDhq4QoCn00GkfpKXSP8PnvSvEKa2yn0ic",
-      authDomain: "portal-iskakfatoni.firebaseapp.com",
-      projectId: "portal-iskakfatoni",
-      storageBucket: "portal-iskakfatoni.firebasestorage.app",
-      messagingSenderId: "367350728822",
-      appId: "1:367350728822:web:6b0c6fd4824102d8acf757",
-      measurementId: "G-0BNNKQQ24V"
-    };
 
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
@@ -504,14 +495,15 @@
       }
     });
   </script>
+  
   <script>
-  if ('serviceWorker' in navigator) {
-    window.addEventListener('load', () => {
-      navigator.serviceWorker.register('sw.js')
-        .then((reg) => console.log('Service Worker registered successfully:', reg.scope))
-        .catch((err) => console.error('Service Worker registration failed:', err));
-    });
-  }
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('sw.js')
+          .then((reg) => console.log('Service Worker registered successfully:', reg.scope))
+          .catch((err) => console.error('Service Worker registration failed:', err));
+      });
+    }
   </script>
 </body>
 </html>
