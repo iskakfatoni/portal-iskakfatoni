@@ -376,11 +376,18 @@
     drawParticles();
   </script>
 
-  <!-- FIREBASE AUTH -->
+  <!-- FIREBASE AUTH (PERBAIKAN PERSISTENSI LOGIN) -->
   <script type="module">
     import { firebaseConfig } from "./assets/js/config/firebase-config.js";
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-    import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut, setPersistence, browserSessionPersistence } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+    import { 
+      getAuth, 
+      signInWithEmailAndPassword, 
+      onAuthStateChanged, 
+      signOut, 
+      setPersistence, 
+      browserLocalPersistence 
+    } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
@@ -407,25 +414,28 @@
       }
     });
 
-    loginForm.addEventListener('submit', async () => {
+    loginForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
       const email = loginEmail.value.trim();
       const pass = loginPassword.value.trim();
       hideError();
       setLoading(true);
 
       try {
-        await setPersistence(auth, browserSessionPersistence);
+        await setPersistence(auth, browserLocalPersistence);
         await signInWithEmailAndPassword(auth, email, pass);
       } catch (err) {
+        console.error("Login Error:", err);
         showError("Login gagal: Email atau password salah!");
       } finally {
         setLoading(false);
       }
     });
 
-    btnLogout.addEventListener('click', () => {
+    btnLogout.addEventListener('click', async () => {
       if (confirm("Keluar dari Master Admin?")) {
-        signOut(auth);
+        await signOut(auth);
+        window.location.reload();
       }
     });
 
