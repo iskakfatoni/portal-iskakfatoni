@@ -13,6 +13,9 @@
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
   <style>
+    /* Proteksi visual sebelum verifikasi autentikasi selesai */
+    html { display: none; }
+
     body {
       font-family: 'Plus Jakarta Sans', sans-serif;
       background-color: #0b0f19;
@@ -70,7 +73,7 @@
         </div>
         <div>
           <h2 class="text-base font-bold text-white tracking-wide">Dashboard Kontrol Absensi Guru</h2>
-          <p id="user-email-display" class="text-xs text-slate-400 font-mono">guru@sekolah.sch.id</p>
+          <p id="user-email-display" class="text-xs text-slate-400 font-mono">Memuat akun...</p>
         </div>
       </div>
 
@@ -105,7 +108,7 @@
       
       <div class="grid grid-cols-1 lg:grid-cols-12 gap-4 w-full">
         
-        <!-- KOLOM KRI (KONFIGURASI & QR - 4 KOLOM GRID WIDE) -->
+        <!-- KOLOM KIRI (KONFIGURASI & QR - 4 KOLOM GRID WIDE) -->
         <div class="lg:col-span-4 space-y-4">
           <div class="glass-card p-5 rounded-2xl border border-slate-800 space-y-4 shadow-xl">
             <h3 class="text-xs font-bold text-cyan-400 border-b border-slate-800 pb-2 flex items-center gap-2 uppercase tracking-wider">
@@ -292,19 +295,11 @@
 
   <!-- FIREBASE AUTH & LOGIC -->
   <script type="module">
+    // Import Konfigurasi Terpisah (Mencegah Kebocoran API Key)
+    import { firebaseConfig } from "../assets/js/config/firebase-config.js";
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
     import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
     import { getFirestore, collection, addDoc, doc, updateDoc, query, where, orderBy, getDocs, onSnapshot, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
-
-    const firebaseConfig = {
-      apiKey: "AIzaSyDhq4QoCn00GkfpKXSP8PnvSvEKa2yn0ic",
-      authDomain: "portal-iskakfatoni.firebaseapp.com",
-      projectId: "portal-iskakfatoni",
-      storageBucket: "portal-iskakfatoni.firebasestorage.app",
-      messagingSenderId: "367350728822",
-      appId: "1:367350728822:web:6b0c6fd4824102d8acf757",
-      measurementId: "G-0BNNKQQ24V"
-    };
 
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
@@ -344,11 +339,14 @@
     let activeToken = "";
     let fullDbRecords = [];
 
-    // 🔒 PROTEKSI ROUTE: Jika belum login, paksa kembali ke ../admin.html
+    // 🔒 AUTH GUARD: Verifikasi Sesi & Proteksi Rawan Bypass URL
     onAuthStateChanged(auth, (user) => {
       if (!user) {
+        // Jika belum terautentikasi, alihkan paksa ke halaman login
         window.location.href = "../admin.html";
       } else {
+        // Tampilkan antarmuka setelah verifikasi sesi berhasil
+        document.documentElement.style.display = 'block';
         userEmailDisplay.innerText = user.email;
         loadKelasDropdown();
         loadMapelDropdown();
