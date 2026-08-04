@@ -5,7 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>PORTAL :: Kelola Link &amp; Running Text</title>
 
-  <!-- Proteksi visual sebelum verifikasi autentikasi selesai -->
   <style>
     html { display: none; }
   </style>
@@ -41,7 +40,6 @@
       border: 1px solid rgba(255, 255, 255, 0.1);
     }
 
-    /* Custom Scrollbar */
     ::-webkit-scrollbar {
       width: 6px;
       height: 6px;
@@ -57,7 +55,6 @@
       background: rgba(56, 189, 248, 0.6);
     }
 
-    /* STYLING ITEM SAAT DRAGGING */
     .link-drag-item {
       cursor: grab;
       user-select: none;
@@ -75,12 +72,10 @@
 </head>
 <body class="min-h-screen flex flex-col justify-start items-center p-3 md:p-6 relative">
 
-  <!-- BACKGROUND PARTICLE CANVAS -->
   <canvas id="particle-canvas"></canvas>
 
   <main class="w-full space-y-4 relative z-10">
     
-    <!-- TOP BAR HEADER FULL WIDTH -->
     <header class="flex items-center justify-between glass-card p-4 rounded-2xl shadow-xl w-full">
       <div class="flex items-center gap-3.5">
         <div class="w-11 h-11 rounded-xl bg-cyan-500/10 border border-cyan-500/30 flex items-center justify-center text-cyan-400 font-bold">
@@ -97,13 +92,10 @@
       </button>
     </header>
 
-    <!-- GRID DUA KOLOM FULL SCREEN -->
     <div class="grid grid-cols-1 lg:grid-cols-12 gap-4 w-full">
       
-      <!-- KOLOM KIRI (4 KOLOM GRID) -->
       <div class="lg:col-span-4 space-y-4">
         
-        <!-- CARD KONTROL STATUS PORTAL ON / OFF -->
         <div class="glass-card p-5 rounded-2xl space-y-4 shadow-xl">
           <div class="flex items-center justify-between border-b border-slate-800 pb-3">
             <h3 class="text-xs font-bold text-cyan-400 flex items-center gap-2 uppercase tracking-wider">
@@ -120,7 +112,6 @@
               <p class="text-[11px] text-slate-400">Klik tombol sakelar di kanan</p>
             </div>
 
-            <!-- TOMBOL SWITCH ON / OFF -->
             <button id="btn-toggle-portal" type="button" class="px-4 py-2 bg-emerald-500 hover:opacity-90 text-slate-950 font-bold text-xs rounded-xl transition flex items-center gap-2 cursor-pointer shadow-lg">
               <i id="toggle-icon" class="fa-solid fa-toggle-on text-base"></i>
               <span id="toggle-text">ON</span>
@@ -128,7 +119,6 @@
           </div>
         </div>
 
-        <!-- FORM RUNNING TEXT -->
         <div class="glass-card p-5 rounded-2xl space-y-3 shadow-xl">
           <h3 class="text-xs font-bold text-cyan-400 border-b border-slate-800 pb-2 flex items-center gap-2 uppercase tracking-wider">
             <i class="fa-solid fa-bullhorn"></i> Running Text Pengumuman
@@ -141,7 +131,6 @@
           </button>
         </div>
 
-        <!-- FORM TAMBAH LINK BARU -->
         <div class="glass-card p-5 rounded-2xl space-y-4 shadow-xl">
           <h3 class="text-xs font-bold text-cyan-400 border-b border-slate-800 pb-2 flex items-center gap-2 uppercase tracking-wider">
             <i class="fa-solid fa-plus-circle"></i> Tambah Link Baru
@@ -170,7 +159,6 @@
 
       </div>
 
-      <!-- KOLOM KANAN: DAFTAR LINK AKTIF (8 KOLOM GRID WIDE) -->
       <div class="lg:col-span-8">
         <div class="glass-card p-5 rounded-2xl shadow-xl h-full flex flex-col justify-between w-full">
           <div>
@@ -184,7 +172,6 @@
               <span id="link-count" class="text-xs text-slate-400 font-mono font-bold bg-slate-950 px-3 py-1 rounded-full border border-slate-800">0 Link</span>
             </div>
 
-            <!-- CONTAINER DAFTAR LINK DRAGGABLE -->
             <div id="link-list-container" class="space-y-2.5 mt-4 max-h-[600px] overflow-y-auto pr-2">
               <p class="text-xs text-slate-500 text-center py-10">// Memuat daftar link dari Firestore...</p>
             </div>
@@ -199,14 +186,12 @@
 
     </div>
 
-    <!-- FOOTER -->
     <div class="text-center pt-1">
       <p class="text-xs text-slate-500 font-mono">Developed by Iskak Fatoni, S.Pd., Gr.</p>
     </div>
 
   </main>
 
-  <!-- MODAL EDIT LINK -->
   <div id="edit-link-modal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-50 hidden flex items-center justify-center p-4">
     <div class="glass-card max-w-md w-full p-6 rounded-2xl shadow-2xl space-y-4 border border-slate-700">
       <div class="flex items-center justify-between border-b border-slate-800 pb-3">
@@ -248,7 +233,6 @@
     </div>
   </div>
 
-  <!-- PARTICLE CANVAS ANIMATION -->
   <script>
     const canvas = document.getElementById('particle-canvas');
     const ctx = canvas.getContext('2d');
@@ -294,9 +278,7 @@
     drawParticles();
   </script>
 
-  <!-- FIREBASE SCRIPT & DRAG-AND-DROP + ACTIVE CHECKLIST TOGGLE -->
   <script type="module">
-    // Import Konfigurasi Terpisah (Aman dari Kebocoran API Key)
     import { firebaseConfig } from "../assets/js/config/firebase-config.js";
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
     import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
@@ -324,7 +306,6 @@
     const linkCount = document.getElementById('link-count');
     const reorderStatus = document.getElementById('reorder-status');
 
-    // ELEMENT MODAL EDIT
     const editLinkModal = document.getElementById('edit-link-modal');
     const formEditLink = document.getElementById('form-edit-link');
     const editLinkId = document.getElementById('edit-link-id');
@@ -337,8 +318,8 @@
     let currentPortalState = true;
     let draggedItem = null;
     let isReordering = false;
+    let unsubscribeLinks = null;
 
-    // 🔒 AUTH GUARD: Proteksi Route jika Belum Login
     onAuthStateChanged(auth, (user) => {
       if (!user) {
         window.location.href = "../admin.html";
@@ -351,12 +332,10 @@
       }
     });
 
-    // ↩️ KEMBALI KE HUB ADMIN
     btnLogout.addEventListener('click', () => {
       window.location.href = "../admin.html";
     });
 
-    // 1. LISTEN & WRITE STATUS PORTAL
     function loadPortalStatus() {
       onSnapshot(doc(db, "settings", "portal_status"), (docSnap) => {
         if (docSnap.exists()) {
@@ -403,7 +382,6 @@
       }
     }
 
-    // 2. RUNNING TEXT
     function loadRunningText() {
       onSnapshot(doc(db, "settings", "announcement"), (docSnap) => {
         if (docSnap.exists()) {
@@ -422,11 +400,14 @@
       }
     });
 
-    // 3. LISTEN & RENDER DAFTAR LINK TERURUT (DENGAN SAKELAR / CHECKLIST ACTIVE)
+    // PERBAIKAN REFRESH BUG ON LINKS LIST
     function loadLinksList() {
+      if (unsubscribeLinks) unsubscribeLinks();
+      isReordering = false; // Reset lock state
+
       const q = query(collection(db, "links"), orderBy("order", "asc"));
       
-      onSnapshot(q, (snapshot) => {
+      unsubscribeLinks = onSnapshot(q, (snapshot) => {
         if (isReordering) return;
 
         linkListContainer.innerHTML = '';
@@ -471,7 +452,6 @@
             </div>
           `;
 
-          // Handler Checklist Active (Toggle Langsung)
           item.querySelector('.toggle-active').onchange = async (e) => {
             const targetState = e.target.checked;
             try {
@@ -482,7 +462,6 @@
             }
           };
 
-          // Handler Tombol Edit Modal
           item.querySelector('.btn-edit').onclick = () => {
             editLinkId.value = docId;
             editLinkTitle.value = data.title;
@@ -491,14 +470,12 @@
             editLinkModal.classList.remove('hidden');
           };
 
-          // Handler Tombol Hapus
           item.querySelector('.btn-del').onclick = async () => {
             if (confirm(`Hapus link "${data.title}"?`)) {
               await deleteDoc(doc(db, "links", docId));
             }
           };
 
-          // Drag and Drop Event Listeners
           item.addEventListener('dragstart', handleDragStart);
           item.addEventListener('dragover', handleDragOver);
           item.addEventListener('drop', handleDrop);
@@ -506,14 +483,15 @@
 
           linkListContainer.appendChild(item);
         });
+      }, (err) => {
+        console.error("Link Listener Error:", err);
+        linkListContainer.innerHTML = '<p class="text-xs text-red-400 text-center py-10">❌ Gagal memuat data. Silakan muat ulang halaman.</p>';
       });
     }
 
-    // HANDLER CLOSE & CANCEL MODAL EDIT
     btnCloseEditModal.onclick = () => editLinkModal.classList.add('hidden');
     btnCancelEdit.onclick = () => editLinkModal.classList.add('hidden');
 
-    // SUBMIT FORM EDIT LINK
     formEditLink.addEventListener('submit', async () => {
       const id = editLinkId.value;
       const title = editLinkTitle.value.trim();
@@ -536,7 +514,6 @@
       }
     });
 
-    // HANDLERS DRAG & DROP
     function handleDragStart(e) {
       isReordering = true;
       draggedItem = this;
@@ -571,7 +548,6 @@
       isReordering = false;
     }
 
-    // SIMPAN URUTAN MASAL KE FIRESTORE
     async function saveNewOrdersToFirestore() {
       reorderStatus.classList.remove('hidden');
       try {
@@ -594,7 +570,6 @@
       }
     }
 
-    // FORM TAMBAH LINK BARU
     formAddLink.addEventListener('submit', async () => {
       const title = inputLinkTitle.value.trim();
       const url = inputLinkUrl.value.trim();
