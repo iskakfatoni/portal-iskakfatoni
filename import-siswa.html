@@ -4,6 +4,12 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>PORTAL :: Impor Data Siswa TEI</title>
+
+  <!-- Proteksi visual sebelum verifikasi autentikasi selesai -->
+  <style>
+    html { display: none; }
+  </style>
+
   <!-- Tailwind CSS via CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
   <!-- SheetJS Library untuk Excel (.xlsx) -->
@@ -76,7 +82,10 @@
   </div>
 
   <script type="module">
+    // Import Konfigurasi Terpisah (Aman dari Kebocoran API Key)
+    import { firebaseConfig } from "./assets/js/config/firebase-config.js";
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
     import { 
       getFirestore, 
       doc, 
@@ -84,18 +93,8 @@
       serverTimestamp 
     } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
-    // Konfigurasi Firebase Project portal-iskakfatoni
-    const firebaseConfig = {
-      apiKey: "AIzaSyDhq4QoCn00GkfpKXSP8PnvSvEKa2yn0ic",
-      authDomain: "portal-iskakfatoni.firebaseapp.com",
-      projectId: "portal-iskakfatoni",
-      storageBucket: "portal-iskakfatoni.firebasestorage.app",
-      messagingSenderId: "367350728822",
-      appId: "1:367350728822:web:6b0c6fd4824102d8acf757",
-      measurementId: "G-0BNNKQQ24V"
-    };
-
     const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
     const db = getFirestore(app);
 
     const logBox = document.getElementById('log-box');
@@ -106,6 +105,27 @@
     const btnSpinner = document.getElementById('btn-spinner');
 
     let parsedSiswaData = [];
+
+    // 🔒 AUTH GUARD: Verifikasi Sesi Admin
+    onAuthStateChanged(auth, (user) => {
+      if (!user) {
+        window.location.href = "admin.html";
+      } else {
+        document.documentElement.style.display = 'block';
+      }
+    });
+
+    // HELPER SANITASI XSS INPUT
+    function sanitizeInput(str) {
+      if (!str) return '';
+      return String(str)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;")
+        .trim();
+    }
 
     function log(message, type = 'info') {
       const p = document.createElement('p');
@@ -120,7 +140,7 @@
       logBox.scrollTop = logBox.scrollHeight;
     }
 
-    // 1. DOWLOAD TEMPLATE EXCEL (.XLSX) MENGGUNAKAN SHEETJS
+    // 1. DOWNLOAD TEMPLATE EXCEL (.XLSX) MENGGUNAKAN SHEETJS
     btnDownload.addEventListener('click', () => {
       try {
         if (typeof XLSX === 'undefined') {
@@ -156,7 +176,7 @@
       }
     });
 
-    // 2. BACA FILE EXCEL (.XLSX) SAAT DIUNGGAH
+    // 2. BACA FILE EXCEL (.XLSX) SAAT DIUNGGAH & TERAPKAN SANITASI
     excelFileInput.addEventListener('change', (e) => {
       const file = e.target.files[0];
       if (!file) {
@@ -181,13 +201,13 @@
           }
 
           parsedSiswaData = jsonRaw.map(row => ({
-            nis: String(row["NIS"] || "").trim(),
-            nama_siswa: String(row["Nama Siswa"] || "").trim(),
-            id_kelas: String(row["ID Kelas"] || "").trim(),
-            nama_kelas: String(row["Nama Kelas"] || "").trim()
+            nis: sanitizeInput(row["NIS"]),
+            nama_siswa: sanitizeInput(row["Nama Siswa"]),
+            id_kelas: sanitizeInput(row["ID Kelas"]),
+            nama_kelas: sanitizeInput(row["Nama Kelas"])
           })).filter(item => item.nis && item.nama_siswa);
 
-          log(`File berhasil dibaca: Ditemukan ${parsedSiswaData.length} data siswa valid.`, "warn");
+          log(`File berhasil dibaca & disanitasi: Ditemukan ${parsedSiswaData.length} data siswa valid.`, "warn");
           btnImport.disabled = false;
 
         } catch (err) {
@@ -220,7 +240,7 @@
           const safeDocId = siswa.nis.replace(/\//g, '-');
 
           await setDoc(doc(db, "siswa", safeDocId), {
-            nis: siswa.nis,               // NIS Asli (misal: "9177/413") tetap utuh di sini
+            nis: siswa.nis,               // NIS Asli tetap utuh
             nama_siswa: siswa.nama_siswa,
             id_kelas: siswa.id_kelas,
             nama_kelas: siswa.nama_kelas,
