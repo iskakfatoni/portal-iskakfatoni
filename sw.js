@@ -1,7 +1,7 @@
-// sw.js - Service Worker Cache Portal
-const CACHE_NAME = 'portal-iskakfatoni-v2';
+// sw.js - Service Worker Cache Portal Iskak Fatoni
+const CACHE_NAME = 'portal-iskakfatoni-v3';
 
-// 1. Aset lokal repositori
+// 1. Berkas Lokal Repositori
 const LOCAL_ASSETS = [
   './',
   'index.html',
@@ -21,27 +21,31 @@ const LOCAL_ASSETS = [
   'import-siswa.html'
 ];
 
-// 2. Aset CDN eksternal yang terkena aturan CORS
+// 2. Library & CDN Eksternal
 const EXTERNAL_CDN_ASSETS = [
   'https://cdn.tailwindcss.com',
   'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css',
-  'https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap'
+  'https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap',
+  'https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js',
+  'https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js',
+  'https://unpkg.com/html5-qrcode',
+  'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js',
+  'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js',
+  'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js'
 ];
 
-// Install Event: Simpan Aset Lokal & CDN Eksternal secara terpisah
+// Install Event
 self.addEventListener('install', (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME).then(async (cache) => {
-      console.log('[Service Worker] Caching local static assets...');
-      // Cache aset lokal
+      console.log('[Service Worker] Caching local assets...');
       await cache.addAll(LOCAL_ASSETS);
 
-      console.log('[Service Worker] Caching external CDN assets (no-cors mode)...');
-      // Cache aset CDN eksternal dengan mode no-cors
+      console.log('[Service Worker] Caching CDN assets...');
       const cdnPromises = EXTERNAL_CDN_ASSETS.map((url) => {
         const req = new Request(url, { mode: 'no-cors' });
         return fetch(req).then((response) => cache.put(url, response)).catch(err => {
-          console.warn('[Service Worker] Failed to cache CDN asset:', url, err);
+          console.warn('[Service Worker] Failed to cache CDN:', url, err);
         });
       });
 
@@ -50,7 +54,7 @@ self.addEventListener('install', (event) => {
   );
 });
 
-// Activate Event: Bersihkan cache versi lama
+// Activate Event
 self.addEventListener('activate', (event) => {
   event.waitUntil(
     caches.keys().then((cacheNames) => {
@@ -66,9 +70,9 @@ self.addEventListener('activate', (event) => {
   );
 });
 
-// Fetch Event: Melayani Aset dari Cache
+// Fetch Event
 self.addEventListener('fetch', (event) => {
-  // Abaikan request Firebase/Firestore agar data live tetap realtime
+  // Abaikan request data Firestore / Auth agar tidak mengganggu sinkronisasi live
   if (event.request.url.includes('firestore.googleapis.com') || 
       event.request.url.includes('firebaseio.com') ||
       event.request.url.includes('identitytoolkit')) {
@@ -81,7 +85,6 @@ self.addEventListener('fetch', (event) => {
         return cachedResponse;
       }
       return fetch(event.request).then((networkResponse) => {
-        // Jangan cache response yang tidak valid atau non-basic kecuali jika memang dibutuhkan
         if (!networkResponse || networkResponse.status !== 200 || networkResponse.type !== 'basic') {
           return networkResponse;
         }
@@ -93,7 +96,7 @@ self.addEventListener('fetch', (event) => {
 
         return networkResponse;
       }).catch(() => {
-        // Fallback jika offline dan aset tidak ada di cache
+        // Mode offline
       });
     })
   );
