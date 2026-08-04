@@ -4,6 +4,12 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>PORTAL :: Rekapitulasi Absensi & Export Excel</title>
+  
+  <!-- Proteksi visual sebelum verifikasi autentikasi selesai -->
+  <style>
+    html { display: none; }
+  </style>
+
   <!-- Tailwind CSS via CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
   <!-- SheetJS / xlsx Library untuk Export Excel -->
@@ -119,9 +125,10 @@
 
   </div>
 
-  <!-- SCRIPT LOGIC (FIRESTORE & SHEETJS) -->
+  <!-- SCRIPT LOGIC (FIRESTORE, AUTH GUARD & SHEETJS) -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
     import { 
       getFirestore, 
       collection, 
@@ -134,6 +141,7 @@
 
     // Inisialisasi Firebase & Firestore
     const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
     const db = getFirestore(app);
 
     // DOM Elements
@@ -146,8 +154,18 @@
 
     let currentData = [];
 
+    // 🔒 AUTH GUARD: Verifikasi Sesi sebelum menampilkan halaman
+    onAuthStateChanged(auth, (user) => {
+      if (!user) {
+        window.location.href = "../admin.html";
+      } else {
+        document.documentElement.style.display = 'block';
+        initSesiDropdown();
+      }
+    });
+
     // 1. INSIALISASI DROPDOWN SESI ABSENSI
-    document.addEventListener('DOMContentLoaded', async () => {
+    async function initSesiDropdown() {
       try {
         const qSesi = query(collection(db, "sesi_absensi"), orderBy("created_at", "desc"));
         const snapSesi = await getDocs(qSesi);
@@ -162,7 +180,7 @@
       } catch (err) {
         console.error("Gagal memuat daftar sesi:", err);
       }
-    });
+    }
 
     // 2. MUAT DATA REKAP DARI FIRESTORE
     btnTampilkan.addEventListener('click', loadData);
