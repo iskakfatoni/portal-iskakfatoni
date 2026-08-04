@@ -1,24 +1,25 @@
 // sw.js - Service Worker Cache Portal
 const CACHE_NAME = 'portal-iskakfatoni-v1';
 
-// Daftar aset statis yang wajib di-cache agar loading instan
+// Gunakan Relative Path (tanpa tanda / di awal)
 const ASSETS_TO_CACHE = [
-  '/',
-  '/index.html',
-  '/admin.html',
-  '/portal.html',
-  '/style.css',
-  '/foto_asn_profile.png',
-  '/nisnas_logo_colorful.png',
-  '/assets/js/config/firebase-config.js',
-  '/guru/index.html',
-  '/guru/rekap.html',
-  '/link/index.html',
-  '/siswa/login.html',
-  '/siswa/index.html',
-  '/database/db-manager.html',
-  '/import-siswa.html',
-  // CDN External Assets
+  './',
+  'index.html',
+  'portal.html',
+  'admin.html',
+  'style.css',
+  'manifest.json',
+  'foto_asn_profile.png',
+  'nisnas_logo_colorful.png',
+  'assets/js/config/firebase-config.js',
+  'guru/index.html',
+  'guru/rekap.html',
+  'link/index.html',
+  'siswa/login.html',
+  'siswa/index.html',
+  'database/db-manager.html',
+  'import-siswa.html',
+  // External CDN
   'https://cdn.tailwindcss.com',
   'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css',
   'https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap'
