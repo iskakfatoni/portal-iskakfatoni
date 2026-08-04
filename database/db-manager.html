@@ -12,7 +12,7 @@
 
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  <!-- SheetJS Library untuk Export Excel (.xlsx) -->
+  <!-- SheetJS Library untuk Export/Import Excel (.xlsx / .csv) -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -138,9 +138,19 @@
               <p class="text-[11px] text-slate-400 font-mono mt-0.5">Total dokumen: <span id="total-doc-count" class="text-emerald-400 font-bold">0</span></p>
             </div>
 
-            <!-- AKSI SELEKSI, EKSPOR PERANGKAT, & HAPUS MASAL -->
+            <!-- AKSI SELEKSI, TAMBAH, IMPORT, EXPORT, & HAPUS MASAL -->
             <div class="flex flex-wrap items-center gap-2 w-full sm:w-auto justify-end">
-              <!-- TOMBOL EKSPOR PERANGKAT EXCEL -->
+              <!-- TOMBOL DATA BARU MANUAL -->
+              <button id="btn-add-new-data" class="py-2 px-3.5 bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-bold text-xs rounded-xl transition flex items-center gap-1.5 cursor-pointer shadow-lg shadow-cyan-500/20">
+                <i class="fa-solid fa-plus"></i> <span>+ Data Baru</span>
+              </button>
+
+              <!-- TOMBOL IMPORT FILE EXCEL/CSV/JSON -->
+              <button id="btn-open-import-modal" class="py-2 px-3.5 bg-teal-500/15 hover:bg-teal-500/30 text-teal-300 border border-teal-500/30 font-bold text-xs rounded-xl transition flex items-center gap-1.5 cursor-pointer">
+                <i class="fa-solid fa-file-import"></i> <span>Import Data</span>
+              </button>
+
+              <!-- TOMBOL EKSPOR PERANGKAT EXCEL (KHUSUS KOLEKSI SISWA) -->
               <button id="btn-export-device-excel" class="py-2 px-3.5 bg-emerald-500/10 hover:bg-emerald-500/25 text-emerald-400 border border-emerald-500/30 font-bold text-xs rounded-xl transition flex items-center gap-1.5 cursor-pointer">
                 <i class="fa-solid fa-file-excel"></i> <span>Ekspor Perangkat (.xlsx)</span>
               </button>
@@ -197,6 +207,81 @@
 
   </main>
 
+  <!-- MODAL 1: TAMBAH DATA BARU MANUAL -->
+  <div id="modal-add-data" class="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-50 hidden flex items-center justify-center p-4">
+    <div class="glass-card max-w-lg w-full p-6 rounded-2xl shadow-2xl space-y-4 border border-slate-700">
+      <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+        <h3 class="text-sm font-bold text-cyan-400 flex items-center gap-2 uppercase tracking-wider">
+          <i class="fa-solid fa-plus-circle"></i> Tambah Data Baru (<span id="modal-col-name" class="font-mono text-emerald-400">siswa</span>)
+        </h3>
+        <button id="btn-close-add-modal" class="text-slate-400 hover:text-white transition">
+          <i class="fa-solid fa-xmark text-lg"></i>
+        </button>
+      </div>
+
+      <form id="form-add-manual" class="space-y-3">
+        <div class="space-y-1">
+          <label class="block text-xs font-semibold text-slate-300">Document ID (Opsional, kosongkan jika acak)</label>
+          <input type="text" id="input-doc-id" placeholder="Misal: 9177-413 (Ganti '/' dengan '-')" class="w-full px-3.5 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-slate-100 text-xs focus:outline-none focus:border-cyan-500 font-mono">
+        </div>
+
+        <div id="dynamic-input-fields" class="space-y-3 max-h-60 overflow-y-auto pr-1">
+          <!-- Input fields dinamis akan disuntikkan oleh JS sesuai koleksi -->
+        </div>
+
+        <div class="flex gap-2 pt-2 border-t border-slate-800">
+          <button type="button" id="btn-cancel-add-modal" class="flex-1 py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold text-xs rounded-xl transition">
+            Batal
+          </button>
+          <button type="submit" class="flex-1 py-2.5 bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-bold text-xs rounded-xl transition shadow-lg shadow-cyan-500/20">
+            Simpan ke Firestore
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL 2: IMPORT DATA FILE (.XLSX / .CSV / .JSON) -->
+  <div id="modal-import-file" class="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-50 hidden flex items-center justify-center p-4">
+    <div class="glass-card max-w-lg w-full p-6 rounded-2xl shadow-2xl space-y-4 border border-slate-700">
+      <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+        <h3 class="text-sm font-bold text-teal-400 flex items-center gap-2 uppercase tracking-wider">
+          <i class="fa-solid fa-file-import"></i> Import Data Koleksi: <span id="import-col-name" class="font-mono text-cyan-400">siswa</span>
+        </h3>
+        <button id="btn-close-import-modal" class="text-slate-400 hover:text-white transition">
+          <i class="fa-solid fa-xmark text-lg"></i>
+        </button>
+      </div>
+
+      <div class="space-y-3">
+        <p class="text-xs text-slate-300">Pilih berkas <b>.xlsx</b>, <b>.csv</b>, atau <b>.json</b>. Pastikan nama header/kolom di file cocok dengan field di Firestore.</p>
+
+        <div class="flex items-center justify-between bg-slate-900 p-3 rounded-xl border border-slate-800">
+          <span class="text-xs text-slate-400">Unduh Format Template:</span>
+          <button id="btn-download-template" type="button" class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-cyan-400 font-semibold text-xs rounded-lg transition border border-slate-700">
+            <i class="fa-solid fa-download"></i> Template Excel (.xlsx)
+          </button>
+        </div>
+
+        <input type="file" id="import-file-input" accept=".xlsx, .xls, .csv, .json" class="block w-full text-xs text-slate-400 file:mr-3 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-slate-800 file:text-teal-400 hover:file:bg-slate-700 cursor-pointer border border-slate-800 rounded-xl p-1 bg-slate-950">
+
+        <!-- LOG BOX IMPOR -->
+        <div id="import-log-box" class="bg-slate-950 rounded-xl p-3 border border-slate-800 font-mono text-[11px] text-slate-300 h-36 overflow-y-auto space-y-1">
+          <p class="text-slate-500">// Log proses impor akan tampil di sini...</p>
+        </div>
+      </div>
+
+      <div class="flex gap-2 pt-2 border-t border-slate-800">
+        <button type="button" id="btn-cancel-import-modal" class="flex-1 py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold text-xs rounded-xl transition">
+          Batal
+        </button>
+        <button type="button" id="btn-process-import" disabled class="flex-1 py-2.5 bg-gradient-to-r from-teal-400 to-cyan-400 text-slate-950 font-bold text-xs rounded-xl hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed transition shadow-lg shadow-cyan-500/10">
+          🚀 Proses &amp; Simpan
+        </button>
+      </div>
+    </div>
+  </div>
+
   <!-- PARTICLE CANVAS ANIMATION -->
   <script>
     const canvas = document.getElementById('particle-canvas');
@@ -245,11 +330,10 @@
 
   <!-- FIREBASE AUTH & FIRESTORE SCRIPT -->
   <script type="module">
-    // Import Konfigurasi Terpisah (Aman dari Kebocoran API Key)
     import { firebaseConfig } from "../assets/js/config/firebase-config.js";
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
     import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
-    import { getFirestore, collection, doc, deleteDoc, updateDoc, deleteField, onSnapshot, writeBatch } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+    import { getFirestore, collection, doc, setDoc, addDoc, deleteDoc, updateDoc, deleteField, onSnapshot, writeBatch, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
@@ -268,17 +352,38 @@
     const selectedCountSpan = document.getElementById('selected-count');
     const btnExportDeviceExcel = document.getElementById('btn-export-device-excel');
 
+    // ELEMENT MODAL
+    const btnAddNewData = document.getElementById('btn-add-new-data');
+    const modalAddData = document.getElementById('modal-add-data');
+    const modalColName = document.getElementById('modal-col-name');
+    const btnCloseAddModal = document.getElementById('btn-close-add-modal');
+    const btnCancelAddModal = document.getElementById('btn-cancel-add-modal');
+    const formAddManual = document.getElementById('form-add-manual');
+    const inputDocId = document.getElementById('input-doc-id');
+    const dynamicInputFields = document.getElementById('dynamic-input-fields');
+
+    const btnOpenImportModal = document.getElementById('btn-open-import-modal');
+    const modalImportFile = document.getElementById('modal-import-file');
+    const importColName = document.getElementById('import-col-name');
+    const btnCloseImportModal = document.getElementById('btn-close-import-modal');
+    const btnCancelImportModal = document.getElementById('btn-cancel-import-modal');
+    const importFileInput = document.getElementById('import-file-input');
+    const btnProcessImport = document.getElementById('btn-process-import');
+    const importLogBox = document.getElementById('import-log-box');
+    const btnDownloadTemplate = document.getElementById('btn-download-template');
+
     let currentCollection = 'siswa';
     let unsubscribeCurrent = null;
     let selectedDocIds = new Set();
     let currentDocsList = [];
+    let parsedImportData = [];
     
     // STATE UNTUK SORTING
     let currentSortField = null;
     let currentSortOrder = 'asc';
     let currentDynamicFields = [];
 
-    // 🔒 AUTH GUARD: Proteksi Route jika Belum Login
+    // 🔒 AUTH GUARD
     onAuthStateChanged(auth, (user) => {
       if (!user) {
         window.location.href = "../admin.html";
@@ -294,7 +399,6 @@
       window.location.href = "../admin.html";
     });
 
-    // HITUNG DATA DI BADGE NAVIGASI SIDEBAR
     function initBadgesCount() {
       const collections = ['siswa', 'kelas', 'mapel', 'sesi_absensi', 'log_absensi', 'links'];
       collections.forEach(colName => {
@@ -305,7 +409,6 @@
       });
     }
 
-    // NAVIGASI GANTI KOLEKSI
     document.querySelectorAll('.btn-col').forEach(btn => {
       btn.addEventListener('click', () => {
         const targetCol = btn.getAttribute('data-collection');
@@ -321,7 +424,6 @@
         currentSortOrder = 'asc';
         activeCollectionTitle.innerHTML = `<i class="fa-solid fa-table-list text-cyan-400"></i> Koleksi: <span class="text-cyan-400 font-mono">${currentCollection}</span>`;
         
-        // Tampilkan/sembunyikan tombol Ekspor Perangkat sesuai koleksi aktif
         if (btnExportDeviceExcel) {
           btnExportDeviceExcel.style.display = currentCollection === 'siswa' ? 'inline-flex' : 'none';
         }
@@ -330,7 +432,6 @@
       });
     });
 
-    // FORMAT VALUE DARI FIRESTORE KE TAMPILAN TEXT
     function formatCellContent(value) {
       if (value === null || value === undefined) return '<span class="text-slate-600">-</span>';
       
@@ -351,7 +452,6 @@
       return String(value);
     }
 
-    // FORMAT NAMA HEADER LEBIH RAPI
     function formatHeaderName(fieldKey) {
       const lower = fieldKey.toLowerCase();
       if (lower === 'wali_kelas' || lower === 'id_wali_kelas' || lower === 'namawalikelas' || lower === 'nama_wali_kelas') {
@@ -360,7 +460,6 @@
       return fieldKey;
     }
 
-    // MUAT DATA DINAMIS TABEL MATRIKS
     function loadCollectionData(colName) {
       if (unsubscribeCurrent) unsubscribeCurrent();
 
@@ -378,7 +477,6 @@
           return;
         }
 
-        // 1. KUMPULKAN FIELD UNIK & FILTER `created_at`
         const fieldSet = new Set();
         snapshot.docs.forEach(docSnap => {
           Object.keys(docSnap.data()).forEach(k => {
@@ -389,15 +487,11 @@
         });
         currentDynamicFields = Array.from(fieldSet);
 
-        // 2. RENDER HEADER TABEL DINAMIS
         renderTableHeaders();
-
-        // 3. RENDER ISI TABEL DATA
         renderSortedTableBody();
       });
     }
 
-    // RENDER HEADER DENGAN POSISI CHECKBOX DI SISI KANAN
     function renderTableHeaders() {
       const getSortIcon = (field) => {
         if (currentSortField !== field) return '<span class="text-[10px] text-slate-600 ml-1">⇅</span>';
@@ -430,7 +524,6 @@
         <th class="p-3 w-28 text-center">Aksi</th>
       `;
 
-      // BIND EVENT LISTENERS PADA HEADER
       const headerChk = document.getElementById('select-all-checkbox');
       if (headerChk) headerChk.addEventListener('change', handleSelectAll);
 
@@ -449,7 +542,6 @@
       });
     }
 
-    // FUNGSI SORTING LOKAL & RENDER BODY TABEL
     function renderSortedTableBody() {
       if (currentDocsList.length === 0) return;
 
@@ -482,7 +574,6 @@
         });
       }
 
-      // RENDER BARIS TABEL
       tableBody.innerHTML = '';
       sortedDocs.forEach((docSnap, index) => {
         const docId = docSnap.id;
@@ -497,7 +588,6 @@
           return `<td class="p-3 border-r border-slate-800/60 max-w-xs overflow-hidden text-ellipsis">${formatCellContent(val)}</td>`;
         }).join('');
 
-        // Tombol Reset Device khusus untuk koleksi 'siswa'
         const isSiswaCollection = currentCollection === 'siswa';
         const btnResetDeviceHTML = isSiswaCollection ? `
           <button class="btn-reset-device p-2 bg-amber-500/15 hover:bg-amber-500/30 text-amber-400 border border-amber-500/30 rounded-lg text-xs font-semibold cursor-pointer transition mr-1" title="Reset Perangkat Siswa">
@@ -520,7 +610,6 @@
           </td>
         `;
 
-        // Checkbox handler
         const chk = tr.querySelector('.row-checkbox');
         chk.addEventListener('change', (e) => {
           if (e.target.checked) {
@@ -531,7 +620,6 @@
           updateSelectedUI();
         });
 
-        // Reset Device Handler (Khusus Siswa)
         if (isSiswaCollection) {
           const btnReset = tr.querySelector('.btn-reset-device');
           if (btnReset) {
@@ -554,7 +642,6 @@
           }
         }
 
-        // Delete handler
         tr.querySelector('.btn-del-single').onclick = async () => {
           if (confirm(`Hapus dokumen ID: "${docId}" dari koleksi ${currentCollection}?`)) {
             try {
@@ -570,7 +657,6 @@
         tableBody.appendChild(tr);
       });
 
-      // Update status Select All Header
       const headerChk = document.getElementById('select-all-checkbox');
       if (headerChk) {
         headerChk.checked = currentDocsList.length > 0 && selectedDocIds.size === currentDocsList.length;
@@ -597,7 +683,6 @@
       btnDeleteSelected.disabled = count === 0;
     }
 
-    // HANDLER HAPUS TERPILIH (BULK DELETE)
     btnDeleteSelected.addEventListener('click', async () => {
       const count = selectedDocIds.size;
       if (count === 0) return;
@@ -621,7 +706,6 @@
       }
     });
 
-    // HANDLER KOSONGKAN SELURUH KOLEKSI
     btnClearCollection.addEventListener('click', async () => {
       if (currentDocsList.length === 0) {
         alert(`Koleksi "${currentCollection}" sudah kosong.`);
@@ -651,7 +735,224 @@
       }
     });
 
-    // HANDLER EKSPOR DATA PERANGKAT HP SISWA KE EXCEL
+    // -------------------------------------------------------------
+    // LOGIKA FITUR 1: TAMBAH DATA BARU MANUAL
+    // -------------------------------------------------------------
+    btnAddNewData.addEventListener('click', () => {
+      modalColName.innerText = currentCollection;
+      inputDocId.value = '';
+      dynamicInputFields.innerHTML = '';
+
+      // Tentukan struktur field standar berdasarkan koleksi aktif
+      let fieldsToRender = [...currentDynamicFields];
+      if (fieldsToRender.length === 0) {
+        if (currentCollection === 'siswa') fieldsToRender = ['nis', 'nama_siswa', 'id_kelas', 'nama_kelas'];
+        else if (currentCollection === 'kelas') fieldsToRender = ['id_kelas', 'nama_kelas', 'wali_kelas'];
+        else if (currentCollection === 'mapel') fieldsToRender = ['id_mapel', 'nama_mapel'];
+        else if (currentCollection === 'links') fieldsToRender = ['title', 'url', 'is_active', 'order'];
+        else fieldsToRender = ['nama', 'keterangan'];
+      }
+
+      fieldsToRender.forEach(fieldKey => {
+        const div = document.createElement('div');
+        div.className = 'space-y-1';
+        div.innerHTML = `
+          <label class="block text-xs font-semibold text-slate-300 capitalize">${formatHeaderName(fieldKey)}</label>
+          <input type="text" data-field="${fieldKey}" placeholder="Masukkan ${fieldKey}..." class="dynamic-input w-full px-3.5 py-2 bg-slate-950 border border-slate-800 rounded-xl text-slate-100 text-xs focus:outline-none focus:border-cyan-500">
+        `;
+        dynamicInputFields.appendChild(div);
+      });
+
+      modalAddData.classList.remove('hidden');
+    });
+
+    btnCloseAddModal.onclick = () => modalAddData.classList.add('hidden');
+    btnCancelAddModal.onclick = () => modalAddData.classList.add('hidden');
+
+    formAddManual.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const rawDocId = inputDocId.value.trim();
+      const safeDocId = rawDocId ? rawDocId.replace(/\//g, '-') : null;
+
+      const newObj = {};
+      document.querySelectorAll('.dynamic-input').forEach(inp => {
+        const key = inp.getAttribute('data-field');
+        const val = inp.value.trim();
+        if (val === 'true') newObj[key] = true;
+        else if (val === 'false') newObj[key] = false;
+        else if (!isNaN(val) && val !== '') newObj[key] = Number(val);
+        else newObj[key] = val;
+      });
+
+      newObj.created_at = serverTimestamp();
+
+      try {
+        if (safeDocId) {
+          await setDoc(doc(db, currentCollection, safeDocId), newObj);
+        } else {
+          await addDoc(collection(db, currentCollection), newObj);
+        }
+
+        modalAddData.classList.add('hidden');
+        alert(`Berhasil menambahkan data baru ke koleksi "${currentCollection}"!`);
+      } catch (err) {
+        alert("Gagal menyimpan data baru: " + err.message);
+      }
+    });
+
+    // -------------------------------------------------------------
+    // LOGIKA FITUR 2: IMPORT DATA FILE (.XLSX / .CSV / .JSON)
+    // -------------------------------------------------------------
+    btnOpenImportModal.addEventListener('click', () => {
+      importColName.innerText = currentCollection;
+      importFileInput.value = '';
+      parsedImportData = [];
+      btnProcessImport.disabled = true;
+      importLogBox.innerHTML = '<p class="text-slate-500">// Log proses impor akan tampil di sini...</p>';
+      modalImportFile.classList.remove('hidden');
+    });
+
+    btnCloseImportModal.onclick = () => modalImportFile.classList.add('hidden');
+    btnCancelImportModal.onclick = () => modalImportFile.classList.add('hidden');
+
+    function logImport(msg, type = 'info') {
+      const p = document.createElement('p');
+      if (type === 'success') p.className = 'text-emerald-400 font-semibold';
+      else if (type === 'error') p.className = 'text-red-400 font-semibold';
+      else if (type === 'warn') p.className = 'text-amber-400';
+      else p.className = 'text-slate-300';
+      
+      const timestamp = new Date().toLocaleTimeString();
+      p.innerText = `[${timestamp}] ${msg}`;
+      importLogBox.appendChild(p);
+      importLogBox.scrollTop = importLogBox.scrollHeight;
+    }
+
+    // BACA FILE YANG DIUNGGAH
+    importFileInput.addEventListener('change', (e) => {
+      const file = e.target.files[0];
+      if (!file) {
+        btnProcessImport.disabled = true;
+        return;
+      }
+
+      const fileName = file.name.toLowerCase();
+      const reader = new FileReader();
+
+      reader.onload = (evt) => {
+        try {
+          if (fileName.endsWith('.json')) {
+            const rawJson = JSON.parse(evt.target.result);
+            parsedImportData = Array.isArray(rawJson) ? rawJson : [rawJson];
+          } else {
+            const data = new Uint8Array(evt.target.result);
+            const workbook = XLSX.read(data, { type: 'array' });
+            const firstSheet = workbook.SheetNames[0];
+            parsedImportData = XLSX.utils.sheet_to_json(workbook.Sheets[firstSheet]);
+          }
+
+          if (parsedImportData.length === 0) {
+            logImport("Berkas kosong atau format tidak valid.", "error");
+            btnProcessImport.disabled = true;
+            return;
+          }
+
+          logImport(`Berkas berhasil dibaca: Terdeteksi ${parsedImportData.length} baris data siap diimpor.`, "warn");
+          btnProcessImport.disabled = false;
+
+        } catch (err) {
+          logImport("Gagal membaca berkas: " + err.message, "error");
+          btnProcessImport.disabled = true;
+        }
+      };
+
+      if (fileName.endsWith('.json')) {
+        reader.readAsText(file);
+      } else {
+        reader.readAsArrayBuffer(file);
+      }
+    });
+
+    // PROSES EKSEKUSI IMPOR KE FIRESTORE DENGAN SANITASI DOCUMENT ID
+    btnProcessImport.addEventListener('click', async () => {
+      if (parsedImportData.length === 0) return;
+
+      btnProcessImport.disabled = true;
+      logImport(`Memulai impor ${parsedImportData.length} data ke koleksi "${currentCollection}"...`, "warn");
+
+      let successCount = 0;
+      let failCount = 0;
+
+      for (const row of parsedImportData) {
+        try {
+          const cleanRow = {};
+          let targetDocId = null;
+
+          Object.keys(row).forEach(key => {
+            const cleanKey = key.trim();
+            const lowerKey = cleanKey.toLowerCase();
+            let val = row[key];
+
+            if (typeof val === 'string') val = val.trim();
+
+            // Cek apakah ada key yang berfungsi sebagai ID (NIS / ID Kelas / Document ID)
+            if (lowerKey === 'nis' || lowerKey === 'id' || lowerKey === 'doc_id' || lowerKey === 'document id' || lowerKey === 'id_kelas' || lowerKey === 'id_mapel') {
+              if (val) {
+                targetDocId = String(val).replace(/\//g, '-'); // Sanitasi ID
+              }
+            }
+
+            // Normalisasi nama key standar jika mengimpor dari file template
+            if (lowerKey === 'nis') cleanRow['nis'] = String(val);
+            else if (lowerKey === 'nama siswa') cleanRow['nama_siswa'] = String(val);
+            else if (lowerKey === 'id kelas') cleanRow['id_kelas'] = String(val);
+            else if (lowerKey === 'nama kelas') cleanRow['nama_kelas'] = String(val);
+            else cleanRow[cleanKey] = val;
+          });
+
+          cleanRow.created_at = serverTimestamp();
+
+          if (targetDocId) {
+            await setDoc(doc(db, currentCollection, targetDocId), cleanRow, { merge: true });
+          } else {
+            await addDoc(collection(db, currentCollection), cleanRow);
+          }
+
+          successCount++;
+          logImport(`✔ [Row ${successCount}] ${targetDocId ? 'ID: ' + targetDocId : 'Auto-ID'} - Sukses`, "success");
+
+        } catch (err) {
+          failCount++;
+          logImport(`❌ Baris Gagal: ${err.message}`, "error");
+        }
+      }
+
+      logImport(`🎉 IMPOR SELESAI! Sukses: ${successCount} | Gagal: ${failCount}`, "success");
+      btnProcessImport.disabled = false;
+    });
+
+    // TEMPLATE DOWNLOAD EXCEL
+    btnDownloadTemplate.addEventListener('click', () => {
+      let sampleData = [];
+      if (currentCollection === 'siswa') {
+        sampleData = [{ "NIS": "9177/413", "Nama Siswa": "ACHMAD HAMDHANI", "ID Kelas": "XI-TEI-1", "Nama Kelas": "XI TEI 1" }];
+      } else if (currentCollection === 'kelas') {
+        sampleData = [{ "id_kelas": "XI-TEI-1", "nama_kelas": "XI TEI 1", "wali_kelas": "Nama Guru" }];
+      } else if (currentCollection === 'mapel') {
+        sampleData = [{ "id_mapel": "TEI-01", "nama_mapel": "Pemrograman Terstruktur" }];
+      } else {
+        sampleData = [{ "id": "DOC-01", "title": "Contoh Data", "keterangan": "Deskripsi" }];
+      }
+
+      const ws = XLSX.utils.json_to_sheet(sampleData);
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, `Template_${currentCollection}`);
+      XLSX.writeFile(wb, `Template_Import_${currentCollection}.xlsx`);
+    });
+
+    // -------------------------------------------------------------
+    // LOGIKA FITUR 3: EKSPOR DATA PERANGKAT HP SISWA KE EXCEL
+    // -------------------------------------------------------------
     if (btnExportDeviceExcel) {
       btnExportDeviceExcel.addEventListener('click', () => {
         if (currentCollection !== 'siswa') {
@@ -664,7 +965,6 @@
           return;
         }
 
-        // Ekstrak & Format Data Perangkat Siswa
         const exportData = currentDocsList.map((docSnap, index) => {
           const data = docSnap.data();
           const isBound = Boolean(data.device_id || data.device_token || data.mac_address);
@@ -685,27 +985,17 @@
           };
         });
 
-        // Buat Worksheet Excel
         const worksheet = XLSX.utils.json_to_sheet(exportData);
         
-        // Atur Lebar Kolom
         worksheet['!cols'] = [
-          { wch: 5 },  // No
-          { wch: 15 }, // Document ID
-          { wch: 15 }, // NIS
-          { wch: 28 }, // Nama Siswa
-          { wch: 12 }, // ID Kelas
-          { wch: 15 }, // Nama Kelas
-          { wch: 20 }, // Status Perangkat
-          { wch: 35 }, // Device ID
-          { wch: 30 }, // Device Token
-          { wch: 22 }  // Waktu Terikat
+          { wch: 5 },  { wch: 15 }, { wch: 15 }, 
+          { wch: 28 }, { wch: 12 }, { wch: 15 }, 
+          { wch: 20 }, { wch: 35 }, { wch: 30 }, { wch: 22 }
         ];
 
         const workbook = XLSX.utils.book_new();
         XLSX.utils.book_append_sheet(workbook, worksheet, "Perangkat Siswa");
 
-        // Unduh File Excel (.xlsx)
         const today = new Date().toISOString().split('T')[0];
         XLSX.writeFile(workbook, `Rekap_Perangkat_Siswa_${today}.xlsx`);
       });
