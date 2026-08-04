@@ -2,246 +2,249 @@
 <html lang="id">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
-  <title>PORTAL::IskakFatoni - Dashboard Guru</title>
-  <link rel="stylesheet" href="../style.css">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PORTAL :: Dashboard Admin & Guru Absensi</title>
+  <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
   <style>
-    /* Proteksi visual sebelum auth check selesai */
-    html { display: none; }
-
-    .dashboard-box {
-      background: var(--card-bg, rgba(15, 23, 42, 0.85));
-      border: 1px solid var(--card-border, rgba(255, 255, 255, 0.1));
-      border-radius: 20px;
-      padding: 24px 20px;
-      backdrop-filter: blur(12px);
-      -webkit-backdrop-filter: blur(12px);
-      margin: 20px 0;
-      width: 100%;
-      box-shadow: 0 15px 35px -10px rgba(0, 0, 0, 0.4);
-    }
-
-    .top-header-hub {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-      padding-bottom: 12px;
-      margin-bottom: 20px;
-    }
-
-    .btn-action {
-      padding: 12px 18px;
-      border-radius: 12px;
-      border: none;
-      font-weight: 700;
-      cursor: pointer;
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      transition: all 0.2s ease;
-      text-decoration: none;
-      font-size: 0.85rem;
-    }
-
-    .btn-primary {
-      background: #38bdf8;
-      color: #090d16;
-      box-shadow: 0 4px 14px rgba(56, 189, 248, 0.3);
-    }
-
-    .btn-primary:hover {
-      background: #0284c7;
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      background-color: #0b0f19;
       color: #ffffff;
+      overflow-x: hidden;
     }
 
-    .btn-logout-small {
-      background: rgba(239, 68, 68, 0.15);
-      color: #f87171;
-      border: 1px solid rgba(239, 68, 68, 0.3);
-      padding: 6px 12px;
-      border-radius: 8px;
-      font-size: 0.75rem;
-      font-weight: 700;
-      cursor: pointer;
-      transition: all 0.2s ease;
+    #particle-canvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      z-index: 0;
+      pointer-events: none;
     }
 
-    .btn-logout-small:hover {
-      background: #ef4444;
-      color: #ffffff;
+    .glass-card {
+      background: rgba(15, 23, 42, 0.85);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
     }
 
-    .grid-menu {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-      gap: 16px;
-      margin-top: 16px;
+    /* Custom Scrollbar */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
     }
-
-    .card-item {
-      background: rgba(3, 7, 18, 0.6);
-      border: 1px solid rgba(255, 255, 255, 0.08);
-      border-radius: 14px;
-      padding: 20px;
-      color: #ffffff;
-      text-decoration: none;
-      transition: all 0.3s ease;
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
+    ::-webkit-scrollbar-track {
+      background: rgba(15, 23, 42, 0.6);
     }
-
-    .card-item:hover {
-      transform: translateY(-3px);
-      border-color: #38bdf8;
-      box-shadow: 0 8px 20px -4px rgba(56, 189, 248, 0.2);
+    ::-webkit-scrollbar-thumb {
+      background: rgba(56, 189, 248, 0.3);
+      border-radius: 4px;
     }
-
-    .card-icon {
-      width: 46px;
-      height: 46px;
-      border-radius: 12px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 1.25rem;
-      background: rgba(56, 189, 248, 0.15);
-      color: #38bdf8;
-      border: 1px solid rgba(56, 189, 248, 0.3);
-    }
-
-    .card-icon.rekap {
-      background: rgba(16, 185, 129, 0.15);
-      color: #34d399;
-      border-color: rgba(16, 185, 129, 0.3);
-    }
-
-    .card-title {
-      font-size: 1rem;
-      font-weight: 700;
-      margin: 0;
-    }
-
-    .card-desc {
-      font-size: 0.78rem;
-      color: #94a3b8;
-      margin: 0;
+    ::-webkit-scrollbar-thumb:hover {
+      background: rgba(56, 189, 248, 0.6);
     }
   </style>
 </head>
-<body>
+<body class="min-h-screen flex flex-col justify-start items-center p-3 md:p-6 relative">
 
-  <!-- PARTICLE CANVAS -->
+  <!-- BACKGROUND PARTICLE CANVAS -->
   <canvas id="particle-canvas"></canvas>
 
-  <main class="container">
+  <!-- CONTAINER DASHBOARD UTAMA FULL SCREEN -->
+  <div id="dashboard-section" class="w-full space-y-4 relative z-10 my-auto">
     
-    <!-- Profil Header -->
-    <header class="profile">
-      <div class="avatar-ring">
-        <img src="../foto_asn_profile.png" alt="Muchamad Iskak Fatoni" class="avatar">
+    <!-- TOP BAR HEADER FULL WIDTH -->
+    <header class="flex items-center justify-between glass-card p-4 rounded-2xl shadow-xl w-full">
+      <div class="flex items-center gap-3.5">
+        <div class="w-11 h-11 rounded-xl bg-cyan-500/10 border border-cyan-500/30 flex items-center justify-center text-cyan-400 font-bold">
+          <i class="fa-solid fa-qrcode text-xl"></i>
+        </div>
+        <div>
+          <h2 class="text-base font-bold text-white tracking-wide">Dashboard Kontrol Absensi Guru</h2>
+          <p id="user-email-display" class="text-xs text-slate-400 font-mono">guru@sekolah.sch.id</p>
+        </div>
       </div>
-      <h1 class="name">PORTAL::Iskak Fatoni</h1>
-      <p class="bio">Panel Pengelolaan Absensi &amp; Rekapitulasi Pembelajaran Guru</p>
+
+      <!-- TAB SWITCHER NAVIGASI (DESKTOP) -->
+      <div class="hidden sm:flex items-center gap-2 p-1.5 bg-slate-950/80 rounded-xl border border-slate-800">
+        <button id="tab-sesi-qr-desktop" class="py-2 px-4 rounded-lg font-bold text-xs bg-cyan-500 text-slate-950 transition flex items-center gap-2 cursor-pointer">
+          <i class="fa-solid fa-qrcode"></i> Sesi QR Aktif
+        </button>
+        <button id="tab-db-rekap-desktop" class="py-2 px-4 rounded-lg font-bold text-xs text-slate-400 hover:text-white transition flex items-center gap-2 cursor-pointer">
+          <i class="fa-solid fa-database"></i> Database Rekap
+        </button>
+      </div>
+
+      <!-- TOMBOL KEMBALI KE ADMIN PUSAT -->
+      <button id="btn-logout" title="Kembali ke Master Admin" class="py-2.5 px-4 bg-red-500/15 hover:bg-red-500/30 text-red-400 border border-red-500/40 font-bold text-xs rounded-xl transition flex items-center gap-2 cursor-pointer">
+        <i class="fa-solid fa-arrow-left"></i> <span class="hidden sm:inline">Hub Admin</span>
+      </button>
     </header>
 
-    <!-- SECTION DASHBOARD GURU -->
-    <section class="dashboard-box">
+    <!-- TAB SWITCHER MOBILE -->
+    <div class="grid grid-cols-2 gap-2 p-1.5 bg-slate-900/90 rounded-xl border border-slate-800 sm:hidden w-full">
+      <button id="tab-sesi-qr-mobile" class="py-2 px-3 rounded-lg font-bold text-xs bg-cyan-500 text-slate-950 transition flex items-center justify-center gap-2">
+        <i class="fa-solid fa-qrcode"></i> Sesi QR Aktif
+      </button>
+      <button id="tab-db-rekap-mobile" class="py-2 px-3 rounded-lg font-bold text-xs text-slate-400 hover:text-white transition flex items-center justify-center gap-2">
+        <i class="fa-solid fa-database"></i> Database Rekap
+      </button>
+    </div>
+
+    <!-- MODUL A: KONTROL SESI ABSENSI REALTIME FULL WIDTH -->
+    <div id="modul-sesi-qr" class="space-y-4 w-full">
       
-      <div class="top-header-hub">
-        <div style="text-align: left;">
-          <p style="font-size: 0.7rem; color: #94a3b8; font-weight: 700; margin: 0;">PANEL GURU TERAUTENTIKASI</p>
-          <p id="user-email-display" style="font-size: 0.85rem; font-weight: 700; color: #38bdf8; font-family: monospace; margin: 2px 0 0 0;">Memuat...</p>
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-4 w-full">
+        
+        <!-- KOLOM KRI (KONFIGURASI & QR - 4 KOLOM GRID WIDE) -->
+        <div class="lg:col-span-4 space-y-4">
+          <div class="glass-card p-5 rounded-2xl border border-slate-800 space-y-4 shadow-xl">
+            <h3 class="text-xs font-bold text-cyan-400 border-b border-slate-800 pb-2 flex items-center gap-2 uppercase tracking-wider">
+              <i class="fa-solid fa-sliders"></i> Konfigurasi Sesi
+            </h3>
+
+            <div class="space-y-1">
+              <label for="select-kelas" class="block text-xs font-semibold text-slate-300">Pilih Kelas TEI</label>
+              <select id="select-kelas" class="w-full px-3.5 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-slate-100 text-xs focus:outline-none focus:border-cyan-500 cursor-pointer">
+                <option value="">-- Memuat Daftar Kelas... --</option>
+              </select>
+            </div>
+
+            <div class="space-y-1">
+              <label for="select-mapel" class="block text-xs font-semibold text-slate-300">Pilih Mata Pelajaran</label>
+              <select id="select-mapel" class="w-full px-3.5 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-slate-100 text-xs focus:outline-none focus:border-cyan-500 cursor-pointer">
+                <option value="">-- Memuat Mata Pelajaran... --</option>
+              </select>
+            </div>
+
+            <div class="flex gap-2 pt-2">
+              <button id="btn-start-sesi" class="flex-1 py-3 px-4 bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-xs rounded-xl transition shadow-lg shadow-emerald-500/20 flex items-center justify-center gap-2 cursor-pointer">
+                <i class="fa-solid fa-play"></i> Mulai Sesi Absensi
+              </button>
+              
+              <button id="btn-stop-sesi" disabled class="py-3 px-4 bg-slate-800 hover:bg-red-500/20 text-slate-500 border border-slate-700 font-bold text-xs rounded-xl transition flex items-center justify-center gap-2 cursor-not-allowed">
+                <i class="fa-solid fa-stop"></i> Tutup Sesi
+              </button>
+            </div>
+          </div>
+
+          <div class="glass-card p-5 rounded-2xl border border-slate-800 flex flex-col items-center justify-center text-center space-y-4 shadow-xl">
+            <div class="flex items-center justify-between w-full border-b border-slate-800 pb-2">
+              <span class="text-xs font-bold text-cyan-400 uppercase tracking-wider">Tampilan QR Ponsel</span>
+              <span id="session-status" class="text-xs text-slate-400 font-mono">Off</span>
+            </div>
+            
+            <div id="qrcode-container" class="p-4 bg-white rounded-2xl shadow-xl min-w-[200px] min-h-[200px] flex items-center justify-center">
+              <p class="text-xs text-slate-500 font-sans">Sesi Belum Aktif</p>
+            </div>
+
+            <button id="btn-fullscreen-qr" disabled class="w-full py-3 px-4 bg-slate-800 text-slate-500 border border-slate-700 font-bold text-xs rounded-xl transition flex items-center justify-center gap-2 cursor-not-allowed">
+              <i class="fa-solid fa-expand"></i> Perbesar QR (Layar Penuh HP)
+            </button>
+          </div>
         </div>
-        <div style="display: flex; gap: 8px; align-items: center;">
-          <a href="../admin.html" class="btn-action btn-primary" style="padding: 6px 12px; font-size: 0.75rem;">
-            <i class="fa-solid fa-house"></i> Admin Hub
-          </a>
-          <button id="btn-logout" class="btn-logout-small">
-            <i class="fa-solid fa-power-off"></i> Logout
+
+        <!-- KOLOM KANAN (LOG REALTIME - 8 KOLOM GRID WIDE) -->
+        <div class="lg:col-span-8">
+          <div class="glass-card p-5 rounded-2xl border border-slate-800 space-y-4 shadow-xl h-full flex flex-col justify-between w-full">
+            <div>
+              <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+                <h3 class="text-xs font-bold text-cyan-400 flex items-center gap-2 uppercase tracking-wider">
+                  <i class="fa-solid fa-list-check"></i> Realtime Attendance Log
+                </h3>
+                <span id="log-count" class="text-xs text-slate-400 font-mono font-bold bg-slate-950 px-3 py-1 rounded-full border border-slate-800">0 Siswa</span>
+              </div>
+
+              <div id="log-siswa-container" class="space-y-2.5 mt-4 max-h-[520px] overflow-y-auto pr-2">
+                <p class="text-xs text-slate-500 text-center py-10">// Siswa yang melakukan scan akan tampil otomatis di sini secara realtime...</p>
+              </div>
+            </div>
+
+            <div class="pt-4 border-t border-slate-800/80 text-right">
+              <span class="text-[11px] text-slate-500 font-mono">Status Sistem: <span class="text-emerald-400">Monitoring Aktif</span></span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+
+    <!-- MODUL B: DATABASE LOG & EXPORT FULL WIDTH -->
+    <div id="modul-db-rekap" class="hidden space-y-4 w-full">
+      <div class="glass-card p-5 md:p-6 rounded-2xl border border-slate-800 space-y-6 shadow-xl w-full">
+        
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between border-b border-slate-800 pb-4 gap-4">
+          <div>
+            <h3 class="text-sm font-bold text-emerald-400 flex items-center gap-2 uppercase tracking-wider">
+              <i class="fa-solid fa-database"></i> Database Riwayat Absensi
+            </h3>
+            <p class="text-xs text-slate-400 mt-1">Seluruh data kehadiran siswa tersimpan rapi secara tersentralisasi</p>
+          </div>
+
+          <button id="btn-export-excel-db" class="py-2.5 px-4 bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-xs rounded-xl transition flex items-center justify-center gap-2 cursor-pointer shadow-lg shadow-emerald-500/20">
+            <i class="fa-solid fa-file-excel text-sm"></i> Download File Excel
           </button>
         </div>
-      </div>
 
-      <div class="grid-menu">
-        
-        <!-- Menu 1: Buka Sesi QR Absensi -->
-        <div class="card-item" id="btn-open-qr" style="cursor: pointer;">
-          <div class="card-icon">
-            <i class="fa-solid fa-qrcode"></i>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div class="space-y-1">
+            <label for="filter-kelas-db" class="block text-xs font-semibold text-slate-300">Filter Berdasarkan Kelas</label>
+            <select id="filter-kelas-db" class="w-full px-3.5 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-slate-100 text-xs focus:outline-none focus:border-emerald-500 cursor-pointer">
+              <option value="ALL">-- Tampilkan Semua Kelas --</option>
+            </select>
           </div>
-          <h2 class="card-title">Buka Sesi QR Absensi</h2>
-          <p class="card-desc">Tampilkan kode QR absensi realtime untuk dipindai oleh siswa di kelas.</p>
+
+          <div class="flex items-end justify-between sm:justify-end gap-2 text-xs text-slate-400 pb-1">
+            <span>Total Catatan:</span>
+            <span id="db-total-count" class="font-mono text-emerald-400 font-bold text-sm bg-slate-950 px-3 py-1 rounded-lg border border-slate-800">0 Record</span>
+          </div>
         </div>
 
-        <!-- Menu 2: Rekap Absensi Siswa -->
-        <a href="rekap.html" class="card-item">
-          <div class="card-icon rekap">
-            <i class="fa-solid fa-clipboard-user"></i>
-          </div>
-          <h2 class="card-title">Rekapitulasi Absensi</h2>
-          <p class="card-desc">Lihat dan cetak riwayat kehadiran siswa berdasarkan tanggal atau kelas.</p>
-        </a>
+        <div id="db-rekap-container" class="space-y-2.5 max-h-[580px] overflow-y-auto pr-2 w-full">
+          <p class="text-xs text-slate-500 text-center py-10">// Memuat data riwayat absensi dari Cloud Firestore...</p>
+        </div>
 
       </div>
+    </div>
 
-    </section>
+    <!-- FOOTER -->
+    <div class="text-center pt-1">
+      <p class="text-xs text-slate-500 font-mono">Developed by Iskak Fatoni, S.Pd., Gr.</p>
+    </div>
 
-    <!-- Footer -->
-    <footer class="footer">
-      <div class="supported-by">
-        <img src="../nisnas_logo_colorful.png" alt="Logo NisNas Computer" class="supporter-logo">
-        <p>Supported by <span>NisNas Computer</span></p>
+  </div>
+
+  <!-- MODAL FULLSCREEN QR CODE -->
+  <div id="qr-fullscreen-modal" class="fixed inset-0 bg-slate-950/95 backdrop-blur-2xl z-50 hidden flex flex-col items-center justify-between p-6 md:p-10 text-center">
+    <div class="w-full max-w-lg flex items-center justify-between border-b border-slate-800 pb-4">
+      <div>
+        <h3 id="modal-kelas-title" class="text-lg font-bold text-white text-left">-</h3>
+        <p id="modal-mapel-title" class="text-xs text-cyan-400 text-left">-</p>
       </div>
-    </footer>
+      <button id="btn-close-modal" class="w-10 h-10 bg-slate-800 hover:bg-slate-700 text-white rounded-full flex items-center justify-center font-bold text-sm cursor-pointer border border-slate-700">✕</button>
+    </div>
 
-  </main>
+    <div class="my-auto p-6 bg-white rounded-3xl shadow-2xl flex items-center justify-center">
+      <div id="qrcode-modal-container"></div>
+    </div>
 
-  <!-- FIREBASE AUTHENTICATION & SCRIPT LOGIC -->
-  <script type="module">
-    import { firebaseConfig } from "../assets/js/config/firebase-config.js";
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-    import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+    <div class="w-full max-w-lg space-y-1">
+      <p class="text-sm text-slate-300 font-semibold">Tunjukkan Layar Ini ke Siswa untuk Di-Scan</p>
+      <p class="text-xs text-slate-500 font-mono">QR Code Diperbarui Otomatis Setiap 10 Detik</p>
+    </div>
+  </div>
 
-    // Inisialisasi Firebase
-    const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
-
-    const userEmailDisplay = document.getElementById('user-email-display');
-    const btnLogout = document.getElementById('btn-logout');
-
-    // AUTH GUARD: Pengecekan Sesi Login
-    onAuthStateChanged(auth, (user) => {
-      if (user) {
-        // Tampilkan halaman jika pengguna terautentikasi
-        document.documentElement.style.display = 'block';
-        userEmailDisplay.innerText = user.email;
-      } else {
-        // Alihkan jika belum login
-        alert("Akses ditolak! Silakan login terlebih dahulu.");
-        window.location.href = "../admin.html";
-      }
-    });
-
-    // Fitur Logout
-    btnLogout.addEventListener('click', () => {
-      if (confirm("Apakah Anda yakin ingin keluar dari Panel Guru?")) {
-        signOut(auth).then(() => {
-          window.location.href = "../admin.html";
-        });
-      }
-    });
-
-    // Handler Buka Sesi QR
-    document.getElementById('btn-open-qr').addEventListener('click', () => {
-      alert("Fitur QR Absensi diproses. Sesi absensi siap dibuka.");
-    });
-  </script>
-
-  <!-- BACKGROUND PARTICLES -->
+  <!-- PARTICLE CANVAS ANIMATION -->
   <script>
     const canvas = document.getElementById('particle-canvas');
     const ctx = canvas.getContext('2d');
@@ -251,7 +254,7 @@
       canvas.width = document.documentElement.clientWidth || window.innerWidth;
       canvas.height = window.innerHeight;
       particles = [];
-      for (let i = 0; i < 30; i++) {
+      for (let i = 0; i < 35; i++) {
         particles.push({
           x: Math.random() * canvas.width,
           y: Math.random() * canvas.height,
@@ -265,11 +268,17 @@
 
     function drawParticles() {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
+      const isDarkMode = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+      const particleColor = isDarkMode ? "0, 245, 212" : "139, 92, 246";
+
       particles.forEach(p => {
         ctx.beginPath();
         ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
-        ctx.fillStyle = `rgba(56, 189, 248, ${p.opacity})`;
+        ctx.fillStyle = `rgba(${particleColor}, ${p.opacity})`;
+        ctx.shadowBlur = 6;
+        ctx.shadowColor = `rgb(${particleColor})`;
         ctx.fill();
+
         p.y += p.speedY; p.x += p.speedX;
         if (p.y < 0) { p.y = canvas.height; p.x = Math.random() * canvas.width; }
       });
@@ -279,6 +288,339 @@
     window.addEventListener('resize', initCanvas);
     initCanvas();
     drawParticles();
+  </script>
+
+  <!-- FIREBASE AUTH & LOGIC -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+    import { getFirestore, collection, addDoc, doc, updateDoc, query, where, orderBy, getDocs, onSnapshot, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyDhq4QoCn00GkfpKXSP8PnvSvEKa2yn0ic",
+      authDomain: "portal-iskakfatoni.firebaseapp.com",
+      projectId: "portal-iskakfatoni",
+      storageBucket: "portal-iskakfatoni.firebasestorage.app",
+      messagingSenderId: "367350728822",
+      appId: "1:367350728822:web:6b0c6fd4824102d8acf757",
+      measurementId: "G-0BNNKQQ24V"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+
+    const userEmailDisplay = document.getElementById('user-email-display');
+    const btnLogout = document.getElementById('btn-logout');
+
+    const tabSesiDesktop = document.getElementById('tab-sesi-qr-desktop');
+    const tabDbDesktop = document.getElementById('tab-db-rekap-desktop');
+    const tabSesiMobile = document.getElementById('tab-sesi-qr-mobile');
+    const tabDbMobile = document.getElementById('tab-db-rekap-mobile');
+    const modulSesiQr = document.getElementById('modul-sesi-qr');
+    const modulDbRekap = document.getElementById('modul-db-rekap');
+
+    const selectKelas = document.getElementById('select-kelas');
+    const selectMapel = document.getElementById('select-mapel');
+    const filterKelasDb = document.getElementById('filter-kelas-db');
+    const btnStartSesi = document.getElementById('btn-start-sesi');
+    const btnStopSesi = document.getElementById('btn-stop-sesi');
+    const btnFullscreenQr = document.getElementById('btn-fullscreen-qr');
+    const btnExportExcelDb = document.getElementById('btn-export-excel-db');
+
+    const qrContainer = document.getElementById('qrcode-container');
+    const qrModalContainer = document.getElementById('qrcode-modal-container');
+    const qrModal = document.getElementById('qr-fullscreen-modal');
+    const btnCloseModal = document.getElementById('btn-close-modal');
+    const sessionStatus = document.getElementById('session-status');
+    const logSiswaContainer = document.getElementById('log-siswa-container');
+    const logCount = document.getElementById('log-count');
+    const dbRekapContainer = document.getElementById('db-rekap-container');
+    const dbTotalCount = document.getElementById('db-total-count');
+
+    let currentSesiId = null;
+    let qrInterval = null;
+    let unsubscribeLog = null;
+    let activeToken = "";
+    let fullDbRecords = [];
+
+    // 🔒 PROTEKSI ROUTE: Jika belum login, paksa kembali ke ../admin.html
+    onAuthStateChanged(auth, (user) => {
+      if (!user) {
+        window.location.href = "../admin.html";
+      } else {
+        userEmailDisplay.innerText = user.email;
+        loadKelasDropdown();
+        loadMapelDropdown();
+        loadDatabaseAbsensi();
+      }
+    });
+
+    // ↩️ KEMBALI KE HUB ADMIN (TANPA LOGOUT)
+    btnLogout.addEventListener('click', () => {
+      window.location.href = "../admin.html";
+    });
+
+    function switchTab(target) {
+      if (target === 'sesi') {
+        tabSesiDesktop.className = "py-2 px-4 rounded-lg font-bold text-xs bg-cyan-500 text-slate-950 transition flex items-center gap-2 cursor-pointer";
+        tabDbDesktop.className = "py-2 px-4 rounded-lg font-bold text-xs text-slate-400 hover:text-white transition flex items-center gap-2 cursor-pointer";
+        tabSesiMobile.className = "py-2 px-3 rounded-lg font-bold text-xs bg-cyan-500 text-slate-950 transition flex items-center justify-center gap-2";
+        tabDbMobile.className = "py-2 px-3 rounded-lg font-bold text-xs text-slate-400 hover:text-white transition flex items-center justify-center gap-2";
+        modulSesiQr.classList.remove('hidden');
+        modulDbRekap.classList.add('hidden');
+      } else {
+        tabDbDesktop.className = "py-2 px-4 rounded-lg font-bold text-xs bg-emerald-500 text-slate-950 transition flex items-center gap-2 cursor-pointer";
+        tabSesiDesktop.className = "py-2 px-4 rounded-lg font-bold text-xs text-slate-400 hover:text-white transition flex items-center gap-2 cursor-pointer";
+        tabDbMobile.className = "py-2 px-3 rounded-lg font-bold text-xs bg-emerald-500 text-slate-950 transition flex items-center justify-center gap-2";
+        tabSesiMobile.className = "py-2 px-3 rounded-lg font-bold text-xs text-slate-400 hover:text-white transition flex items-center justify-center gap-2";
+        modulDbRekap.classList.remove('hidden');
+        modulSesiQr.classList.add('hidden');
+        loadDatabaseAbsensi();
+      }
+    }
+
+    tabSesiDesktop.addEventListener('click', () => switchTab('sesi'));
+    tabDbDesktop.addEventListener('click', () => switchTab('db'));
+    tabSesiMobile.addEventListener('click', () => switchTab('sesi'));
+    tabDbMobile.addEventListener('click', () => switchTab('db'));
+
+    async function loadKelasDropdown() {
+      selectKelas.innerHTML = '<option value="">-- Pilih Kelas TEI --</option>';
+      filterKelasDb.innerHTML = '<option value="ALL">-- Tampilkan Semua Kelas --</option>';
+      try {
+        const q = query(collection(db, "kelas"));
+        const snapshot = await getDocs(q);
+        if (!snapshot.empty) {
+          snapshot.forEach(docSnap => {
+            const data = docSnap.data();
+            const kName = data.nama_kelas || docSnap.id;
+            
+            const opt1 = document.createElement('option');
+            opt1.value = kName; opt1.textContent = kName;
+            selectKelas.appendChild(opt1);
+
+            const opt2 = document.createElement('option');
+            opt2.value = kName; opt2.textContent = kName;
+            filterKelasDb.appendChild(opt2);
+          });
+        }
+      } catch (err) { console.error("Gagal load kelas:", err); }
+    }
+
+    async function loadMapelDropdown() {
+      selectMapel.innerHTML = '<option value="">-- Pilih Mata Pelajaran --</option>';
+      try {
+        const q = query(collection(db, "mapel"), orderBy("order", "asc"));
+        const snapshot = await getDocs(q);
+        if (!snapshot.empty) {
+          snapshot.forEach(docSnap => {
+            const data = docSnap.data();
+            const option = document.createElement('option');
+            option.value = data.nama_mapel;
+            option.textContent = data.nama_mapel;
+            selectMapel.appendChild(option);
+          });
+        }
+      } catch (err) { console.error("Gagal load mapel:", err); }
+    }
+
+    btnStartSesi.addEventListener('click', async () => {
+      const kelas = selectKelas.value;
+      const mapel = selectMapel.value;
+
+      if (!kelas || !mapel) {
+        alert("Pilih Kelas dan Mata Pelajaran terlebih dahulu!");
+        return;
+      }
+
+      try {
+        btnStartSesi.disabled = true;
+
+        activeToken = 'QR-' + Math.random().toString(36).substring(2, 10).toUpperCase();
+        const docRef = await addDoc(collection(db, "sesi_absensi"), {
+          id_kelas: kelas,
+          nama_mapel: mapel,
+          current_qr_token: activeToken,
+          is_active: true,
+          created_at: serverTimestamp()
+        });
+
+        currentSesiId = docRef.id;
+
+        btnStopSesi.disabled = false;
+        btnStopSesi.className = 'py-3 px-4 bg-red-500 hover:bg-red-400 text-white font-bold text-xs rounded-xl transition shadow-lg shadow-red-500/20 flex items-center justify-center gap-2 cursor-pointer';
+
+        btnFullscreenQr.disabled = false;
+        btnFullscreenQr.className = 'w-full py-3 px-4 bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-bold text-xs rounded-xl transition flex items-center justify-center gap-2 cursor-pointer shadow-lg shadow-cyan-500/20';
+
+        sessionStatus.innerText = `Aktif [${kelas}]`;
+        sessionStatus.className = 'text-xs text-emerald-400 font-mono font-bold';
+
+        document.getElementById('modal-kelas-title').innerText = kelas;
+        document.getElementById('modal-mapel-title').innerText = mapel;
+
+        updateQRDisplay(activeToken);
+
+        qrInterval = setInterval(async () => {
+          if (!currentSesiId) return;
+          activeToken = 'QR-' + Math.random().toString(36).substring(2, 10).toUpperCase();
+          await updateDoc(doc(db, "sesi_absensi", currentSesiId), {
+            current_qr_token: activeToken
+          });
+          updateQRDisplay(activeToken);
+        }, 10000);
+
+        listenToLogAbsensi(currentSesiId);
+
+      } catch (e) {
+        alert("Gagal membuka sesi: " + e.message);
+        btnStartSesi.disabled = false;
+      }
+    });
+
+    btnStopSesi.addEventListener('click', async () => {
+      if (currentSesiId) {
+        await updateDoc(doc(db, "sesi_absensi", currentSesiId), { is_active: false });
+        resetSesiState();
+      }
+    });
+
+    btnFullscreenQr.addEventListener('click', () => qrModal.classList.remove('hidden'));
+    btnCloseModal.addEventListener('click', () => qrModal.classList.add('hidden'));
+
+    function updateQRDisplay(token) {
+      qrContainer.innerHTML = '';
+      qrModalContainer.innerHTML = '';
+      new QRCode(qrContainer, { text: token, width: 180, height: 180 });
+      new QRCode(qrModalContainer, { text: token, width: 280, height: 280 });
+    }
+
+    function listenToLogAbsensi(sesiId) {
+      if (unsubscribeLog) unsubscribeLog();
+
+      const q = query(collection(db, "log_absensi"), where("id_sesi", "==", sesiId));
+      unsubscribeLog = onSnapshot(q, (snapshot) => {
+        logSiswaContainer.innerHTML = '';
+
+        if (snapshot.empty) {
+          logSiswaContainer.innerHTML = '<p class="text-xs text-slate-500 text-center py-10">// Belum ada siswa scan...</p>';
+          logCount.innerText = "0 Siswa";
+          return;
+        }
+
+        let count = 0;
+        snapshot.forEach((docSnap) => {
+          count++;
+          const data = docSnap.data();
+          const item = document.createElement('div');
+          item.className = 'flex items-center justify-between p-3 bg-slate-950/90 rounded-xl border border-slate-800 text-xs hover:border-cyan-500/30 transition';
+          item.innerHTML = `
+            <div class="flex items-center gap-3">
+              <div class="w-8 h-8 rounded-lg bg-cyan-500/10 text-cyan-400 font-bold flex items-center justify-center">${count}</div>
+              <div>
+                <p class="font-bold text-white text-sm">${data.nama_siswa}</p>
+                <p class="text-[11px] text-slate-400 font-mono">NIS: ${data.nis} | ${data.id_kelas}</p>
+              </div>
+            </div>
+            <span class="px-3 py-1 rounded-full text-xs font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+              ✔ ${data.status || 'Hadir'}
+            </span>
+          `;
+          logSiswaContainer.appendChild(item);
+        });
+
+        logCount.innerText = `${count} Siswa`;
+      });
+    }
+
+    function loadDatabaseAbsensi() {
+      const q = query(collection(db, "log_absensi"));
+      onSnapshot(q, (snapshot) => {
+        fullDbRecords = [];
+        if (snapshot.empty) { renderDbRekap([]); return; }
+        snapshot.forEach(docSnap => fullDbRecords.push(docSnap.data()));
+        filterAndRenderDb();
+      });
+    }
+
+    filterKelasDb.addEventListener('change', filterAndRenderDb);
+
+    function filterAndRenderDb() {
+      const selectedKelas = filterKelasDb.value;
+      let filtered = fullDbRecords;
+      if (selectedKelas !== "ALL") filtered = fullDbRecords.filter(r => r.id_kelas === selectedKelas);
+      renderDbRekap(filtered);
+    }
+
+    function renderDbRekap(records) {
+      dbRekapContainer.innerHTML = '';
+      dbTotalCount.innerText = `${records.length} Record`;
+
+      if (records.length === 0) {
+        dbRekapContainer.innerHTML = '<p class="text-xs text-slate-500 text-center py-10">// Tidak ada data absensi untuk kelas ini...</p>';
+        return;
+      }
+
+      records.forEach((data, idx) => {
+        const item = document.createElement('div');
+        item.className = 'flex items-center justify-between p-3.5 bg-slate-950/90 rounded-xl border border-slate-800 text-xs hover:border-emerald-500/30 transition';
+        item.innerHTML = `
+          <div class="flex items-center gap-3">
+            <div class="w-8 h-8 rounded-lg bg-emerald-500/10 text-emerald-400 font-bold flex items-center justify-center font-mono">${idx + 1}</div>
+            <div>
+              <p class="font-bold text-white text-sm">${data.nama_siswa}</p>
+              <p class="text-[11px] text-slate-400 font-mono">NIS: ${data.nis} | Kelas: ${data.id_kelas}</p>
+              <p class="text-[10px] text-cyan-400 font-mono mt-0.5"><i class="fa-regular fa-clock"></i> ${data.waktu_scan || '-'}</p>
+            </div>
+          </div>
+          <span class="px-3 py-1 rounded-full text-xs font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+            ${data.status || 'Hadir'}
+          </span>
+        `;
+        dbRekapContainer.appendChild(item);
+      });
+    }
+
+    btnExportExcelDb.addEventListener('click', () => {
+      const selectedKelas = filterKelasDb.value;
+      let dataToExport = fullDbRecords;
+      if (selectedKelas !== "ALL") dataToExport = fullDbRecords.filter(r => r.id_kelas === selectedKelas);
+
+      if (dataToExport.length === 0) {
+        alert("Tidak ada data untuk diexport!");
+        return;
+      }
+
+      const excelRows = dataToExport.map((item, idx) => ({
+        "No": idx + 1,
+        "NIS": item.nis,
+        "Nama Siswa": item.nama_siswa,
+        "Kelas": item.id_kelas,
+        "Waktu Scan": item.waktu_scan || "-",
+        "Status": item.status || "Hadir"
+      }));
+
+      const worksheet = XLSX.utils.json_to_sheet(excelRows);
+      const workbook = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(workbook, worksheet, "Database Absensi");
+      XLSX.writeFile(workbook, `Rekap_Database_Absensi_${selectedKelas}_${new Date().toISOString().split('T')[0]}.xlsx`);
+    });
+
+    function resetSesiState() {
+      if (qrInterval) clearInterval(qrInterval);
+      if (unsubscribeLog) unsubscribeLog();
+      currentSesiId = null;
+      btnStartSesi.disabled = false;
+      btnStopSesi.disabled = true;
+      btnStopSesi.className = 'py-3 px-4 bg-slate-800 hover:bg-red-500/20 text-slate-500 border border-slate-700 font-bold text-xs rounded-xl transition flex items-center justify-center gap-2 cursor-not-allowed';
+      btnFullscreenQr.disabled = true;
+      btnFullscreenQr.className = 'w-full py-3 px-4 bg-slate-800 text-slate-500 border border-slate-700 font-bold text-xs rounded-xl transition flex items-center justify-center gap-2 cursor-not-allowed';
+      sessionStatus.innerText = 'Off';
+      sessionStatus.className = 'text-xs text-slate-400 font-mono';
+      qrContainer.innerHTML = '<p class="text-xs text-slate-500 font-sans">Sesi Belum Aktif</p>';
+      qrModal.classList.add('hidden');
+    }
   </script>
 </body>
 </html>
