@@ -4,6 +4,12 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>PORTAL :: Dashboard Admin & Guru Absensi</title>
+  
+  <!-- Proteksi visual sebelum verifikasi autentikasi selesai -->
+  <style>
+    html { display: none; }
+  </style>
+
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
@@ -13,9 +19,6 @@
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
   <style>
-    /* Proteksi visual sebelum verifikasi autentikasi selesai */
-    html { display: none; }
-
     body {
       font-family: 'Plus Jakarta Sans', sans-serif;
       background-color: #0b0f19;
@@ -82,9 +85,10 @@
         <button id="tab-sesi-qr-desktop" class="py-2 px-4 rounded-lg font-bold text-xs bg-cyan-500 text-slate-950 transition flex items-center gap-2 cursor-pointer">
           <i class="fa-solid fa-qrcode"></i> Sesi QR Aktif
         </button>
-        <button id="tab-db-rekap-desktop" class="py-2 px-4 rounded-lg font-bold text-xs text-slate-400 hover:text-white transition flex items-center gap-2 cursor-pointer">
+        <!-- Tautan Navigasi Langsung ke rekap.html -->
+        <a href="rekap.html" class="py-2 px-4 rounded-lg font-bold text-xs text-slate-400 hover:text-white transition flex items-center gap-2 cursor-pointer">
           <i class="fa-solid fa-database"></i> Database Rekap
-        </button>
+        </a>
       </div>
 
       <!-- TOMBOL KEMBALI KE ADMIN PUSAT -->
@@ -98,9 +102,10 @@
       <button id="tab-sesi-qr-mobile" class="py-2 px-3 rounded-lg font-bold text-xs bg-cyan-500 text-slate-950 transition flex items-center justify-center gap-2">
         <i class="fa-solid fa-qrcode"></i> Sesi QR Aktif
       </button>
-      <button id="tab-db-rekap-mobile" class="py-2 px-3 rounded-lg font-bold text-xs text-slate-400 hover:text-white transition flex items-center justify-center gap-2">
+      <!-- Tautan Navigasi Langsung ke rekap.html -->
+      <a href="rekap.html" class="py-2 px-3 rounded-lg font-bold text-xs text-slate-400 hover:text-white transition flex items-center justify-center gap-2">
         <i class="fa-solid fa-database"></i> Database Rekap
-      </button>
+      </a>
     </div>
 
     <!-- MODUL A: KONTROL SESI ABSENSI REALTIME FULL WIDTH -->
@@ -180,44 +185,6 @@
 
       </div>
 
-    </div>
-
-    <!-- MODUL B: DATABASE LOG & EXPORT FULL WIDTH -->
-    <div id="modul-db-rekap" class="hidden space-y-4 w-full">
-      <div class="glass-card p-5 md:p-6 rounded-2xl border border-slate-800 space-y-6 shadow-xl w-full">
-        
-        <div class="flex flex-col sm:flex-row sm:items-center justify-between border-b border-slate-800 pb-4 gap-4">
-          <div>
-            <h3 class="text-sm font-bold text-emerald-400 flex items-center gap-2 uppercase tracking-wider">
-              <i class="fa-solid fa-database"></i> Database Riwayat Absensi
-            </h3>
-            <p class="text-xs text-slate-400 mt-1">Seluruh data kehadiran siswa tersimpan rapi secara tersentralisasi</p>
-          </div>
-
-          <button id="btn-export-excel-db" class="py-2.5 px-4 bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-xs rounded-xl transition flex items-center justify-center gap-2 cursor-pointer shadow-lg shadow-emerald-500/20">
-            <i class="fa-solid fa-file-excel text-sm"></i> Download File Excel
-          </button>
-        </div>
-
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <div class="space-y-1">
-            <label for="filter-kelas-db" class="block text-xs font-semibold text-slate-300">Filter Berdasarkan Kelas</label>
-            <select id="filter-kelas-db" class="w-full px-3.5 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-slate-100 text-xs focus:outline-none focus:border-emerald-500 cursor-pointer">
-              <option value="ALL">-- Tampilkan Semua Kelas --</option>
-            </select>
-          </div>
-
-          <div class="flex items-end justify-between sm:justify-end gap-2 text-xs text-slate-400 pb-1">
-            <span>Total Catatan:</span>
-            <span id="db-total-count" class="font-mono text-emerald-400 font-bold text-sm bg-slate-950 px-3 py-1 rounded-lg border border-slate-800">0 Record</span>
-          </div>
-        </div>
-
-        <div id="db-rekap-container" class="space-y-2.5 max-h-[580px] overflow-y-auto pr-2 w-full">
-          <p class="text-xs text-slate-500 text-center py-10">// Memuat data riwayat absensi dari Cloud Firestore...</p>
-        </div>
-
-      </div>
     </div>
 
     <!-- FOOTER -->
@@ -308,20 +275,11 @@
     const userEmailDisplay = document.getElementById('user-email-display');
     const btnLogout = document.getElementById('btn-logout');
 
-    const tabSesiDesktop = document.getElementById('tab-sesi-qr-desktop');
-    const tabDbDesktop = document.getElementById('tab-db-rekap-desktop');
-    const tabSesiMobile = document.getElementById('tab-sesi-qr-mobile');
-    const tabDbMobile = document.getElementById('tab-db-rekap-mobile');
-    const modulSesiQr = document.getElementById('modul-sesi-qr');
-    const modulDbRekap = document.getElementById('modul-db-rekap');
-
     const selectKelas = document.getElementById('select-kelas');
     const selectMapel = document.getElementById('select-mapel');
-    const filterKelasDb = document.getElementById('filter-kelas-db');
     const btnStartSesi = document.getElementById('btn-start-sesi');
     const btnStopSesi = document.getElementById('btn-stop-sesi');
     const btnFullscreenQr = document.getElementById('btn-fullscreen-qr');
-    const btnExportExcelDb = document.getElementById('btn-export-excel-db');
 
     const qrContainer = document.getElementById('qrcode-container');
     const qrModalContainer = document.getElementById('qrcode-modal-container');
@@ -330,27 +288,21 @@
     const sessionStatus = document.getElementById('session-status');
     const logSiswaContainer = document.getElementById('log-siswa-container');
     const logCount = document.getElementById('log-count');
-    const dbRekapContainer = document.getElementById('db-rekap-container');
-    const dbTotalCount = document.getElementById('db-total-count');
 
     let currentSesiId = null;
     let qrInterval = null;
     let unsubscribeLog = null;
     let activeToken = "";
-    let fullDbRecords = [];
 
-    // 🔒 AUTH GUARD: Verifikasi Sesi & Proteksi Rawan Bypass URL
+    // 🔒 AUTH GUARD: Verifikasi Sesi
     onAuthStateChanged(auth, (user) => {
       if (!user) {
-        // Jika belum terautentikasi, alihkan paksa ke halaman login
         window.location.href = "../admin.html";
       } else {
-        // Tampilkan antarmuka setelah verifikasi sesi berhasil
         document.documentElement.style.display = 'block';
         userEmailDisplay.innerText = user.email;
         loadKelasDropdown();
         loadMapelDropdown();
-        loadDatabaseAbsensi();
       }
     });
 
@@ -359,33 +311,8 @@
       window.location.href = "../admin.html";
     });
 
-    function switchTab(target) {
-      if (target === 'sesi') {
-        tabSesiDesktop.className = "py-2 px-4 rounded-lg font-bold text-xs bg-cyan-500 text-slate-950 transition flex items-center gap-2 cursor-pointer";
-        tabDbDesktop.className = "py-2 px-4 rounded-lg font-bold text-xs text-slate-400 hover:text-white transition flex items-center gap-2 cursor-pointer";
-        tabSesiMobile.className = "py-2 px-3 rounded-lg font-bold text-xs bg-cyan-500 text-slate-950 transition flex items-center justify-center gap-2";
-        tabDbMobile.className = "py-2 px-3 rounded-lg font-bold text-xs text-slate-400 hover:text-white transition flex items-center justify-center gap-2";
-        modulSesiQr.classList.remove('hidden');
-        modulDbRekap.classList.add('hidden');
-      } else {
-        tabDbDesktop.className = "py-2 px-4 rounded-lg font-bold text-xs bg-emerald-500 text-slate-950 transition flex items-center gap-2 cursor-pointer";
-        tabSesiDesktop.className = "py-2 px-4 rounded-lg font-bold text-xs text-slate-400 hover:text-white transition flex items-center gap-2 cursor-pointer";
-        tabDbMobile.className = "py-2 px-3 rounded-lg font-bold text-xs bg-emerald-500 text-slate-950 transition flex items-center justify-center gap-2";
-        tabSesiMobile.className = "py-2 px-3 rounded-lg font-bold text-xs text-slate-400 hover:text-white transition flex items-center justify-center gap-2";
-        modulDbRekap.classList.remove('hidden');
-        modulSesiQr.classList.add('hidden');
-        loadDatabaseAbsensi();
-      }
-    }
-
-    tabSesiDesktop.addEventListener('click', () => switchTab('sesi'));
-    tabDbDesktop.addEventListener('click', () => switchTab('db'));
-    tabSesiMobile.addEventListener('click', () => switchTab('sesi'));
-    tabDbMobile.addEventListener('click', () => switchTab('db'));
-
     async function loadKelasDropdown() {
       selectKelas.innerHTML = '<option value="">-- Pilih Kelas TEI --</option>';
-      filterKelasDb.innerHTML = '<option value="ALL">-- Tampilkan Semua Kelas --</option>';
       try {
         const q = query(collection(db, "kelas"));
         const snapshot = await getDocs(q);
@@ -394,13 +321,9 @@
             const data = docSnap.data();
             const kName = data.nama_kelas || docSnap.id;
             
-            const opt1 = document.createElement('option');
-            opt1.value = kName; opt1.textContent = kName;
-            selectKelas.appendChild(opt1);
-
-            const opt2 = document.createElement('option');
-            opt2.value = kName; opt2.textContent = kName;
-            filterKelasDb.appendChild(opt2);
+            const opt = document.createElement('option');
+            opt.value = kName; opt.textContent = kName;
+            selectKelas.appendChild(opt);
           });
         }
       } catch (err) { console.error("Gagal load kelas:", err); }
@@ -531,79 +454,6 @@
         logCount.innerText = `${count} Siswa`;
       });
     }
-
-    function loadDatabaseAbsensi() {
-      const q = query(collection(db, "log_absensi"));
-      onSnapshot(q, (snapshot) => {
-        fullDbRecords = [];
-        if (snapshot.empty) { renderDbRekap([]); return; }
-        snapshot.forEach(docSnap => fullDbRecords.push(docSnap.data()));
-        filterAndRenderDb();
-      });
-    }
-
-    filterKelasDb.addEventListener('change', filterAndRenderDb);
-
-    function filterAndRenderDb() {
-      const selectedKelas = filterKelasDb.value;
-      let filtered = fullDbRecords;
-      if (selectedKelas !== "ALL") filtered = fullDbRecords.filter(r => r.id_kelas === selectedKelas);
-      renderDbRekap(filtered);
-    }
-
-    function renderDbRekap(records) {
-      dbRekapContainer.innerHTML = '';
-      dbTotalCount.innerText = `${records.length} Record`;
-
-      if (records.length === 0) {
-        dbRekapContainer.innerHTML = '<p class="text-xs text-slate-500 text-center py-10">// Tidak ada data absensi untuk kelas ini...</p>';
-        return;
-      }
-
-      records.forEach((data, idx) => {
-        const item = document.createElement('div');
-        item.className = 'flex items-center justify-between p-3.5 bg-slate-950/90 rounded-xl border border-slate-800 text-xs hover:border-emerald-500/30 transition';
-        item.innerHTML = `
-          <div class="flex items-center gap-3">
-            <div class="w-8 h-8 rounded-lg bg-emerald-500/10 text-emerald-400 font-bold flex items-center justify-center font-mono">${idx + 1}</div>
-            <div>
-              <p class="font-bold text-white text-sm">${data.nama_siswa}</p>
-              <p class="text-[11px] text-slate-400 font-mono">NIS: ${data.nis} | Kelas: ${data.id_kelas}</p>
-              <p class="text-[10px] text-cyan-400 font-mono mt-0.5"><i class="fa-regular fa-clock"></i> ${data.waktu_scan || '-'}</p>
-            </div>
-          </div>
-          <span class="px-3 py-1 rounded-full text-xs font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
-            ${data.status || 'Hadir'}
-          </span>
-        `;
-        dbRekapContainer.appendChild(item);
-      });
-    }
-
-    btnExportExcelDb.addEventListener('click', () => {
-      const selectedKelas = filterKelasDb.value;
-      let dataToExport = fullDbRecords;
-      if (selectedKelas !== "ALL") dataToExport = fullDbRecords.filter(r => r.id_kelas === selectedKelas);
-
-      if (dataToExport.length === 0) {
-        alert("Tidak ada data untuk diexport!");
-        return;
-      }
-
-      const excelRows = dataToExport.map((item, idx) => ({
-        "No": idx + 1,
-        "NIS": item.nis,
-        "Nama Siswa": item.nama_siswa,
-        "Kelas": item.id_kelas,
-        "Waktu Scan": item.waktu_scan || "-",
-        "Status": item.status || "Hadir"
-      }));
-
-      const worksheet = XLSX.utils.json_to_sheet(excelRows);
-      const workbook = XLSX.utils.book_new();
-      XLSX.utils.book_append_sheet(workbook, worksheet, "Database Absensi");
-      XLSX.writeFile(workbook, `Rekap_Database_Absensi_${selectedKelas}_${new Date().toISOString().split('T')[0]}.xlsx`);
-    });
 
     function resetSesiState() {
       if (qrInterval) clearInterval(qrInterval);
