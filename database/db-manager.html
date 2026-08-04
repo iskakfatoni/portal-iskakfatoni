@@ -12,6 +12,8 @@
 
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <!-- SheetJS Library untuk Export Excel (.xlsx) -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -136,8 +138,13 @@
               <p class="text-[11px] text-slate-400 font-mono mt-0.5">Total dokumen: <span id="total-doc-count" class="text-emerald-400 font-bold">0</span></p>
             </div>
 
-            <!-- AKSI SELEKSI & HAPUS MASAL -->
-            <div class="flex items-center gap-2 w-full sm:w-auto justify-end">
+            <!-- AKSI SELEKSI, EKSPOR PERANGKAT, & HAPUS MASAL -->
+            <div class="flex flex-wrap items-center gap-2 w-full sm:w-auto justify-end">
+              <!-- TOMBOL EKSPOR PERANGKAT EXCEL -->
+              <button id="btn-export-device-excel" class="py-2 px-3.5 bg-emerald-500/10 hover:bg-emerald-500/25 text-emerald-400 border border-emerald-500/30 font-bold text-xs rounded-xl transition flex items-center gap-1.5 cursor-pointer">
+                <i class="fa-solid fa-file-excel"></i> <span>Ekspor Perangkat (.xlsx)</span>
+              </button>
+
               <button id="btn-delete-selected" disabled class="py-2 px-3.5 bg-red-500/10 hover:bg-red-500/25 text-red-400 border border-red-500/30 font-bold text-xs rounded-xl transition flex items-center gap-1.5 cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed">
                 <i class="fa-solid fa-trash-can"></i> <span>Hapus Terpilih (<span id="selected-count">0</span>)</span>
               </button>
@@ -259,6 +266,7 @@
     const btnDeleteSelected = document.getElementById('btn-delete-selected');
     const btnClearCollection = document.getElementById('btn-clear-collection');
     const selectedCountSpan = document.getElementById('selected-count');
+    const btnExportDeviceExcel = document.getElementById('btn-export-device-excel');
 
     let currentCollection = 'siswa';
     let unsubscribeCurrent = null;
@@ -312,6 +320,12 @@
         currentSortField = null;
         currentSortOrder = 'asc';
         activeCollectionTitle.innerHTML = `<i class="fa-solid fa-table-list text-cyan-400"></i> Koleksi: <span class="text-cyan-400 font-mono">${currentCollection}</span>`;
+        
+        // Tampilkan/sembunyikan tombol Ekspor Perangkat sesuai koleksi aktif
+        if (btnExportDeviceExcel) {
+          btnExportDeviceExcel.style.display = currentCollection === 'siswa' ? 'inline-flex' : 'none';
+        }
+
         loadCollectionData(currentCollection);
       });
     });
@@ -636,6 +650,66 @@
         alert("Konfirmasi dibatalkan: Nama koleksi yang dimasukkan tidak cocok.");
       }
     });
+
+    // HANDLER EKSPOR DATA PERANGKAT HP SISWA KE EXCEL
+    if (btnExportDeviceExcel) {
+      btnExportDeviceExcel.addEventListener('click', () => {
+        if (currentCollection !== 'siswa') {
+          alert('Fitur ekspor perangkat HP hanya tersedia untuk koleksi "siswa".');
+          return;
+        }
+
+        if (!currentDocsList || currentDocsList.length === 0) {
+          alert('Tidak ada data siswa untuk diekspor.');
+          return;
+        }
+
+        // Ekstrak & Format Data Perangkat Siswa
+        const exportData = currentDocsList.map((docSnap, index) => {
+          const data = docSnap.data();
+          const isBound = Boolean(data.device_id || data.device_token || data.mac_address);
+
+          return {
+            "No": index + 1,
+            "Document ID": docSnap.id,
+            "NIS": data.nis || docSnap.id,
+            "Nama Siswa": data.nama_siswa || data.nama || "-",
+            "ID Kelas": data.id_kelas || "-",
+            "Nama Kelas": data.nama_kelas || "-",
+            "Status Perangkat": isBound ? "TERIKAT (BOUND)" : "BELUM TERIKAT",
+            "Device ID / Fingerprint": data.device_id || "-",
+            "Device Token": data.device_token || "-",
+            "Waktu Terikat": data.registered_at && data.registered_at.seconds 
+              ? new Date(data.registered_at.seconds * 1000).toLocaleString('id-ID') 
+              : "-"
+          };
+        });
+
+        // Buat Worksheet Excel
+        const worksheet = XLSX.utils.json_to_sheet(exportData);
+        
+        // Atur Lebar Kolom
+        worksheet['!cols'] = [
+          { wch: 5 },  // No
+          { wch: 15 }, // Document ID
+          { wch: 15 }, // NIS
+          { wch: 28 }, // Nama Siswa
+          { wch: 12 }, // ID Kelas
+          { wch: 15 }, // Nama Kelas
+          { wch: 20 }, // Status Perangkat
+          { wch: 35 }, // Device ID
+          { wch: 30 }, // Device Token
+          { wch: 22 }  // Waktu Terikat
+        ];
+
+        const workbook = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(workbook, worksheet, "Perangkat Siswa");
+
+        // Unduh File Excel (.xlsx)
+        const today = new Date().toISOString().split('T')[0];
+        XLSX.writeFile(workbook, `Rekap_Perangkat_Siswa_${today}.xlsx`);
+      });
+    }
   </script>
 </body>
 </html>
