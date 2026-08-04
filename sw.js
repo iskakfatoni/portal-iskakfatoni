@@ -1,7 +1,6 @@
-// sw.js - Service Worker Cache Portal Iskak Fatoni
-const CACHE_NAME = 'portal-iskakfatoni-v3';
+// sw.js - Service Worker Fix
+const CACHE_NAME = 'portal-iskakfatoni-v4';
 
-// 1. Berkas Lokal Repositori
 const LOCAL_ASSETS = [
   './',
   'index.html',
@@ -21,47 +20,25 @@ const LOCAL_ASSETS = [
   'import-siswa.html'
 ];
 
-// 2. Library & CDN Eksternal
-const EXTERNAL_CDN_ASSETS = [
-  'https://cdn.tailwindcss.com',
-  'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css',
-  'https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap',
-  'https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js',
-  'https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js',
-  'https://unpkg.com/html5-qrcode',
-  'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js',
-  'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js',
-  'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js'
-];
-
 // Install Event
 self.addEventListener('install', (event) => {
   event.waitUntil(
-    caches.open(CACHE_NAME).then(async (cache) => {
-      console.log('[Service Worker] Caching local assets...');
-      await cache.addAll(LOCAL_ASSETS);
-
-      console.log('[Service Worker] Caching CDN assets...');
-      const cdnPromises = EXTERNAL_CDN_ASSETS.map((url) => {
-        const req = new Request(url, { mode: 'no-cors' });
-        return fetch(req).then((response) => cache.put(url, response)).catch(err => {
-          console.warn('[Service Worker] Failed to cache CDN:', url, err);
-        });
+    caches.open(CACHE_NAME).then((cache) => {
+      return cache.addAll(LOCAL_ASSETS).catch(err => {
+        console.warn('[SW] Caching partial error:', err);
       });
-
-      return Promise.all(cdnPromises);
     }).then(() => self.skipWaiting())
   );
 });
 
-// Activate Event
+// Activate Event: Hapus semua cache versi lama secara paksa
 self.addEventListener('activate', (event) => {
   event.waitUntil(
     caches.keys().then((cacheNames) => {
       return Promise.all(
         cacheNames.map((cache) => {
           if (cache !== CACHE_NAME) {
-            console.log('[Service Worker] Deleting old cache:', cache);
+            console.log('[SW] Deleting old cache:', cache);
             return caches.delete(cache);
           }
         })
@@ -70,33 +47,41 @@ self.addEventListener('activate', (event) => {
   );
 });
 
-// Fetch Event
+// Fetch Event: ABAIKAN SEMUA TRAFIK FIREBASE / AUTH / FIRESTORE (PENTING!)
 self.addEventListener('fetch', (event) => {
-  // Abaikan request data Firestore / Auth agar tidak mengganggu sinkronisasi live
-  if (event.request.url.includes('firestore.googleapis.com') || 
-      event.request.url.includes('firebaseio.com') ||
-      event.request.url.includes('identitytoolkit')) {
+  const url = event.request.url;
+
+  // 1. Jangan cache API Firebase Auth & Firestore sama sekali agar Login Admin & Data Live tidak error
+  if (url.includes('firestore.googleapis.com') || 
+      url.includes('firebaseio.com') ||
+      url.includes('identitytoolkit.googleapis.com') ||
+      url.includes('securetoken.googleapis.com') ||
+      url.includes('google.googleapis.com') ||
+      event.request.method !== 'GET') {
+    return; // Biarkan browser memproses langsung ke jaringan (Network Direct)
+  }
+
+  // 2. Strategi Network First untuk File HTML agar saat di-refresh SELALU mengambil data terbaru
+  if (event.request.mode === 'navigate' || event.request.headers.get('accept')?.includes('text/html')) {
+    event.respondWith(
+      fetch(event.request).then((networkResponse) => {
+        const responseToCache = networkResponse.clone();
+        caches.open(CACHE_NAME).then((cache) => cache.put(event.request, responseToCache));
+        return networkResponse;
+      }).catch(() => caches.match(event.request))
+    );
     return;
   }
 
+  // 3. Aset Statis (CSS, Gambar, Font): Cache First, Fallback to Network
   event.respondWith(
     caches.match(event.request).then((cachedResponse) => {
-      if (cachedResponse) {
-        return cachedResponse;
-      }
-      return fetch(event.request).then((networkResponse) => {
-        if (!networkResponse || networkResponse.status !== 200 || networkResponse.type !== 'basic') {
-          return networkResponse;
+      return cachedResponse || fetch(event.request).then((networkResponse) => {
+        if (networkResponse && networkResponse.status === 200 && networkResponse.type === 'basic') {
+          const responseToCache = networkResponse.clone();
+          caches.open(CACHE_NAME).then((cache) => cache.put(event.request, responseToCache));
         }
-
-        const responseToCache = networkResponse.clone();
-        caches.open(CACHE_NAME).then((cache) => {
-          cache.put(event.request, responseToCache);
-        });
-
         return networkResponse;
-      }).catch(() => {
-        // Mode offline
       });
     })
   );
