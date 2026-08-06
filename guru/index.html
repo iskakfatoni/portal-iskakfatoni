@@ -262,11 +262,10 @@
 
   <!-- FIREBASE AUTH & LOGIC -->
   <script type="module">
-    // Import Konfigurasi Terpisah (Mencegah Kebocoran API Key)
     import { firebaseConfig } from "../assets/js/config/firebase-config.js";
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
     import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
-    import { getFirestore, collection, addDoc, doc, updateDoc, query, where, orderBy, getDocs, onSnapshot, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+    import { getFirestore, collection, addDoc, doc, getDoc, updateDoc, query, where, orderBy, getDocs, onSnapshot, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
@@ -294,15 +293,16 @@
     let unsubscribeLog = null;
     let activeToken = "";
 
-    // 🔒 AUTH GUARD: Verifikasi Sesi
-    onAuthStateChanged(auth, (user) => {
+    // 🔒 AUTH GUARD: Verifikasi Sesi & Cek Restore Sesi Aktif
+    onAuthStateChanged(auth, async (user) => {
       if (!user) {
         window.location.href = "../admin.html";
       } else {
         document.documentElement.style.display = 'block';
         userEmailDisplay.innerText = user.email;
-        loadKelasDropdown();
-        loadMapelDropdown();
+        await loadKelasDropdown();
+        await loadMapelDropdown();
+        await checkAndRestoreActiveSession();
       }
     });
 
@@ -346,6 +346,101 @@
       } catch (err) { console.error("Gagal load mapel:", err); }
     }
 
+    // 🔄 RECOVERY: CEK DAN RESTORE SESI QR AKTIF SAAT REFRESH / PINDAH HALAMAN
+    async function checkAndRestoreActiveSession() {
+      try {
+        // 1. Cek dari LocalStorage terlebih dahulu
+        const savedSessionJson = localStorage.getItem('active_qr_session');
+        if (savedSessionJson) {
+          const savedSession = JSON.parse(savedSessionJson);
+          const docSnap = await getDoc(doc(db, "sesi_absensi", savedSession.id_sesi));
+
+          if (docSnap.exists() && docSnap.data().is_active === true) {
+            const dbData = docSnap.data();
+            restoreActiveSessionUI(
+              savedSession.id_sesi, 
+              dbData.id_kelas, 
+              dbData.nama_mapel, 
+              dbData.current_qr_token || savedSession.current_token
+            );
+            return;
+          } else {
+            localStorage.removeItem('active_qr_session');
+          }
+        }
+
+        // 2. Jika LocalStorage kosong, cari sesi aktif terakhir dari Firestore
+        const qActive = query(collection(db, "sesi_absensi"), where("is_active", "==", true), orderBy("created_at", "desc"));
+        const querySnap = await getDocs(qActive);
+
+        if (!querySnap.empty) {
+          const activeDoc = querySnap.docs[0];
+          const dbData = activeDoc.data();
+          const sesiId = activeDoc.id;
+
+          const sessionPayload = {
+            id_sesi: sesiId,
+            id_kelas: dbData.id_kelas,
+            nama_mapel: dbData.nama_mapel,
+            current_token: dbData.current_qr_token
+          };
+
+          localStorage.setItem('active_qr_session', JSON.stringify(sessionPayload));
+          restoreActiveSessionUI(sesiId, dbData.id_kelas, dbData.nama_mapel, dbData.current_qr_token);
+        }
+      } catch (e) {
+        console.error("Gagal merestore sesi aktif:", e);
+      }
+    }
+
+    // FUNGSI RESTORE TAMPILAN & LOGIKA SESI
+    function restoreActiveSessionUI(sesiId, kelas, mapel, token) {
+      currentSesiId = sesiId;
+      activeToken = token || ('QR-' + Math.random().toString(36).substring(2, 10).toUpperCase());
+
+      selectKelas.value = kelas;
+      selectMapel.value = mapel;
+
+      btnStartSesi.disabled = true;
+
+      btnStopSesi.disabled = false;
+      btnStopSesi.className = 'py-3 px-4 bg-red-500 hover:bg-red-400 text-white font-bold text-xs rounded-xl transition shadow-lg shadow-red-500/20 flex items-center justify-center gap-2 cursor-pointer';
+
+      btnFullscreenQr.disabled = false;
+      btnFullscreenQr.className = 'w-full py-3 px-4 bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-bold text-xs rounded-xl transition flex items-center justify-center gap-2 cursor-pointer shadow-lg shadow-cyan-500/20';
+
+      sessionStatus.innerText = `Aktif [${kelas}]`;
+      sessionStatus.className = 'text-xs text-emerald-400 font-mono font-bold';
+
+      document.getElementById('modal-kelas-title').innerText = kelas;
+      document.getElementById('modal-mapel-title').innerText = mapel;
+
+      updateQRDisplay(activeToken);
+
+      // Jalankan kembali timer perputaran token 10 detik
+      if (qrInterval) clearInterval(qrInterval);
+      qrInterval = setInterval(async () => {
+        if (!currentSesiId) return;
+        activeToken = 'QR-' + Math.random().toString(36).substring(2, 10).toUpperCase();
+        
+        try {
+          await updateDoc(doc(db, "sesi_absensi", currentSesiId), {
+            current_qr_token: activeToken
+          });
+
+          // Update LocalStorage dengan token terbaru
+          const sessionPayload = { id_sesi: currentSesiId, id_kelas: kelas, nama_mapel: mapel, current_token: activeToken };
+          localStorage.setItem('active_qr_session', JSON.stringify(sessionPayload));
+
+          updateQRDisplay(activeToken);
+        } catch (err) {
+          console.error("Gagal update token QR:", err);
+        }
+      }, 10000);
+
+      listenToLogAbsensi(currentSesiId);
+    }
+
     btnStartSesi.addEventListener('click', async () => {
       const kelas = selectKelas.value;
       const mapel = selectMapel.value;
@@ -369,30 +464,16 @@
 
         currentSesiId = docRef.id;
 
-        btnStopSesi.disabled = false;
-        btnStopSesi.className = 'py-3 px-4 bg-red-500 hover:bg-red-400 text-white font-bold text-xs rounded-xl transition shadow-lg shadow-red-500/20 flex items-center justify-center gap-2 cursor-pointer';
+        // Simpan sesi ke LocalStorage
+        const sessionPayload = {
+          id_sesi: currentSesiId,
+          id_kelas: kelas,
+          nama_mapel: mapel,
+          current_token: activeToken
+        };
+        localStorage.setItem('active_qr_session', JSON.stringify(sessionPayload));
 
-        btnFullscreenQr.disabled = false;
-        btnFullscreenQr.className = 'w-full py-3 px-4 bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-bold text-xs rounded-xl transition flex items-center justify-center gap-2 cursor-pointer shadow-lg shadow-cyan-500/20';
-
-        sessionStatus.innerText = `Aktif [${kelas}]`;
-        sessionStatus.className = 'text-xs text-emerald-400 font-mono font-bold';
-
-        document.getElementById('modal-kelas-title').innerText = kelas;
-        document.getElementById('modal-mapel-title').innerText = mapel;
-
-        updateQRDisplay(activeToken);
-
-        qrInterval = setInterval(async () => {
-          if (!currentSesiId) return;
-          activeToken = 'QR-' + Math.random().toString(36).substring(2, 10).toUpperCase();
-          await updateDoc(doc(db, "sesi_absensi", currentSesiId), {
-            current_qr_token: activeToken
-          });
-          updateQRDisplay(activeToken);
-        }, 10000);
-
-        listenToLogAbsensi(currentSesiId);
+        restoreActiveSessionUI(currentSesiId, kelas, mapel, activeToken);
 
       } catch (e) {
         alert("Gagal membuka sesi: " + e.message);
@@ -402,8 +483,15 @@
 
     btnStopSesi.addEventListener('click', async () => {
       if (currentSesiId) {
-        await updateDoc(doc(db, "sesi_absensi", currentSesiId), { is_active: false });
-        resetSesiState();
+        if (confirm("Apakah Anda yakin ingin menutup sesi absensi ini? Sesi akan diakhiri permanen.")) {
+          try {
+            await updateDoc(doc(db, "sesi_absensi", currentSesiId), { is_active: false });
+            localStorage.removeItem('active_qr_session');
+            resetSesiState();
+          } catch (e) {
+            alert("Gagal menutup sesi: " + e.message);
+          }
+        }
       }
     });
 
