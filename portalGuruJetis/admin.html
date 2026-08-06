@@ -4,9 +4,14 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Portal Guru SMK Jetis - Device & Accounts</title>
-    <!-- Firebase SDK (Compat Version untuk CDN tanpa Build Tool) -->
+    
+    <!-- 1. Firebase SDK CDN (Compat Version) -->
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+    
+    <!-- 2. Terintegrasi dengan Konfigurasi Terpusat auth.js -->
+    <script src="auth.js"></script>
+
     <style>
         :root {
             --bg-color: #0d0e15;
@@ -182,7 +187,7 @@
             <h3>Tambah / Update Data Guru</h3>
             <form id="teacherForm" class="form-group">
                 <input type="text" id="nipInput" placeholder="NIP Guru" required>
-                <input type="text" id="nameInput" placeholder="Nama Lengkap Guru" required>
+                <input type="text" id="nameInput" placeholder="Nama Lengkap Guru (misal: Budi, S.Pd., Gr.)" required>
                 <button type="submit">Simpan Data Guru</button>
             </form>
         </div>
@@ -190,7 +195,7 @@
         <!-- Tabel Data Guru -->
         <div class="glass-card">
             <h3>Daftar Guru & Penambatan Perangkat (Device Binding)</h3>
-            <input type="text" id="searchInput" placeholder="Cari berdasarkan NIP atau Nama..." style="width: 100%; margin-bottom: 16px; box-sizing: border-box;">
+            <input type="text" id="searchInput" placeholder="Cari berdasarkan NIP atau Nama Guru..." style="width: 100%; margin-bottom: 16px; box-sizing: border-box;">
             
             <table>
                 <thead>
@@ -212,29 +217,14 @@
     </div>
 
     <script>
-// Your web app's Firebase configuration
-// For Firebase JS SDK v7.20.0 and later, measurementId is optional
-const firebaseConfig = {
-  apiKey: "AIzaSyAR_9SDtOM-SGjQywqd-oXmajgroAhFBfw",
-  authDomain: "portal-guru-jetis-36d41.firebaseapp.com",
-  projectId: "portal-guru-jetis-36d41",
-  storageBucket: "portal-guru-jetis-36d41.firebasestorage.app",
-  messagingSenderId: "339557702349",
-  appId: "1:339557702349:web:740cdd828375299561a784",
-  measurementId: "G-K0DED36NSS"
-};
-
-        // Initialize Firebase
-        firebase.initializeApp(firebaseConfig);
-        const db = firebase.firestore();
-
+        // Memakai instance 'db' yang sudah diinisialisasi oleh auth.js
         const teacherForm = document.getElementById('teacherForm');
         const teacherTableBody = document.getElementById('teacherTableBody');
         const searchInput = document.getElementById('searchInput');
 
         let teacherDataCache = [];
 
-        // 1. Fetch & Realtime Listen Data Teachers
+        // 1. Fetch & Realtime Listener Koleksi Teachers
         db.collection('teachers').onSnapshot(snapshot => {
             teacherDataCache = [];
             snapshot.forEach(doc => {
@@ -242,15 +232,15 @@ const firebaseConfig = {
             });
             renderTable(teacherDataCache);
         }, error => {
-            console.error("Error reading teachers: ", error);
-            teacherTableBody.innerHTML = `<tr><td colspan="5" style="color: red; text-align: center;">Gagal memuat data. Periksa konfigurasi Firebase / Security Rules.</td></tr>`;
+            console.error("Error fetching teachers: ", error);
+            teacherTableBody.innerHTML = `<tr><td colspan="5" style="color: #ff0844; text-align: center;">Gagal memuat data: ${error.message}</td></tr>`;
         });
 
         // 2. Render Tabel Data
         function renderTable(data) {
             teacherTableBody.innerHTML = '';
             if (data.length === 0) {
-                teacherTableBody.innerHTML = `<tr><td colspan="5" style="text-align: center;">Tidak ada data guru.</td></tr>`;
+                teacherTableBody.innerHTML = `<tr><td colspan="5" style="text-align: center; color: var(--text-sub);">Tidak ada data guru ditemukan.</td></tr>`;
                 return;
             }
 
@@ -278,7 +268,7 @@ const firebaseConfig = {
             });
         }
 
-        // 3. Tambah / Edit Guru
+        // 3. Tambah / Edit Data Guru
         teacherForm.addEventListener('submit', async (e) => {
             e.preventDefault();
             const nip = document.getElementById('nipInput').value.trim();
@@ -296,25 +286,25 @@ const firebaseConfig = {
                     last_login: Date.now()
                 }, { merge: true });
 
-                alert(`Guru ${name} berhasil disimpan!`);
+                alert(`Data guru ${name} (${nip}) berhasil disimpan!`);
                 teacherForm.reset();
             } catch (err) {
-                alert("Gagal menyimpan: " + err.message);
+                alert("Gagal menyimpan data guru: " + err.message);
             }
         });
 
-        // 4. Aksi Unbind Device (Memungkinkan Guru Login di HP Baru)
+        // 4. Reset Binding HP (Solusi untuk kasus "NIP terikat di HP lain")
         async function unbindDevice(nip, deviceId) {
-            if (!confirm(`Apakah Anda yakin ingin melepas tautan HP untuk NIP ${nip}? Guru akan dapat menautkan HP baru saat login berikutnya.`)) return;
+            if (!confirm(`Apakah Anda yakin ingin melepas penambatan HP dari NIP ${nip}? Guru tersebut akan dapat menautkan HP baru saat login berikutnya.`)) return;
 
             try {
                 const batch = db.batch();
                 
-                // Reset field device_id di collection teachers
+                // Unbind field device_id di dokumen guru
                 const teacherRef = db.collection('teachers').doc(nip);
                 batch.update(teacherRef, { device_id: "" });
 
-                // Hapus dokumen lookup di collection devices
+                // Hapus record di koleksi devices
                 if (deviceId) {
                     const deviceRef = db.collection('devices').doc(deviceId);
                     batch.delete(deviceRef);
@@ -323,11 +313,11 @@ const firebaseConfig = {
                 await batch.commit();
                 alert(`HP berhasil dilepas dari NIP ${nip}!`);
             } catch (err) {
-                alert("Gagal melakukan unbind: " + err.message);
+                alert("Gagal mereset HP: " + err.message);
             }
         }
 
-        // 5. Aksi Toggle Active/Inactive
+        // 5. Ubah Status Aktif / Non-Aktif
         async function toggleStatus(nip, currentStatus) {
             try {
                 await db.collection('teachers').doc(nip).update({
@@ -338,7 +328,7 @@ const firebaseConfig = {
             }
         }
 
-        // 6. Filter Pencarian
+        // 6. Pencarian / Filter
         searchInput.addEventListener('input', (e) => {
             const query = e.target.value.toLowerCase();
             const filtered = teacherDataCache.filter(t => 
