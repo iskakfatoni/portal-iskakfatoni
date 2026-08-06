@@ -1,1 +1,209 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Firebase Seeder :: Portal Absensi TEI</title>
+  <!-- Tailwind CSS via CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-slate-900 text-slate-100 min-h-screen flex items-center justify-center p-4 font-sans">
 
+  <div class="max-w-md w-full bg-slate-800 rounded-2xl p-6 border border-slate-700 shadow-2xl space-y-6">
+    <div class="text-center">
+      <div class="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-cyan-500/10 text-cyan-400 mb-3 border border-cyan-500/30">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s1.79-8 4m0 5c0 2.21-3.582 4-8 4s-8-1.79-8-4" />
+        </svg>
+      </div>
+      <h1 class="text-xl font-bold text-white tracking-wide">FIRESTORE DATABASE SEEDER</h1>
+      <p class="text-xs text-slate-400 mt-1">Generate Kelas, Mapel TEI, & Data Sampel Otomatis</p>
+    </div>
+
+    <!-- STATUS LOG BOX -->
+    <div id="log-box" class="bg-slate-950 rounded-xl p-4 border border-slate-800 font-mono text-xs text-slate-300 h-56 overflow-y-auto space-y-1">
+      <p class="text-slate-500">// Klik tombol di bawah untuk mulai menginjeksi data...</p>
+    </div>
+
+    <!-- ACTION BUTTON -->
+    <button 
+      id="btn-seed" 
+      type="button"
+      class="w-full py-3.5 px-4 bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-bold text-sm rounded-xl transition shadow-lg shadow-cyan-500/20 flex items-center justify-center space-x-2 cursor-pointer"
+    >
+      <span id="btn-text">🚀 Jalankan Database Seeder</span>
+      <div id="btn-spinner" class="hidden w-4 h-4 border-2 border-slate-950 border-t-transparent rounded-full animate-spin"></div>
+    </button>
+
+    <!-- FOOTER -->
+    <div class="text-center pt-2 border-t border-slate-700/40">
+      <p class="text-[11px] text-slate-500 font-mono">Developed by Iskak Fatoni, S.Pd., Gr.</p>
+    </div>
+  </div>
+
+  <!-- SCRIPT SEEDER LOGIC -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+    import { 
+      getFirestore, 
+      doc, 
+      setDoc, 
+      addDoc, 
+      collection, 
+      serverTimestamp 
+    } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+    // Konfigurasi Firebase Portal IskakFatoni
+    const firebaseConfig = {
+      apiKey: "AIzaSyDhq4QoCn00GkfpKXSP8PnvSvEKa2yn0ic",
+      authDomain: "portal-iskakfatoni.firebaseapp.com",
+      projectId: "portal-iskakfatoni",
+      storageBucket: "portal-iskakfatoni.firebasestorage.app",
+      messagingSenderId: "367350728822",
+      appId: "1:367350728822:web:6b0c6fd4824102d8acf757",
+      measurementId: "G-0BNNKQQ24V"
+    };
+
+    const logBox = document.getElementById('log-box');
+    const btnSeed = document.getElementById('btn-seed');
+    const btnText = document.getElementById('btn-text');
+    const btnSpinner = document.getElementById('btn-spinner');
+
+    function log(message, type = 'info') {
+      const p = document.createElement('p');
+      if (type === 'success') p.className = 'text-emerald-400 font-semibold';
+      else if (type === 'error') p.className = 'text-red-400 font-semibold';
+      else if (type === 'warn') p.className = 'text-amber-400';
+      else p.className = 'text-slate-300';
+      
+      const timestamp = new Date().toLocaleTimeString();
+      p.innerText = `[${timestamp}] ${message}`;
+      logBox.appendChild(p);
+      logBox.scrollTop = logBox.scrollHeight;
+    }
+
+    // Tangkap JS Error
+    window.addEventListener('error', (e) => {
+      log(`❌ Error: ${e.message}`, 'error');
+    });
+
+    btnSeed.addEventListener('click', async () => {
+      btnSeed.disabled = true;
+      btnText.innerText = "Memproses Seeding...";
+      btnSpinner.classList.remove('hidden');
+      logBox.innerHTML = '';
+
+      log("Menghubungkan ke Cloud Firestore...", "warn");
+
+      try {
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        // -------------------------------------------------------------
+        // 1. SEED KOLEKSI: kelas
+        // -------------------------------------------------------------
+        log("1. Membuat koleksi 'kelas'...");
+        const dataKelas = [
+          { id: "XI-TEI-1", nama_kelas: "XI TEI 1", wali_kelas: "Iskak Fatoni, S.Pd., Gr." },
+          { id: "XI-TEI-2", nama_kelas: "XI TEI 2", wali_kelas: "Iskak Fatoni, S.Pd., Gr." },
+          { id: "XII-TEI-1", nama_kelas: "XII TEI 1", wali_kelas: "Iskak Fatoni, S.Pd., Gr." },
+          { id: "XII-TEI-2", nama_kelas: "XII TEI 2", wali_kelas: "Iskak Fatoni, S.Pd., Gr." },
+          { id: "XI-TEI-1-MUTU", nama_kelas: "XI TEI 1 MUTU", wali_kelas: "Iskak Fatoni, S.Pd., Gr." },
+          { id: "XI-TEI-2-MUTU", nama_kelas: "XI TEI 2 MUTU", wali_kelas: "Iskak Fatoni, S.Pd., Gr." },
+          { id: "XII-TEI-MUTU", nama_kelas: "XII TEI MUTU", wali_kelas: "Iskak Fatoni, S.Pd., Gr." }
+        ];
+
+        for (const item of dataKelas) {
+          await setDoc(doc(db, "kelas", item.id), {
+            nama_kelas: item.nama_kelas,
+            wali_kelas: item.wali_kelas,
+            created_at: serverTimestamp()
+          });
+          log(`  ✔ Kelas '${item.nama_kelas}' berhasil dibuat.`, "success");
+        }
+
+        // -------------------------------------------------------------
+        // 2. SEED KOLEKSI: mapel
+        // -------------------------------------------------------------
+        log("2. Membuat koleksi 'mapel'...");
+        const dataMapel = [
+          { id: "SKE", nama_mapel: "Sistem Kendali Elektronika", kategori: "Wajib", order: 1 },
+          { id: "KKA", nama_mapel: "Koding dan Kecerdasan Artificial", kategori: "Wajib", order: 2 },
+          { id: "SKBA", nama_mapel: "Mapel Pilihan : Sistem Kendali Berbasis Arduino", kategori: "Pilihan", order: 3 }
+        ];
+
+        for (const item of dataMapel) {
+          await setDoc(doc(db, "mapel", item.id), {
+            nama_mapel: item.nama_mapel,
+            kategori: item.kategori,
+            order: item.order,
+            created_at: serverTimestamp()
+          });
+          log(`  ✔ Mapel '${item.nama_mapel}' berhasil dibuat.`, "success");
+        }
+
+        // -------------------------------------------------------------
+        // 3. SEED KOLEKSI: siswa (Sampel)
+        // -------------------------------------------------------------
+        log("3. Membuat koleksi 'siswa'...");
+        const dataSiswa = [
+          { nis: "2026001", nama_siswa: "Ahmad Fatoni", id_kelas: "XI-TEI-1", nama_kelas: "XI TEI 1" },
+          { nis: "2026002", nama_siswa: "Budi Pratama", id_kelas: "XI-TEI-2", nama_kelas: "XI TEI 2" },
+          { nis: "2026003", nama_siswa: "Citra Dewi", id_kelas: "XII-TEI-1", nama_kelas: "XII TEI 1" },
+          { nis: "2026004", nama_siswa: "Doni Wijaya", id_kelas: "XII-TEI-2", nama_kelas: "XII TEI 2" },
+          { nis: "2026005", nama_siswa: "Eka Putri", id_kelas: "XI-TEI-1-MUTU", nama_kelas: "XI TEI 1 MUTU" },
+          { nis: "2026006", nama_siswa: "Fajar Nugraha", id_kelas: "XI-TEI-2-MUTU", nama_kelas: "XI TEI 2 MUTU" },
+          { nis: "2026007", nama_siswa: "Gita Gutawa", id_kelas: "XII-TEI-MUTU", nama_kelas: "XII TEI MUTU" }
+        ];
+
+        for (const item of dataSiswa) {
+          await setDoc(doc(db, "siswa", item.nis), {
+            nis: item.nis,
+            nama_siswa: item.nama_siswa,
+            id_kelas: item.id_kelas,
+            nama_kelas: item.nama_kelas,
+            device_id: "", // Default belum terikat HP
+            created_at: serverTimestamp()
+          });
+          log(`  ✔ Siswa '${item.nama_siswa}' (${item.nama_kelas}) dibuat.`, "success");
+        }
+
+        // -------------------------------------------------------------
+        // 4. SEED KOLEKSI: sesi_absensi & log_absensi (Sampel)
+        // -------------------------------------------------------------
+        log("4. Membuat koleksi 'sesi_absensi' & 'log_absensi'...");
+        const refSesi = await addDoc(collection(db, "sesi_absensi"), {
+          id_kelas: "XI-TEI-1",
+          nama_mapel: "Sistem Kendali Elektronika",
+          tanggal: new Date().toISOString().split('T')[0],
+          is_active: false,
+          current_qr_token: "SAMPLE_EXPIRED_TOKEN",
+          created_at: serverTimestamp()
+        });
+        log(`  ✔ Sesi Absensi Sampel dibuat.`, "success");
+
+        await addDoc(collection(db, "log_absensi"), {
+          id_sesi: refSesi.id,
+          nis: "2026001",
+          nama_siswa: "Ahmad Fatoni",
+          id_kelas: "XI-TEI-1",
+          waktu_scan: new Date().toLocaleString(),
+          status: "Hadir",
+          created_at: serverTimestamp()
+        });
+        log(`  ✔ Log Absensi Sampel dibuat.`, "success");
+
+        log("🎉 SEEDING SELESAI! Seluruh koleksi kelas, mapel, & siswa siap digunakan.", "success");
+
+      } catch (err) {
+        console.error(err);
+        log(`❌ Error Seeding: ${err.message}`, "error");
+      } finally {
+        btnSeed.disabled = false;
+        btnText.innerText = "🚀 Jalankan Ulang Seeder";
+        btnSpinner.classList.add('hidden');
+      }
+    });
+  </script>
+</body>
+</html>
