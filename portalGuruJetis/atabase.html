@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Portal Guru SMK Jetis - Direct Database Tools</title>
+    
+    <!-- 1. Firebase SDK CDN (Compat Version) -->
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+    
+    <!-- 2. Terintegrasi dengan Konfigurasi Terpusat auth.js -->
+    <script src="auth.js"></script>
+
+    <style>
+        :root {
+            --bg-color: #0d0e15;
+            --card-bg: rgba(255, 255, 255, 0.05);
+            --card-border: rgba(255, 255, 255, 0.15);
+            --neon-cyan: #00f2fe;
+            --neon-pink: #ff0844;
+            --neon-purple: #7f00ff;
+            --neon-green: #00ff87;
+            --text-main: #ffffff;
+            --text-sub: #b0b3c6;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            margin: 0;
+            padding: 24px;
+        }
+
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid var(--card-border);
+        }
+
+        h1 {
+            margin: 0;
+            font-size: 24px;
+            background: linear-gradient(45deg, var(--neon-cyan), var(--neon-pink));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .nav-links a {
+            color: var(--text-sub);
+            text-decoration: none;
+            margin-left: 16px;
+            padding: 8px 16px;
+            border-radius: 8px;
+            border: 1px solid transparent;
+            transition: all 0.3s;
+        }
+
+        .nav-links a.active, .nav-links a:hover {
+            color: var(--neon-cyan);
+            border-color: var(--neon-cyan);
+            background: var(--card-bg);
+        }
+
+        .glass-card {
+            background: var(--card-bg);
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--card-border);
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 24px;
+        }
+
+        .grid-2 {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 20px;
+        }
+
+        select, input, textarea {
+            background: rgba(0, 0, 0, 0.4);
+            border: 1px solid var(--card-border);
+            color: #fff;
+            padding: 10px 14px;
+            border-radius: 8px;
+            font-size: 14px;
+            outline: none;
+            width: 100%;
+            box-sizing: border-box;
+            margin-bottom: 12px;
+        }
+
+        select:focus, input:focus, textarea:focus {
+            border-color: var(--neon-cyan);
+        }
+
+        textarea {
+            font-family: monospace;
+            font-size: 12px;
+            height: 180px;
+            resize: vertical;
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        button {
+            background: linear-gradient(45deg, var(--neon-purple), var(--neon-cyan));
+            border: none;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: opacity 0.2s;
+        }
+
+        button:hover {
+            opacity: 0.9;
+        }
+
+        button.btn-green {
+            background: linear-gradient(45deg, #11998e, #38ef7d);
+            color: #000;
+        }
+
+        button.btn-danger {
+            background: linear-gradient(45deg, #ff416c, #ff4b2b);
+        }
+
+        .console-output {
+            background: #000;
+            border: 1px solid var(--neon-cyan);
+            border-radius: 8px;
+            padding: 12px;
+            font-family: monospace;
+            font-size: 12px;
+            color: var(--neon-green);
+            max-height: 300px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Portal Guru - Database Direct Tools</h1>
+            <nav class="nav-links">
+                <a href="admin.html">Data Guru & Device</a>
+                <a href="link.html">Dashboard Links</a>
+                <a href="database.html" class="active">Database Direct</a>
+            </nav>
+        </header>
+
+        <div class="grid-2">
+            <!-- Panel Backup & Export -->
+            <div class="glass-card">
+                <h3>Export / Backup JSON</h3>
+                <p style="font-size: 13px; color: var(--text-sub);">Unduh seluruh data dari Firestore ke dalam berkas format `.json` untuk kebutuhan cadangan data.</p>
+                
+                <label style="font-size: 12px; color: var(--text-sub);">Pilih Koleksi:</label>
+                <select id="exportCollectionSelect">
+                    <option value="ALL">Semua Koleksi (teachers, devices, dashboard_links)</option>
+                    <option value="teachers">teachers (Data NIP Guru)</option>
+                    <option value="devices">devices (Data Binding HP)</option>
+                    <option value="dashboard_links">dashboard_links (Data Tombol Link)</option>
+                </select>
+
+                <button type="button" class="btn-green" onclick="exportData()">Download Backup JSON</button>
+            </div>
+
+            <!-- Panel Restore & Import -->
+            <div class="glass-card">
+                <h3>Import / Restore JSON</h3>
+                <p style="font-size: 13px; color: var(--text-sub);">Unggah atau tempelkan skema data JSON untuk melakukan penyuntikan data massal (*batch write*).</p>
+                
+                <label style="font-size: 12px; color: var(--text-sub);">Pilih Koleksi Target:</label>
+                <select id="importCollectionSelect">
+                    <option value="teachers">teachers</option>
+                    <option value="devices">devices</option>
+                    <option value="dashboard_links">dashboard_links</option>
+                </select>
+
+                <textarea id="importJsonInput" placeholder='[&#10;  { "nip": "19810909...", "name": "Nama Guru", "is_active": true, "device_id": "" }&#10;]'></textarea>
+                
+                <button type="button" onclick="importData()">Jalankan Import Data</button>
+            </div>
+        </div>
+
+        <!-- Panel Direct Raw Document Editor -->
+        <div class="glass-card">
+            <h3>Direct Document Inspector & Editor</h3>
+            <div style="display: flex; gap: 10px;">
+                <input type="text" id="directDocPath" placeholder="Masukan Koleksi/ID_Dokumen (misal: teachers/198109092026001)">
+                <button type="button" onclick="fetchSingleDocument()" style="white-space: nowrap;">Cek Dokumen</button>
+            </div>
+
+            <textarea id="docContentTextarea" placeholder="Hasil isi dokumen Firestore akan tampil di sini..." style="height: 140px;"></textarea>
+            
+            <div class="btn-group">
+                <button type="button" onclick="saveSingleDocument()">Simpan / Override Dokumen</button>
+                <button type="button" class="btn-danger" onclick="deleteSingleDocument()">Hapus Dokumen</button>
+            </div>
+        </div>
+
+        <!-- Console Log Output -->
+        <div class="glass-card">
+            <h3>Output Logs</h3>
+            <div id="consoleLog" class="console-output">Sistem siap. Silakan pilih tindakan operasi database di atas.</div>
+        </div>
+    </div>
+
+    <script>
+        // Menggunakan instance 'db' dari auth.js
+        const logBox = document.getElementById('consoleLog');
+
+        function printLog(message, isError = false) {
+            const timestamp = new Date().toLocaleTimeString();
+            const color = isError ? '#ff0844' : '#00ff87';
+            logBox.innerHTML += `\n<span style="color: ${color}">[${timestamp}] ${message}</span>`;
+            logBox.scrollTop = logBox.scrollHeight;
+        }
+
+        // 1. Export Data to JSON File
+        async function exportData() {
+            const target = document.getElementById('exportCollectionSelect').value;
+            printLog(`Memulai proses ekspor data (${target})...`);
+
+            try {
+                let exportData = {};
+
+                if (target === "ALL") {
+                    const collections = ["teachers", "devices", "dashboard_links"];
+                    for (const col of collections) {
+                        const snap = await db.collection(col).get();
+                        exportData[col] = snap.docs.map(doc => ({ _id: doc.id, ...doc.data() }));
+                    }
+                } else {
+                    const snap = await db.collection(target).get();
+                    exportData[target] = snap.docs.map(doc => ({ _id: doc.id, ...doc.data() }));
+                }
+
+                // Download File JSON
+                const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(exportData, null, 2));
+                const downloadAnchor = document.createElement('a');
+                downloadAnchor.setAttribute("href", dataStr);
+                downloadAnchor.setAttribute("download", `backup_portal_guru_${target.toLowerCase()}_${Date.now()}.json`);
+                document.body.appendChild(downloadAnchor);
+                downloadAnchor.click();
+                downloadAnchor.remove();
+
+                printLog(`Ekspor data (${target}) berhasil Diunduh!`);
+            } catch (err) {
+                printLog(`Gagal melakukan ekspor: ${err.message}`, true);
+            }
+        }
+
+        // 2. Import JSON Data (Batch Write)
+        async function importData() {
+            const collectionName = document.getElementById('importCollectionSelect').value;
+            const rawJson = document.getElementById('importJsonInput').value.trim();
+
+            if (!rawJson) {
+                alert("Area masukan JSON tidak boleh kosong.");
+                return;
+            }
+
+            try {
+                const items = JSON.parse(rawJson);
+                if (!Array.isArray(items)) {
+                    throw new Error("Format JSON harus berupa Array / List objek `[...]`");
+                }
+
+                printLog(`Menulis ${items.length} data ke koleksi '${collectionName}'...`);
+                const batch = db.batch();
+
+                items.forEach(item => {
+                    // Jika ada _id atau nip / id, gunakan sebagai Document ID
+                    const docId = item._id || item.nip || item.id || db.collection(collectionName).doc().id;
+                    delete item._id; // Bersihkan field temporary _id jika ada
+
+                    const docRef = db.collection(collectionName).doc(docId);
+                    batch.set(docRef, item, { merge: true });
+                });
+
+                await batch.commit();
+                printLog(`Berhasil mengimpor ${items.length} dokumen ke koleksi '${collectionName}'!`);
+                document.getElementById('importJsonInput').value = '';
+            } catch (err) {
+                printLog(`Gagal mengimpor data: ${err.message}`, true);
+            }
+        }
+
+        // 3. Inspection - Read Single Document
+        async function fetchSingleDocument() {
+            const path = document.getElementById('directDocPath').value.trim();
+            if (!path || !path.includes('/')) {
+                alert("Masukan path dokumen dengan format `Koleksi/Document_ID` (misal: teachers/198109092026001)");
+                return;
+            }
+
+            try {
+                const [col, id] = path.split('/');
+                const docSnap = await db.collection(col).doc(id).get();
+
+                if (!docSnap.exists) {
+                    printLog(`Dokumen '${path}' tidak ditemukan di Firestore.`, true);
+                    document.getElementById('docContentTextarea').value = '';
+                    return;
+                }
+
+                document.getElementById('docContentTextarea').value = JSON.stringify(docSnap.data(), null, 2);
+                printLog(`Dokumen '${path}' berhasil dimuat.`);
+            } catch (err) {
+                printLog(`Gagal mengambil dokumen: ${err.message}`, true);
+            }
+        }
+
+        // 4. Save Single Document
+        async function saveSingleDocument() {
+            const path = document.getElementById('directDocPath').value.trim();
+            const rawContent = document.getElementById('docContentTextarea').value.trim();
+
+            if (!path || !path.includes('/') || !rawContent) {
+                alert("Pastikan Path Dokumen dan Konten JSON sudah diisi secara valid.");
+                return;
+            }
+
+            try {
+                const [col, id] = path.split('/');
+                const parsedData = JSON.parse(rawContent);
+
+                await db.collection(col).doc(id).set(parsedData, { merge: true });
+                printLog(`Dokumen '${path}' berhasil diperbarui!`);
+            } catch (err) {
+                printLog(`Gagal menyimpan dokumen: ${err.message}`, true);
+            }
+        }
+
+        // 5. Delete Single Document
+        async function deleteSingleDocument() {
+            const path = document.getElementById('directDocPath').value.trim();
+            if (!path || !path.includes('/')) return;
+
+            if (!confirm(`Apakah Anda yakin ingin menghapus dokumen '${path}' secara permanen?`)) return;
+
+            try {
+                const [col, id] = path.split('/');
+                await db.collection(col).doc(id).delete();
+                printLog(`Dokumen '${path}' berhasil dihapus.`);
+                document.getElementById('docContentTextarea').value = '';
+            } catch (err) {
+                printLog(`Gagal menghapus dokumen: ${err.message}`, true);
+            }
+        }
+    </script>
+</body>
+</html>
