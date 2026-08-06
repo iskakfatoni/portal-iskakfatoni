@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Portal Guru SMK Jetis - Device & Accounts</title>
+    <!-- Firebase SDK (Compat Version untuk CDN tanpa Build Tool) -->
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+    <style>
+        :root {
+            --bg-color: #0d0e15;
+            --card-bg: rgba(255, 255, 255, 0.05);
+            --card-border: rgba(255, 255, 255, 0.15);
+            --neon-cyan: #00f2fe;
+            --neon-pink: #ff0844;
+            --neon-purple: #7f00ff;
+            --neon-green: #00ff87;
+            --text-main: #ffffff;
+            --text-sub: #b0b3c6;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            margin: 0;
+            padding: 24px;
+        }
+
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid var(--card-border);
+        }
+
+        h1 {
+            margin: 0;
+            font-size: 24px;
+            background: linear-gradient(45deg, var(--neon-cyan), var(--neon-pink));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .nav-links a {
+            color: var(--text-sub);
+            text-decoration: none;
+            margin-left: 16px;
+            padding: 8px 16px;
+            border-radius: 8px;
+            border: 1px solid transparent;
+            transition: all 0.3s;
+        }
+
+        .nav-links a.active, .nav-links a:hover {
+            color: var(--neon-cyan);
+            border-color: var(--neon-cyan);
+            background: var(--card-bg);
+        }
+
+        .glass-card {
+            background: var(--card-bg);
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--card-border);
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 24px;
+        }
+
+        .form-group {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin-bottom: 16px;
+        }
+
+        input {
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid var(--card-border);
+            color: #fff;
+            padding: 10px 14px;
+            border-radius: 8px;
+            font-size: 14px;
+            outline: none;
+            flex: 1;
+            min-width: 180px;
+        }
+
+        input:focus {
+            border-color: var(--neon-cyan);
+        }
+
+        button {
+            background: linear-gradient(45deg, var(--neon-purple), var(--neon-cyan));
+            border: none;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: opacity 0.2s;
+        }
+
+        button:hover {
+            opacity: 0.9;
+        }
+
+        button.btn-danger {
+            background: linear-gradient(45deg, #ff416c, #ff4b2b);
+        }
+
+        button.btn-warning {
+            background: linear-gradient(45deg, #f7971e, #ffd200);
+            color: #000;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 12px;
+        }
+
+        th, td {
+            padding: 12px 16px;
+            text-align: left;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+            font-size: 14px;
+        }
+
+        th {
+            color: var(--text-sub);
+            font-weight: 600;
+        }
+
+        .status-badge {
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        .status-active {
+            background: rgba(0, 255, 135, 0.15);
+            color: var(--neon-green);
+            border: 1px solid var(--neon-green);
+        }
+
+        .status-inactive {
+            background: rgba(255, 8, 68, 0.15);
+            color: var(--neon-pink);
+            border: 1px solid var(--neon-pink);
+        }
+
+        .device-id {
+            font-family: monospace;
+            font-size: 12px;
+            color: var(--neon-cyan);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Portal Guru - Admin Dashboard</h1>
+            <nav class="nav-links">
+                <a href="admin.html" class="active">Data Guru & Device</a>
+                <a href="link.html">Dashboard Links</a>
+                <a href="database.html">Database Direct</a>
+            </nav>
+        </header>
+
+        <!-- Form Tambah/Update Guru -->
+        <div class="glass-card">
+            <h3>Tambah / Update Data Guru</h3>
+            <form id="teacherForm" class="form-group">
+                <input type="text" id="nipInput" placeholder="NIP Guru" required>
+                <input type="text" id="nameInput" placeholder="Nama Lengkap Guru" required>
+                <button type="submit">Simpan Data Guru</button>
+            </form>
+        </div>
+
+        <!-- Tabel Data Guru -->
+        <div class="glass-card">
+            <h3>Daftar Guru & Penambatan Perangkat (Device Binding)</h3>
+            <input type="text" id="searchInput" placeholder="Cari berdasarkan NIP atau Nama..." style="width: 100%; margin-bottom: 16px; box-sizing: border-box;">
+            
+            <table>
+                <thead>
+                    <tr>
+                        <th>NIP</th>
+                        <th>Nama Guru</th>
+                        <th>Bound Device ID</th>
+                        <th>Status</th>
+                        <th>Aksi</th>
+                    </tr>
+                </thead>
+                <tbody id="teacherTableBody">
+                    <tr>
+                        <td colspan="5" style="text-align: center; color: var(--text-sub);">Memuat data dari Firestore...</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        // ===================================================
+        // KONFIGURASI FIREBASE WEB SDK (Isi sesuai Firebase Console Anda)
+        // ===================================================
+        const firebaseConfig = {
+            apiKey: "YOUR_API_KEY",
+            authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
+            projectId: "YOUR_PROJECT_ID",
+            storageBucket: "YOUR_PROJECT_ID.appspot.com",
+            messagingSenderId: "YOUR_SENDER_ID",
+            appId: "YOUR_APP_ID"
+        };
+
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+
+        const teacherForm = document.getElementById('teacherForm');
+        const teacherTableBody = document.getElementById('teacherTableBody');
+        const searchInput = document.getElementById('searchInput');
+
+        let teacherDataCache = [];
+
+        // 1. Fetch & Realtime Listen Data Teachers
+        db.collection('teachers').onSnapshot(snapshot => {
+            teacherDataCache = [];
+            snapshot.forEach(doc => {
+                teacherDataCache.push({ nip: doc.id, ...doc.data() });
+            });
+            renderTable(teacherDataCache);
+        }, error => {
+            console.error("Error reading teachers: ", error);
+            teacherTableBody.innerHTML = `<tr><td colspan="5" style="color: red; text-align: center;">Gagal memuat data. Periksa konfigurasi Firebase / Security Rules.</td></tr>`;
+        });
+
+        // 2. Render Tabel Data
+        function renderTable(data) {
+            teacherTableBody.innerHTML = '';
+            if (data.length === 0) {
+                teacherTableBody.innerHTML = `<tr><td colspan="5" style="text-align: center;">Tidak ada data guru.</td></tr>`;
+                return;
+            }
+
+            data.forEach(teacher => {
+                const tr = document.createElement('tr');
+                const hasDevice = teacher.device_id && teacher.device_id.trim() !== '';
+
+                tr.innerHTML = `
+                    <td><strong>${teacher.nip}</strong></td>
+                    <td>${teacher.name}</td>
+                    <td>${hasDevice ? `<span class="device-id">${teacher.device_id}</span>` : '<em style="color:#666;">Belum Terikat</em>'}</td>
+                    <td>
+                        <span class="status-badge ${teacher.is_active ? 'status-active' : 'status-inactive'}">
+                            ${teacher.is_active ? 'Aktif' : 'Non-Aktif'}
+                        </span>
+                    </td>
+                    <td>
+                        ${hasDevice ? `<button class="btn-warning" onclick="unbindDevice('${teacher.nip}', '${teacher.device_id}')">Reset HP (Unbind)</button>` : ''}
+                        <button class="${teacher.is_active ? 'btn-danger' : ''}" onclick="toggleStatus('${teacher.nip}', ${teacher.is_active})">
+                            ${teacher.is_active ? 'Nonaktifkan' : 'Aktifkan'}
+                        </button>
+                    </td>
+                `;
+                teacherTableBody.appendChild(tr);
+            });
+        }
+
+        // 3. Tambah / Edit Guru
+        teacherForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const nip = document.getElementById('nipInput').value.trim();
+            const name = document.getElementById('nameInput').value.trim();
+
+            if (!nip || !name) return;
+
+            try {
+                await db.collection('teachers').doc(nip).set({
+                    nip: nip,
+                    name: name,
+                    device_id: "",
+                    is_active: true,
+                    created_at: Date.now(),
+                    last_login: Date.now()
+                }, { merge: true });
+
+                alert(`Guru ${name} berhasil disimpan!`);
+                teacherForm.reset();
+            } catch (err) {
+                alert("Gagal menyimpan: " + err.message);
+            }
+        });
+
+        // 4. Aksi Unbind Device (Memungkinkan Guru Login di HP Baru)
+        async function unbindDevice(nip, deviceId) {
+            if (!confirm(`Apakah Anda yakin ingin melepas tautan HP untuk NIP ${nip}? Guru akan dapat menautkan HP baru saat login berikutnya.`)) return;
+
+            try {
+                const batch = db.batch();
+                
+                // Reset field device_id di collection teachers
+                const teacherRef = db.collection('teachers').doc(nip);
+                batch.update(teacherRef, { device_id: "" });
+
+                // Hapus dokumen lookup di collection devices
+                if (deviceId) {
+                    const deviceRef = db.collection('devices').doc(deviceId);
+                    batch.delete(deviceRef);
+                }
+
+                await batch.commit();
+                alert(`HP berhasil dilepas dari NIP ${nip}!`);
+            } catch (err) {
+                alert("Gagal melakukan unbind: " + err.message);
+            }
+        }
+
+        // 5. Aksi Toggle Active/Inactive
+        async function toggleStatus(nip, currentStatus) {
+            try {
+                await db.collection('teachers').doc(nip).update({
+                    is_active: !currentStatus
+                });
+            } catch (err) {
+                alert("Gagal mengubah status: " + err.message);
+            }
+        }
+
+        // 6. Filter Pencarian
+        searchInput.addEventListener('input', (e) => {
+            const query = e.target.value.toLowerCase();
+            const filtered = teacherDataCache.filter(t => 
+                t.nip.toLowerCase().includes(query) || t.name.toLowerCase().includes(query)
+            );
+            renderTable(filtered);
+        });
+    </script>
+</body>
+</html>
