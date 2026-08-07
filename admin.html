@@ -1,0 +1,461 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+  <title>PORTAL::IskakFatoni - Master Admin Hub</title>
+  
+  <!-- INTEGRASI PWA & CACHING -->
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#0b0f19">
+
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <style>
+    .admin-box {
+      background: var(--card-bg, rgba(15, 23, 42, 0.85));
+      border: 1px solid var(--card-border, rgba(255, 255, 255, 0.1));
+      border-radius: 20px;
+      padding: 24px 20px;
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      margin: 20px 0;
+      width: 100%;
+      box-shadow: 0 15px 35px -10px rgba(0, 0, 0, 0.4);
+    }
+
+    .form-group-admin {
+      margin-bottom: 16px;
+      text-align: left;
+    }
+
+    .form-group-admin label {
+      display: block;
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: #94a3b8;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 6px;
+    }
+
+    .input-admin {
+      width: 100%;
+      padding: 14px 16px;
+      background: rgba(3, 7, 18, 0.7);
+      border: 1.5px solid rgba(255, 255, 255, 0.15);
+      border-radius: 12px;
+      color: #ffffff;
+      font-family: inherit;
+      font-size: 0.95rem;
+      outline: none;
+      transition: all 0.2s ease;
+    }
+
+    .input-admin:focus {
+      border-color: #38bdf8;
+      box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.25);
+    }
+
+    .btn-admin {
+      width: 100%;
+      padding: 14px 20px;
+      border: none;
+      border-radius: 12px;
+      font-family: inherit;
+      font-size: 0.9rem;
+      font-weight: 800;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: all 0.2s ease;
+      background: #38bdf8;
+      color: #090d16;
+      box-shadow: 0 8px 20px -4px rgba(56, 189, 248, 0.3);
+    }
+
+    .btn-admin:hover {
+      background: #0284c7;
+      color: #ffffff;
+    }
+
+    .menu-container {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      width: 100%;
+      margin-top: 16px;
+    }
+
+    .menu-card {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 16px 18px;
+      background: rgba(3, 7, 18, 0.6);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 14px;
+      text-decoration: none;
+      color: #ffffff;
+      transition: all 0.3s ease;
+      text-align: left;
+    }
+
+    .menu-card:hover {
+      transform: translateY(-2px);
+      border-color: #38bdf8;
+      box-shadow: 0 8px 20px -4px rgba(56, 189, 248, 0.2);
+    }
+
+    .menu-info {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .menu-icon {
+      width: 42px;
+      height: 42px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.15rem;
+      flex-shrink: 0;
+    }
+
+    .menu-icon.link-icon {
+      background: rgba(56, 189, 248, 0.15);
+      color: #38bdf8;
+      border: 1px solid rgba(56, 189, 248, 0.3);
+    }
+
+    .menu-icon.absensi-icon {
+      background: rgba(16, 185, 129, 0.15);
+      color: #34d399;
+      border: 1px solid rgba(16, 185, 129, 0.3);
+    }
+
+    .menu-icon.db-icon {
+      background: rgba(168, 85, 247, 0.15);
+      color: #c084fc;
+      border: 1px solid rgba(168, 85, 247, 0.3);
+    }
+
+    .menu-text h2 {
+      font-size: 0.9rem;
+      font-weight: 700;
+      color: #ffffff;
+      margin-bottom: 2px;
+    }
+
+    .menu-text p {
+      font-size: 0.72rem;
+      color: #94a3b8;
+    }
+
+    .arrow-icon {
+      color: #64748b;
+      font-size: 0.8rem;
+      transition: transform 0.2s ease, color 0.2s ease;
+    }
+
+    .menu-card:hover .arrow-icon {
+      color: #38bdf8;
+      transform: translateX(4px);
+    }
+
+    .top-header-hub {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      padding-bottom: 12px;
+      margin-bottom: 16px;
+    }
+
+    .btn-logout-small {
+      background: rgba(239, 68, 68, 0.15);
+      color: #f87171;
+      border: 1px solid rgba(239, 68, 68, 0.3);
+      padding: 6px 12px;
+      border-radius: 8px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .btn-logout-small:hover {
+      background: #ef4444;
+      color: #ffffff;
+    }
+
+    .error-msg {
+      background: rgba(239, 68, 68, 0.15);
+      border: 1px solid rgba(239, 68, 68, 0.3);
+      color: #f87171;
+      padding: 10px;
+      border-radius: 10px;
+      font-size: 0.8rem;
+      text-align: center;
+      margin-bottom: 14px;
+    }
+
+    .hidden { display: none !important; }
+  </style>
+</head>
+<body>
+
+  <!-- PARTICLE CANVAS -->
+  <canvas id="particle-canvas"></canvas>
+
+  <main class="container">
+    
+    <!-- Profil Header -->
+    <header class="profile">
+      <div class="avatar-ring">
+        <img src="foto_asn_profile.png" alt="Muchamad Iskak Fatoni" class="avatar">
+      </div>
+      <h1 class="name">PORTAL::Iskak Fatoni</h1>
+      <p class="bio">I'am certified electronical and computer teacher, also a former Kamen Rider</p>
+    </header>
+
+    <!-- SECTION MASTER ADMIN HUB -->
+    <section class="admin-box">
+      
+      <!-- STATE 1: FORM LOGIN ADMIN -->
+      <div id="section-login-admin">
+        <div style="text-align:center; margin-bottom: 20px;">
+          <i class="fa-solid fa-user-gear" style="font-size: 2rem; color: #38bdf8; margin-bottom: 8px;"></i>
+          <h2 style="font-size: 1.1rem; font-weight: 800; color: #ffffff;">MASTER ADMIN DASHBOARD</h2>
+          <p style="font-size: 0.8rem; color: #94a3b8; margin-top: 4px;">Masuk untuk mengelola Portal Link, Absensi, &amp; Database</p>
+        </div>
+
+        <form id="login-form" action="#" onsubmit="return false;">
+          <div class="form-group-admin">
+            <label for="login-email">Email Admin</label>
+            <input type="email" id="login-email" placeholder="nama@domain.com" class="input-admin" autocomplete="username" required>
+          </div>
+
+          <div class="form-group-admin">
+            <label for="login-password">Password</label>
+            <input type="password" id="login-password" placeholder="••••••••" class="input-admin" autocomplete="current-password" required>
+          </div>
+
+          <div id="error-msg" class="error-msg hidden"></div>
+
+          <button id="btn-login" type="submit" class="btn-admin">
+            <i class="fa-solid fa-right-to-bracket"></i>
+            <span id="btn-text">Masuk Master Dashboard</span>
+          </button>
+        </form>
+      </div>
+
+      <!-- STATE 2: MENU KONTROL HUB (SESUDAH LOGIN) -->
+      <div id="section-dashboard-admin" class="hidden">
+        
+        <div class="top-header-hub">
+          <div style="text-align: left;">
+            <p style="font-size: 0.7rem; color: #94a3b8; font-weight: 700;">TERAUTENTIKASI</p>
+            <p id="user-email-display" style="font-size: 0.85rem; font-weight: 700; color: #38bdf8; font-family: monospace;">admin@domain.com</p>
+          </div>
+          <button id="btn-logout" class="btn-logout-small">
+            <i class="fa-solid fa-power-off"></i> Logout
+          </button>
+        </div>
+
+        <div class="menu-container">
+          
+          <!-- Option 1: Kelola Portal Link -->
+          <a href="link/index.html" class="menu-card">
+            <div class="menu-info">
+              <div class="menu-icon link-icon"><i class="fa-solid fa-link"></i></div>
+              <div class="menu-text">
+                <h2>Kelola Link &amp; Running Text</h2>
+                <p>Tambah/hapus tautan portal &amp; pengumuman</p>
+              </div>
+            </div>
+            <i class="fa-solid fa-chevron-right arrow-icon"></i>
+          </a>
+
+          <!-- Option 2: Dashboard Absensi Guru -->
+          <a href="guru/index.html" class="menu-card">
+            <div class="menu-info">
+              <div class="menu-icon absensi-icon"><i class="fa-solid fa-qrcode"></i></div>
+              <div class="menu-text">
+                <h2>Dashboard Absensi Guru</h2>
+                <p>Buka sesi QR Absensi &amp; rekap realtime</p>
+              </div>
+            </div>
+            <i class="fa-solid fa-chevron-right arrow-icon"></i>
+          </a>
+
+          <!-- Option 3: Manager Database Firebase -->
+          <a href="database/db-manager.html" class="menu-card">
+            <div class="menu-info">
+              <div class="menu-icon db-icon"><i class="fa-solid fa-database"></i></div>
+              <div class="menu-text">
+                <h2>Database Firestore Manager</h2>
+                <p>CRUD koleksi siswa, reset HP, kelas, &amp; mapel</p>
+              </div>
+            </div>
+            <i class="fa-solid fa-chevron-right arrow-icon"></i>
+          </a>
+
+        </div>
+
+      </div>
+
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+      <div class="social-icons">
+        <a href="https://wa.me/085645453111" target="_blank" rel="noopener noreferrer" class="social-btn wa"><i class="fa-brands fa-whatsapp"></i></a>
+        <a href="https://facebook.com/iskakfatoni" target="_blank" rel="noopener noreferrer" class="social-btn fb"><i class="fa-brands fa-facebook-f"></i></a>
+        <a href="https://instagram.com/iskakfatoni" target="_blank" rel="noopener noreferrer" class="social-btn ig"><i class="fa-brands fa-instagram"></i></a>
+        <a href="https://youtube.com/iskakfatoni" target="_blank" rel="noopener noreferrer" class="social-btn yt"><i class="fa-brands fa-youtube"></i></a>
+        <a href="https://tiktok.com/@iskakfatoni" target="_blank" rel="noopener noreferrer" class="social-btn tt"><i class="fa-brands fa-tiktok"></i></a>
+      </div>
+
+      <div class="supported-by">
+        <img src="nisnas_logo_colorful.png" alt="Logo NisNas Computer" class="supporter-logo">
+        <p>Supported by <span>NisNas Computer</span></p>
+      </div>
+    </footer>
+
+  </main>
+
+  <!-- PARTICLE CANVAS -->
+  <script>
+    const canvas = document.getElementById('particle-canvas');
+    const ctx = canvas.getContext('2d');
+    let particles = [];
+
+    function initCanvas() {
+      canvas.width = document.documentElement.clientWidth || window.innerWidth;
+      canvas.height = window.innerHeight;
+      particles = [];
+      for (let i = 0; i < 35; i++) {
+        particles.push({
+          x: Math.random() * canvas.width,
+          y: Math.random() * canvas.height,
+          radius: Math.random() * 2 + 1,
+          speedY: Math.random() * -0.5 - 0.2,
+          speedX: (Math.random() - 0.5) * 0.3,
+          opacity: Math.random() * 0.6 + 0.3
+        });
+      }
+    }
+
+    function drawParticles() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      const isDarkMode = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+      const particleColor = isDarkMode ? "0, 245, 212" : "139, 92, 246";
+
+      particles.forEach(p => {
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(${particleColor}, ${p.opacity})`;
+        ctx.shadowBlur = 6;
+        ctx.shadowColor = `rgb(${particleColor})`;
+        ctx.fill();
+
+        p.y += p.speedY; p.x += p.speedX;
+        if (p.y < 0) { p.y = canvas.height; p.x = Math.random() * canvas.width; }
+      });
+      requestAnimationFrame(drawParticles);
+    }
+
+    window.addEventListener('resize', initCanvas);
+    initCanvas();
+    drawParticles();
+  </script>
+
+  <!-- FIREBASE AUTH (PERBAIKAN PERSISTENSI LOGIN) -->
+  <script type="module">
+    import { firebaseConfig } from "./assets/js/config/firebase-config.js";
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+    import { 
+      getAuth, 
+      signInWithEmailAndPassword, 
+      onAuthStateChanged, 
+      signOut, 
+      setPersistence, 
+      browserLocalPersistence 
+    } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+
+    const sectionLogin = document.getElementById('section-login-admin');
+    const sectionDashboard = document.getElementById('section-dashboard-admin');
+    const loginForm = document.getElementById('login-form');
+    const loginEmail = document.getElementById('login-email');
+    const loginPassword = document.getElementById('login-password');
+    const btnLogin = document.getElementById('btn-login');
+    const btnText = document.getElementById('btn-text');
+    const errorMsg = document.getElementById('error-msg');
+    const userEmailDisplay = document.getElementById('user-email-display');
+    const btnLogout = document.getElementById('btn-logout');
+
+    onAuthStateChanged(auth, (user) => {
+      if (user) {
+        sectionLogin.classList.add('hidden');
+        sectionDashboard.classList.remove('hidden');
+        userEmailDisplay.innerText = user.email;
+      } else {
+        sectionLogin.classList.remove('hidden');
+        sectionDashboard.classList.add('hidden');
+      }
+    });
+
+    loginForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const email = loginEmail.value.trim();
+      const pass = loginPassword.value.trim();
+      hideError();
+      setLoading(true);
+
+      try {
+        await setPersistence(auth, browserLocalPersistence);
+        await signInWithEmailAndPassword(auth, email, pass);
+      } catch (err) {
+        console.error("Login Error:", err);
+        showError("Login gagal: Email atau password salah!");
+      } finally {
+        setLoading(false);
+      }
+    });
+
+    btnLogout.addEventListener('click', async () => {
+      if (confirm("Keluar dari Master Admin?")) {
+        await signOut(auth);
+        window.location.reload();
+      }
+    });
+
+    function showError(msg) { errorMsg.innerText = msg; errorMsg.classList.remove('hidden'); }
+    function hideError() { errorMsg.innerText = ''; errorMsg.classList.add('hidden'); }
+    function setLoading(isLoading) {
+      if (isLoading) { btnLogin.disabled = true; btnText.innerText = "Memverifikasi..."; }
+      else { btnLogin.disabled = false; btnText.innerText = "Masuk Master Dashboard"; }
+    }
+  </script>
+
+  <!-- REGISTRASI SERVICE WORKER UNTUK CACHING PWA -->
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('sw.js')
+          .then((reg) => console.log('[PWA] Service Worker registered for scope:', reg.scope))
+          .catch((err) => console.error('[PWA] Service Worker registration failed:', err));
+      });
+    }
+  </script>
+</body>
+</html>
