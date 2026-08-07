@@ -4,38 +4,13 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>PORTAL :: Scanner QR Absensi Siswa</title>
-  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Master Stylesheet Terpusat & Pustaka Eksternal -->
+  <link rel="stylesheet" href="../styles/style.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
   <style>
-    body {
-      font-family: 'Plus Jakarta Sans', sans-serif;
-      background-color: #0b0f19;
-      color: #ffffff;
-      overflow-x: hidden;
-    }
-
-    #particle-canvas {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100vw;
-      height: 100vh;
-      z-index: 0;
-      pointer-events: none;
-    }
-
-    .glass-card {
-      background: rgba(15, 23, 42, 0.85);
-      backdrop-filter: blur(16px);
-      -webkit-backdrop-filter: blur(16px);
-      border: 1px solid rgba(255, 255, 255, 0.1);
-    }
-
     #reader {
       width: 100% !important;
       height: 100% !important;
@@ -51,10 +26,12 @@
 </head>
 <body class="min-h-screen flex flex-col justify-between items-center p-4 relative">
 
+  <!-- BACKGROUND PARTICLE CANVAS -->
   <canvas id="particle-canvas"></canvas>
 
   <main class="max-w-md w-full my-auto space-y-4 relative z-10">
     
+    <!-- HEADER PROFIL SISWA -->
     <header class="glass-card p-4 rounded-2xl flex items-center justify-between shadow-xl">
       <div class="flex items-center gap-3">
         <div class="w-10 h-10 rounded-xl bg-cyan-500/15 border border-cyan-500/30 flex items-center justify-center text-cyan-400 font-bold">
@@ -71,6 +48,7 @@
       </button>
     </header>
 
+    <!-- KONTEN SCANNER QR -->
     <div class="glass-card p-5 rounded-2xl shadow-xl space-y-4 text-center">
       
       <div class="flex items-center justify-between border-b border-slate-800 pb-2.5">
@@ -82,6 +60,7 @@
         </span>
       </div>
 
+      <!-- FRAME KAMERA -->
       <div class="relative w-full aspect-square bg-slate-950 rounded-2xl overflow-hidden border-2 border-dashed border-cyan-500/40 flex items-center justify-center shadow-inner">
         
         <div id="reader"></div>
@@ -96,6 +75,7 @@
         </div>
       </div>
 
+      <!-- KONTROL KAMERA -->
       <div class="grid grid-cols-2 gap-2 pt-1">
         <button id="btn-switch-camera" class="py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold text-xs rounded-xl transition border border-slate-700 flex items-center justify-center gap-2 cursor-pointer">
           <i class="fa-solid fa-camera-rotate"></i> Putar Kamera
@@ -111,12 +91,14 @@
 
     </div>
 
+    <!-- FOOTER -->
     <div class="text-center pt-2">
       <p class="text-[11px] text-slate-500 font-mono">Developed by Iskak Fatoni, S.Pd., Gr.</p>
     </div>
 
   </main>
 
+  <!-- CANVAS ANIMATION -->
   <script>
     const canvas = document.getElementById('particle-canvas');
     const ctx = canvas.getContext('2d');
@@ -162,6 +144,7 @@
     drawParticles();
   </script>
 
+  <!-- FIREBASE LOGIC & CAMERA SCANNER -->
   <script type="module">
     import { firebaseConfig } from "../assets/js/config/firebase-config.js";
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
@@ -205,7 +188,7 @@
         siswaNama.innerText = namaSiswa;
         siswaNisKelas.innerText = `NIS: ${currentSiswaUser.nis} | ${kelasSiswa}`;
         
-        // PEMBERIAN TIMEOUT UNTUK MENCEGAH CAM LOCK / STUCK DI WEBVIEW
+        // TIMEOUT UNTUK MENCEGAH CAM LOCK / STUCK DI WEBVIEW
         setTimeout(() => {
           startCameraEngine();
         }, 300);
@@ -397,9 +380,8 @@
       }
     }
 
-    // Jalankan inisialisasi sesi saat DOM siap
+    // Inisialisasi sesi saat DOM siap
     document.addEventListener('DOMContentLoaded', initSiswaSession);
-    // Jalankan fallback jika event DOMContentLoaded sudah lewat saat script di-load
     if (document.readyState === 'interactive' || document.readyState === 'complete') {
       initSiswaSession();
     }
