@@ -1,2 +1,0 @@
-# portal-iskakfatoni
-PORTAL::IskakFatoni
