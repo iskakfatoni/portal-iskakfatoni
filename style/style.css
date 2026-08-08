@@ -917,6 +917,13 @@ body.theme-glass #particle-canvas {
   line-height: 1.25;
 }
 
+/* Jarak penomoran urut link pada portal.html */
+.link-number {
+  margin-right: 8px;
+  display: inline-block;
+  font-weight: 700;
+}
+
 .link-card-item .arrow-icon {
   color: #64748b;
   font-size: 0.75rem;
