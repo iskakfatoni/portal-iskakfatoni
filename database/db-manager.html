@@ -386,7 +386,8 @@
       });
     });
 
-    function formatCellContent(value) {
+    // PERBAIKAN: Fungsi formatCellContent sekarang menerima docId dan fieldKey untuk merender Checkbox
+    function formatCellContent(value, fieldKey = '', docId = '') {
       if (value === null || value === undefined) return '<span class="text-slate-600">-</span>';
       
       if (typeof value === 'object' && value.seconds !== undefined) {
@@ -397,10 +398,12 @@
         return `<span class="text-amber-300/80">${JSON.stringify(value)}</span>`;
       }
 
+      // Render Checkbox interaktif untuk data boolean
       if (typeof value === 'boolean') {
-        return value 
-          ? '<span class="text-emerald-400 font-bold">true</span>' 
-          : '<span class="text-rose-400 font-bold">false</span>';
+        const checked = value ? 'checked' : '';
+        return `<div class="flex items-center justify-center">
+                  <input type="checkbox" ${checked} data-doc="${docId}" data-field="${fieldKey}" class="toggle-boolean-field rounded bg-slate-900 border-slate-700 text-emerald-500 focus:ring-0 cursor-pointer w-4 h-4" title="Ubah status ${fieldKey}">
+                </div>`;
       }
 
       return String(value);
@@ -537,9 +540,10 @@
         const tr = document.createElement('tr');
         tr.className = "hover:bg-slate-900/80 transition border-b border-slate-800/40";
         
+        // Perbaikan: Meneruskan data fieldKey dan docId ke formatCellContent
         const fieldCells = currentDynamicFields.map(fieldKey => {
           const val = dataObj[fieldKey];
-          return `<td class="p-3 border-r border-slate-800/60 max-w-xs overflow-hidden text-ellipsis">${formatCellContent(val)}</td>`;
+          return `<td class="p-3 border-r border-slate-800/60 max-w-xs overflow-hidden text-ellipsis">${formatCellContent(val, fieldKey, docId)}</td>`;
         }).join('');
 
         const isSiswaCollection = currentCollection === 'siswa';
@@ -563,6 +567,24 @@
             </button>
           </td>
         `;
+
+        // LISTENER EVENT UNTUK CHECKBOX BOOLEAN (MENGUBAH TRUE/FALSE LANGSUNG)
+        tr.querySelectorAll('.toggle-boolean-field').forEach(chk => {
+          chk.addEventListener('change', async (e) => {
+            const targetField = e.target.getAttribute('data-field');
+            const targetDocId = e.target.getAttribute('data-doc');
+            const newValue = e.target.checked;
+            
+            try {
+              await updateDoc(doc(db, currentCollection, targetDocId), { 
+                [targetField]: newValue 
+              });
+            } catch (err) {
+              alert(`Gagal merubah status ${targetField}: ` + err.message);
+              e.target.checked = !newValue; // Kembalikan ke state awal jika gagal
+            }
+          });
+        });
 
         const chk = tr.querySelector('.row-checkbox');
         chk.addEventListener('change', (e) => {
