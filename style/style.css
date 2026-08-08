@@ -30,7 +30,12 @@
    ========================================================================== */
 :root {
   /* --- Tema Glass (light mode default) --- */
-  --bg-gradient: linear-gradient(-45deg, #fff7ed, #e0f2fe, #fce7f3, #f0fdf4);
+  /* Warna lama (Pastel Aura): */
+  /* --bg-gradient: linear-gradient(-45deg, #fff7ed, #e0f2fe, #fce7f3, #f0fdf4); */
+  
+  /* Warna baru (Magenta, Purple, Indigo, Cyan): */
+  --bg-gradient: linear-gradient(-45deg, #E91E63, #9C27B0, #3F51B5, #00BCD4);
+
   --text-main: #0f172a;
   --text-sub: #334155;
   --text-muted: #475569;
