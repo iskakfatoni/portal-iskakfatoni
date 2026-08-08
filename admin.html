@@ -9,206 +9,10 @@
   <link rel="manifest" href="manifest.json">
   <meta name="theme-color" content="#0b0f19">
 
-  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="style/style.css">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer">
-  
-  <style>
-    .admin-box {
-      background: var(--card-bg, rgba(15, 23, 42, 0.85));
-      border: 1px solid var(--card-border, rgba(255, 255, 255, 0.1));
-      border-radius: 20px;
-      padding: 24px 20px;
-      backdrop-filter: blur(12px);
-      -webkit-backdrop-filter: blur(12px);
-      margin: 20px 0;
-      width: 100%;
-      box-shadow: 0 15px 35px -10px rgba(0, 0, 0, 0.4);
-    }
-
-    .form-group-admin {
-      margin-bottom: 16px;
-      text-align: left;
-    }
-
-    .form-group-admin label {
-      display: block;
-      font-size: 0.75rem;
-      font-weight: 700;
-      color: #94a3b8;
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-      margin-bottom: 6px;
-    }
-
-    .input-admin {
-      width: 100%;
-      padding: 14px 16px;
-      background: rgba(3, 7, 18, 0.7);
-      border: 1.5px solid rgba(255, 255, 255, 0.15);
-      border-radius: 12px;
-      color: #ffffff;
-      font-family: inherit;
-      font-size: 0.95rem;
-      outline: none;
-      transition: all 0.2s ease;
-    }
-
-    .input-admin:focus {
-      border-color: #38bdf8;
-      box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.25);
-    }
-
-    .btn-admin {
-      width: 100%;
-      padding: 14px 20px;
-      border: none;
-      border-radius: 12px;
-      font-family: inherit;
-      font-size: 0.9rem;
-      font-weight: 800;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-      transition: all 0.2s ease;
-      background: #38bdf8;
-      color: #090d16;
-      box-shadow: 0 8px 20px -4px rgba(56, 189, 248, 0.3);
-    }
-
-    .btn-admin:hover {
-      background: #0284c7;
-      color: #ffffff;
-    }
-
-    .menu-container {
-      display: flex;
-      flex-direction: column;
-      gap: 14px;
-      width: 100%;
-      margin-top: 16px;
-    }
-
-    .menu-card {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 16px 18px;
-      background: rgba(3, 7, 18, 0.6);
-      border: 1px solid rgba(255, 255, 255, 0.08);
-      border-radius: 14px;
-      text-decoration: none;
-      color: #ffffff;
-      transition: all 0.3s ease;
-      text-align: left;
-    }
-
-    .menu-card:hover {
-      transform: translateY(-2px);
-      border-color: #38bdf8;
-      box-shadow: 0 8px 20px -4px rgba(56, 189, 248, 0.2);
-    }
-
-    .menu-info {
-      display: flex;
-      align-items: center;
-      gap: 14px;
-    }
-
-    .menu-icon {
-      width: 42px;
-      height: 42px;
-      border-radius: 12px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 1.15rem;
-      flex-shrink: 0;
-    }
-
-    .menu-icon.link-icon {
-      background: rgba(56, 189, 248, 0.15);
-      color: #38bdf8;
-      border: 1px solid rgba(56, 189, 248, 0.3);
-    }
-
-    .menu-icon.absensi-icon {
-      background: rgba(16, 185, 129, 0.15);
-      color: #34d399;
-      border: 1px solid rgba(16, 185, 129, 0.3);
-    }
-
-    .menu-icon.db-icon {
-      background: rgba(168, 85, 247, 0.15);
-      color: #c084fc;
-      border: 1px solid rgba(168, 85, 247, 0.3);
-    }
-
-    .menu-text h2 {
-      font-size: 0.9rem;
-      font-weight: 700;
-      color: #ffffff;
-      margin-bottom: 2px;
-    }
-
-    .menu-text p {
-      font-size: 0.72rem;
-      color: #94a3b8;
-    }
-
-    .arrow-icon {
-      color: #64748b;
-      font-size: 0.8rem;
-      transition: transform 0.2s ease, color 0.2s ease;
-    }
-
-    .menu-card:hover .arrow-icon {
-      color: #38bdf8;
-      transform: translateX(4px);
-    }
-
-    .top-header-hub {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-      padding-bottom: 12px;
-      margin-bottom: 16px;
-    }
-
-    .btn-logout-small {
-      background: rgba(239, 68, 68, 0.15);
-      color: #f87171;
-      border: 1px solid rgba(239, 68, 68, 0.3);
-      padding: 6px 12px;
-      border-radius: 8px;
-      font-size: 0.75rem;
-      font-weight: 700;
-      cursor: pointer;
-      transition: all 0.2s ease;
-    }
-
-    .btn-logout-small:hover {
-      background: #ef4444;
-      color: #ffffff;
-    }
-
-    .error-msg {
-      background: rgba(239, 68, 68, 0.15);
-      border: 1px solid rgba(239, 68, 68, 0.3);
-      color: #f87171;
-      padding: 10px;
-      border-radius: 10px;
-      font-size: 0.8rem;
-      text-align: center;
-      margin-bottom: 14px;
-    }
-
-    .hidden { display: none !important; }
-  </style>
 </head>
-<body>
+<body class="theme-glass">
 
   <!-- PARTICLE CANVAS -->
   <canvas id="particle-canvas"></canvas>
@@ -225,30 +29,30 @@
     </header>
 
     <!-- SECTION MASTER ADMIN HUB -->
-    <section class="admin-box">
+    <section class="dark-panel">
       
       <!-- STATE 1: FORM LOGIN ADMIN -->
       <div id="section-login-admin">
-        <div style="text-align:center; margin-bottom: 20px;">
-          <i class="fa-solid fa-user-gear" style="font-size: 2rem; color: #38bdf8; margin-bottom: 8px;"></i>
-          <h2 style="font-size: 1.1rem; font-weight: 800; color: #ffffff;">MASTER ADMIN DASHBOARD</h2>
-          <p style="font-size: 0.8rem; color: #94a3b8; margin-top: 4px;">Masuk untuk mengelola Portal Link, Absensi, &amp; Database</p>
+        <div class="intro-block">
+          <i class="fa-solid fa-user-gear intro-icon"></i>
+          <h2 class="intro-title">MASTER ADMIN DASHBOARD</h2>
+          <p class="intro-subtitle">Masuk untuk mengelola Portal Link, Absensi, &amp; Database</p>
         </div>
 
         <form id="login-form" action="#" onsubmit="return false;">
-          <div class="form-group-admin">
+          <div class="form-group">
             <label for="login-email">Email Admin</label>
-            <input type="email" id="login-email" placeholder="nama@domain.com" class="input-admin" autocomplete="username" required>
+            <input type="email" id="login-email" placeholder="nama@domain.com" class="input-field" autocomplete="username" required>
           </div>
 
-          <div class="form-group-admin">
+          <div class="form-group">
             <label for="login-password">Password</label>
-            <input type="password" id="login-password" placeholder="••••••••" class="input-admin" autocomplete="current-password" required>
+            <input type="password" id="login-password" placeholder="••••••••" class="input-field" autocomplete="current-password" required>
           </div>
 
           <div id="error-msg" class="error-msg hidden"></div>
 
-          <button id="btn-login" type="submit" class="btn-admin">
+          <button id="btn-login" type="submit" class="btn btn-cyan">
             <i class="fa-solid fa-right-to-bracket"></i>
             <span id="btn-text">Masuk Master Dashboard</span>
           </button>
@@ -259,9 +63,9 @@
       <div id="section-dashboard-admin" class="hidden">
         
         <div class="top-header-hub">
-          <div style="text-align: left;">
-            <p style="font-size: 0.7rem; color: #94a3b8; font-weight: 700;">TERAUTENTIKASI</p>
-            <p id="user-email-display" style="font-size: 0.85rem; font-weight: 700; color: #38bdf8; font-family: monospace;">admin@domain.com</p>
+          <div class="text-left">
+            <p class="auth-label">TERAUTENTIKASI</p>
+            <p id="user-email-display" class="auth-email">admin@domain.com</p>
           </div>
           <button id="btn-logout" class="btn-logout-small">
             <i class="fa-solid fa-power-off"></i> Logout

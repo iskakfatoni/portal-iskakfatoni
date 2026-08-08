@@ -4,129 +4,10 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
   <title>PORTAL::IskakFatoni - Absensi Siswa</title>
-  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="style/style.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer">
-  
-  <style>
-    .absensi-box {
-      background: var(--card-bg, rgba(15, 23, 42, 0.85));
-      border: 1px solid var(--card-border, rgba(255, 255, 255, 0.1));
-      border-radius: 20px;
-      padding: 24px 20px;
-      backdrop-filter: blur(12px);
-      -webkit-backdrop-filter: blur(12px);
-      margin: 20px 0;
-      width: 100%;
-      box-shadow: 0 15px 35px -10px rgba(0, 0, 0, 0.4);
-    }
-
-    .form-group-absensi {
-      margin-bottom: 16px;
-      text-align: left;
-    }
-
-    .form-group-absensi label {
-      display: block;
-      font-size: 0.75rem;
-      font-weight: 700;
-      color: #94a3b8;
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-      margin-bottom: 6px;
-    }
-
-    .input-absensi {
-      width: 100%;
-      padding: 14px 16px;
-      background: rgba(3, 7, 18, 0.7);
-      border: 1.5px solid rgba(255, 255, 255, 0.15);
-      border-radius: 12px;
-      color: #ffffff;
-      font-family: inherit;
-      font-size: 0.95rem;
-      outline: none;
-      transition: all 0.2s ease;
-    }
-
-    .input-absensi:focus {
-      border-color: #38bdf8;
-      box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.25);
-    }
-
-    .btn-absensi {
-      width: 100%;
-      padding: 14px 20px;
-      border: none;
-      border-radius: 12px;
-      font-family: inherit;
-      font-size: 0.9rem;
-      font-weight: 800;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-      transition: all 0.2s ease;
-    }
-
-    .btn-cyan {
-      background: #38bdf8;
-      color: #090d16;
-      box-shadow: 0 8px 20px -4px rgba(56, 189, 248, 0.3);
-    }
-
-    .btn-cyan:hover {
-      background: #0284c7;
-      color: #ffffff;
-    }
-
-    .btn-emerald {
-      background: linear-gradient(135deg, #10b981, #14b8a6);
-      color: #090d16;
-      box-shadow: 0 8px 20px -4px rgba(16, 185, 129, 0.3);
-    }
-
-    .btn-emerald:hover {
-      opacity: 0.9;
-    }
-
-    .profile-info-grid {
-      background: rgba(3, 7, 18, 0.6);
-      border: 1px solid rgba(255, 255, 255, 0.08);
-      border-radius: 14px;
-      padding: 16px;
-      text-align: left;
-      margin-bottom: 18px;
-    }
-
-    .badge-status {
-      display: inline-flex;
-      align-items: center;
-      gap: 4px;
-      padding: 4px 10px;
-      border-radius: 20px;
-      font-size: 0.7rem;
-      font-weight: 700;
-      background: rgba(16, 185, 129, 0.15);
-      color: #34d399;
-      border: 1px solid rgba(16, 185, 129, 0.3);
-    }
-
-    .error-msg {
-      background: rgba(239, 68, 68, 0.15);
-      border: 1px solid rgba(239, 68, 68, 0.3);
-      color: #f87171;
-      padding: 10px;
-      border-radius: 10px;
-      font-size: 0.8rem;
-      text-align: center;
-      margin-bottom: 14px;
-    }
-
-    .hidden { display: none !important; }
-  </style>
 </head>
-<body>
+<body class="theme-glass">
 
   <!-- PARTICLE CANVAS -->
   <canvas id="particle-canvas"></canvas>
@@ -146,7 +27,7 @@
     </header>
 
     <!-- SECTION ABSENSI SISWA -->
-    <section class="absensi-box">
+    <section class="dark-panel">
       
       <!-- LOADING STATE INITIALIZATION -->
       <div id="section-loading-absensi" class="text-center py-6">
@@ -156,18 +37,18 @@
 
       <!-- STATE 1: FORM INPUT NIS & DEVICE BINDING -->
       <div id="section-login-absensi" class="hidden">
-        <div style="text-align:center; margin-bottom: 20px;">
-          <h2 style="font-size: 1.1rem; font-weight: 800; color: #ffffff;">VERIFIKASI ABSENSI SISWA</h2>
-          <p style="font-size: 0.8rem; color: #94a3b8; margin-top: 4px;">Masukkan NIS Anda di HP ini</p>
+        <div class="intro-block">
+          <h2 class="intro-title">VERIFIKASI ABSENSI SISWA</h2>
+          <p class="intro-subtitle">Masukkan NIS Anda di HP ini</p>
         </div>
 
-        <div class="form-group-absensi">
+        <div class="form-group">
           <label for="nis-input">Nomor Induk Siswa (NIS)</label>
           <input 
             type="text" 
             id="nis-input" 
             placeholder="Contoh: 1234/123" 
-            class="input-absensi"
+            class="input-field"
             inputmode="text"
             autocomplete="off"
           >
@@ -175,35 +56,35 @@
 
         <div id="error-msg" class="error-msg hidden"></div>
 
-        <button id="btn-verifikasi" type="button" class="btn-absensi btn-cyan">
+        <button id="btn-verifikasi" type="button" class="btn btn-cyan">
           <span id="btn-text">Verifikasi NIS</span>
         </button>
       </div>
 
       <!-- STATE 2: PROFIL SISWA TERIKAT -->
       <div id="section-profile-absensi" class="hidden">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
-          <span style="font-size: 0.75rem; color: #94a3b8; font-weight: 700;">STATUS PERANGKAT</span>
-          <span class="badge-status">🔒 HP Terikat Resmi</span>
+        <div class="device-status-row">
+          <span class="auth-label">STATUS PERANGKAT</span>
+          <span class="badge-pill badge-pill--success">🔒 HP Terikat Resmi</span>
         </div>
 
         <div class="profile-info-grid">
-          <p style="font-size: 0.75rem; color: #94a3b8;">Nama Siswa</p>
-          <p id="profile-nama" style="font-size: 1rem; font-weight: 800; color: #ffffff; margin-bottom: 10px;">-</p>
+          <p class="profile-field-label">Nama Siswa</p>
+          <p id="profile-nama" class="profile-field-value">-</p>
 
-          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+          <div class="profile-grid">
             <div>
-              <p style="font-size: 0.7rem; color: #94a3b8;">NIS</p>
-              <p id="profile-nis" style="font-size: 0.85rem; font-weight: 700; color: #38bdf8; font-family: monospace;">-</p>
+              <p class="profile-subfield-label">NIS</p>
+              <p id="profile-nis" class="profile-subfield-value">-</p>
             </div>
             <div>
-              <p style="font-size: 0.7rem; color: #94a3b8;">Kelas</p>
-              <p id="profile-kelas" style="font-size: 0.85rem; font-weight: 700; color: #cbd5e1;">-</p>
+              <p class="profile-subfield-label">Kelas</p>
+              <p id="profile-kelas" class="profile-subfield-value--muted">-</p>
             </div>
           </div>
         </div>
 
-        <button id="btn-buka-scanner" type="button" class="btn-absensi btn-emerald">
+        <button id="btn-buka-scanner" type="button" class="btn btn-emerald">
           <i class="fa-solid fa-camera"></i>
           <span>Buka Scanner QR Absensi</span>
         </button>

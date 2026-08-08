@@ -1,12 +1,12 @@
 // sw.js - Service Worker Fix
-const CACHE_NAME = 'portal-iskakfatoni-v4';
+const CACHE_NAME = 'portal-iskakfatoni-v5';
 
 const LOCAL_ASSETS = [
   './',
   'index.html',
   'portal.html',
   'admin.html',
-  'style.css',
+  'style/style.css',
   'manifest.json',
   'foto_asn_profile.png',
   'nisnas_logo_colorful.png',
