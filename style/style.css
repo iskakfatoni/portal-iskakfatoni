@@ -29,32 +29,34 @@
    1. CSS VARIABLES (SUMBER TUNGGAL WARNA & TEMA)
    ========================================================================== */
 :root {
-  /* --- Tema Glass (light mode default) --- */
+  /* --- Tema Glass (default) --- */
   /* Warna lama (Pastel Aura): */
   /* --bg-gradient: linear-gradient(-45deg, #fff7ed, #e0f2fe, #fce7f3, #f0fdf4); */
   
   /* Warna baru (Magenta, Purple, Indigo, Cyan): */
   --bg-gradient: linear-gradient(-45deg, #E91E63, #9C27B0, #3F51B5, #00BCD4);
 
-  --text-main: #0f172a;
-  --text-sub: #334155;
-  --text-muted: #475569;
+  /* Teks disesuaikan agar putih/terang di atas background pekat & kartu gelap */
+  /* --text-main lama: #0f172a; */
+  --text-main: #f8fafc;
+  --text-sub: #cbd5e1;
+  --text-muted: #94a3b8;
 
-  --glass-bg: rgba(255, 255, 255, 0.55);
-  --glass-border: 1.5px solid rgba(255, 255, 255, 0.8);
-  --glass-shadow: 0 20px 50px -10px rgba(139, 92, 246, 0.18), inset 0 1px 1px rgba(255, 255, 255, 0.9);
+  /* Card Utama dibuat gelap transparan agar lebih kontras & elegan */
+  /* --glass-bg lama: rgba(255, 255, 255, 0.55); */
+  --glass-bg: rgba(15, 23, 42, 0.75);
+  --glass-border: 1.5px solid rgba(255, 255, 255, 0.15);
+  --glass-shadow: 0 20px 50px -10px rgba(0, 0, 0, 0.4), inset 0 1px 1px rgba(255, 255, 255, 0.2);
 
   --announcement-bg: rgba(15, 23, 42, 0.85);
   --announcement-border: rgba(255, 255, 255, 0.2);
   --announcement-text: #e2e8f0;
 
   --progress-bg: rgba(15, 23, 42, 0.08);
-  --social-bg: rgba(255, 255, 255, 0.7);
-  --social-border: rgba(255, 255, 255, 0.9);
+  --social-bg: rgba(255, 255, 255, 0.15);
+  --social-border: rgba(255, 255, 255, 0.25);
 
-  /* --- Warna kartu gelap yang dipakai di beberapa halaman glass (admin,
-     absensi, portal) — dulunya ditulis lewat var(--card-bg, fallback),
-     sekarang didefinisikan resmi di sini --- */
+  /* --- Warna kartu gelap yang dipakai di beberapa halaman glass (admin, absensi, portal) --- */
   --card-bg: rgba(15, 23, 42, 0.85);
   --card-border: rgba(255, 255, 255, 0.1);
 
