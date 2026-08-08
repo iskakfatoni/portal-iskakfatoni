@@ -96,15 +96,18 @@
               <input type="url" id="input-link-url" placeholder="https://drive.google.com/..." required class="w-full px-3.5 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-slate-100 text-xs focus:outline-none focus:border-cyan-500">
             </div>
 
-            <!-- DROPDOWN IKON -->
+            <!-- DROPDOWN IKON DENGAN GOOGLE ICONS -->
             <div class="space-y-1">
               <label class="block text-xs font-semibold text-slate-300">Ikon Link</label>
               <select id="input-link-icon" class="w-full px-3.5 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-slate-100 text-xs focus:outline-none focus:border-cyan-500 cursor-pointer">
-                <!-- Gunakan Unicode atau Text sebagai placeholder icon -->
                 <option value="fa-solid fa-link">🔗 Link Default</option>
-                <option value="fa-solid fa-file-pen">📝 Form / Tugas / Upload</option>
+                <option value="fa-brands fa-google-drive">☁️ Google Drive</option>
+                <option value="fa-solid fa-file-lines">📄 Google Docs</option>
+                <option value="fa-solid fa-table-cells">📊 Google Sheets</option>
+                <option value="fa-solid fa-file-signature">📝 Google Forms</option>
+                <option value="fa-solid fa-file-pen">📝 Tugas / Upload Umum</option>
                 <option value="fa-solid fa-palette">🎨 Canva / Desain</option>
-                <option value="fa-solid fa-file-pdf">📄 PDF / Drive / Modul</option>
+                <option value="fa-solid fa-file-pdf">📄 PDF / Modul</option>
                 <option value="fa-brands fa-youtube">▶️ YouTube / Video</option>
                 <option value="fa-solid fa-gamepad">🎮 Quiz / Game / Ujian</option>
                 <option value="fa-brands fa-whatsapp">💬 WhatsApp / Grup</option>
@@ -186,14 +189,18 @@
           <input type="url" id="edit-link-url" required class="w-full px-3.5 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-slate-100 text-xs focus:outline-none focus:border-cyan-500">
         </div>
 
-        <!-- DROPDOWN IKON EDIT -->
+        <!-- DROPDOWN IKON EDIT DENGAN GOOGLE ICONS -->
         <div class="space-y-1">
           <label class="block text-xs font-semibold text-slate-300">Ikon Link</label>
           <select id="edit-link-icon" class="w-full px-3.5 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-slate-100 text-xs focus:outline-none focus:border-cyan-500 cursor-pointer">
             <option value="fa-solid fa-link">🔗 Link Default</option>
-            <option value="fa-solid fa-file-pen">📝 Form / Tugas / Upload</option>
+            <option value="fa-brands fa-google-drive">☁️ Google Drive</option>
+            <option value="fa-solid fa-file-lines">📄 Google Docs</option>
+            <option value="fa-solid fa-table-cells">📊 Google Sheets</option>
+            <option value="fa-solid fa-file-signature">📝 Google Forms</option>
+            <option value="fa-solid fa-file-pen">📝 Tugas / Upload Umum</option>
             <option value="fa-solid fa-palette">🎨 Canva / Desain</option>
-            <option value="fa-solid fa-file-pdf">📄 PDF / Drive / Modul</option>
+            <option value="fa-solid fa-file-pdf">📄 PDF / Modul</option>
             <option value="fa-brands fa-youtube">▶️ YouTube / Video</option>
             <option value="fa-solid fa-gamepad">🎮 Quiz / Game / Ujian</option>
             <option value="fa-brands fa-whatsapp">💬 WhatsApp / Grup</option>
@@ -289,7 +296,7 @@
     const formAddLink = document.getElementById('form-add-link');
     const inputLinkTitle = document.getElementById('input-link-title');
     const inputLinkUrl = document.getElementById('input-link-url');
-    const inputLinkIcon = document.getElementById('input-link-icon'); // TAMBAHAN: Input Ikon
+    const inputLinkIcon = document.getElementById('input-link-icon');
     const inputLinkActive = document.getElementById('input-link-active');
     
     const linkListContainer = document.getElementById('link-list-container');
@@ -302,7 +309,7 @@
     const editLinkId = document.getElementById('edit-link-id');
     const editLinkTitle = document.getElementById('edit-link-title');
     const editLinkUrl = document.getElementById('edit-link-url');
-    const editLinkIcon = document.getElementById('edit-link-icon'); // TAMBAHAN: Input Ikon Edit
+    const editLinkIcon = document.getElementById('edit-link-icon');
     const editLinkActive = document.getElementById('edit-link-active');
     const btnCloseEditModal = document.getElementById('btn-close-edit-modal');
     const btnCancelEdit = document.getElementById('btn-cancel-edit');
