@@ -96,6 +96,22 @@
               <input type="url" id="input-link-url" placeholder="https://drive.google.com/..." required class="w-full px-3.5 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-slate-100 text-xs focus:outline-none focus:border-cyan-500">
             </div>
 
+            <!-- DROPDOWN IKON -->
+            <div class="space-y-1">
+              <label class="block text-xs font-semibold text-slate-300">Ikon Link</label>
+              <select id="input-link-icon" class="w-full px-3.5 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-slate-100 text-xs focus:outline-none focus:border-cyan-500 cursor-pointer">
+                <!-- Gunakan Unicode atau Text sebagai placeholder icon -->
+                <option value="fa-solid fa-link">🔗 Link Default</option>
+                <option value="fa-solid fa-file-pen">📝 Form / Tugas / Upload</option>
+                <option value="fa-solid fa-palette">🎨 Canva / Desain</option>
+                <option value="fa-solid fa-file-pdf">📄 PDF / Drive / Modul</option>
+                <option value="fa-brands fa-youtube">▶️ YouTube / Video</option>
+                <option value="fa-solid fa-gamepad">🎮 Quiz / Game / Ujian</option>
+                <option value="fa-brands fa-whatsapp">💬 WhatsApp / Grup</option>
+                <option value="fa-brands fa-github">💻 GitHub / Koding</option>
+              </select>
+            </div>
+
             <div class="flex items-center gap-2 pt-1">
               <input type="checkbox" id="input-link-active" checked class="rounded bg-slate-950 border-slate-700 text-cyan-500 focus:ring-0 cursor-pointer">
               <label for="input-link-active" class="text-xs font-semibold text-slate-300 cursor-pointer">Langsung Aktifkan Link ini</label>
@@ -168,6 +184,21 @@
         <div class="space-y-1">
           <label class="block text-xs font-semibold text-slate-300">URL Destination Link</label>
           <input type="url" id="edit-link-url" required class="w-full px-3.5 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-slate-100 text-xs focus:outline-none focus:border-cyan-500">
+        </div>
+
+        <!-- DROPDOWN IKON EDIT -->
+        <div class="space-y-1">
+          <label class="block text-xs font-semibold text-slate-300">Ikon Link</label>
+          <select id="edit-link-icon" class="w-full px-3.5 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-slate-100 text-xs focus:outline-none focus:border-cyan-500 cursor-pointer">
+            <option value="fa-solid fa-link">🔗 Link Default</option>
+            <option value="fa-solid fa-file-pen">📝 Form / Tugas / Upload</option>
+            <option value="fa-solid fa-palette">🎨 Canva / Desain</option>
+            <option value="fa-solid fa-file-pdf">📄 PDF / Drive / Modul</option>
+            <option value="fa-brands fa-youtube">▶️ YouTube / Video</option>
+            <option value="fa-solid fa-gamepad">🎮 Quiz / Game / Ujian</option>
+            <option value="fa-brands fa-whatsapp">💬 WhatsApp / Grup</option>
+            <option value="fa-brands fa-github">💻 GitHub / Koding</option>
+          </select>
         </div>
 
         <div class="flex items-center gap-2 pt-1">
@@ -254,10 +285,13 @@
 
     const inputRunningText = document.getElementById('input-running-text');
     const btnSaveAnnouncement = document.getElementById('btn-save-announcement');
+    
     const formAddLink = document.getElementById('form-add-link');
     const inputLinkTitle = document.getElementById('input-link-title');
     const inputLinkUrl = document.getElementById('input-link-url');
+    const inputLinkIcon = document.getElementById('input-link-icon'); // TAMBAHAN: Input Ikon
     const inputLinkActive = document.getElementById('input-link-active');
+    
     const linkListContainer = document.getElementById('link-list-container');
     const linkCount = document.getElementById('link-count');
     const reorderStatus = document.getElementById('reorder-status');
@@ -268,6 +302,7 @@
     const editLinkId = document.getElementById('edit-link-id');
     const editLinkTitle = document.getElementById('edit-link-title');
     const editLinkUrl = document.getElementById('edit-link-url');
+    const editLinkIcon = document.getElementById('edit-link-icon'); // TAMBAHAN: Input Ikon Edit
     const editLinkActive = document.getElementById('edit-link-active');
     const btnCloseEditModal = document.getElementById('btn-close-edit-modal');
     const btnCancelEdit = document.getElementById('btn-cancel-edit');
@@ -385,6 +420,8 @@
           const data = docSnap.data();
           const docId = docSnap.id;
           const isActive = data.is_active !== false;
+          // Fallback ke default jika icon tidak ada di database
+          const linkIconClass = data.icon || 'fa-solid fa-link'; 
 
           const item = document.createElement('div');
           item.draggable = true;
@@ -392,20 +429,26 @@
           item.className = `link-drag-item flex items-center justify-between p-3 rounded-xl border text-xs transition ${isActive ? 'bg-slate-950/90 border-slate-800 hover:border-cyan-500/30' : 'bg-slate-950/40 border-slate-900 opacity-60'}`;
           
           item.innerHTML = `
-            <div class="flex items-center gap-3">
-              <div class="drag-handle cursor-grab text-slate-500 hover:text-cyan-400 p-1" title="Geser untuk mengubah urutan">
+            <div class="flex items-center gap-3 w-[70%]">
+              <div class="drag-handle cursor-grab text-slate-500 hover:text-cyan-400 p-1 shrink-0" title="Geser untuk mengubah urutan">
                 <i class="fa-solid fa-grip-vertical text-sm"></i>
               </div>
-              <input type="checkbox" ${isActive ? 'checked' : ''} class="toggle-active rounded bg-slate-900 border-slate-700 text-emerald-500 focus:ring-0 cursor-pointer w-4 h-4" title="${isActive ? 'Aktif (Klik untuk nonaktifkan)' : 'Nonaktif (Klik untuk aktifkan)'}">
-              <div class="space-y-0.5">
-                <p class="font-bold text-white text-sm flex items-center gap-1.5">
+              <input type="checkbox" ${isActive ? 'checked' : ''} class="toggle-active shrink-0 rounded bg-slate-900 border-slate-700 text-emerald-500 focus:ring-0 cursor-pointer w-4 h-4" title="${isActive ? 'Aktif (Klik untuk nonaktifkan)' : 'Nonaktif (Klik untuk aktifkan)'}">
+              
+              <!-- TAMPILAN ICON LINK -->
+              <div class="w-8 h-8 rounded-lg bg-slate-900 border border-slate-800 flex items-center justify-center shrink-0">
+                  <i class="${linkIconClass} text-slate-300"></i>
+              </div>
+
+              <div class="space-y-0.5 truncate">
+                <p class="font-bold text-white text-sm flex items-center gap-1.5 truncate">
                   ${data.title}
-                  ${!isActive ? '<span class="text-[10px] text-red-400 bg-red-500/10 px-2 py-0.5 rounded-full border border-red-500/20">Nonaktif</span>' : ''}
+                  ${!isActive ? '<span class="text-[10px] text-red-400 bg-red-500/10 px-2 py-0.5 rounded-full border border-red-500/20 shrink-0">Nonaktif</span>' : ''}
                 </p>
-                <a href="${data.url}" target="_blank" class="text-cyan-400 font-mono text-[11px] hover:underline">${data.url}</a>
+                <a href="${data.url}" target="_blank" class="text-cyan-400 font-mono text-[11px] hover:underline block truncate">${data.url}</a>
               </div>
             </div>
-            <div class="flex items-center gap-1.5">
+            <div class="flex items-center gap-1.5 shrink-0">
               <button class="btn-edit p-2 bg-cyan-500/15 hover:bg-cyan-500/30 text-cyan-400 border border-cyan-500/30 rounded-lg text-xs font-semibold cursor-pointer transition" title="Edit Link">
                 <i class="fa-solid fa-pen-to-square"></i>
               </button>
@@ -432,6 +475,14 @@
             editLinkTitle.value = data.title;
             editLinkUrl.value = data.url;
             editLinkActive.checked = isActive;
+            
+            // Set value untuk dropdown ikon edit
+            if (data.icon) {
+                editLinkIcon.value = data.icon;
+            } else {
+                editLinkIcon.value = 'fa-solid fa-link'; // Default value
+            }
+
             editLinkModal.classList.remove('hidden');
           };
 
@@ -465,6 +516,7 @@
       const id = editLinkId.value;
       const title = editLinkTitle.value.trim();
       const url = editLinkUrl.value.trim();
+      const icon = editLinkIcon.value; // Ambil value ikon dari edit
       const isActive = editLinkActive.checked;
 
       if (!id || !title || !url) return;
@@ -473,6 +525,7 @@
         await updateDoc(doc(db, "links", id), {
           title: title,
           url: url,
+          icon: icon, // Simpan perubahan ikon
           is_active: isActive,
           updated_at: serverTimestamp()
         });
@@ -545,6 +598,7 @@
     formAddLink.addEventListener('submit', async () => {
       const title = inputLinkTitle.value.trim();
       const url = inputLinkUrl.value.trim();
+      const icon = inputLinkIcon.value; // Ambil value ikon saat tambah link
       const isActive = inputLinkActive.checked;
 
       if (!title || !url) return;
@@ -554,7 +608,8 @@
         
         await addDoc(collection(db, "links"), { 
           title, 
-          url, 
+          url,
+          icon, // Simpan data ikon
           is_active: isActive,
           order: currentCount + 1,
           created_at: serverTimestamp() 
@@ -562,6 +617,7 @@
         
         inputLinkTitle.value = '';
         inputLinkUrl.value = '';
+        inputLinkIcon.value = 'fa-solid fa-link'; // Reset ikon ke default setelah submit
         inputLinkActive.checked = true;
       } catch (err) {
         alert("Gagal menambah link: " + err.message);
