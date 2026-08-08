@@ -242,7 +242,9 @@
       if (dbIcon.includes('fa-file-lines')) return { icon: dbIcon, cls: 'link-type-form' }; // Google Docs
       if (dbIcon.includes('fa-table-cells')) return { icon: dbIcon, cls: 'link-type-canva' }; // Google Sheets (Pakai warna canva sebagai fallback)
       if (dbIcon.includes('fa-file-signature')) return { icon: dbIcon, cls: 'link-type-form' }; // Google Forms
-
+      if (dbIcon.includes('fa-cubes')) return { icon: dbIcon, cls: 'link-type-default' }; // Pakai warna Cyan default
+      if (dbIcon.includes('fa-android')) return { icon: dbIcon, cls: 'link-type-whatsapp' }; // Pakai warna Hijau agar identik dengan Android
+      
       // Jika ikon di database adalah default atau tidak dikenali, coba tebak dari title/url
       const t = (data.title || "").toLowerCase();
       const u = (data.url || "").toLowerCase();
