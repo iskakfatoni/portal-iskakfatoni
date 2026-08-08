@@ -224,9 +224,28 @@
       greetingWrapper.classList.remove('hidden');
     }
 
-    function getLinkIconConfig(title, url) {
-      const t = (title || "").toLowerCase();
-      const u = (url || "").toLowerCase();
+    // FUNGSI UNTUK MENENTUKAN IKON DAN WARNA BACKGROUNDNYA (CLASS)
+    function getLinkIconConfig(data) {
+      // Prioritaskan ikon yang disimpan di database
+      let dbIcon = data.icon || "fa-solid fa-link";
+      
+      // Kembalikan objek dengan ikon dari database dan warna latar (class) 
+      // yang disesuaikan dengan jenis ikonnya.
+      if (dbIcon.includes('fa-file-pen')) return { icon: dbIcon, cls: 'link-type-form' };
+      if (dbIcon.includes('fa-palette')) return { icon: dbIcon, cls: 'link-type-canva' };
+      if (dbIcon.includes('fa-file-pdf')) return { icon: dbIcon, cls: 'link-type-drive' };
+      if (dbIcon.includes('fa-youtube')) return { icon: dbIcon, cls: 'link-type-youtube' };
+      if (dbIcon.includes('fa-gamepad')) return { icon: dbIcon, cls: 'link-type-quiz' };
+      if (dbIcon.includes('fa-whatsapp')) return { icon: dbIcon, cls: 'link-type-whatsapp' };
+      if (dbIcon.includes('fa-github')) return { icon: dbIcon, cls: 'link-type-github' };
+      if (dbIcon.includes('fa-google-drive')) return { icon: dbIcon, cls: 'link-type-drive' }; // Google Drive
+      if (dbIcon.includes('fa-file-lines')) return { icon: dbIcon, cls: 'link-type-form' }; // Google Docs
+      if (dbIcon.includes('fa-table-cells')) return { icon: dbIcon, cls: 'link-type-canva' }; // Google Sheets (Pakai warna canva sebagai fallback)
+      if (dbIcon.includes('fa-file-signature')) return { icon: dbIcon, cls: 'link-type-form' }; // Google Forms
+
+      // Jika ikon di database adalah default atau tidak dikenali, coba tebak dari title/url
+      const t = (data.title || "").toLowerCase();
+      const u = (data.url || "").toLowerCase();
 
       if (u.includes('forms.google.com') || u.includes('forms.gle') || u.includes('/forms/') || t.includes('form') || t.includes('tugas') || t.includes('upload')) {
         return { icon: 'fa-solid fa-file-pen', cls: 'link-type-form' };
@@ -256,7 +275,7 @@
         return { icon: 'fa-brands fa-github', cls: 'link-type-github' };
       }
 
-      return { icon: 'fa-solid fa-link', cls: 'link-type-default' };
+      return { icon: dbIcon, cls: 'link-type-default' };
     }
 
     // 1. LISTEN REALTIME STATUS PORTAL ON / OFF
@@ -306,7 +325,8 @@
         if (data.is_active === false) return;
 
         activeCount++;
-        const iconConfig = getLinkIconConfig(data.title, data.url);
+        // Sekarang kirim seluruh objek 'data' ke fungsi getLinkIconConfig
+        const iconConfig = getLinkIconConfig(data);
 
         const a = document.createElement('a');
         a.href = data.url;
