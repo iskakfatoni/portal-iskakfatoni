@@ -115,24 +115,30 @@
     const canvas = document.getElementById('particle-canvas');
     const ctx = canvas.getContext('2d');
     let particles = [];
+    let animationFrameId = null;
+    let shouldRun = window.innerWidth >= 768;
 
     function initCanvas() {
-      canvas.width = document.documentElement.clientWidth || window.innerWidth;
+      canvas.width = Math.min(window.innerWidth, 1400);
       canvas.height = window.innerHeight;
       particles = [];
-      for (let i = 0; i < 35; i++) {
+
+      const particleCount = window.innerWidth < 768 ? 10 : 24;
+      for (let i = 0; i < particleCount; i++) {
         particles.push({
           x: Math.random() * canvas.width,
           y: Math.random() * canvas.height,
-          radius: Math.random() * 2 + 1,
-          speedY: Math.random() * -0.5 - 0.2,
-          speedX: (Math.random() - 0.5) * 0.3,
-          opacity: Math.random() * 0.6 + 0.3
+          radius: Math.random() * 1.6 + 0.8,
+          speedY: Math.random() * -0.35 - 0.1,
+          speedX: (Math.random() - 0.5) * 0.18,
+          opacity: Math.random() * 0.45 + 0.2
         });
       }
     }
 
     function drawParticles() {
+      if (!shouldRun) return;
+
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       const isDarkMode = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
       const particleColor = isDarkMode ? "0, 245, 212" : "139, 92, 246";
@@ -141,19 +147,40 @@
         ctx.beginPath();
         ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
         ctx.fillStyle = `rgba(${particleColor}, ${p.opacity})`;
-        ctx.shadowBlur = 6;
+        ctx.shadowBlur = 4;
         ctx.shadowColor = `rgb(${particleColor})`;
         ctx.fill();
 
         p.y += p.speedY; p.x += p.speedX;
         if (p.y < 0) { p.y = canvas.height; p.x = Math.random() * canvas.width; }
       });
-      requestAnimationFrame(drawParticles);
+      animationFrameId = requestAnimationFrame(drawParticles);
     }
 
-    window.addEventListener('resize', initCanvas);
-    initCanvas();
-    drawParticles();
+    function startParticles() {
+      if (shouldRun) return;
+      shouldRun = true;
+      initCanvas();
+      drawParticles();
+    }
+
+    function stopParticles() {
+      shouldRun = false;
+      if (animationFrameId) cancelAnimationFrame(animationFrameId);
+    }
+
+    window.addEventListener('resize', () => {
+      if (window.innerWidth < 768) {
+        stopParticles();
+      } else {
+        startParticles();
+      }
+    });
+
+    if (window.innerWidth >= 768) {
+      initCanvas();
+      drawParticles();
+    }
   </script>
 
   <!-- LOGIC FIREBASE & HARDWARE FINGERPRINTING -->
