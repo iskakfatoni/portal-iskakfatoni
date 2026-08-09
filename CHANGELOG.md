@@ -7,6 +7,7 @@
 - Dibatasi animasi pada layar yang lebih besar agar performa lebih ringan.
 - Disederhanakan strategi caching pada service worker agar lebih efisien.
 - Diperbaiki pengalaman loading pada halaman dengan efek visual berat.
+- Dilakukan pengoptimalan aset gambar dengan mengonversi PNG ke WebP untuk loading yang lebih ringan.
 
 ### Added
 - Dukungan PWA melalui manifest dan service worker.
