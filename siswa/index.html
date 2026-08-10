@@ -193,6 +193,12 @@
       try {
         await hardReleaseCamera();
 
+        if (typeof Html5Qrcode === 'undefined') {
+          showNotif("❌ Library QR Code Scanner gagal dimuat! Periksa koneksi internet Anda.", "error");
+          cameraLoading.classList.add('hidden');
+          return;
+        }
+
         html5QrCode = new Html5Qrcode("reader");
 
         const config = {

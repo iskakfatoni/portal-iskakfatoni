@@ -402,6 +402,10 @@
     function updateQRDisplay(token) {
       qrContainer.innerHTML = '';
       qrModalContainer.innerHTML = '';
+      if (typeof QRCode === 'undefined') {
+        qrContainer.innerHTML = '<p class="text-xs text-rose-400 font-sans font-mono p-4">❌ Library QRCode CDN gagal dimuat. Periksa koneksi internet Anda.</p>';
+        return;
+      }
       new QRCode(qrContainer, { text: token, width: 180, height: 180 });
       new QRCode(qrModalContainer, { text: token, width: 280, height: 280 });
     }

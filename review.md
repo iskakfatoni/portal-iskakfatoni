@@ -4,6 +4,39 @@ Dokumen ini berisi rangkuman review perubahan kode (*code review*) terbaru yang 
 
 ---
 
+## 📅 Review [2026-08-10 17:52 WIB] - Audit Pengecekan Kode & Tambahan Pengecekan Defensif Library CDN
+
+### 📁 1. Berkas yang Diubah
+* 📄 **[siswa/index.html](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/siswa/index.html)**
+* 📄 **[guru/index.html](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/guru/index.html)**
+
+---
+
+### 📝 2. Rincian Baris & Logika yang Diperbarui
+
+1. **Audit & Pemeriksaan Bebas Error (*Zero Error Audit*)**:
+   - Dilakukan verifikasi kompilasi sintaksis (*syntax check*) pada seluruh berkas JavaScript (`.js`) dan blok `<script>` HTML. Hasil: **0 Error**.
+   - Dilakukan verifikasi seluruh resolusi dependensi lokal, gambar WebP, CSS, dan modul JS (`import`/`export`). Hasil: Seluruh jalur dependensi valid.
+
+2. **Penanganan Pengecekan Defensif CDN `Html5Qrcode` (`siswa/index.html`)**:
+   - Menambahkan verifikasi `typeof Html5Qrcode === 'undefined'` pada fungsi `startCameraEngine()`.
+   - Apabila CDN library scanner gagal dimuat (misal kondisi internet mati/terganggu), sistem menampilkan notifikasi kesalahan yang jelas alih-alih melempar error `ReferenceError` pada konsol.
+
+3. **Penanganan Pengecekan Defensif CDN `QRCode` (`guru/index.html`)**:
+   - Menambahkan verifikasi `typeof QRCode === 'undefined'` pada fungsi `updateQRDisplay()`.
+   - Mencegah *uncaught exception* apabila library generator QR Code CDN gagal dimuat.
+
+---
+
+### 🧪 3. Petunjuk Pengujian Lokal (*Local Verification*)
+
+1. **Uji Coba Kamera Siswa**:
+   - Buka `siswa/index.html` dan pastikan kamera memuat scanner QR dengan lancar.
+2. **Uji Coba QR Guru**:
+   - Buka `guru/index.html` dan pastikan QR Code sesi absensi tampil sempurna.
+
+---
+
 ## 📅 Review [2026-08-10 17:38 WIB] - Perbaikan Bug Pesan Error 'Gagal Membuka Kamera' Saat Kamera Berhasil Dibuka
 
 ### 📁 1. Berkas yang Diubah
