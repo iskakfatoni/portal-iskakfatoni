@@ -4,6 +4,34 @@ Dokumen ini berisi rangkuman review perubahan kode (*code review*) terbaru yang 
 
 ---
 
+## 📅 Review [2026-08-10 09:41 WIB] - Penambahan Popup Kalender Interaktif pada Menu 'Pilih Tanggal Khusus'
+
+### 📁 1. Berkas yang Diubah
+* 📄 **[database/db-manager.html](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/database/db-manager.html)**
+
+---
+
+### 📝 2. Rincian Baris & Logika yang Diperbarui
+
+1. **Auto Popup Calendar Trigger (`HTMLInputElement.prototype.showPicker`)**:
+   - Mengintegrasikan API native `showPicker()` yang dipicu otomatis saat area manapun pada input atau label **Pilih Tanggal Khusus** diklik oleh admin.
+   - Peramban akan langsung memunculkan **Popup Kalender Interaktif** tanpa perlu mengklik ikon kecil di sudut kanan.
+
+2. **Kustomisasi UI Dark Mode Glowing Calendar Icon**:
+   - Menambahkan aturan CSS `::-webkit-calendar-picker-indicator` berwarna cyan *glowing* yang serasi dengan tema dark mode dashboard.
+   - Menambahkan ikon kalender FontAwesome dan petunjuk teks font-mono `// Klik untuk membuka kalender interaktif`.
+
+---
+
+### 🧪 3. Petunjuk Pengujian Lokal (*Local Verification*)
+
+1. Buka peramban di [http://localhost:8080/database/db-manager.html](http://localhost:8080/database/db-manager.html).
+2. Lihat Card **Log Presensi** di sidebar kiri.
+3. Klik di mana saja pada kotak **Pilih Tanggal Khusus** &rarr; Popup Kalender Interaktif akan langsung muncul di layar.
+4. Pilih salah satu tanggal di kalender &rarr; Tabel matriks kanan akan langsung menyaring log presensi tanggal tersebut secara instan.
+
+---
+
 ## 📅 Review [2026-08-10 09:39 WIB] - Penghilangan Kolom Referensi Teknis (id_sesi / id_absensi) dari Tabel log_absensi
 
 ### 📁 1. Berkas yang Diubah
