@@ -415,9 +415,15 @@ const TableEngine = {
   },
 
   renderBody() {
+    const filteredDocs = TableEngine.getFilteredAndSortedDocs();
+    StatsManager.updateStats(filteredDocs.length);
+
+    if (filteredDocs.length === 0) {
+      dom.tableBody.innerHTML = `<tr><td colspan="${state.currentDynamicFields.length + 3}" class="p-8 text-center text-slate-500 font-sans">// Tidak ada data yang cocok dengan kriteria.</td></tr>`;
       dom.pageInfo.innerText = 'Halaman 0 dari 0';
       dom.btnPrevPage.disabled = true;
       dom.btnNextPage.disabled = true;
+      TableEngine.updateSelectedUI();
       return;
     }
 

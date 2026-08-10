@@ -4,6 +4,33 @@ Dokumen ini berisi rangkuman review perubahan kode (*code review*) terbaru yang 
 
 ---
 
+## 📅 Review [2026-08-10 18:37 WIB] - Perbaikan Bug Utama `renderBody` & Aktivasi Tombol Batch Actions Ceklist
+
+### 📁 1. Berkas yang Diubah
+* 📄 **[assets/js/database/db-manager.js](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/assets/js/database/db-manager.js)**
+
+---
+
+### 📝 2. Rincian Baris & Logika yang Diperbarui
+
+1. **Perbaikan Root Cause Bug Early Return `renderBody()`**:
+   - Teridentifikasi bahwa potongan kode awal pada `renderBody()` me-return fungsi lebih awal sebelum baris tabel dan event listener `.row-checkbox` sempat dirender ke DOM.
+   - Mengembalikan fungsi pemfilteran `TableEngine.getFilteredAndSortedDocs()` dan logika render baris tabel secara utuh.
+
+2. **Jaminan Responsivitas Ceklist & Toolbar Aksi Masal**:
+   - Menghubungkan event handler `onclick` dan `onchange` pada `.row-checkbox` agar setiap kali pengguna memilih/menceklist baris tabel, `state.selectedDocIds` dan `updateSelectedUI()` langsung berjalan 100% instan.
+   - Tombol **`Reset HP Terpilih`** dan **`Ekspor Terpilih`** kini langsung aktif (mengubah indikator angka hitungan dan mengaktifkan tombol dari disabled menjadi active) saat minimal 1 baris siswa diceklist.
+
+---
+
+### 🧪 3. Petunjuk Pengujian Lokal (*Local Verification*)
+
+1. Buka `database/db-manager.html` di browser.
+2. Centang 3 baris siswa pada tabel.
+3. **Hasil**: Tombol **`Reset HP Terpilih (3)`** dan **`Ekspor Terpilih (3)`** langsung aktif dan berfungsi 100%.
+
+---
+
 ## 📅 Review [2026-08-10 18:33 WIB] - Visibilitas Tombol 'Reset HP Terpilih' & Indikator Jumlah Terceklist
 
 ### 📁 1. Berkas yang Diubah
