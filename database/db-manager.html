@@ -140,7 +140,7 @@
           </nav>
         </div>
 
-        <!-- 📋 CARD BARU: LOG PRESENSI SISWA -->
+        <!-- 📋 CARD BARU: LOG PRESENSI SISWA (MEMILIKI FILTER MENURUT HARI) -->
         <div class="glass-card p-3.5 rounded-2xl border border-slate-800 shadow-xl space-y-3">
           <div class="flex items-center justify-between border-b border-slate-800 pb-2">
             <h2 class="text-xs font-bold text-slate-400 uppercase tracking-wider font-mono flex items-center gap-1.5">
@@ -148,12 +148,26 @@
             </h2>
           </div>
 
-          <nav class="space-y-1.5" id="nav-log-absensi">
-            <button data-collection="log_absensi" class="btn-col w-full text-left px-3.5 py-2.5 rounded-xl text-xs font-bold transition flex items-center justify-between cursor-pointer bg-slate-900/60 text-slate-400 hover:bg-slate-800 border border-slate-800">
-              <span class="flex items-center gap-2"><i class="fa-solid fa-clock-rotate-left text-cyan-400"></i> log_absensi</span>
+          <nav class="space-y-1.5" id="nav-log-filters">
+            <button data-log-filter="today" class="btn-log-filter w-full text-left px-3.5 py-2.5 rounded-xl text-xs font-bold transition flex items-center justify-between cursor-pointer bg-slate-900/60 text-slate-400 hover:bg-slate-800 border border-slate-800">
+              <span class="flex items-center gap-2"><i class="fa-solid fa-calendar-day text-emerald-400"></i> Hari Ini</span>
+              <span id="badge-log-today" class="px-2 py-0.5 rounded-full text-[10px] bg-slate-900 border border-slate-700 font-mono text-emerald-400">0</span>
+            </button>
+            <button data-log-filter="yesterday" class="btn-log-filter w-full text-left px-3.5 py-2.5 rounded-xl text-xs font-bold transition flex items-center justify-between cursor-pointer bg-slate-900/60 text-slate-400 hover:bg-slate-800 border border-slate-800">
+              <span class="flex items-center gap-2"><i class="fa-solid fa-calendar-minus text-amber-400"></i> Kemarin</span>
+              <span id="badge-log-yesterday" class="px-2 py-0.5 rounded-full text-[10px] bg-slate-900 border border-slate-700 font-mono text-amber-400">0</span>
+            </button>
+            <button data-log-filter="all" class="btn-log-filter w-full text-left px-3.5 py-2.5 rounded-xl text-xs font-bold transition flex items-center justify-between cursor-pointer bg-slate-900/60 text-slate-400 hover:bg-slate-800 border border-slate-800">
+              <span class="flex items-center gap-2"><i class="fa-solid fa-clock-rotate-left text-cyan-400"></i> Semua Riwayat</span>
               <span id="badge-log_absensi" class="px-2 py-0.5 rounded-full text-[10px] bg-slate-900 border border-slate-700 font-mono text-cyan-300">0</span>
             </button>
           </nav>
+
+          <!-- FILTER TANGGAL KUSTOM -->
+          <div class="pt-2 border-t border-slate-800/80 space-y-1">
+            <label class="block text-[10px] uppercase font-bold text-slate-400 font-mono">📅 Pilih Tanggal Khusus:</label>
+            <input type="date" id="input-log-date-filter" class="w-full px-2.5 py-1.5 bg-slate-950 border border-slate-800 rounded-xl text-xs text-cyan-400 font-mono focus:outline-none focus:border-cyan-500 cursor-pointer">
+          </div>
         </div>
 
         <!-- 📱 CARD BARU: PERANGKAT HP SISWA -->
@@ -444,6 +458,7 @@
     const state = {
       currentCollection: 'siswa',
       deviceFilter: 'all',
+      logDateFilter: 'all',
       unsubscribeCurrent: null,
       selectedDocIds: new Set(),
       currentDocsList: [],
@@ -675,6 +690,29 @@
             const data = docSnap.data();
             const isBound = Boolean(data.device_id || data.device_token || data.mac_address);
             return state.deviceFilter === 'bound' ? isBound : !isBound;
+          });
+        }
+
+        // 2. Log Absensi Date Filter (Pemisahan menurut Hari / Tanggal)
+        if (state.currentCollection === 'log_absensi' && state.logDateFilter !== 'all') {
+          const now = new Date();
+          let targetDateStr = state.logDateFilter;
+
+          if (state.logDateFilter === 'today') {
+            targetDateStr = now.toLocaleDateString('id-ID', { year: 'numeric', month: '2-digit', day: '2-digit' }).split('/').reverse().join('-');
+          } else if (state.logDateFilter === 'yesterday') {
+            const y = new Date(now);
+            y.setDate(y.getDate() - 1);
+            targetDateStr = y.toLocaleDateString('id-ID', { year: 'numeric', month: '2-digit', day: '2-digit' }).split('/').reverse().join('-');
+          }
+
+          docs = docs.filter(docSnap => {
+            const data = docSnap.data();
+            let docDateStr = data.tanggal || '';
+            if (!docDateStr && data.created_at && data.created_at.seconds) {
+              docDateStr = new Date(data.created_at.seconds * 1000).toLocaleDateString('id-ID', { year: 'numeric', month: '2-digit', day: '2-digit' }).split('/').reverse().join('-');
+            }
+            return docDateStr === targetDateStr;
           });
         }
 
@@ -1071,6 +1109,27 @@
             const bUnbound = document.getElementById('badge-hp-unbound');
             if (bBound) bBound.innerText = bound;
             if (bUnbound) bUnbound.innerText = unbound;
+          } else if (colName === 'log_absensi') {
+            const now = new Date();
+            const todayStr = now.toLocaleDateString('id-ID', { year: 'numeric', month: '2-digit', day: '2-digit' }).split('/').reverse().join('-');
+            const y = new Date(now);
+            y.setDate(y.getDate() - 1);
+            const yesterdayStr = y.toLocaleDateString('id-ID', { year: 'numeric', month: '2-digit', day: '2-digit' }).split('/').reverse().join('-');
+
+            let tCount = 0, yCount = 0;
+            snap.docs.forEach(d => {
+              const data = d.data();
+              let docDateStr = data.tanggal || '';
+              if (!docDateStr && data.created_at && data.created_at.seconds) {
+                docDateStr = new Date(data.created_at.seconds * 1000).toLocaleDateString('id-ID', { year: 'numeric', month: '2-digit', day: '2-digit' }).split('/').reverse().join('-');
+              }
+              if (docDateStr === todayStr) tCount++;
+              if (docDateStr === yesterdayStr) yCount++;
+            });
+            const bToday = document.getElementById('badge-log-today');
+            const bYesterday = document.getElementById('badge-log-yesterday');
+            if (bToday) bToday.innerText = tCount;
+            if (bYesterday) bYesterday.innerText = yCount;
           }
         });
       });
@@ -1119,10 +1178,14 @@
         document.querySelectorAll('.btn-device-filter').forEach(b => {
           b.className = "btn-device-filter w-full text-left px-3.5 py-2.5 rounded-xl text-xs font-bold transition flex items-center justify-between cursor-pointer bg-slate-900/60 text-slate-400 hover:bg-slate-800 border border-slate-800";
         });
+        document.querySelectorAll('.btn-log-filter').forEach(b => {
+          b.className = "btn-log-filter w-full text-left px-3.5 py-2.5 rounded-xl text-xs font-bold transition flex items-center justify-between cursor-pointer bg-slate-900/60 text-slate-400 hover:bg-slate-800 border border-slate-800";
+        });
         btn.className = "btn-col w-full text-left px-3.5 py-2.5 rounded-xl text-xs font-bold transition flex items-center justify-between cursor-pointer bg-cyan-500/20 text-cyan-300 border border-cyan-500/40";
 
         state.currentCollection = targetCol;
         state.deviceFilter = 'all';
+        state.logDateFilter = 'all';
         state.currentSortField = null;
         state.currentSortOrder = 'asc';
         state.searchQuery = '';
@@ -1140,6 +1203,81 @@
         loadCollectionData(state.currentCollection);
       });
     });
+
+    // 📋 Sidebar Log Presensi Date Filter Switcher (Hari Ini, Kemarin, Semua)
+    document.querySelectorAll('.btn-log-filter').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const filter = btn.getAttribute('data-log-filter');
+
+        document.querySelectorAll('.btn-col').forEach(b => {
+          b.className = "btn-col w-full text-left px-3.5 py-2.5 rounded-xl text-xs font-bold transition flex items-center justify-between cursor-pointer bg-slate-900/60 text-slate-400 hover:bg-slate-800 border border-slate-800";
+        });
+        document.querySelectorAll('.btn-device-filter').forEach(b => {
+          b.className = "btn-device-filter w-full text-left px-3.5 py-2.5 rounded-xl text-xs font-bold transition flex items-center justify-between cursor-pointer bg-slate-900/60 text-slate-400 hover:bg-slate-800 border border-slate-800";
+        });
+        document.querySelectorAll('.btn-log-filter').forEach(b => {
+          b.className = "btn-log-filter w-full text-left px-3.5 py-2.5 rounded-xl text-xs font-bold transition flex items-center justify-between cursor-pointer bg-slate-900/60 text-slate-400 hover:bg-slate-800 border border-slate-800";
+        });
+
+        btn.className = "btn-log-filter w-full text-left px-3.5 py-2.5 rounded-xl text-xs font-bold transition flex items-center justify-between cursor-pointer bg-cyan-500/20 text-cyan-300 border border-cyan-500/40";
+
+        state.currentCollection = 'log_absensi';
+        state.logDateFilter = filter;
+        state.currentSortField = null;
+        state.currentSortOrder = 'asc';
+        state.searchQuery = '';
+        state.currentPage = 1;
+        dom.inputSearchDb.value = '';
+        dom.btnClearSearch.classList.add('hidden');
+
+        let filterLabel = 'Semua Riwayat';
+        if (filter === 'today') filterLabel = 'Hari Ini';
+        else if (filter === 'yesterday') filterLabel = 'Kemarin';
+
+        dom.activeCollectionTitle.innerHTML = `<i class="fa-solid fa-clipboard-user text-cyan-400"></i> Log Presensi: <span class="text-cyan-400 font-mono">${filterLabel}</span>`;
+
+        if (dom.btnExportDeviceExcel) {
+          dom.btnExportDeviceExcel.style.display = 'none';
+        }
+
+        loadCollectionData('log_absensi');
+      });
+    });
+
+    const inputLogDateFilter = document.getElementById('input-log-date-filter');
+    if (inputLogDateFilter) {
+      inputLogDateFilter.addEventListener('change', (e) => {
+        const customDate = e.target.value;
+        if (!customDate) return;
+
+        document.querySelectorAll('.btn-col').forEach(b => {
+          b.className = "btn-col w-full text-left px-3.5 py-2.5 rounded-xl text-xs font-bold transition flex items-center justify-between cursor-pointer bg-slate-900/60 text-slate-400 hover:bg-slate-800 border border-slate-800";
+        });
+        document.querySelectorAll('.btn-device-filter').forEach(b => {
+          b.className = "btn-device-filter w-full text-left px-3.5 py-2.5 rounded-xl text-xs font-bold transition flex items-center justify-between cursor-pointer bg-slate-900/60 text-slate-400 hover:bg-slate-800 border border-slate-800";
+        });
+        document.querySelectorAll('.btn-log-filter').forEach(b => {
+          b.className = "btn-log-filter w-full text-left px-3.5 py-2.5 rounded-xl text-xs font-bold transition flex items-center justify-between cursor-pointer bg-slate-900/60 text-slate-400 hover:bg-slate-800 border border-slate-800";
+        });
+
+        state.currentCollection = 'log_absensi';
+        state.logDateFilter = customDate;
+        state.currentSortField = null;
+        state.currentSortOrder = 'asc';
+        state.searchQuery = '';
+        state.currentPage = 1;
+        dom.inputSearchDb.value = '';
+        dom.btnClearSearch.classList.add('hidden');
+
+        dom.activeCollectionTitle.innerHTML = `<i class="fa-solid fa-clipboard-user text-cyan-400"></i> Log Presensi: <span class="text-cyan-400 font-mono">Tanggal ${customDate}</span>`;
+
+        if (dom.btnExportDeviceExcel) {
+          dom.btnExportDeviceExcel.style.display = 'none';
+        }
+
+        loadCollectionData('log_absensi');
+      });
+    }
 
     // 📱 Sidebar Device Filter Switcher (HP Terikat vs Belum Terikat)
     document.querySelectorAll('.btn-device-filter').forEach(btn => {

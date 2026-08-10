@@ -4,6 +4,38 @@ Dokumen ini berisi rangkuman review perubahan kode (*code review*) terbaru yang 
 
 ---
 
+## 📅 Review [2026-08-10 09:14 WIB] - Penambahan Filter Pemisah Log Presensi Menurut Hari (Hari Ini, Kemarin, Tanggal Khusus)
+
+### 📁 1. Berkas yang Diubah
+* 📄 **[database/db-manager.html](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/database/db-manager.html)**
+
+---
+
+### 📝 2. Rincian Baris & Logika yang Diperbarui
+
+1. **Tombol Sub-Filter & Date Picker pada Card 'Log Presensi' (`#nav-log-filters`)**:
+   - Di dalam Card **Log Presensi**, ditambahkan 3 opsi tombol filter cepat:
+     - 🟢 **Hari Ini**: Memuat log presensi tanggal hari ini (`#badge-log-today`).
+     - 🟡 **Kemarin**: Memuat log presensi tanggal kemarin (`#badge-log-yesterday`).
+     - 🔵 **Semua Riwayat**: Memuat seluruh riwayat presensi (`#badge-log_absensi`).
+   - 📅 **Input Date Picker (`#input-log-date-filter`)**: Memungkinkan Admin memilih tanggal kalender spesifik untuk menyaring log presensi hari manapun.
+
+2. **Perhitungan Badge Counter & Logika Penyaringan (`TableEngine.getFilteredAndSortedDocs`)**:
+   - Menghitung secara otomatis jumlah siswa yang presensi hari ini vs kemarin via listener `onSnapshot`.
+   - Fungsi `getFilteredAndSortedDocs()` secara presisi membandingkan `tanggal` atau `created_at` timestamp dengan tanggal yang dipilih.
+
+---
+
+### 🧪 3. Petunjuk Pengujian Lokal (*Local Verification*)
+
+1. Buka peramban di [http://localhost:8080/database/db-manager.html](http://localhost:8080/database/db-manager.html).
+2. Lihat Card **Log Presensi** di sidebar kiri. Anda akan melihat tombol **Hari Ini**, **Kemarin**, **Semua Riwayat**, dan input **Pilih Tanggal Khusus**.
+3. Klik **"Hari Ini"** &rarr; Tabel matriks kanan menyaring log presensi khusus hari ini.
+4. Klik **"Kemarin"** &rarr; Tabel menyaring log presensi kemarin.
+5. Gunakan **Pilih Tanggal Khusus** (date picker) &rarr; Pilih tanggal mana saja di kalender untuk melihat log pada tanggal tersebut secara instan.
+
+---
+
 ## 📅 Review [2026-08-10 09:07 WIB] - Filter Default Absensi Hari Ini di guru/rekap.html
 
 ### 📁 1. Berkas yang Diubah
