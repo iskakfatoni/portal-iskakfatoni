@@ -27,8 +27,34 @@
           <i class="fa-solid fa-user-check"></i>
         </div>
         <div>
-          <h2 id="siswa-nama" class="text-sm font-bold text-white leading-tight">Memuat Siswa...</h2>
-          <p id="siswa-nis-kelas" class="text-[11px] text-slate-400 font-mono">-</p>
+          <h2 id="siswa-nama" class="text-sm font-bold text-white leading-tight">
+            <script>
+              (function(){
+                try {
+                  const s = localStorage.getItem('siswa_session') || localStorage.getItem('portal_siswa_user');
+                  if (s) {
+                    const u = JSON.parse(s);
+                    if (u && (u.nama_siswa || u.nama)) document.write(u.nama_siswa || u.nama);
+                    else document.write('Scanner QR Absensi');
+                  } else { document.write('Scanner QR Absensi'); }
+                } catch(e) { document.write('Scanner QR Absensi'); }
+              })();
+            </script>
+          </h2>
+          <p id="siswa-nis-kelas" class="text-[11px] text-slate-400 font-mono">
+            <script>
+              (function(){
+                try {
+                  const s = localStorage.getItem('siswa_session') || localStorage.getItem('portal_siswa_user');
+                  if (s) {
+                    const u = JSON.parse(s);
+                    if (u && u.nis) document.write(`NIS: ${u.nis} | ${u.nama_kelas || u.id_kelas || '-'}`);
+                    else document.write('-');
+                  } else { document.write('-'); }
+                } catch(e) { document.write('-'); }
+              })();
+            </script>
+          </p>
         </div>
       </div>
 
@@ -56,9 +82,9 @@
           <div class="w-full h-full border-2 border-cyan-400/80 rounded-xl relative animate-pulse"></div>
         </div>
 
-        <div id="camera-loading" class="absolute inset-0 bg-slate-950/85 backdrop-blur-md flex flex-col items-center justify-center gap-2 z-20 transition-opacity duration-300">
-          <i class="fa-solid fa-circle-notch fa-spin text-3xl text-cyan-400"></i>
-          <p class="text-xs text-slate-300 font-mono font-medium">Inisialisasi Kamera...</p>
+        <div id="camera-loading" class="absolute inset-0 bg-slate-950/70 backdrop-blur-sm flex flex-col items-center justify-center gap-2 z-20 transition-opacity duration-200">
+          <i class="fa-solid fa-circle-notch fa-spin text-2xl text-cyan-400"></i>
+          <p class="text-xs text-slate-200 font-mono font-medium">Membuka Kamera...</p>
         </div>
       </div>
 
@@ -132,10 +158,8 @@
         siswaNama.innerText = namaSiswa;
         siswaNisKelas.innerText = `NIS: ${currentSiswaUser.nis} | ${kelasSiswa}`;
         
-        // INSIALISASI KAMERA SEGERA SETELAH SESI VALID
-        setTimeout(() => {
-          startCameraEngine();
-        }, 50);
+        // INSIALISASI KAMERA LANGSUNG DENGAN ZERO DELAY
+        startCameraEngine();
 
       } catch (e) {
         console.error("Session Error:", e);

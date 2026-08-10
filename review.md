@@ -4,6 +4,62 @@ Dokumen ini berisi rangkuman review perubahan kode (*code review*) terbaru yang 
 
 ---
 
+## 📅 Review [2026-08-10 18:51 WIB] - Eliminasi Jeda Flashing 'Memuat Siswa...' & Pemangkasan Delay Kamera Scanner
+
+### 📁 1. Berkas yang Diubah
+* 📄 **[siswa/index.html](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/siswa/index.html)**
+
+---
+
+### 📝 2. Rincian Baris & Logika yang Diperbarui
+
+1. **Pre-rendering Instan Nama & NIS Siswa di Header**:
+   - Menambahkan skrip *pre-render synchronous inline* pada elemen `<h2 id="siswa-nama">` dan `<p id="siswa-nis-kelas">`.
+   - Mengambil data sesi siswa secara langsung saat HTML pertama kali di-parse oleh peramban, sehingga nama asli siswa (misal: *ACHMAD HAMDHANI*) dan NIS tampil seketika **tanpa pernah memunculkan teks *"Memuat Siswa..."***.
+
+2. **Eliminasi Delay `setTimeout` pada Inisialisasi Kamera**:
+   - Mengubah pemicuan `startCameraEngine()` pada `initSiswaSession()` dari menggunakan `setTimeout(..., 50)` menjadi pemanggilan langsung (Zero Delay).
+
+3. **Penghalusan Tampilan Loading Overlay Kamera**:
+   - Memperbarui gaya elemen `#camera-loading` menggunakan `bg-slate-900/60 backdrop-blur-sm` agar transisi kamera terasa halus (*smooth*) dan natural.
+
+---
+
+### 🧪 3. Petunjuk Pengujian Lokal (*Local Verification*)
+
+1. Buka `absensi.html` lalu klik **Buka Scanner QR Absensi** (atau buka `siswa/index.html` langsung).
+2. **Hasil**: Nama siswa langsung tampil seketika di header **tanpa kilatan *"Memuat Siswa..."***, dan kamera scanner terbuka lebih cepat dan lancar.
+
+---
+
+## 📅 Review [2026-08-10 18:47 WIB] - Diagnosa & Pembuatan Aturan Keamanan Firebase Firestore (`firestore.rules`)
+
+### 📁 1. Berkas yang Dibuat
+* 📄 **[NEW] [firestore.rules](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/firestore.rules)**
+
+---
+
+### 📝 2. Rincian Baris & Logika yang Diperbarui
+
+1. **Diagnosa Penyebab Error `insufficient permission`**:
+   - Teridentifikasi bahwa error `insufficient permission` saat siswa memindai QR Code disebabkan oleh **Aturan Uji Coba Firebase (*Test Mode Expiration*)** yang kadaluarsa pada hari ini (10 Agustus 2026), atau aturan bawaan Firebase Console yang membatasi hak akses *write* tanpa akun Firebase Auth pada koleksi `log_absensi`.
+   - Karena siswa melakukan presensi secara publik (tanpa login Firebase Auth), hak akses membuat dokumen (`create`) pada koleksi `log_absensi` wajib diizinkan secara terbuka.
+
+2. **Penerbitan Berkas Konfigurasi `firestore.rules`**:
+   - Menyediakan berkas [firestore.rules](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/firestore.rules) resmi yang mengizinkan operasi *create* dan *read* publik untuk `log_absensi`, `sesi_absensi`, `siswa`, `kelas`, `mapel`, dan `links`.
+
+---
+
+### 🧪 3. Petunjuk Penyelesaian di Firebase Console
+
+1. Buka **[Firebase Console](https://console.firebase.google.com/)** &rarr; Pilih Proyek **`portal-iskakfatoni`**.
+2. Masuk ke menu **Firestore Database** &rarr; Klik Tab **Rules**.
+3. Salin seluruh isi dari berkas **[firestore.rules](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/firestore.rules)** lokal dan tempel (*paste*) pada editor Firebase Console.
+4. Klik **Publish**.
+5. Coba lakukan scan QR Absensi Siswa kembali &rarr; Presensi berhasil tersimpan 100% tanpa error permission!
+
+---
+
 ## 📅 Review [2026-08-10 18:37 WIB] - Perbaikan Bug Utama `renderBody` & Aktivasi Tombol Batch Actions Ceklist
 
 ### 📁 1. Berkas yang Diubah

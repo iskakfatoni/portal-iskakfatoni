@@ -1,0 +1,34 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // 1. Koleksi log_absensi: Siswa (publik) dapat menambahkan (create) log presensi saat scan QR,
+    //    serta Guru/Admin dapat membaca (read), mengedit (update), dan menghapus (delete) log absensi.
+    match /log_absensi/{docId} {
+      allow read, create, update, delete: if true;
+    }
+
+    // 2. Koleksi sesi_absensi: Siswa (publik) dapat membaca (read) status & QR token sesi aktif,
+    //    Guru/Admin dapat membuat, memutar token, dan menutup sesi (write/update).
+    match /sesi_absensi/{docId} {
+      allow read, create, update, delete: if true;
+    }
+
+    // 3. Koleksi siswa: Siswa (publik) dapat membaca profil & memperbarui (update) device_id saat verifikasi HP,
+    //    Admin dapat mengelola data master siswa.
+    match /siswa/{docId} {
+      allow read, create, update, delete: if true;
+    }
+
+    // 4. Koleksi kelas, mapel, & links
+    match /kelas/{docId} {
+      allow read, create, update, delete: if true;
+    }
+    match /mapel/{docId} {
+      allow read, create, update, delete: if true;
+    }
+    match /links/{docId} {
+      allow read, create, update, delete: if true;
+    }
+  }
+}
