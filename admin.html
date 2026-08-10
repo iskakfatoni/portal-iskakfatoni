@@ -147,19 +147,14 @@
 
   <!-- FIREBASE AUTH (PERBAIKAN PERSISTENSI LOGIN) -->
   <script type="module">
-    import { firebaseConfig } from "./assets/js/config/firebase-config.js";
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+    import { auth } from "./assets/js/config/firebase-config.js";
     import { 
-      getAuth, 
       signInWithEmailAndPassword, 
       onAuthStateChanged, 
       signOut, 
       setPersistence, 
       browserLocalPersistence 
     } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
-
-    const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
 
     const sectionLogin = document.getElementById('section-login-admin');
     const sectionDashboard = document.getElementById('section-dashboard-admin');

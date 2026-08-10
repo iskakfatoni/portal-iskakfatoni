@@ -314,14 +314,9 @@
 
   <!-- FIREBASE AUTH & FIRESTORE SCRIPT -->
   <script type="module">
-    import { firebaseConfig } from "../assets/js/config/firebase-config.js";
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
-    import { getFirestore, collection, doc, setDoc, addDoc, deleteDoc, updateDoc, deleteField, onSnapshot, writeBatch, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
-
-    const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
-    const db = getFirestore(app);
+    import { db } from "../assets/js/config/firebase-config.js";
+    import { initializeAuthGuard } from "../assets/js/auth-guard.js";
+    import { collection, doc, setDoc, addDoc, deleteDoc, updateDoc, deleteField, onSnapshot, writeBatch, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
     const userEmailDisplay = document.getElementById('user-email-display');
     const btnLogout = document.getElementById('btn-logout');
@@ -368,11 +363,8 @@
     let currentDynamicFields = [];
 
     // 🔒 AUTH GUARD
-    onAuthStateChanged(auth, (user) => {
-      if (!user) {
-        window.location.href = "../admin.html";
-      } else {
-        document.documentElement.style.display = 'block';
+    initializeAuthGuard({
+      onAuthenticated: (user) => {
         userEmailDisplay.innerText = user.email;
         initBadgesCount();
         loadCollectionData(currentCollection);

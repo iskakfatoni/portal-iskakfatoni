@@ -124,22 +124,15 @@
 
   <!-- SCRIPT LOGIC (FIRESTORE, AUTH GUARD & SHEETJS) -->
   <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+    import { db } from "../assets/js/config/firebase-config.js";
+    import { initializeAuthGuard } from "../assets/js/auth-guard.js";
     import { 
-      getFirestore, 
       collection, 
       getDocs, 
       query, 
       orderBy,
       where 
     } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
-    import { firebaseConfig } from "../assets/js/config/firebase-config.js";
-
-    // Inisialisasi Firebase & Firestore
-    const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
-    const db = getFirestore(app);
 
     // DOM Elements
     const selectSesi = document.getElementById('select-sesi');
@@ -152,10 +145,8 @@
     let currentData = [];
 
     // 🔒 AUTH GUARD: Verifikasi Sesi sebelum menampilkan halaman
-    onAuthStateChanged(auth, (user) => {
-      if (!user) {
-        window.location.href = "../admin.html";
-      } else {
+    initializeAuthGuard({
+      onAuthenticated: () => {
         document.documentElement.style.display = 'block';
         initSesiDropdown();
       }

@@ -1,21 +1,45 @@
 // assets/js/auth-guard.js
-import { firebaseConfig } from "./config/firebase-config.js";
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+import { auth } from "./config/firebase-config.js";
+import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
+const DEFAULT_REDIRECT_PATH = "../admin.html";
 
-// Sembunyikan elemen body sementara sebelum verifikasi selesai agar UI tidak 'flashing'
-document.documentElement.style.display = "none";
+function revealPage() {
+  document.documentElement.style.display = "block";
+  document.documentElement.classList.remove("auth-guard");
+}
 
-onAuthStateChanged(auth, (user) => {
-  if (!user) {
-    // Jika tidak ada user terautentikasi, alihkan ke halaman login admin
-    alert("Akses ditolak! Anda harus login terlebih dahulu.");
-    window.location.href = "../admin.html"; // Sesuaikan path jika berada di sub-folder
-  } else {
-    // Jika terautentikasi, tampilkan kembali halaman
-    document.documentElement.style.display = "block";
-  }
-});
+function redirectToLogin(redirectPath = DEFAULT_REDIRECT_PATH) {
+  alert("Akses ditolak! Anda harus login terlebih dahulu.");
+  window.location.href = redirectPath;
+}
+
+export function initializeAuthGuard({
+  redirectTo = DEFAULT_REDIRECT_PATH,
+  onAuthenticated = null,
+  onUnauthenticated = null
+} = {}) {
+  document.documentElement.style.display = "none";
+  document.documentElement.classList.add("auth-guard");
+
+  return onAuthStateChanged(auth, (user) => {
+    if (!user) {
+      if (onUnauthenticated) {
+        onUnauthenticated();
+      } else {
+        redirectToLogin(redirectTo);
+      }
+      return;
+    }
+
+    revealPage();
+
+    if (onAuthenticated) {
+      onAuthenticated(user);
+    }
+  });
+}
+
+export function requireAuthSession(options = {}) {
+  return initializeAuthGuard(options);
+}

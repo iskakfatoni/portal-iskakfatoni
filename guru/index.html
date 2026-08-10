@@ -246,15 +246,9 @@
 
   <!-- FIREBASE AUTH & LOGIC -->
   <script type="module">
-    // Import Konfigurasi Terpisah (Mencegah Kebocoran API Key)
-    import { firebaseConfig } from "../assets/js/config/firebase-config.js";
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
-    import { getFirestore, collection, addDoc, doc, updateDoc, query, where, orderBy, getDocs, onSnapshot, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
-
-    const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
-    const db = getFirestore(app);
+    import { db } from "../assets/js/config/firebase-config.js";
+    import { initializeAuthGuard } from "../assets/js/auth-guard.js";
+    import { collection, addDoc, doc, updateDoc, query, where, orderBy, getDocs, onSnapshot, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
     const userEmailDisplay = document.getElementById('user-email-display');
     const btnLogout = document.getElementById('btn-logout');
@@ -279,10 +273,8 @@
     let activeToken = "";
 
     // 🔒 AUTH GUARD: Verifikasi Sesi
-    onAuthStateChanged(auth, (user) => {
-      if (!user) {
-        window.location.href = "../admin.html";
-      } else {
+    initializeAuthGuard({
+      onAuthenticated: (user) => {
         document.documentElement.style.display = 'block';
         userEmailDisplay.innerText = user.email;
         loadKelasDropdown();
