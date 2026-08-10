@@ -1229,7 +1229,8 @@
 
         snapshot.docs.forEach(docSnap => {
           Object.keys(docSnap.data()).forEach(k => {
-            if (k.toLowerCase() !== 'created_at' && k.toLowerCase() !== 'createdat' && k.toLowerCase() !== 'device_id' && k.toLowerCase() !== 'waktu_scan') {
+            const lk = k.toLowerCase();
+            if (lk !== 'created_at' && lk !== 'createdat' && lk !== 'device_id' && lk !== 'waktu_scan' && lk !== 'id_sesi' && lk !== 'id_absensi') {
               fieldSet.add(k);
             }
           });

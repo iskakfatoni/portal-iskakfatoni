@@ -4,6 +4,28 @@ Dokumen ini berisi rangkuman review perubahan kode (*code review*) terbaru yang 
 
 ---
 
+## 📅 Review [2026-08-10 09:39 WIB] - Penghilangan Kolom Referensi Teknis (id_sesi / id_absensi) dari Tabel log_absensi
+
+### 📁 1. Berkas yang Diubah
+* 📄 **[database/db-manager.html](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/database/db-manager.html)**
+
+---
+
+### 📝 2. Rincian Baris & Logika yang Diperbarui
+
+1. **Penyeleksian Field Visual (`loadCollectionData`)**:
+   - Mengecualikan kolom referensi teknis `id_sesi` dan `id_absensi` dari header visual tabel matriks `log_absensi`.
+   - Tabel kini secara khusus fokus menyajikan data yang relevan bagi pengguna/admin: **NIS**, **Nama Siswa**, **Kelas**, **Nama Mapel**, **Hari**, **Tanggal**, **Waktu**, dan **Status**.
+
+---
+
+### 🧪 3. Petunjuk Pengujian Lokal (*Local Verification*)
+
+1. Buka peramban di [http://localhost:8080/database/db-manager.html](http://localhost:8080/database/db-manager.html) &rarr; **Log Presensi**.
+2. Perhatikan tabel matriks `log_absensi` kini menyajikan data presensi secara sangat bersih tanpa ada lagi kolom ID teknis `id_sesi` atau `id_absensi`.
+
+---
+
 ## 📅 Review [2026-08-10 09:37 WIB] - Standarisasi Field 'waktu' dan Eliminasi Kolom Redundan 'waktu_scan' pada log_absensi
 
 ### 📁 1. Berkas yang Diubah
