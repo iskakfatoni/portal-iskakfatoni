@@ -4,6 +4,40 @@ Dokumen ini berisi rangkuman review perubahan kode (*code review*) terbaru yang 
 
 ---
 
+## 📅 Review [2026-08-10 18:20 WIB] - Implementasi Pure Hardware Fingerprinting (Tahan Hapus Data & Cache)
+
+### 📁 1. Berkas yang Diubah
+* 📄 **[assets/js/utils/device-fingerprint.js](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/assets/js/utils/device-fingerprint.js)**
+
+---
+
+### 📝 2. Rincian Baris & Logika yang Diperbarui
+
+1. **Eliminasi Kebergantungan `localStorage` Token**:
+   - Menghapus pembuatan & penyimpanan `portal_device_seed` di `localStorage`.
+   - Perhitungan sidik jari perangkat (`getHardwareFingerprint()`) kini **100% Stateless / Pure Hardware**, berbasis karakteristik fisik komponen peramban & perangkat keras HP.
+
+2. **Integrasi Multilayer Hardware Signal**:
+   - **AudioContext DSP Fingerprint**: Memproses parameter karakteristik DSP audio (*oscillator triangle & dynamics compressor*).
+   - **WebGL Detailed Parameters**: Mengidentifikasi `UNMASKED_VENDOR_WEBGL`, `UNMASKED_RENDERER_WEBGL`, `MAX_TEXTURE_SIZE`, dan `MAX_VIEWPORT_DIMS`.
+   - **Sub-pixel Canvas 2D Hash**: Mengukur mikro-variasi render GPU & font engine.
+   - **Screen & Hardware Specs**: Resolusi layar, `devicePixelRatio`, CPU cores (`hardwareConcurrency`), RAM (`deviceMemory`), multi-touch points (`maxTouchPoints`), serta zona waktu.
+
+3. **Auto-Restore Berkelanjutan Saat Hapus Data**:
+   - Apabila siswa melakukan *Hapus Data / Clear Cache* di HP, kalkulasi `getHardwareFingerprint()` akan menghasilkan nilai `HW-XXXXXXXX` yang **100% identik**.
+   - Saat membuka `absensi.html`, sistem secara otomatis menemukan kecocokan `device_id` di Firestore dan langsung memulihkan profil siswa (*Auto-Restore*) tanpa perlu input/login NIS ulang.
+
+---
+
+### 🧪 3. Petunjuk Pengujian Lokal (*Local Verification*)
+
+1. Buka `absensi.html` di HP/Browser &rarr; Input NIS & Verifikasi (HP Terikat).
+2. Lakukan **Hapus Data / Clear Storage / Clear Cache** peramban/aplikasi Android.
+3. Buka kembali `absensi.html`.
+4. **Hasil**: Profil siswa langsung **terpulihkan otomatis (*Auto-Restore*)** dengan badge **🔒 HP Terikat Resmi**, tanpa muncul notifikasi terikat di HP lain.
+
+---
+
 ## 📅 Review [2026-08-10 17:58 WIB] - Eliminasi Lag & Layar Hitam Saat Membuka Scanner QR Absensi Siswa
 
 ### 📁 1. Berkas yang Diubah
