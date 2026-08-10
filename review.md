@@ -4,6 +4,30 @@ Dokumen ini berisi rangkuman review perubahan kode (*code review*) terbaru yang 
 
 ---
 
+## 📅 Review [2026-08-10 09:44 WIB] - Penampilan Kembali Kolom device_id Khusus Menu 'HP Terikat'
+
+### 📁 1. Berkas yang Diubah
+* 📄 **[database/db-manager.html](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/database/db-manager.html)**
+
+---
+
+### 📝 2. Rincian Baris & Logika yang Diperbarui
+
+1. **Pengondisian Kolom `device_id` (`loadCollectionData`)**:
+   - Kolom **`device_id`** kini secara khusus **dimunculkan kembali** saat admin membuka menu **"HP Terikat"** (Perangkat HP).
+   - Saat membuka menu **"Belum Terikat"** atau koleksi lain, kolom `device_id` disembunyikan agar tabel tetap bersih dan rapi.
+
+---
+
+### 🧪 3. Petunjuk Pengujian Lokal (*Local Verification*)
+
+1. Buka peramban di [http://localhost:8080/database/db-manager.html](http://localhost:8080/database/db-manager.html).
+2. Lihat Card **Perangkat HP** di sidebar kiri bawah &rarr; Klik tombol **"HP Terikat"**.
+3. Perhatikan tabel matriks kanan: Kolom **`device_id` (ID Perangkat)** kini tampil kembali dengan jelas.
+4. Klik tombol **"Belum Terikat"** &rarr; Kolom `device_id` otomatis disembunyikan kembali.
+
+---
+
 ## 📅 Review [2026-08-10 09:41 WIB] - Penambahan Popup Kalender Interaktif pada Menu 'Pilih Tanggal Khusus'
 
 ### 📁 1. Berkas yang Diubah

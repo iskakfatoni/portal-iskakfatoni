@@ -1240,7 +1240,13 @@
         }
 
         const fieldSet = new Set();
-        if (colName === 'log_absensi') {
+        if (colName === 'siswa') {
+          if (state.deviceFilter === 'bound') {
+            ['nis', 'nama_siswa', 'id_kelas', 'nama_kelas', 'device_id'].forEach(k => fieldSet.add(k));
+          } else {
+            ['nis', 'nama_siswa', 'id_kelas', 'nama_kelas'].forEach(k => fieldSet.add(k));
+          }
+        } else if (colName === 'log_absensi') {
           ['nis', 'nama_siswa', 'id_kelas', 'nama_mapel', 'hari', 'tanggal', 'waktu', 'status'].forEach(k => fieldSet.add(k));
         } else if (colName === 'sesi_absensi') {
           ['id_kelas', 'nama_mapel', 'hari', 'tanggal', 'waktu', 'is_active'].forEach(k => fieldSet.add(k));
@@ -1249,7 +1255,8 @@
         snapshot.docs.forEach(docSnap => {
           Object.keys(docSnap.data()).forEach(k => {
             const lk = k.toLowerCase();
-            if (lk !== 'created_at' && lk !== 'createdat' && lk !== 'device_id' && lk !== 'waktu_scan' && lk !== 'id_sesi' && lk !== 'id_absensi') {
+            const isDeviceIdAllowed = colName === 'siswa' && state.deviceFilter === 'bound' && lk === 'device_id';
+            if (lk !== 'created_at' && lk !== 'createdat' && (lk !== 'device_id' || isDeviceIdAllowed) && lk !== 'waktu_scan' && lk !== 'id_sesi' && lk !== 'id_absensi') {
               fieldSet.add(k);
             }
           });
