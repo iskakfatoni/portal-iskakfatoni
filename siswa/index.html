@@ -58,8 +58,8 @@
         </div>
       </div>
 
-      <button id="btn-kembali" class="py-2 px-3 bg-slate-800 hover:bg-slate-700 text-slate-300 font-semibold text-xs rounded-xl transition border border-slate-700 flex items-center gap-1.5 cursor-pointer">
-        <i class="fa-solid fa-right-from-bracket"></i> <span>Keluar</span>
+      <button id="btn-kembali" class="py-2 px-3 bg-slate-800 hover:bg-slate-700 text-slate-300 font-semibold text-xs rounded-xl transition border border-slate-700 flex items-center gap-1.5 cursor-pointer" title="Kembali ke Dashboard Absensi">
+        <i class="fa-solid fa-arrow-left"></i> <span>Kembali</span>
       </button>
     </header>
 
@@ -170,12 +170,8 @@
     }
 
     btnKembali.addEventListener('click', async () => {
-      if (confirm("Apakah Anda yakin ingin keluar dari sesi siswa ini?")) {
-        await hardReleaseCamera();
-        localStorage.removeItem('siswa_session');
-        localStorage.removeItem('portal_siswa_user');
-        window.location.href = "login.html";
-      }
+      await hardReleaseCamera();
+      window.location.href = "../absensi.html";
     });
 
     btnRestartCam.addEventListener('click', () => {

@@ -4,6 +4,31 @@ Dokumen ini berisi rangkuman review perubahan kode (*code review*) terbaru yang 
 
 ---
 
+## 📅 Review [2026-08-10 18:52 WIB] - Penggantian Tombol Keluar Menjadi Tombol Kembali pada Scanner QR Siswa
+
+### 📁 1. Berkas yang Diubah
+* 📄 **[siswa/index.html](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/siswa/index.html)**
+
+---
+
+### 📝 2. Rincian Baris & Logika yang Diperbarui
+
+1. **Pembaruan Elemen Header & Tombol Navigasi**:
+   - Mengganti tombol **`Keluar`** (`fa-right-from-bracket`) menjadi tombol **`Kembali`** dengan ikon panah kiri (`fa-arrow-left`).
+
+2. **Perbaikan Logika Navigasi**:
+   - Tombol **`Kembali`** kini secara langsung melepas hardware kamera (`hardReleaseCamera()`) lalu menavigasi pengguna kembali ke layar sebelumnya (`../absensi.html`) **tanpa menghapus data sesi siswa di `localStorage`**.
+
+---
+
+### 🧪 3. Petunjuk Pengujian Lokal (*Local Verification*)
+
+1. Dari `absensi.html` &rarr; Klik **Buka Scanner QR Absensi** (`siswa/index.html`).
+2. Klik tombol **`Kembali`** di sudut kanan atas.
+3. **Hasil**: Kamera dilepas secara bersih dan peramban kembali ke layar utama dashboard `absensi.html` dengan sesi siswa tetap utuh.
+
+---
+
 ## 📅 Review [2026-08-10 18:51 WIB] - Eliminasi Jeda Flashing 'Memuat Siswa...' & Pemangkasan Delay Kamera Scanner
 
 ### 📁 1. Berkas yang Diubah
