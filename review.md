@@ -4,6 +4,33 @@ Dokumen ini berisi rangkuman review perubahan kode (*code review*) terbaru yang 
 
 ---
 
+## 📅 Review [2026-08-10 09:30 WIB] - Penyesuaian Lebar Kolom Otomatis & Fitur Interaktif Resizable Columns (Drag & Drop Width)
+
+### 📁 1. Berkas yang Diubah
+* 📄 **[database/db-manager.html](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/database/db-manager.html)**
+
+---
+
+### 📝 2. Rincian Baris & Logika yang Diperbarui
+
+1. **Auto-Fit Lebar Kolom Konten (`whitespace-nowrap`)**:
+   - Seluruh sel data tabel kini dikonfigurasi dengan kelas `whitespace-nowrap` sehingga lebar kolom secara otomatis **menyesuaikan dengan panjang teks data di dalamnya** secara sempurna tanpa terpotong atau *wrapped*.
+
+2. **Handle Drag & Drop Resizable Columns (`.resizer` & `initColumnResizers`)**:
+   - Pada setiap header kolom (`<th>`), ditambahkan handle garis penyekat `.resizer` berwarna cyan glowing.
+   - Admin dapat **mengklik dan menggeser (drag & drop)** garis penyekat header ke kanan/kiri untuk melebarkan atau menyempitkan ukuran kolom sesuai keinginan.
+   - Event klik sorting header dipisahkan secara aman dari event drag resizer sehingga keduanya bekerja tanpa bentrok.
+
+---
+
+### 🧪 3. Petunjuk Pengujian Lokal (*Local Verification*)
+
+1. Buka peramban di [http://localhost:8080/database/db-manager.html](http://localhost:8080/database/db-manager.html).
+2. Perhatikan kolom-kolom tabel matriks kini melebar secara pas menyesuaikan isi teksnya masing-masing (*Auto-Fit*).
+3. **Uji Geser Ukuran Kolom**: Arahkan kursor ke garis pembatas di sebelah kanan nama header kolom mana saja (kursor akan berubah menjadi `col-resize`). Klik dan geser mouse ke kanan/kiri untuk mengubah ukuran lebar kolom secara *real-time*.
+
+---
+
 ## 📅 Review [2026-08-10 09:27 WIB] - Pengurutan Kolom Utama & Dynamic Fallback Field 'hari' dan 'tanggal'
 
 ### 📁 1. Berkas yang Diubah

@@ -48,6 +48,28 @@
     ::-webkit-scrollbar-thumb:hover {
       background: rgba(56, 189, 248, 0.4);
     }
+
+    /* Resizable Table Column Handles */
+    .resizer {
+      position: absolute;
+      right: 0;
+      top: 0;
+      bottom: 0;
+      width: 6px;
+      background: rgba(56, 189, 248, 0.15);
+      cursor: col-resize;
+      user-select: none;
+      touch-action: none;
+      z-index: 20;
+      transition: background 0.15s ease;
+    }
+    .resizer:hover, .resizer.resizing {
+      background: rgba(56, 189, 248, 0.85);
+      box-shadow: 0 0 10px rgba(56, 189, 248, 0.6);
+    }
+    th.resizable-th {
+      position: relative;
+    }
   </style>
 </head>
 
@@ -774,8 +796,12 @@
           const isSorted = state.currentSortField === f;
           const bgClass = isSorted ? 'bg-cyan-950/40 text-cyan-300 font-bold' : 'text-slate-300 font-semibold';
           return `
-            <th class="p-3 border-r border-slate-800 ${bgClass} cursor-pointer hover:bg-slate-800/80 transition select-none sort-header" data-sort="${f}">
-              ${Sanitizer.formatHeaderName(f)} ${getSortIcon(f)}
+            <th class="p-3 border-r border-slate-800 ${bgClass} cursor-pointer hover:bg-slate-800/80 transition select-none sort-header resizable-th min-w-[110px]" data-sort="${f}">
+              <div class="flex items-center justify-between gap-1.5 pr-2">
+                <span class="truncate">${Sanitizer.formatHeaderName(f)}</span>
+                ${getSortIcon(f)}
+              </div>
+              <div class="resizer" title="Geser untuk merubah lebar kolom"></div>
             </th>
           `;
         }).join('');
@@ -796,7 +822,8 @@
         }
 
         document.querySelectorAll('.sort-header').forEach(th => {
-          th.onclick = () => {
+          th.onclick = (e) => {
+            if (e.target.classList.contains('resizer')) return; // Abaikan jika sedang melakukan resize
             const sortKey = th.getAttribute('data-sort');
             if (state.currentSortField === sortKey) {
               state.currentSortOrder = state.currentSortOrder === 'asc' ? 'desc' : 'asc';
@@ -807,6 +834,37 @@
             TableEngine.renderHeaders();
             TableEngine.renderBody();
           };
+        });
+
+        TableEngine.initColumnResizers();
+      },
+
+      initColumnResizers() {
+        document.querySelectorAll('.resizable-th .resizer').forEach(resizer => {
+          resizer.addEventListener('mousedown', (e) => {
+            e.stopPropagation();
+            e.preventDefault();
+
+            const th = resizer.parentElement;
+            const startX = e.pageX;
+            const startWidth = th.offsetWidth;
+            resizer.classList.add('resizing');
+
+            const onMouseMove = (moveEvent) => {
+              const newWidth = Math.max(70, startWidth + (moveEvent.pageX - startX));
+              th.style.width = `${newWidth}px`;
+              th.style.minWidth = `${newWidth}px`;
+            };
+
+            const onMouseUp = () => {
+              resizer.classList.remove('resizing');
+              document.removeEventListener('mousemove', onMouseMove);
+              document.removeEventListener('mouseup', onMouseUp);
+            };
+
+            document.addEventListener('mousemove', onMouseMove);
+            document.addEventListener('mouseup', onMouseUp);
+          });
         });
       },
 
@@ -868,7 +926,7 @@
               val = dataObj.waktu_scan;
             }
 
-            return `<td class="p-3 border-r border-slate-800/60 max-w-xs overflow-hidden text-ellipsis">${Sanitizer.formatCellContent(val, fieldKey, docId)}</td>`;
+            return `<td class="p-3 border-r border-slate-800/60 whitespace-nowrap overflow-hidden text-ellipsis">${Sanitizer.formatCellContent(val, fieldKey, docId)}</td>`;
           }).join('');
 
           const isSiswaCollection = state.currentCollection === 'siswa';
