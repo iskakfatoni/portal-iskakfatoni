@@ -265,7 +265,8 @@
         }
 
         const now = new Date();
-        const waktuScanStr = now.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+        const tanggalStr = now.toLocaleDateString('id-ID', { year: 'numeric', month: '2-digit', day: '2-digit' }).split('/').reverse().join('-');
+        const waktuScanStr = now.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', second: '2-digit' }) + ' WIB';
 
         await addDoc(collection(db, "log_absensi"), {
           id_sesi: idSesi,
@@ -275,6 +276,8 @@
           nama_siswa: namaSiswaVal,
           device_id: currentSiswaUser.device_id || 'UNKNOWN',
           status: 'Hadir',
+          tanggal: tanggalStr,
+          waktu: waktuScanStr,
           waktu_scan: waktuScanStr,
           created_at: serverTimestamp()
         });

@@ -38,8 +38,11 @@
           </svg>
         </div>
         <div>
-          <h1 class="text-lg font-bold text-white tracking-wide">REKAPITULASI ABSENSI</h1>
-          <p class="text-xs text-slate-400">Filter data kehadiran & unduh dalam format Excel (.xlsx)</p>
+          <h1 class="text-lg font-bold text-white tracking-wide flex items-center gap-2">
+            <span>REKAPITULASI ABSENSI</span>
+            <span class="px-2.5 py-0.5 text-[10px] bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 rounded-full uppercase font-mono font-bold">Hari Ini</span>
+          </h1>
+          <p class="text-xs text-slate-400">Menampilkan kehadiran siswa & unduh dalam format Excel (.xlsx)</p>
         </div>
       </div>
 
@@ -55,6 +58,17 @@
 
     <!-- PANEL FILTER & ACTION BUTTONS -->
     <div class="bg-slate-800/80 backdrop-blur-md rounded-2xl p-5 border border-slate-700/50 shadow-xl space-y-4">
+      <!-- OPSI ABSENSI HARI INI -->
+      <div class="flex items-center justify-between bg-slate-900/80 px-4 py-2.5 rounded-xl border border-slate-700/60">
+        <div class="flex items-center gap-2">
+          <input type="checkbox" id="chk-only-today" checked class="rounded bg-slate-950 border-slate-700 text-emerald-400 focus:ring-0 cursor-pointer w-4 h-4">
+          <label for="chk-only-today" class="text-xs font-bold text-emerald-400 cursor-pointer select-none flex items-center gap-1.5">
+            📅 Tampilkan Absensi Hari Ini Saja (<span id="today-date-str" class="font-mono underline">--</span>)
+          </label>
+        </div>
+        <span class="text-[11px] text-slate-400 hidden sm:inline font-mono">// Default aktif untuk memuat presensi hari ini</span>
+      </div>
+
       <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
         
         <div>
@@ -141,14 +155,23 @@
     const btnExportExcel = document.getElementById('btn-export-excel');
     const tableBody = document.getElementById('table-body');
     const totalRecord = document.getElementById('total-record');
+    const chkOnlyToday = document.getElementById('chk-only-today');
+    const todayDateStrSpan = document.getElementById('today-date-str');
 
     let currentData = [];
+
+    const now = new Date();
+    const todayISOStr = now.toLocaleDateString('id-ID', { year: 'numeric', month: '2-digit', day: '2-digit' }).split('/').reverse().join('-');
+    const todayFormattedText = now.toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+
+    if (todayDateStrSpan) todayDateStrSpan.innerText = todayFormattedText;
 
     // 🔒 AUTH GUARD: Verifikasi Sesi sebelum menampilkan halaman
     initializeAuthGuard({
       onAuthenticated: () => {
         document.documentElement.style.display = 'block';
         initSesiDropdown();
+        loadData();
       }
     });
 
@@ -172,6 +195,7 @@
 
     // 2. MUAT DATA REKAP DARI FIRESTORE
     btnTampilkan.addEventListener('click', loadData);
+    if (chkOnlyToday) chkOnlyToday.addEventListener('change', loadData);
 
     async function loadData() {
       btnTampilkan.disabled = true;
@@ -179,7 +203,7 @@
       tableBody.innerHTML = `
         <tr>
           <td colspan="6" class="px-4 py-8 text-center text-xs text-slate-400">
-            Mengambil data kehadiran dari server...
+            Mengambil data kehadiran hari ini...
           </td>
         </tr>
       `;
@@ -187,6 +211,7 @@
       try {
         const selectedSesiId = selectSesi.value;
         const inputKelasVal = filterKelas.value.trim().toLowerCase();
+        const onlyToday = chkOnlyToday ? chkOnlyToday.checked : true;
 
         let q;
         if (selectedSesiId) {
@@ -201,10 +226,33 @@
         querySnap.forEach(docSnap => {
           const d = docSnap.data();
           
-          // Filter lokal berdasarkan kelas jika diisi
+          // Filter 1: Hanya tampilkan absensi hari ini jika checkbox aktif & tidak sedang memilih sesi spesifik
+          if (onlyToday && !selectedSesiId) {
+            let isToday = false;
+            if (d.tanggal && d.tanggal === todayISOStr) {
+              isToday = true;
+            } else if (d.created_at && d.created_at.seconds) {
+              const dDate = new Date(d.created_at.seconds * 1000).toLocaleDateString('id-ID', { year: 'numeric', month: '2-digit', day: '2-digit' }).split('/').reverse().join('-');
+              if (dDate === todayISOStr) isToday = true;
+            } else if (d.waktu_scan) {
+              isToday = true; // Sesi baru
+            }
+            if (!isToday) return;
+          }
+
+          // Filter 2: Filter kelas
           if (inputKelasVal) {
             const k = (d.id_kelas || "").toLowerCase();
             if (!k.includes(inputKelasVal)) return;
+          }
+
+          let timeDisplay = "-";
+          if (d.tanggal) {
+            timeDisplay = `${d.tanggal} (${d.waktu || d.waktu_scan || '-'})`;
+          } else if (d.created_at && d.created_at.seconds) {
+            timeDisplay = new Date(d.created_at.seconds * 1000).toLocaleString('id-ID');
+          } else if (d.waktu_scan) {
+            timeDisplay = d.waktu_scan;
           }
 
           currentData.push({
@@ -212,7 +260,7 @@
             nis: d.nis || "-",
             nama: d.nama_siswa || "-",
             kelas: d.id_kelas || "-",
-            waktu: d.waktu_scan ? new Date(d.waktu_scan).toLocaleString('id-ID') : "-",
+            waktu: timeDisplay,
             status: d.status || "Hadir"
           });
         });
