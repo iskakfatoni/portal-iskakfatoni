@@ -58,15 +58,27 @@
 
     <!-- PANEL FILTER & ACTION BUTTONS -->
     <div class="bg-slate-800/80 backdrop-blur-md rounded-2xl p-5 border border-slate-700/50 shadow-xl space-y-4">
-      <!-- OPSI ABSENSI HARI INI -->
-      <div class="flex items-center justify-between bg-slate-900/80 px-4 py-2.5 rounded-xl border border-slate-700/60">
-        <div class="flex items-center gap-2">
-          <input type="checkbox" id="chk-only-today" checked class="rounded bg-slate-950 border-slate-700 text-emerald-400 focus:ring-0 cursor-pointer w-4 h-4">
-          <label for="chk-only-today" class="text-xs font-bold text-emerald-400 cursor-pointer select-none flex items-center gap-1.5">
-            📅 Tampilkan Absensi Hari Ini Saja (<span id="today-date-str" class="font-mono underline">--</span>)
-          </label>
+      <!-- OPSI ABSENSI HARI INI & AUTO TIDAK HADIR 17.00 -->
+      <div class="flex flex-col md:flex-row md:items-center justify-between bg-slate-900/80 px-4 py-3 rounded-xl border border-slate-700/60 gap-3">
+        <div class="flex flex-wrap items-center gap-4">
+          <div class="flex items-center gap-2">
+            <input type="checkbox" id="chk-only-today" checked class="rounded bg-slate-950 border-slate-700 text-emerald-400 focus:ring-0 cursor-pointer w-4 h-4">
+            <label for="chk-only-today" class="text-xs font-bold text-emerald-400 cursor-pointer select-none flex items-center gap-1.5">
+              📅 Absensi Hari Ini (<span id="today-date-str" class="font-mono underline">--</span>)
+            </label>
+          </div>
+
+          <div class="flex items-center gap-2 border-t md:border-t-0 md:border-l border-slate-700/80 pt-2 md:pt-0 md:pl-4">
+            <input type="checkbox" id="chk-include-alpa" checked class="rounded bg-slate-950 border-slate-700 text-rose-400 focus:ring-0 cursor-pointer w-4 h-4">
+            <label for="chk-include-alpa" class="text-xs font-bold text-rose-400 cursor-pointer select-none flex items-center gap-1">
+              ⚠️ Sertakan Siswa Tidak Hadir (S.d. 17:00 WIB)
+            </label>
+          </div>
         </div>
-        <span class="text-[11px] text-slate-400 hidden sm:inline font-mono">// Default aktif untuk memuat presensi hari ini</span>
+
+        <button id="btn-save-alpa-logs" class="py-1.5 px-3 bg-rose-500/20 hover:bg-rose-500/35 text-rose-300 border border-rose-500/40 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 cursor-pointer shadow-lg">
+          ⚡ Simpan Auto 'Tidak Hadir' ke DB
+        </button>
       </div>
 
       <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -143,9 +155,13 @@
     import { 
       collection, 
       getDocs, 
+      getDoc,
+      doc,
       query, 
       orderBy,
-      where 
+      where,
+      writeBatch,
+      serverTimestamp
     } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
     // DOM Elements
@@ -156,6 +172,8 @@
     const tableBody = document.getElementById('table-body');
     const totalRecord = document.getElementById('total-record');
     const chkOnlyToday = document.getElementById('chk-only-today');
+    const chkIncludeAlpa = document.getElementById('chk-include-alpa');
+    const btnSaveAlpaLogs = document.getElementById('btn-save-alpa-logs');
     const todayDateStrSpan = document.getElementById('today-date-str');
 
     let currentData = [];
@@ -196,6 +214,7 @@
     // 2. MUAT DATA REKAP DARI FIRESTORE
     btnTampilkan.addEventListener('click', loadData);
     if (chkOnlyToday) chkOnlyToday.addEventListener('change', loadData);
+    if (chkIncludeAlpa) chkIncludeAlpa.addEventListener('change', loadData);
 
     async function loadData() {
       btnTampilkan.disabled = true;
@@ -212,6 +231,7 @@
         const selectedSesiId = selectSesi.value;
         const inputKelasVal = filterKelas.value.trim().toLowerCase();
         const onlyToday = chkOnlyToday ? chkOnlyToday.checked : true;
+        const includeAlpa = chkIncludeAlpa ? chkIncludeAlpa.checked : true;
 
         let q;
         if (selectedSesiId) {
@@ -266,6 +286,44 @@
           });
         });
 
+        // 🟢 FILTER SISWA TIDAK HADIR (ALPA S.D 17:00 WIB UNTUK 1 KELAS SPESIFIK)
+        if (includeAlpa) {
+          try {
+            let targetKelasName = inputKelasVal;
+            if (!targetKelasName && selectedSesiId) {
+              const sesiDoc = await getDoc(doc(db, "sesi_absensi", selectedSesiId));
+              if (sesiDoc.exists()) targetKelasName = (sesiDoc.data().id_kelas || '').toLowerCase();
+            }
+
+            if (targetKelasName) {
+              const snapSiswa = await getDocs(collection(db, "siswa"));
+              const presentNisSet = new Set(currentData.map(d => String(d.nis).trim()));
+
+              snapSiswa.forEach(siswaDoc => {
+                const s = siswaDoc.data();
+                const sKelas = (s.id_kelas || s.nama_kelas || '').toLowerCase();
+
+                if (sKelas.includes(targetKelasName)) {
+                  const sNis = String(s.nis || siswaDoc.id).trim();
+                  if (!presentNisSet.has(sNis)) {
+                    currentData.push({
+                      id: `alpa-${sNis}`,
+                      isVirtualAlpa: true,
+                      nis: s.nis || "-",
+                      nama: s.nama_siswa || s.nama || "-",
+                      kelas: s.id_kelas || s.nama_kelas || "-",
+                      waktu: `Tidak Absen (s.d. 17:00 WIB)`,
+                      status: "Tidak Hadir"
+                    });
+                  }
+                }
+              });
+            }
+          } catch (errAlpa) {
+            console.warn("Gagal menyaring siswa alpa kelas:", errAlpa);
+          }
+        }
+
         renderTable(currentData);
 
       } catch (err) {
@@ -300,6 +358,11 @@
 
       let html = '';
       data.forEach((item, idx) => {
+        const isHadir = item.status.toLowerCase().includes('hadir') && !item.status.toLowerCase().includes('tidak');
+        const badgeClass = isHadir 
+          ? 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30'
+          : 'bg-rose-500/20 text-rose-400 border-rose-500/40 font-bold';
+
         html += `
           <tr class="hover:bg-slate-700/30 transition">
             <td class="px-4 py-3 font-mono text-slate-400 text-xs">${idx + 1}</td>
@@ -308,7 +371,7 @@
             <td class="px-4 py-3 font-semibold text-white">${item.nama}</td>
             <td class="px-4 py-3 text-xs text-slate-300">${item.kelas}</td>
             <td class="px-4 py-3 text-center">
-              <span class="px-2.5 py-1 bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 rounded-lg text-[11px] font-bold">
+              <span class="px-2.5 py-1 border rounded-lg text-[11px] ${badgeClass}">
                 ${item.status}
               </span>
             </td>
@@ -317,6 +380,52 @@
       });
 
       tableBody.innerHTML = html;
+    }
+
+    // ⚡ BATCH SIMPAN AUTO 'TIDAK HADIR' KE FIRESTORE LOG_ABSENSI
+    if (btnSaveAlpaLogs) {
+      btnSaveAlpaLogs.addEventListener('click', async () => {
+        const virtualAlpaItems = currentData.filter(d => d.isVirtualAlpa);
+        if (virtualAlpaItems.length === 0) {
+          alert("Tidak ada data siswa 'Tidak Hadir' yang perlu disimpan untuk kelas ini.\n\nTips: Masukkan nama kelas pada 'Filter Kelas' atau pilih sesi untuk mendeteksi siswa yang belum absen.");
+          return;
+        }
+
+        const confirmMsg = `Konfirmasi Simpan Status 'Tidak Hadir':\n\nSimpan ${virtualAlpaItems.length} siswa kelas ini yang belum absen sampai 17:00 WIB ke database Firestore?`;
+        if (!confirm(confirmMsg)) return;
+
+        btnSaveAlpaLogs.disabled = true;
+        btnSaveAlpaLogs.innerText = "Menyimpan...";
+
+        try {
+          const batch = writeBatch(db);
+          const hariStr = now.toLocaleDateString('id-ID', { weekday: 'long' });
+
+          virtualAlpaItems.forEach(item => {
+            const newRef = doc(collection(db, "log_absensi"));
+            batch.set(newRef, {
+              nis: item.nis,
+              nama_siswa: item.nama,
+              id_kelas: item.kelas,
+              hari: hariStr,
+              tanggal: todayISOStr,
+              waktu: '17:00 WIB',
+              status: 'Tidak Hadir',
+              created_at: serverTimestamp()
+            });
+          });
+
+          await batch.commit();
+          alert(`Berhasil menyimpan ${virtualAlpaItems.length} log 'Tidak Hadir' ke database!`);
+          loadData();
+        } catch (err) {
+          console.error("Gagal menyimpan batch alpa:", err);
+          alert("Gagal menyimpan data: " + err.message);
+        } finally {
+          btnSaveAlpaLogs.disabled = false;
+          btnSaveAlpaLogs.innerText = "⚡ Simpan Auto 'Tidak Hadir' ke DB";
+        }
+      });
     }
 
     // 4. EXPORT DATA DARI TABEL KE FILE EXCEL (.XLSX) VIA SHEETJS

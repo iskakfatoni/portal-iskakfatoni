@@ -4,6 +4,35 @@ Dokumen ini berisi rangkuman review perubahan kode (*code review*) terbaru yang 
 
 ---
 
+## 📅 Review [2026-08-10 09:34 WIB] - Penambahan Status 'Tidak Hadir' Otomatis untuk Siswa yang Belum Absen sampai Jam 17:00 WIB (Per Kelas)
+
+### 📁 1. Berkas yang Diubah
+* 📄 **[guru/rekap.html](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/guru/rekap.html)**
+
+---
+
+### 📝 2. Rincian Baris & Logika yang Diperbarui
+
+1. **Checkbox Opsi Detection (`#chk-include-alpa`)**:
+   - Menambahkan opsi `⚠️ Sertakan Siswa Tidak Hadir (S.d. 17:00 WIB)` pada panel filter rekap.
+   - Saat Guru memilih Sesi Absensi atau mengisi **Filter Kelas** (misal: *X IPA 1*), sistem secara otomatis mengomparasi daftar seluruh siswa di kelas tersebut dengan `log_absensi` hari ini.
+   - Siswa yang **belum melakukan presensi sampai jam 17:00 WIB** akan otomatis ditampilkan di tabel dengan badge merah khas **`Tidak Hadir (Alpa)`** dan keterangan waktu `Tidak Absen (s.d. 17:00 WIB)`.
+
+2. **Tombol Batch Commit Firestore (`#btn-save-alpa-logs`)**:
+   - Menambahkan tombol `⚡ Simpan Auto 'Tidak Hadir' ke DB`.
+   - Menggunakan `writeBatch(db)` Firestore untuk sekali klik menyimpan secara masal seluruh dokumen `log_absensi` berstatus `Tidak Hadir` bagi siswa yang belum absen pada kelas tersebut.
+
+---
+
+### 3. Petunjuk Pengujian Lokal (*Local Verification*)
+
+1. Buka peramban di [http://localhost:8080/guru/rekap.html](http://localhost:8080/guru/rekap.html).
+2. Isi **Filter Kelas** (contoh: `X IPA 1`) atau pilih salah satu Sesi Absensi.
+3. Siswa di kelas tersebut yang belum absen akan langsung muncul di tabel dengan badge merah **Tidak Hadir**.
+4. Klik tombol **`⚡ Simpan Auto 'Tidak Hadir' ke DB`** &rarr; Konfirmasi &rarr; Data siswa yang tidak hadir akan langsung tersimpan permanen di database Firestore `log_absensi`.
+
+---
+
 ## 📅 Review [2026-08-10 09:30 WIB] - Penyesuaian Lebar Kolom Otomatis & Fitur Interaktif Resizable Columns (Drag & Drop Width)
 
 ### 📁 1. Berkas yang Diubah
