@@ -239,7 +239,7 @@
   <!-- FIREBASE SCRIPT & DRAG-AND-DROP + ACTIVE CHECKLIST TOGGLE -->
   <script type="module">
     import { db } from "../assets/js/config/firebase-config.js";
-    import { initializeAuthGuard } from "../assets/js/auth-guard.js";
+    import { initializeAuthGuard } from "../assets/js/auth/auth-guard.js";
     import { collection, doc, setDoc, addDoc, deleteDoc, updateDoc, onSnapshot, query, orderBy, writeBatch, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
     const userEmailDisplay = document.getElementById('user-email-display');

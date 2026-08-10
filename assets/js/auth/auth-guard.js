@@ -1,5 +1,5 @@
-// assets/js/auth-guard.js
-import { auth } from "./config/firebase-config.js";
+// assets/js/auth/auth-guard.js
+import { auth } from "../config/firebase-config.js";
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 
 const DEFAULT_REDIRECT_PATH = "../admin.html";
