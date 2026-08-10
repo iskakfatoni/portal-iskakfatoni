@@ -265,6 +265,7 @@
         }
 
         const now = new Date();
+        const hariStr = now.toLocaleDateString('id-ID', { weekday: 'long' });
         const tanggalStr = now.toLocaleDateString('id-ID', { year: 'numeric', month: '2-digit', day: '2-digit' }).split('/').reverse().join('-');
         const waktuScanStr = now.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', second: '2-digit' }) + ' WIB';
 
@@ -274,11 +275,10 @@
           nama_mapel: sesiData.nama_mapel,
           nis: currentSiswaUser.nis,
           nama_siswa: namaSiswaVal,
-          device_id: currentSiswaUser.device_id || 'UNKNOWN',
-          status: 'Hadir',
+          hari: hariStr,
           tanggal: tanggalStr,
           waktu: waktuScanStr,
-          waktu_scan: waktuScanStr,
+          status: 'Hadir',
           created_at: serverTimestamp()
         });
 

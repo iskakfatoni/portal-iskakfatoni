@@ -4,6 +4,37 @@ Dokumen ini berisi rangkuman review perubahan kode (*code review*) terbaru yang 
 
 ---
 
+## 📅 Review [2026-08-10 09:24 WIB] - Penggantian Kolom device_id Menjadi Field 'hari' dan 'tanggal' pada log_absensi
+
+### 📁 1. Berkas yang Diubah
+* 📄 **[siswa/index.html](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/siswa/index.html)**
+* 📄 **[guru/rekap.html](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/guru/rekap.html)**
+* 📄 **[database/db-manager.html](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/database/db-manager.html)**
+
+---
+
+### 📝 2. Rincian Baris & Logika yang Diperbarui
+
+1. **Pencatatan Presensi QR Siswa (`siswa/index.html`)**:
+   - Mengilangkan field `device_id` dari pembuatan dokumen baru `log_absensi`.
+   - Menggantikannya dengan merekam field `hari` (contoh: `Senin`) dan `tanggal` (`2026-08-10`) secara presisi saat scan QR dilakukan.
+
+2. **Format Tampilan Rekapitulasi Presensi Guru (`guru/rekap.html`)**:
+   - Kolom *Tanggal / Waktu* kini menampilkan nama hari lengkap, tanggal, dan jam scan presensi (contoh: `Senin, 2026-08-10 (09:24:10 WIB)`).
+
+3. **Form Tambah Manual Firestore Manager (`database/db-manager.html`)**:
+   - Form Tambah Data koleksi `log_absensi` kini menyertakan field `hari` yang di-prefill otomatis dengan nama hari terkini (misal: `Senin`).
+
+---
+
+### 🧪 3. Petunjuk Pengujian Lokal (*Local Verification*)
+
+1. **Scan Presensi Siswa**: Buka [http://localhost:8080/siswa/index.html](http://localhost:8080/siswa/index.html) lalu scan QR sesi.
+2. **Cek Tabel Rekap**: Buka [http://localhost:8080/guru/rekap.html](http://localhost:8080/guru/rekap.html) &rarr; perhatikan kolom Tanggal/Waktu kini memuat nama **Hari** dan **Tanggal** secara rapi tanpa `device_id`.
+3. **Cek Database Manager**: Buka [http://localhost:8080/database/db-manager.html](http://localhost:8080/database/db-manager.html) &rarr; Log Presensi &rarr; perhatikan kolom `hari` dan `tanggal` sudah menggantikan `device_id`.
+
+---
+
 ## 📅 Review [2026-08-10 09:14 WIB] - Penambahan Filter Pemisah Log Presensi Menurut Hari (Hari Ini, Kemarin, Tanggal Khusus)
 
 ### 📁 1. Berkas yang Diubah

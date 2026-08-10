@@ -984,19 +984,22 @@
           else if (state.currentCollection === 'kelas') fieldsToRender = ['id_kelas', 'nama_kelas', 'wali_kelas'];
           else if (state.currentCollection === 'mapel') fieldsToRender = ['id_mapel', 'nama_mapel'];
           else if (state.currentCollection === 'sesi_absensi') fieldsToRender = ['id_kelas', 'nama_mapel', 'tanggal', 'waktu', 'is_active'];
-          else if (state.currentCollection === 'log_absensi') fieldsToRender = ['nis', 'nama_siswa', 'id_kelas', 'nama_mapel', 'tanggal', 'waktu', 'status'];
+          else if (state.currentCollection === 'log_absensi') fieldsToRender = ['nis', 'nama_siswa', 'id_kelas', 'nama_mapel', 'hari', 'tanggal', 'waktu', 'status'];
           else if (state.currentCollection === 'links') fieldsToRender = ['title', 'url', 'is_active', 'order'];
           else fieldsToRender = ['nama', 'keterangan'];
         }
 
         const now = new Date();
+        const defaultHari = now.toLocaleDateString('id-ID', { weekday: 'long' });
         const defaultTanggal = now.toLocaleDateString('id-ID', { year: 'numeric', month: '2-digit', day: '2-digit' }).split('/').reverse().join('-');
         const defaultWaktu = now.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', second: '2-digit' }) + ' WIB';
 
         fieldsToRender.forEach(fieldKey => {
           let defaultVal = '';
-          if (fieldKey === 'tanggal') defaultVal = defaultTanggal;
+          if (fieldKey === 'hari') defaultVal = defaultHari;
+          else if (fieldKey === 'tanggal') defaultVal = defaultTanggal;
           else if (fieldKey === 'waktu') defaultVal = defaultWaktu;
+          else if (fieldKey === 'status') defaultVal = 'Hadir';
           else if (fieldKey === 'is_active') defaultVal = 'true';
           ModalManager.appendFieldRow(dom.dynamicInputFields, fieldKey, defaultVal);
         });
