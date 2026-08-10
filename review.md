@@ -4,6 +4,63 @@ Dokumen ini berisi rangkuman review perubahan kode (*code review*) terbaru yang 
 
 ---
 
+## 📅 Review [2026-08-10 09:48 WIB] - Pemisahan Kode JavaScript ke Berkas Modul Eksternal (.js)
+
+### 📁 1. Berkas yang Diubah & Dibuat
+* 📄 **[NEW] [assets/js/guru/rekap.js](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/assets/js/guru/rekap.js)**
+* 📄 **[NEW] [assets/js/database/db-manager.js](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/assets/js/database/db-manager.js)**
+* 📄 **[guru/rekap.html](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/guru/rekap.html)**
+* 📄 **[database/db-manager.html](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/database/db-manager.html)**
+
+---
+
+### 📝 2. Rincian Baris & Logika yang Diperbarui
+
+1. **Pemisahan Modul JavaScript Rekap Guru (`assets/js/guru/rekap.js`)**:
+   - Seluruh logika JS untuk Rekap Guru (Auth Guard, Firestore Query, DateUtils, Batch Alpa, dan Export Excel) dipindahkan ke berkas modul terpisah.
+   - Halaman `guru/rekap.html` kini menjadi sangat bersih dan berfokus pada markup struktur HTML semata via `<script type="module" src="../assets/js/guru/rekap.js"></script>`.
+
+2. **Pemisahan Modul JavaScript Firestore DB Manager (`assets/js/database/db-manager.js`)**:
+   - Seluruh logika JS Firestore DB Manager (StateStore, DOM Registry, Sanitizer Engine, BatchUtils, StatsManager, TableEngine, ModalManager, Import/Export) dipindahkan ke berkas modul terpisah.
+   - Halaman `database/db-manager.html` kini dipautkan ke modul eksternal via `<script type="module" src="../assets/js/database/db-manager.js"></script>`.
+
+---
+
+### 🧪 3. Petunjuk Pengujian Produksi (*GitHub Pages Verification*)
+
+1. Buka [https://iskakfatoni.github.io/portal-iskakfatoni/guru/rekap.html](https://iskakfatoni.github.io/portal-iskakfatoni/guru/rekap.html) &rarr; Pastikan fitur pemuatan data presensi dan ekspor Excel tetap berjalan sempurna.
+2. Buka [https://iskakfatoni.github.io/portal-iskakfatoni/database/db-manager.html](https://iskakfatoni.github.io/portal-iskakfatoni/database/db-manager.html) &rarr; Pastikan seluruh interaksi koleksi, filter tanggal, perbaikan `device_id`, dan modal popup bekerja dengan lancar tanpa error di console.
+
+---
+
+## 📅 Review [2026-08-10 09:46 WIB] - Refactoring Kode Modul Rekap Guru (rekap.html) & Firestore DB Manager (db-manager.html)
+
+### 📁 1. Berkas yang Diubah
+* 📄 **[guru/rekap.html](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/guru/rekap.html)**
+* 📄 **[database/db-manager.html](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/database/db-manager.html)**
+
+---
+
+### 📝 2. Rincian Baris & Logika yang Diperbarui
+
+1. **Refactoring `guru/rekap.html`**:
+   - Struktur modul JavaScript dibagi menjadi blok utilitas yang bersih (`DateUtils`, `initSesiDropdown`, `loadData`, `renderTable`, `btnSaveAlpaLogs`, dan `ExportExcel`).
+   - Penambahan ikon status interaktif pada tabel presensi (🟢 `fa-circle-check` untuk Hadir & 🔴 `fa-triangle-exclamation` untuk Tidak Hadir).
+   - Ekspor Excel disempurnakan dengan nama file dinamis berdasarkan filter kelas dan tanggal: `Rekap_Presensi_[NamaKelas]_[YYYY-MM-DD].xlsx`.
+
+2. **Refactoring `database/db-manager.html`**:
+   - Pemetaan nama header (`Sanitizer.formatHeaderName`) disempurnakan dengan kamus istilah Bahasa Indonesia yang konsisten (`Waktu Presensi`, `Status Kehadiran`, `Guru Kelas`, `ID Perangkat HP`, `Token Sesi QR`).
+   - Optimasi penanganan *error boundary* dan pengulangan listener resizer kolom agar tabel matriks bekerja lebih responsif dan ringan.
+
+---
+
+### 🧪 3. Petunjuk Pengujian Lokal (*Local Verification*)
+
+1. **Rekap Guru**: Buka [http://localhost:8080/guru/rekap.html](http://localhost:8080/guru/rekap.html) &rarr; perhatikan ikon status dan nama file ekspor Excel yang dinamis.
+2. **DB Manager**: Buka [http://localhost:8080/database/db-manager.html](http://localhost:8080/database/db-manager.html) &rarr; perhatikan judul-judul header kolom kini tampil dalam Bahasa Indonesia yang sangat rapi.
+
+---
+
 ## 📅 Review [2026-08-10 09:44 WIB] - Penampilan Kembali Kolom device_id Khusus Menu 'HP Terikat'
 
 ### 📁 1. Berkas yang Diubah
