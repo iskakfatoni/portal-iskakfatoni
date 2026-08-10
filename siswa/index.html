@@ -106,9 +106,13 @@
     let isProcessingScan = false;
     let currentSiswaUser = null;
     let currentFacingMode = "environment";
+    let isSessionInitialized = false;
+    let isStartingCamera = false;
 
     // AMBIL DARI LOCAL STORAGE PERSISTEN LOKAL
     function initSiswaSession() {
+      if (isSessionInitialized) return;
+      isSessionInitialized = true;
       const savedUserJson = localStorage.getItem('siswa_session') || localStorage.getItem('portal_siswa_user');
       
       if (!savedUserJson) {
@@ -184,6 +188,8 @@
     }
 
     async function startCameraEngine() {
+      if (isStartingCamera) return;
+      isStartingCamera = true;
       try {
         await hardReleaseCamera();
 
@@ -215,6 +221,8 @@
         console.error("Gagal membuka kamera:", err);
         cameraLoading.classList.add('hidden');
         showNotif("❌ Gagal Membuka Kamera! Pastikan Izin Kamera Diberikan di Browser HP.", "error");
+      } finally {
+        isStartingCamera = false;
       }
     }
 

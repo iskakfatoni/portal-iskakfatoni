@@ -4,6 +4,32 @@ Dokumen ini berisi rangkuman review perubahan kode (*code review*) terbaru yang 
 
 ---
 
+## 📅 Review [2026-08-10 17:38 WIB] - Perbaikan Bug Pesan Error 'Gagal Membuka Kamera' Saat Kamera Berhasil Dibuka
+
+### 📁 1. Berkas yang Diubah
+* 📄 **[siswa/index.html](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/siswa/index.html)**
+
+---
+
+### 📝 2. Rincian Baris & Logika yang Diperbarui
+
+1. **Pencegahan Inisialisasi Sesi Ganda (`initSiswaSession`)**:
+   - Menambahkan *flag* pengunci `isSessionInitialized`. Karena event listener `DOMContentLoaded` dan *fallback* `document.readyState` dapat tereksekusi secara berurutan dalam kondisi tertentu, hal ini mencegah `startCameraEngine()` dipanggil dua kali secara bersamaan.
+
+2. **Locking pada Kamera Engine (`startCameraEngine`)**:
+   - Menambahkan pengunci asinkron `isStartingCamera` agar inisialisasi kamera tidak dapat berjalan secara simultan/tumpang tindih meskipun pengguna menekan tombol "Ganti Kamera" berkali-kali.
+   - Sebelumnya, panggilan ganda menyebabkan panggilan kedua melempar error dan memunculkan notifikasi "Gagal Membuka Kamera", padahal panggilan pertama berhasil menampilkan *stream* kamera.
+
+---
+
+### 🧪 3. Petunjuk Pengujian Lokal (*Local Verification*)
+
+1. Buka peramban di HP/Emulator dan navigasi ke halaman `siswa/index.html`.
+2. Tunggu hingga kamera terbuka.
+3. **Hasil**: Kamera berhasil terbuka dan siap menscan QR code **tanpa** diiringi oleh kemunculan pesan error notifikasi di bagian atas layar.
+
+---
+
 ## 📅 Review [2026-08-10 15:49 WIB] - Perbaikan Bug Auto-Restore Sesi Absensi Aktif Guru (Persistensi Sesi 1 Jam)
 
 ### 📁 1. Berkas yang Diubah
