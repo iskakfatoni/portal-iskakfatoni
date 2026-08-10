@@ -1,3 +1,4 @@
+// assets/js/particle/particle-bg.js
 (() => {
   const canvas = document.getElementById('particle-canvas');
   if (!canvas) return;
