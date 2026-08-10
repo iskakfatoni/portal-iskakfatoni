@@ -3,8 +3,8 @@
   "name": "PORTAL :: Iskak Fatoni",
   "icons": [
     {
-      "src": "nisnas_logo_colorful.png",
-      "type": "image/png",
+      "src": "nisnas_logo_colorful.webp",
+      "type": "image/webp",
       "sizes": "192x192 512x512",
       "purpose": "any maskable"
     }

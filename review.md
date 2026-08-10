@@ -4,6 +4,60 @@ Dokumen ini berisi rangkuman review perubahan kode (*code review*) terbaru yang 
 
 ---
 
+## 📅 Review [2026-08-10 09:55 WIB] - Migrasi Total Berkas Gambar PNG ke WebP & Pembersihan Aset Repositori
+
+### 📁 1. Berkas yang Diubah & Dihapus
+* 🗑️ **[DELETE] `foto_asn_profile.png`** (*156 KB - Berhasil dimigrasikan ke foto_asn_profile.webp*)
+* 🗑️ **[DELETE] `nisnas_logo_colorful.png`** (*270 KB - Berhasil dimigrasikan ke nisnas_logo_colorful.webp*)
+* 📄 **[portal.html](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/portal.html)**
+* 📄 **[index.html](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/index.html)**
+* 📄 **[admin.html](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/admin.html)**
+* 📄 **[absensi.html](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/absensi.html)**
+* 📄 **[database/db-manager.html](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/database/db-manager.html)**
+* 📄 **[manifest.json](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/manifest.json)**
+* 📄 **[sw.js](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/sw.js)**
+
+---
+
+### 📝 2. Rincian Baris & Logika yang Diperbarui
+
+1. **Migrasi Total Format Gambar ke WebP**:
+   - Seluruh tag `<img>`, icon PWA (`manifest.json`), favicon (`link rel="icon"`), dan daftar aset Service Worker (`sw.js`) telah diperbarui 100% menggunakan `.webp`.
+   - Menghapus tag `<picture>` redundan, menyederhanakan markup menjadi elemen `<img>` langsung dengan dukungan 100% peramban modern.
+   - **Total Hemat Ukuran Repositori**: ~1.35 MB (bersama `foto_asn_profile_lama.png`).
+
+---
+
+### 🧪 3. Petunjuk Pengujian Produksi (*GitHub Pages Verification*)
+
+1. Buka [https://iskakfatoni.github.io/portal-iskakfatoni/](https://iskakfatoni.github.io/portal-iskakfatoni/) &rarr; Pastikan foto profil dan logo NisNas tampil sempurna dengan format WebP ultra-ringan.
+
+---
+
+## 📅 Review [2026-08-10 09:52 WIB] - Analisis & Penghapusan Berkas Gambar PNG Tidak Terpakai
+
+### 📁 1. Berkas yang Dihapus & Dipertahankan
+* 🗑️ **[DELETE] `foto_asn_profile_lama.png`** (908 KB - *Berkas lama tidak terpakai*)
+* 📄 **[KEEP] `foto_asn_profile.png`** (156 KB - *Digunakan sebagai fallback `<picture>` di index, admin, portal, absensi*)
+* 📄 **[KEEP] `nisnas_logo_colorful.png`** (270 KB - *Digunakan sebagai icon PWA manifest.json & fallback logo*)
+
+---
+
+### 📝 2. Rincian Baris & Logika yang Diperbarui
+
+1. **Audit Berkas Gambar Workspace**:
+   - Dilakukan pencarian menyeluruh (*grep search*) terhadap seluruh referensi berkas `.png` dalam repositori.
+   - **`foto_asn_profile_lama.png`** teridentifikasi memiliki **0 referensi** dan ukuran besar (908 KB), sehingga telah dihapus untuk menghemat ruang repositori.
+   - Berkas **`foto_asn_profile.png`** dan **`nisnas_logo_colorful.png`** dipertahankan karena secara aktif terdaftar pada `manifest.json`, `sw.js`, dan elemen `<picture>` HTML sebagai fallback peramban lama.
+
+---
+
+### 🧪 3. Petunjuk Pengujian Produksi (*GitHub Pages Verification*)
+
+1. Buka [https://iskakfatoni.github.io/portal-iskakfatoni/](https://iskakfatoni.github.io/portal-iskakfatoni/) &rarr; Pastikan foto profil dan logo NisNas tetap tampil sempurna tanpa broken image.
+
+---
+
 ## 📅 Review [2026-08-10 09:48 WIB] - Pemisahan Kode JavaScript ke Berkas Modul Eksternal (.js)
 
 ### 📁 1. Berkas yang Diubah & Dibuat

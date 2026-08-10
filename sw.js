@@ -8,8 +8,8 @@ const LOCAL_ASSETS = [
   'admin.html',
   'style/style.css',
   'manifest.json',
-  'foto_asn_profile.png',
-  'nisnas_logo_colorful.png'
+  'foto_asn_profile.webp',
+  'nisnas_logo_colorful.webp'
 ];
 
 self.addEventListener('install', (event) => {
