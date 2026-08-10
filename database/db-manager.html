@@ -890,12 +890,21 @@
           if (state.currentCollection === 'siswa') fieldsToRender = ['nis', 'nama_siswa', 'id_kelas', 'nama_kelas'];
           else if (state.currentCollection === 'kelas') fieldsToRender = ['id_kelas', 'nama_kelas', 'wali_kelas'];
           else if (state.currentCollection === 'mapel') fieldsToRender = ['id_mapel', 'nama_mapel'];
+          else if (state.currentCollection === 'sesi_absensi') fieldsToRender = ['id_kelas', 'nama_mapel', 'tanggal', 'waktu', 'is_active'];
           else if (state.currentCollection === 'links') fieldsToRender = ['title', 'url', 'is_active', 'order'];
           else fieldsToRender = ['nama', 'keterangan'];
         }
 
+        const now = new Date();
+        const defaultTanggal = now.toLocaleDateString('id-ID', { year: 'numeric', month: '2-digit', day: '2-digit' }).split('/').reverse().join('-');
+        const defaultWaktu = now.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', second: '2-digit' }) + ' WIB';
+
         fieldsToRender.forEach(fieldKey => {
-          ModalManager.appendFieldRow(dom.dynamicInputFields, fieldKey, '');
+          let defaultVal = '';
+          if (fieldKey === 'tanggal') defaultVal = defaultTanggal;
+          else if (fieldKey === 'waktu') defaultVal = defaultWaktu;
+          else if (fieldKey === 'is_active') defaultVal = 'true';
+          ModalManager.appendFieldRow(dom.dynamicInputFields, fieldKey, defaultVal);
         });
 
         dom.modalAddData.classList.remove('hidden');
@@ -1346,6 +1355,8 @@
         sampleData = [{ "id_kelas": "XI-TEI-1", "nama_kelas": "XI TEI 1", "wali_kelas": "Nama Guru" }];
       } else if (state.currentCollection === 'mapel') {
         sampleData = [{ "id_mapel": "TEI-01", "nama_mapel": "Pemrograman Terstruktur" }];
+      } else if (state.currentCollection === 'sesi_absensi') {
+        sampleData = [{ "id_kelas": "XI-TEI-1", "nama_mapel": "Pemrograman Terstruktur", "tanggal": "2026-08-10", "waktu": "08:53:00 WIB", "is_active": true }];
       } else {
         sampleData = [{ "id": "DOC-01", "title": "Contoh Data", "keterangan": "Deskripsi" }];
       }

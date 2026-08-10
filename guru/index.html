@@ -264,10 +264,16 @@
       try {
         btnStartSesi.disabled = true;
 
+        const now = new Date();
+        const tanggalStr = now.toLocaleDateString('id-ID', { year: 'numeric', month: '2-digit', day: '2-digit' }).split('/').reverse().join('-');
+        const waktuStr = now.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', second: '2-digit' }) + ' WIB';
+
         activeToken = 'QR-' + Math.random().toString(36).substring(2, 10).toUpperCase();
         const docRef = await addDoc(collection(db, "sesi_absensi"), {
           id_kelas: kelas,
           nama_mapel: mapel,
+          tanggal: tanggalStr,
+          waktu: waktuStr,
           current_qr_token: activeToken,
           is_active: true,
           created_at: serverTimestamp()

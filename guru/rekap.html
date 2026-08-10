@@ -162,7 +162,7 @@
           const d = docSnap.data();
           const opt = document.createElement('option');
           opt.value = docSnap.id;
-          opt.innerText = `${d.tanggal || '-'} | ${d.id_kelas || '-'} (${d.nama_mapel || 'Mapel'})`;
+          opt.innerText = `${d.tanggal || '-'} ${d.waktu ? '(' + d.waktu + ')' : ''} | ${d.id_kelas || '-'} (${d.nama_mapel || 'Mapel'})`;
           selectSesi.appendChild(opt);
         });
       } catch (err) {
