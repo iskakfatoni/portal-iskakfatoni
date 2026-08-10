@@ -4,6 +4,103 @@ Dokumen ini berisi rangkuman review perubahan kode (*code review*) terbaru yang 
 
 ---
 
+## 📅 Review [2026-08-10 15:49 WIB] - Perbaikan Bug Auto-Restore Sesi Absensi Aktif Guru (Persistensi Sesi 1 Jam)
+
+### 📁 1. Berkas yang Diubah
+* 📄 **[guru/index.html](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/guru/index.html)**
+
+---
+
+### 📝 2. Rincian Baris & Logika yang Diperbarui
+
+1. **Auto-Restore Active Session (`checkAndRestoreActiveSesi`)**:
+   - Saat Guru membuka `guru/index.html` (baik setelah refresh maupun berpindah ke halaman lain seperti `rekap.html` / `admin.html` lalu kembali), sistem secara otomatis memeriksa dokumen `sesi_absensi` yang berstatus `is_active: true` di Firestore.
+   - Apabila terdapat sesi aktif yang dibuat **kurang dari 1 jam (60 menit)**, sistem akan memulihkan (*restore*) state UI meliputi: pilihan kelas & mapel, tampilan QR Code, penyeleksi interval rotasi QR 10-detik, serta *listener real-time log absensi* siswa.
+
+2. **Auto-Expiration Limit (1 Jam)**:
+   - Apabila sesi aktif di Firestore telah berumur **lebih dari 1 jam**, sistem akan menganggap sesi tersebut kadaluarsa dan memperbarui statusnya menjadi `is_active: false`.
+
+3. **Pencegahan Sesi Ganda saat Membuat Sesi Baru**:
+   - Saat Guru menekan tombol *Mulai Sesi Absensi*, jika terdapat sesi aktif sebelumnya, sistem secara otomatis menonaktifkan sesi terdahulu sebelum membuka sesi yang baru.
+
+---
+
+### 🧪 3. Petunjuk Pengujian Lokal (*Local Verification*)
+
+1. **Pengujian Persistensi Berpindah Halaman**:
+   - Buka `guru/index.html` &rarr; Pilih Kelas & Mapel &rarr; Klik **Mulai Sesi Absensi**.
+   - Perhatikan QR Code dan indikator `Aktif [Nama Kelas]`.
+   - Klik **Database Rekap** (`rekap.html`) atau **Kembali ke Admin** (`admin.html`).
+   - Kembali lagi ke `guru/index.html`.
+   - **Hasil**: Sesi absensi yang aktif tidak hilang, QR Code langsung muncul kembali, dan log siswa tetap terpantau secara *real-time*.
+2. **Pengujian Tutup Sesi Manual**:
+   - Klik **Tutup Sesi** &rarr; Sesi resmi ditutup di Firestore.
+
+---
+
+## 📅 Review [2026-08-10 15:46 WIB] - Fitur Deteksi & Flagging 'HP Berbagi' (Multi-Siswa 1 Perangkat) pada Scanner & Rekap Presensi
+
+### 📁 1. Berkas yang Diubah
+* 📄 **[siswa/index.html](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/siswa/index.html)**
+* 📄 **[assets/js/guru/rekap.js](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/assets/js/guru/rekap.js)**
+
+---
+
+### 📝 2. Rincian Baris & Logika yang Diperbarui
+
+1. **Pencatatan Hardware `device_id` pada Log Presensi (`siswa/index.html`)**:
+   - Saat siswa melakukan pemindaian QR Code presensi, dokumen baru di `log_absensi` kini secara otomatis menyertakan field `device_id` perangkat HP yang digunakan.
+
+2. **Deteksi Real-time & Visual Badge 'HP Berbagi' (`assets/js/guru/rekap.js`)**:
+   - Sistem Rekapitulasi Guru kini menghitung frekuensi penggunaan `device_id` pada daftar absensi yang dimuat.
+   - Apabila 1 `device_id` HP digunakan oleh 2 siswa atau lebih untuk presensi pada sesi/hari yang sama, sistem secara otomatis memberikan badge peringatan **`📱 HP Berbagi (X Siswa)`** berwarna amber di samping status kehadiran tabel.
+
+3. **Adaptasi Laporan Excel (.xlsx)**:
+   - Kolom tambahan **Keterangan Perangkat** (`HP Berbagi (X Siswa)` vs `HP Mandiri`) disertakan dalam hasil unduhan file Excel agar Guru dapat dengan mudah mengidentifikasi presensi dari perangkat berbagi.
+
+---
+
+### 🧪 3. Petunjuk Pengujian Lokal (*Local Verification*)
+
+1. **Simulasi Presensi Perangkat Berbagi**:
+   - Siswa 1 melakukan scan presensi via `siswa/index.html`.
+   - Admin/Guru melakukan reset `device_id` Siswa 1 via `database/db-manager.html`.
+   - Siswa 2 mengikat HP yang sama via `absensi.html` dan melakukan scan presensi.
+2. **Cek Laporan Rekap Guru**:
+   - Buka `guru/rekap.html` &rarr; Klik **Muat Data**.
+   - Perhatikan baris Siswa 1 dan Siswa 2: Keduanya kini memiliki badge **`📱 HP Berbagi (2 Siswa)`** berwarna amber.
+3. **Cek Ekspor Excel**:
+   - Klik **Export (.xlsx)** &rarr; Buka file hasil unduhan &rarr; Perhatikan kolom **Keterangan Perangkat** tercatat `HP Berbagi (2 Siswa)`.
+
+---
+
+## 📅 Review [2026-08-10 10:00 WIB] - Penambahan Menu Navigasi 'Rekapitulasi Presensi Siswa' pada Master Admin Hub
+
+### 📁 1. Berkas yang Diubah
+* 📄 **[admin.html](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/admin.html)**
+* 📄 **[style/style.css](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/style/style.css)**
+
+---
+
+### 📝 2. Rincian Baris & Logika yang Diperbarui
+
+1. **Menu Card Navigasi Baru (`admin.html`)**:
+   - Menambahkan Card Menu Navigasi baru bertuliskan **Rekapitulasi Presensi Siswa** yang mengarah langsung ke `guru/rekap.html`.
+   - Admin kini dapat langsung membuka laporan rekapitulasi presensi, filter kelas, dan ekspor file Excel langsung dari Dashboard Master Admin Hub.
+
+2. **Kustomisasi Tema Visual Icon (`style/style.css`)**:
+   - Menambahkan class `.menu-icon.rekap-icon` beraksen warna amber *glowing* (`#fbbf24`) dan ikon invoice `fa-file-invoice`.
+
+---
+
+### 🧪 3. Petunjuk Pengujian Produksi (*GitHub Pages Verification*)
+
+1. Buka [https://iskakfatoni.github.io/portal-iskakfatoni/admin.html](https://iskakfatoni.github.io/portal-iskakfatoni/admin.html) &rarr; Masuk ke Dashboard Admin.
+2. Lihat daftar menu kontrol: Card **Rekapitulasi Presensi Siswa** kini tampil resmi di urutan ke-3.
+3. Klik Card tersebut &rarr; Otomatis beralih ke halaman `guru/rekap.html`.
+
+---
+
 ## 📅 Review [2026-08-10 09:55 WIB] - Migrasi Total Berkas Gambar PNG ke WebP & Pembersihan Aset Repositori
 
 ### 📁 1. Berkas yang Diubah & Dihapus

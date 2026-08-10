@@ -143,8 +143,24 @@ async function loadData() {
         nama: d.nama_siswa || "-",
         kelas: d.id_kelas || "-",
         waktu: DateUtils.formatLogTime(d),
-        status: d.status || "Hadir"
+        status: d.status || "Hadir",
+        device_id: d.device_id || ""
       });
+    });
+
+    // Deteksi penggunaan HP Berbagi (1 device_id dipakai >1 siswa)
+    const deviceCountMap = {};
+    currentData.forEach(item => {
+      if (item.device_id) {
+        deviceCountMap[item.device_id] = (deviceCountMap[item.device_id] || 0) + 1;
+      }
+    });
+
+    currentData.forEach(item => {
+      if (item.device_id && deviceCountMap[item.device_id] > 1) {
+        item.isSharedDevice = true;
+        item.sharedCount = deviceCountMap[item.device_id];
+      }
     });
 
     // Deteksi Siswa Tidak Hadir (S.d. 17:00 WIB untuk 1 kelas spesifik)
@@ -230,6 +246,15 @@ function renderTable(data) {
       ? '<i class="fa-solid fa-circle-check text-emerald-400 mr-1"></i>' 
       : '<i class="fa-solid fa-triangle-exclamation text-rose-400 mr-1"></i>';
 
+    let sharedBadgeHTML = '';
+    if (item.isSharedDevice) {
+      sharedBadgeHTML = `
+        <span class="px-2 py-0.5 ml-1.5 rounded text-[10px] bg-amber-500/20 text-amber-300 border border-amber-500/40 font-mono inline-flex items-center gap-1" title="Perangkat HP ini digunakan oleh ${item.sharedCount} siswa untuk absen">
+          <i class="fa-solid fa-mobile-screen-button text-amber-400"></i> HP Berbagi (${item.sharedCount} Siswa)
+        </span>
+      `;
+    }
+
     html += `
       <tr class="hover:bg-slate-700/30 transition border-b border-slate-800/60">
         <td class="px-4 py-3 font-mono text-slate-400 text-xs">${idx + 1}</td>
@@ -241,6 +266,7 @@ function renderTable(data) {
           <span class="px-2.5 py-1 border rounded-lg text-[11px] inline-flex items-center ${badgeClass}">
             ${iconHTML} ${item.status}
           </span>
+          ${sharedBadgeHTML}
         </td>
       </tr>
     `;
@@ -314,7 +340,8 @@ btnExportExcel.addEventListener('click', () => {
     "NIS": item.nis,
     "Nama Siswa": item.nama,
     "Kelas": item.kelas,
-    "Status Kehadiran": item.status
+    "Status Kehadiran": item.status,
+    "Keterangan Perangkat": item.isSharedDevice ? `HP Berbagi (${item.sharedCount} Siswa)` : 'HP Mandiri'
   }));
 
   const worksheet = XLSX.utils.json_to_sheet(excelRows);
@@ -326,7 +353,8 @@ btnExportExcel.addEventListener('click', () => {
     { wch: 15 }, // NIS
     { wch: 30 }, // Nama Siswa
     { wch: 15 }, // Kelas
-    { wch: 18 }  // Status Kehadiran
+    { wch: 18 }, // Status Kehadiran
+    { wch: 25 }  // Keterangan Perangkat
   ];
 
   XLSX.utils.book_append_sheet(workbook, worksheet, "Rekap Presensi");

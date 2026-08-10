@@ -204,11 +204,12 @@
 
     // 🔒 AUTH GUARD: Verifikasi Sesi
     initializeAuthGuard({
-      onAuthenticated: (user) => {
+      onAuthenticated: async (user) => {
         document.documentElement.style.display = 'block';
         userEmailDisplay.innerText = user.email;
-        loadKelasDropdown();
-        loadMapelDropdown();
+        await loadKelasDropdown();
+        await loadMapelDropdown();
+        await checkAndRestoreActiveSesi();
       }
     });
 
@@ -216,6 +217,76 @@
     btnLogout.addEventListener('click', () => {
       window.location.href = "../admin.html";
     });
+
+    async function checkAndRestoreActiveSesi() {
+      try {
+        const q = query(
+          collection(db, "sesi_absensi"),
+          where("is_active", "==", true),
+          orderBy("created_at", "desc")
+        );
+        const snapshot = await getDocs(q);
+        if (snapshot.empty) return;
+
+        const activeDoc = snapshot.docs[0];
+        const data = activeDoc.data();
+
+        // Cek Durasi Umur Sesi (Apakah sudah > 1 Jam / 3600000 ms)
+        let isExpired = false;
+        if (data.created_at && data.created_at.seconds) {
+          const createdTimeMs = data.created_at.seconds * 1000;
+          const nowMs = Date.now();
+          if ((nowMs - createdTimeMs) > 60 * 60 * 1000) { // > 1 Jam
+            isExpired = true;
+          }
+        }
+
+        if (isExpired) {
+          // Otomatis tutup sesi yang sudah lebih dari 1 jam
+          await updateDoc(doc(db, "sesi_absensi", activeDoc.id), { is_active: false });
+          return;
+        }
+
+        // SESI MASIH AKTIF (< 1 JAM): PERTAHANKAN STATE & UI
+        currentSesiId = activeDoc.id;
+        activeToken = data.current_qr_token || ('QR-' + Math.random().toString(36).substring(2, 10).toUpperCase());
+
+        if (data.id_kelas) selectKelas.value = data.id_kelas;
+        if (data.nama_mapel) selectMapel.value = data.nama_mapel;
+
+        btnStartSesi.disabled = true;
+        btnStopSesi.disabled = false;
+        btnStopSesi.className = 'py-3 px-4 bg-red-500 hover:bg-red-400 text-white font-bold text-xs rounded-xl transition shadow-lg shadow-red-500/20 flex items-center justify-center gap-2 cursor-pointer';
+
+        btnFullscreenQr.disabled = false;
+        btnFullscreenQr.className = 'w-full py-3 px-4 bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-bold text-xs rounded-xl transition flex items-center justify-center gap-2 cursor-pointer shadow-lg shadow-cyan-500/20';
+
+        sessionStatus.innerText = `Aktif [${data.id_kelas || '-'}]`;
+        sessionStatus.className = 'text-xs text-emerald-400 font-mono font-bold';
+
+        document.getElementById('modal-kelas-title').innerText = data.id_kelas || '-';
+        document.getElementById('modal-mapel-title').innerText = data.nama_mapel || '-';
+
+        updateQRDisplay(activeToken);
+
+        // Putar QR Token setiap 10 detik
+        if (qrInterval) clearInterval(qrInterval);
+        qrInterval = setInterval(async () => {
+          if (!currentSesiId) return;
+          activeToken = 'QR-' + Math.random().toString(36).substring(2, 10).toUpperCase();
+          await updateDoc(doc(db, "sesi_absensi", currentSesiId), {
+            current_qr_token: activeToken
+          });
+          updateQRDisplay(activeToken);
+        }, 10000);
+
+        // Listen ke realtime log absensi
+        listenToLogAbsensi(currentSesiId);
+
+      } catch (err) {
+        console.error("Gagal memulihkan sesi aktif:", err);
+      }
+    }
 
     async function loadKelasDropdown() {
       selectKelas.innerHTML = '<option value="">-- Pilih Kelas TEI --</option>';
@@ -264,6 +335,11 @@
       try {
         btnStartSesi.disabled = true;
 
+        // Tutup sesi terdahulu jika masih aktif
+        if (currentSesiId) {
+          await updateDoc(doc(db, "sesi_absensi", currentSesiId), { is_active: false });
+        }
+
         const now = new Date();
         const tanggalStr = now.toLocaleDateString('id-ID', { year: 'numeric', month: '2-digit', day: '2-digit' }).split('/').reverse().join('-');
         const waktuStr = now.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', second: '2-digit' }) + ' WIB';
@@ -295,6 +371,7 @@
 
         updateQRDisplay(activeToken);
 
+        if (qrInterval) clearInterval(qrInterval);
         qrInterval = setInterval(async () => {
           if (!currentSesiId) return;
           activeToken = 'QR-' + Math.random().toString(36).substring(2, 10).toUpperCase();
