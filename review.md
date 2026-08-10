@@ -4,6 +4,35 @@ Dokumen ini berisi rangkuman review perubahan kode (*code review*) terbaru yang 
 
 ---
 
+## 📅 Review [2026-08-10 18:33 WIB] - Visibilitas Tombol 'Reset HP Terpilih' & Indikator Jumlah Terceklist
+
+### 📁 1. Berkas yang Diubah
+* 📄 **[database/db-manager.html](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/database/db-manager.html)**
+* 📄 **[assets/js/database/db-manager.js](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/assets/js/database/db-manager.js)**
+
+---
+
+### 📝 2. Rincian Baris & Logika yang Diperbarui
+
+1. **Visibilitas Tombol Toolbar Utama (`db-manager.html`)**:
+   - Menghapus class `hidden` bawaan pada tombol **`Reset HP Terpilih`** (`#btn-reset-selected-device`) agar tombol selalu tampak secara permanen di toolbar atas sebagai tombol aksi amber yang konsisten.
+   - Menambahkan elemen indikator hitungan terpilih `<span id="selected-reset-count">0</span>` pada teks tombol.
+
+2. **Pembaruan Dinamis & State Management (`db-manager.js`)**:
+   - Menambahkan `selectedResetCountSpan` ke registry `dom` untuk memperbarui angka `Reset HP Terpilih (X)` secara *real-time* saat siswa di-ceklist.
+   - Mengatur status aktif/disabled tombol (`disabled = count === 0 || !isSiswa`) secara otomatis berdasarkan koleksi aktif (`siswa`) dan jumlah baris terceklist.
+
+---
+
+### 🧪 3. Petunjuk Pengujian Lokal (*Local Verification*)
+
+1. Buka `database/db-manager.html` di browser.
+2. Perhatikan toolbar atas: Tombol amber **`Reset HP Terpilih (0)`** kini tampak jelas secara permanen di barisan tombol (dengan kondisi *disabled* / transparan).
+3. Ceklist 3 nama siswa &rArr; Tombol otomatis aktif menjadi **`Reset HP Terpilih (3)`** berwarna amber glowing.
+4. Klik tombol tersebut &rArr; Konfirmasi reset masal muncul dan berhasil memproses 3 siswa terpilih.
+
+---
+
 ## 📅 Review [2026-08-10 18:29 WIB] - Perbaikan Seleksi Ceklist & Penambahan Batch Action Toolbar di DB Manager
 
 ### 📁 1. Berkas yang Diubah

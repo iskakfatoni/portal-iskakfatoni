@@ -32,6 +32,7 @@ const dom = {
   selectAllCheckbox: document.getElementById('select-all-checkbox'),
   btnDeleteSelected: document.getElementById('btn-delete-selected'),
   btnResetSelectedDevice: document.getElementById('btn-reset-selected-device'),
+  selectedResetCountSpan: document.getElementById('selected-reset-count'),
   btnExportSelectedExcel: document.getElementById('btn-export-selected-excel'),
   selectedExportCountSpan: document.getElementById('selected-export-count'),
   btnClearCollection: document.getElementById('btn-clear-collection'),
@@ -576,17 +577,14 @@ const TableEngine = {
     const count = state.selectedDocIds.size;
     if (dom.selectedCountSpan) dom.selectedCountSpan.innerText = count;
     if (dom.selectedExportCountSpan) dom.selectedExportCountSpan.innerText = count;
+    if (dom.selectedResetCountSpan) dom.selectedResetCountSpan.innerText = count;
+
     if (dom.btnDeleteSelected) dom.btnDeleteSelected.disabled = count === 0;
     if (dom.btnExportSelectedExcel) dom.btnExportSelectedExcel.disabled = count === 0;
 
     if (dom.btnResetSelectedDevice) {
       const isSiswa = state.currentCollection === 'siswa';
       dom.btnResetSelectedDevice.disabled = count === 0 || !isSiswa;
-      if (isSiswa && count > 0) {
-        dom.btnResetSelectedDevice.classList.remove('hidden');
-      } else {
-        dom.btnResetSelectedDevice.classList.add('hidden');
-      }
     }
 
     const headerChk = document.getElementById('select-all-checkbox');
