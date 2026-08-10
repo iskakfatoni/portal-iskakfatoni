@@ -295,6 +295,14 @@
                 <i class="fa-solid fa-file-excel"></i> <span>Ekspor Perangkat (.xlsx)</span>
               </button>
 
+              <button id="btn-reset-selected-device" disabled class="py-2 px-3.5 bg-amber-500/10 hover:bg-amber-500/25 text-amber-300 border border-amber-500/30 font-bold text-xs rounded-xl transition flex items-center gap-1.5 cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed hidden">
+                <i class="fa-solid fa-mobile-screen-button"></i> <span>Reset HP Terpilih</span>
+              </button>
+
+              <button id="btn-export-selected-excel" disabled class="py-2 px-3.5 bg-emerald-500/10 hover:bg-emerald-500/25 text-emerald-300 border border-emerald-500/30 font-bold text-xs rounded-xl transition flex items-center gap-1.5 cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed">
+                <i class="fa-solid fa-file-excel"></i> <span>Ekspor Terpilih (<span id="selected-export-count">0</span>)</span>
+              </button>
+
               <button id="btn-delete-selected" disabled class="py-2 px-3.5 bg-red-500/10 hover:bg-red-500/25 text-red-400 border border-red-500/30 font-bold text-xs rounded-xl transition flex items-center gap-1.5 cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed">
                 <i class="fa-solid fa-trash-can"></i> <span>Hapus Terpilih (<span id="selected-count">0</span>)</span>
               </button>

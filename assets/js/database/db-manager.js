@@ -31,6 +31,9 @@ const dom = {
   tableBody: document.getElementById('table-body'),
   selectAllCheckbox: document.getElementById('select-all-checkbox'),
   btnDeleteSelected: document.getElementById('btn-delete-selected'),
+  btnResetSelectedDevice: document.getElementById('btn-reset-selected-device'),
+  btnExportSelectedExcel: document.getElementById('btn-export-selected-excel'),
+  selectedExportCountSpan: document.getElementById('selected-export-count'),
   btnClearCollection: document.getElementById('btn-clear-collection'),
   selectedCountSpan: document.getElementById('selected-count'),
   btnExportDeviceExcel: document.getElementById('btn-export-device-excel'),
@@ -357,7 +360,9 @@ const TableEngine = {
 
     const headerChk = document.getElementById('select-all-checkbox');
     if (headerChk) {
-      headerChk.checked = state.currentDocsList.length > 0 && state.selectedDocIds.size === state.currentDocsList.length;
+      const filteredDocs = TableEngine.getFilteredAndSortedDocs();
+      const allFilteredSelected = filteredDocs.length > 0 && filteredDocs.every(d => state.selectedDocIds.has(d.id));
+      headerChk.checked = allFilteredSelected;
       headerChk.onclick = (e) => TableEngine.handleSelectAll(e.target.checked);
     }
 
@@ -409,11 +414,6 @@ const TableEngine = {
   },
 
   renderBody() {
-    const filteredDocs = TableEngine.getFilteredAndSortedDocs();
-    StatsManager.updateStats(filteredDocs.length);
-
-    if (filteredDocs.length === 0) {
-      dom.tableBody.innerHTML = `<tr><td colspan="${state.currentDynamicFields.length + 3}" class="p-8 text-center text-slate-500 font-sans">// Tidak ada data yang cocok dengan kriteria.</td></tr>`;
       dom.pageInfo.innerText = 'Halaman 0 dari 0';
       dom.btnPrevPage.disabled = true;
       dom.btnNextPage.disabled = true;
@@ -558,19 +558,43 @@ const TableEngine = {
   },
 
   handleSelectAll(isChecked) {
-    document.querySelectorAll('.row-checkbox').forEach(chk => {
-      chk.checked = isChecked;
-      const id = chk.getAttribute('data-id');
-      if (isChecked) state.selectedDocIds.add(id);
-      else state.selectedDocIds.delete(id);
+    const filteredDocs = TableEngine.getFilteredAndSortedDocs();
+    filteredDocs.forEach(docSnap => {
+      if (isChecked) state.selectedDocIds.add(docSnap.id);
+      else state.selectedDocIds.delete(docSnap.id);
     });
+
+    document.querySelectorAll('.row-checkbox').forEach(chk => {
+      const id = chk.getAttribute('data-id');
+      chk.checked = state.selectedDocIds.has(id);
+    });
+
     TableEngine.updateSelectedUI();
   },
 
   updateSelectedUI() {
     const count = state.selectedDocIds.size;
-    dom.selectedCountSpan.innerText = count;
-    dom.btnDeleteSelected.disabled = count === 0;
+    if (dom.selectedCountSpan) dom.selectedCountSpan.innerText = count;
+    if (dom.selectedExportCountSpan) dom.selectedExportCountSpan.innerText = count;
+    if (dom.btnDeleteSelected) dom.btnDeleteSelected.disabled = count === 0;
+    if (dom.btnExportSelectedExcel) dom.btnExportSelectedExcel.disabled = count === 0;
+
+    if (dom.btnResetSelectedDevice) {
+      const isSiswa = state.currentCollection === 'siswa';
+      dom.btnResetSelectedDevice.disabled = count === 0 || !isSiswa;
+      if (isSiswa && count > 0) {
+        dom.btnResetSelectedDevice.classList.remove('hidden');
+      } else {
+        dom.btnResetSelectedDevice.classList.add('hidden');
+      }
+    }
+
+    const headerChk = document.getElementById('select-all-checkbox');
+    if (headerChk) {
+      const filteredDocs = TableEngine.getFilteredAndSortedDocs();
+      const allFilteredSelected = filteredDocs.length > 0 && filteredDocs.every(d => state.selectedDocIds.has(d.id));
+      headerChk.checked = allFilteredSelected;
+    }
   }
 };
 
@@ -985,7 +1009,82 @@ dom.btnNextPage.addEventListener('click', () => {
   TableEngine.renderBody();
 });
 
-// 🗑️ Delete Selected & Clear Collection
+// 🗑️ Delete Selected & Batch Actions
+if (dom.btnResetSelectedDevice) {
+  dom.btnResetSelectedDevice.addEventListener('click', async () => {
+    const count = state.selectedDocIds.size;
+    if (count === 0 || state.currentCollection !== 'siswa') return;
+
+    if (confirm(`Reset pendaftaran perangkat (HP) untuk ${count} siswa terpilih? Siswa terpilih dapat melakukan registrasi ulang di HP baru.`)) {
+      try {
+        dom.btnResetSelectedDevice.disabled = true;
+        const selectedArray = Array.from(state.selectedDocIds);
+        const CHUNK_SIZE = 400;
+        for (let i = 0; i < selectedArray.length; i += CHUNK_SIZE) {
+          const chunk = selectedArray.slice(i, i + CHUNK_SIZE);
+          const batch = writeBatch(db);
+          chunk.forEach(id => {
+            batch.update(doc(db, "siswa", id), {
+              device_id: deleteField(),
+              device_token: deleteField(),
+              mac_address: deleteField(),
+              registered_at: deleteField()
+            });
+          });
+          await batch.commit();
+        }
+        alert(`Berhasil mereset pendaftaran HP untuk ${count} siswa!`);
+        state.selectedDocIds.clear();
+        TableEngine.updateSelectedUI();
+      } catch (err) {
+        alert("Gagal mereset perangkat masal: " + err.message);
+      } finally {
+        dom.btnResetSelectedDevice.disabled = false;
+      }
+    }
+  });
+}
+
+if (dom.btnExportSelectedExcel) {
+  dom.btnExportSelectedExcel.addEventListener('click', () => {
+    const count = state.selectedDocIds.size;
+    if (count === 0) return;
+
+    const allFiltered = TableEngine.getFilteredAndSortedDocs();
+    const selectedDocs = allFiltered.filter(docSnap => state.selectedDocIds.has(docSnap.id));
+
+    if (selectedDocs.length === 0) {
+      alert("Tidak ada dokumen terceklist yang ditemukan.");
+      return;
+    }
+
+    const exportRows = selectedDocs.map((docSnap, index) => {
+      const data = docSnap.data();
+      const row = { "No": index + 1, "Document ID": docSnap.id };
+
+      state.currentDynamicFields.forEach(fieldKey => {
+        const headerName = Sanitizer.formatHeaderName(fieldKey);
+        let val = data[fieldKey];
+        if (typeof val === 'object' && val !== null && val.seconds !== undefined) {
+          val = new Date(val.seconds * 1000).toLocaleString('id-ID');
+        } else if (typeof val === 'object' && val !== null) {
+          val = JSON.stringify(val);
+        }
+        row[headerName] = val !== undefined && val !== null ? val : "-";
+      });
+
+      return row;
+    });
+
+    const worksheet = XLSX.utils.json_to_sheet(exportRows);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, `Selected_${state.currentCollection}`);
+
+    const today = new Date().toISOString().split('T')[0];
+    XLSX.writeFile(workbook, `Ekspor_Terpilih_${state.currentCollection}_${today}.xlsx`);
+  });
+}
+
 dom.btnDeleteSelected.addEventListener('click', async () => {
   const count = state.selectedDocIds.size;
   if (count === 0) return;

@@ -4,6 +4,40 @@ Dokumen ini berisi rangkuman review perubahan kode (*code review*) terbaru yang 
 
 ---
 
+## 📅 Review [2026-08-10 18:29 WIB] - Perbaikan Seleksi Ceklist & Penambahan Batch Action Toolbar di DB Manager
+
+### 📁 1. Berkas yang Diubah
+* 📄 **[database/db-manager.html](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/database/db-manager.html)**
+* 📄 **[assets/js/database/db-manager.js](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/assets/js/database/db-manager.js)**
+
+---
+
+### 📝 2. Rincian Baris & Logika yang Diperbarui
+
+1. **Perbaikan Seleksi "Pilih Semua" Lintas Halaman (*Global Select All*)**:
+   - Fungsi `handleSelectAll(isChecked)` kini menambahkan/menghapus seluruh ID dokumen yang cocok dengan filter aktif (`TableEngine.getFilteredAndSortedDocs()`), sehingga menceklist data lintas seluruh halaman paginasi.
+   - Status checkbox header (`select-all-checkbox`) kini diperbarui secara dinamis pada `updateSelectedUI()` berdasarkan apakah seluruh data pada filter aktif telah terceklist.
+
+2. **Pembaruan Dinamis & Preservasi State Selection**:
+   - `updateSelectedUI()` diperbarui untuk memperbarui jumlah item terpilih dan status aktif/non-aktif seluruh tombol aksi masal secara *real-time*.
+
+3. **Penambahan Fitur Tombol Aksi Masal Berbasis Ceklist (*Batch Actions Toolbar*)**:
+   - 📱 **`Reset HP Terpilih` (`btn-reset-selected-device`)**: Memungkinkan admin mereset ikatan perangkat HP untuk beberapa siswa terceklist sekaligus secara masal (otomatis tampil pada koleksi `siswa`).
+   - 📥 **`Ekspor Terpilih (.xlsx)` (`btn-export-selected-excel`)**: Memungkinkan admin mengunduh laporan Excel (.xlsx) khusus dokumen yang terceklist saja.
+   - 🗑️ **`Hapus Terpilih` (`btn-delete-selected`)**: Dipastikan berfungsi 100% responsif menghitung & menghapus dokumen terceklist dari seluruh halaman.
+
+---
+
+### 🧪 3. Petunjuk Pengujian Lokal (*Local Verification*)
+
+1. Buka `database/db-manager.html` &rarr; Pilih koleksi **siswa**.
+2. Ceklist beberapa baris siswa (atau centang **Select All** di header).
+3. Perhatikan toolbar atas: Tombol **Reset HP Terpilih**, **Ekspor Terpilih (.xlsx)**, dan **Hapus Terpilih** kini aktif dan menampilkan jumlah data terceklist.
+4. Uji coba tombol **Reset HP Terpilih** &rarr; Pendaftaran HP seluruh siswa terceklist berhasil di-reset bersamaan.
+5. Uji coba tombol **Ekspor Terpilih (.xlsx)** &rarr; Berkas Excel berisi data terceklist berhasil diunduh.
+
+---
+
 ## 📅 Review [2026-08-10 18:20 WIB] - Implementasi Pure Hardware Fingerprinting (Tahan Hapus Data & Cache)
 
 ### 📁 1. Berkas yang Diubah
