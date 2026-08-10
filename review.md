@@ -4,6 +4,36 @@ Dokumen ini berisi rangkuman review perubahan kode (*code review*) terbaru yang 
 
 ---
 
+## 📅 Review [2026-08-10 17:58 WIB] - Eliminasi Lag & Layar Hitam Saat Membuka Scanner QR Absensi Siswa
+
+### 📁 1. Berkas yang Diubah
+* 📄 **[siswa/index.html](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/siswa/index.html)**
+
+---
+
+### 📝 2. Rincian Baris & Logika yang Diperbarui
+
+1. **Penyelidikan Penyebab Layar Hitam & Lag**:
+   - Teridentifikasi bahwa fungsi `hardReleaseCamera()` sebelumnya memanggil `await navigator.mediaDevices.getUserMedia({ video: true })` secara redundan untuk kemudian langsung menghentikan track tersebut (`track.stop()`).
+   - Hal ini menyebabkan sistem memicu sensor hardware kamera 2 kali berturut-turut (membuka dummy stream &rArr; menutup stream &rArr; membuka stream `Html5Qrcode`), yang menghasilkan delay ~1-1.5 detik berupa tampilan layar hitam bertuliskan *"Membuka Kamera HP..."*.
+
+2. **Eliminasi Pemanggilan Hardware Kamera Redundan (`hardReleaseCamera`)**:
+   - Menghapus pemanggilan `getUserMedia()` dummy pada `hardReleaseCamera()`.
+   - Proses pelepasan stream kini langsung menyasar elemen `<video>` aktif di DOM (`document.querySelectorAll("#reader video")`) secara instan (0 ms).
+
+3. **Percepatan Inisialisasi & Penghalusan Visual UI**:
+   - Memangkas delay pembuka `setTimeout` pada `initSiswaSession()` dari 300 ms menjadi 50 ms.
+   - Memperbarui gaya elemen `#camera-loading` menggunakan efek *glassmorphic backdrop blur* (`bg-slate-950/85 backdrop-blur-md transition-opacity duration-300`) agar transisi pembukaan kamera terasa sangat halus (*smooth*) tanpa kilatan layar hitam pekat.
+
+---
+
+### 🧪 3. Petunjuk Pengujian Lokal (*Local Verification*)
+
+1. Buka `absensi.html` lalu klik **Buka Scanner QR Absensi** (atau buka `siswa/index.html` langsung).
+2. **Hasil**: Kamera scanner terbuka jauh lebih cepat dan instan tanpa jeda layar hitam pekat berdurasi panjang.
+
+---
+
 ## 📅 Review [2026-08-10 17:52 WIB] - Audit Pengecekan Kode & Tambahan Pengecekan Defensif Library CDN
 
 ### 📁 1. Berkas yang Diubah

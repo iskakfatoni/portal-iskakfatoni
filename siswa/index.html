@@ -56,9 +56,9 @@
           <div class="w-full h-full border-2 border-cyan-400/80 rounded-xl relative animate-pulse"></div>
         </div>
 
-        <div id="camera-loading" class="absolute inset-0 bg-slate-950 flex flex-col items-center justify-center gap-2 z-20">
+        <div id="camera-loading" class="absolute inset-0 bg-slate-950/85 backdrop-blur-md flex flex-col items-center justify-center gap-2 z-20 transition-opacity duration-300">
           <i class="fa-solid fa-circle-notch fa-spin text-3xl text-cyan-400"></i>
-          <p class="text-xs text-slate-400 font-mono">Membuka Kamera HP...</p>
+          <p class="text-xs text-slate-300 font-mono font-medium">Inisialisasi Kamera...</p>
         </div>
       </div>
 
@@ -132,10 +132,10 @@
         siswaNama.innerText = namaSiswa;
         siswaNisKelas.innerText = `NIS: ${currentSiswaUser.nis} | ${kelasSiswa}`;
         
-        // PEMBERIAN TIMEOUT UNTUK MENCEGAH CAM LOCK / STUCK DI WEBVIEW
+        // INSIALISASI KAMERA SEGERA SETELAH SESI VALID
         setTimeout(() => {
           startCameraEngine();
-        }, 300);
+        }, 50);
 
       } catch (e) {
         console.error("Session Error:", e);
@@ -177,14 +177,14 @@
         }
       }
 
-      if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
-        try {
-          const stream = await navigator.mediaDevices.getUserMedia({ video: true });
-          if (stream) {
-            stream.getTracks().forEach(track => track.stop());
-          }
-        } catch (e) {}
-      }
+      // Hentikan sisa track video pada DOM tanpa melempar getUserMedia baru
+      const videoElements = document.querySelectorAll("#reader video");
+      videoElements.forEach(video => {
+        if (video.srcObject && video.srcObject.getTracks) {
+          video.srcObject.getTracks().forEach(track => track.stop());
+          video.srcObject = null;
+        }
+      });
     }
 
     async function startCameraEngine() {
