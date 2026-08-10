@@ -4,6 +4,59 @@ Dokumen ini berisi rangkuman review perubahan kode (*code review*) terbaru yang 
 
 ---
 
+## 📅 Review [2026-08-10 09:27 WIB] - Pengurutan Kolom Utama & Dynamic Fallback Field 'hari' dan 'tanggal'
+
+### 📁 1. Berkas yang Diubah
+* 📄 **[database/db-manager.html](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/database/db-manager.html)**
+
+---
+
+### 📝 2. Rincian Baris & Logika yang Diperbarui
+
+1. **Prioritas Pengurutan Kolom (`loadCollectionData`)**:
+   - Memastikan kolom **`hari`**, **`tanggal`**, dan **`waktu`** selalu tampil di urutan terdepan tabel matriks saat membuka koleksi `log_absensi` dan `sesi_absensi`.
+   - Mengabaikan tampilan kolom teknis `device_id` agar tabel terlihat lebih rapi.
+
+2. **Smart Dynamic Fallback (`TableEngine.renderBody`)**:
+   - Untuk dokumen-dokumen riwayat lama yang belum menyimpan string `hari` atau `tanggal` secara eksplisit saat dibuat, sistem secara cerdas **mengkalkulasi dan menampilkan nama hari (misal: `Senin`) dan tanggal (misal: `2026-08-10`) secara otomatis dari stempel timestamp `created_at`**.
+   - Menjamin 100% dokumen (baik lama maupun baru) tampil dengan kolom `hari` dan `tanggal` yang terisi rapi tanpa ada nilai `-` atau kosong.
+
+---
+
+### 🧪 3. Petunjuk Pengujian Lokal (*Local Verification*)
+
+1. Buka peramban di [http://localhost:8080/database/db-manager.html](http://localhost:8080/database/db-manager.html).
+2. Klik **Log Presensi** di sidebar kiri.
+3. Perhatikan kolom **`hari`** (misal: *Senin*) dan **`tanggal`** (misal: *2026-08-10*) kini langsung muncul dengan jelas di urutan depan tabel untuk seluruh baris dokumen.
+
+---
+
+## 📅 Review [2026-08-10 09:26 WIB] - Penghilangan Tampilan Kolom Document ID pada Tabel Firestore DB Manager
+
+### 📁 1. Berkas yang Diubah
+* 📄 **[database/db-manager.html](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/database/db-manager.html)**
+
+---
+
+### 📝 2. Rincian Baris & Logika yang Diperbarui
+
+1. **Pembersihan Tampilan Matriks Tabel (`TableEngine.renderHeaders` & `renderBody`)**:
+   - Menghapus elemen header `<th data-sort="__id__">Document ID</th>` dan sel kolom `<td class="font-bold text-cyan-400">${docId}</td>` dari render tabel visual.
+   - Kolom yang ditampilkan kini langsung menyajikan **NO**, **[Field-field Data Koleksi]**, **Checkbox Seleksi Baris**, dan **Aksi**.
+
+2. **Keamanan & Fungsi Backend Tetap 100% Utuh**:
+   - `Document ID` tetap tersimpan secara internal di atribut `data-id="${docId}"` dan digunakan secara penuh untuk operasi edit modal (`setDoc`), hapus single (`deleteDoc`), seleksi massal (`writeBatch`), serta ekspor data. Tampilan tabel visual menjadi jauh lebih bersih dan lega.
+
+---
+
+### 🧪 3. Petunjuk Pengujian Lokal (*Local Verification*)
+
+1. Buka peramban di [http://localhost:8080/database/db-manager.html](http://localhost:8080/database/db-manager.html).
+2. Perhatikan tabel matriks kanan. Kolom **Document ID** sudah tidak lagi tampak secara visual, sehingga kolom data utama seperti NIS, Nama Siswa, Hari, dan Tanggal terlihat lebih luas dan mudah dibaca.
+3. Uji fungsi Edit (✏️) dan Hapus (🗑️) &rarr; Seluruh fungsi backend Firestore tetap berjalan 100% normal.
+
+---
+
 ## 📅 Review [2026-08-10 09:24 WIB] - Penggantian Kolom device_id Menjadi Field 'hari' dan 'tanggal' pada log_absensi
 
 ### 📁 1. Berkas yang Diubah

@@ -780,13 +780,8 @@
           `;
         }).join('');
 
-        const idHeaderClass = state.currentSortField === '__id__' ? 'bg-cyan-950/40 text-cyan-300 font-bold' : 'text-cyan-400 font-bold';
-
         dom.tableHeaderRow.innerHTML = `
           <th class="p-3 w-12 text-center border-r border-slate-800 font-bold text-slate-400">NO</th>
-          <th class="p-3 ${idHeaderClass} border-r border-slate-800 cursor-pointer hover:bg-slate-800/80 transition select-none sort-header" data-sort="__id__">
-            Document ID ${getSortIcon('__id__')}
-          </th>
           ${fieldsHeaderHTML}
           <th class="p-3 w-10 text-center border-r border-slate-800">
             <input type="checkbox" id="select-all-checkbox" class="rounded bg-slate-900 border-slate-700 text-cyan-500 focus:ring-0 cursor-pointer" title="Pilih Semua">
@@ -820,7 +815,7 @@
         StatsManager.updateStats(filteredDocs.length);
 
         if (filteredDocs.length === 0) {
-          dom.tableBody.innerHTML = `<tr><td colspan="${state.currentDynamicFields.length + 4}" class="p-8 text-center text-slate-500 font-sans">// Tidak ada data yang cocok dengan kriteria.</td></tr>`;
+          dom.tableBody.innerHTML = `<tr><td colspan="${state.currentDynamicFields.length + 3}" class="p-8 text-center text-slate-500 font-sans">// Tidak ada data yang cocok dengan kriteria.</td></tr>`;
           dom.pageInfo.innerText = 'Halaman 0 dari 0';
           dom.btnPrevPage.disabled = true;
           dom.btnNextPage.disabled = true;
@@ -857,7 +852,22 @@
           tr.className = "hover:bg-slate-900/80 transition border-b border-slate-800/40";
 
           const fieldCells = state.currentDynamicFields.map(fieldKey => {
-            const val = dataObj[fieldKey];
+            let val = dataObj[fieldKey];
+
+            // Fallback pintar untuk dokumen lama yang belum memiliki field hari/tanggal secara eksplisit
+            if ((val === undefined || val === null || val === '') && dataObj.created_at && dataObj.created_at.seconds) {
+              const dObj = new Date(dataObj.created_at.seconds * 1000);
+              if (fieldKey === 'hari') {
+                val = dObj.toLocaleDateString('id-ID', { weekday: 'long' });
+              } else if (fieldKey === 'tanggal') {
+                val = dObj.toLocaleDateString('id-ID', { year: 'numeric', month: '2-digit', day: '2-digit' }).split('/').reverse().join('-');
+              } else if (fieldKey === 'waktu') {
+                val = dataObj.waktu_scan || dObj.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', second: '2-digit' }) + ' WIB';
+              }
+            } else if ((val === undefined || val === null || val === '') && fieldKey === 'waktu' && dataObj.waktu_scan) {
+              val = dataObj.waktu_scan;
+            }
+
             return `<td class="p-3 border-r border-slate-800/60 max-w-xs overflow-hidden text-ellipsis">${Sanitizer.formatCellContent(val, fieldKey, docId)}</td>`;
           }).join('');
 
@@ -870,7 +880,6 @@
 
           tr.innerHTML = `
             <td class="p-3 text-center border-r border-slate-800/60 font-mono text-slate-400 font-bold">${globalRowIndex}</td>
-            <td class="p-3 font-bold text-cyan-400 border-r border-slate-800/60 font-mono">${docId}</td>
             ${fieldCells}
             <td class="p-3 text-center border-r border-slate-800/60">
               <input type="checkbox" data-id="${docId}" ${isChecked ? 'checked' : ''} class="row-checkbox rounded bg-slate-900 border-slate-700 text-cyan-500 focus:ring-0 cursor-pointer">
@@ -1156,9 +1165,15 @@
         }
 
         const fieldSet = new Set();
+        if (colName === 'log_absensi') {
+          ['nis', 'nama_siswa', 'id_kelas', 'nama_mapel', 'hari', 'tanggal', 'waktu', 'status'].forEach(k => fieldSet.add(k));
+        } else if (colName === 'sesi_absensi') {
+          ['id_kelas', 'nama_mapel', 'hari', 'tanggal', 'waktu', 'is_active'].forEach(k => fieldSet.add(k));
+        }
+
         snapshot.docs.forEach(docSnap => {
           Object.keys(docSnap.data()).forEach(k => {
-            if (k.toLowerCase() !== 'created_at' && k.toLowerCase() !== 'createdat') {
+            if (k.toLowerCase() !== 'created_at' && k.toLowerCase() !== 'createdat' && k.toLowerCase() !== 'device_id') {
               fieldSet.add(k);
             }
           });
