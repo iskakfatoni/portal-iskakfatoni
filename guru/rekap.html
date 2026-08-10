@@ -269,11 +269,11 @@
           let dayStr = d.hari || (d.tanggal ? new Date(d.tanggal).toLocaleDateString('id-ID', { weekday: 'long' }) : '');
           let timeDisplay = "-";
           if (d.tanggal) {
-            timeDisplay = `${dayStr ? dayStr + ', ' : ''}${d.tanggal} (${d.waktu || d.waktu_scan || '-'})`;
+            timeDisplay = `${dayStr ? dayStr + ', ' : ''}${d.tanggal} (${d.waktu || '-'})`;
           } else if (d.created_at && d.created_at.seconds) {
             timeDisplay = new Date(d.created_at.seconds * 1000).toLocaleString('id-ID', { weekday: 'long', year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' });
-          } else if (d.waktu_scan) {
-            timeDisplay = d.waktu_scan;
+          } else if (d.waktu) {
+            timeDisplay = d.waktu;
           }
 
           currentData.push({

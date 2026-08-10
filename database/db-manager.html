@@ -920,10 +920,8 @@
               } else if (fieldKey === 'tanggal') {
                 val = dObj.toLocaleDateString('id-ID', { year: 'numeric', month: '2-digit', day: '2-digit' }).split('/').reverse().join('-');
               } else if (fieldKey === 'waktu') {
-                val = dataObj.waktu_scan || dObj.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', second: '2-digit' }) + ' WIB';
+                val = dObj.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', second: '2-digit' }) + ' WIB';
               }
-            } else if ((val === undefined || val === null || val === '') && fieldKey === 'waktu' && dataObj.waktu_scan) {
-              val = dataObj.waktu_scan;
             }
 
             return `<td class="p-3 border-r border-slate-800/60 whitespace-nowrap overflow-hidden text-ellipsis">${Sanitizer.formatCellContent(val, fieldKey, docId)}</td>`;
@@ -1231,7 +1229,7 @@
 
         snapshot.docs.forEach(docSnap => {
           Object.keys(docSnap.data()).forEach(k => {
-            if (k.toLowerCase() !== 'created_at' && k.toLowerCase() !== 'createdat' && k.toLowerCase() !== 'device_id') {
+            if (k.toLowerCase() !== 'created_at' && k.toLowerCase() !== 'createdat' && k.toLowerCase() !== 'device_id' && k.toLowerCase() !== 'waktu_scan') {
               fieldSet.add(k);
             }
           });

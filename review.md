@@ -4,6 +4,31 @@ Dokumen ini berisi rangkuman review perubahan kode (*code review*) terbaru yang 
 
 ---
 
+## 📅 Review [2026-08-10 09:37 WIB] - Standarisasi Field 'waktu' dan Eliminasi Kolom Redundan 'waktu_scan' pada log_absensi
+
+### 📁 1. Berkas yang Diubah
+* 📄 **[guru/rekap.html](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/guru/rekap.html)**
+* 📄 **[database/db-manager.html](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/database/db-manager.html)**
+
+---
+
+### 📝 2. Rincian Baris & Logika yang Diperbarui
+
+1. **Eliminasi Kolom Redundan `waktu_scan`**:
+   - Kolom `waktu_scan` sebelumnya bernilai sama persis dengan field standar **`waktu`**.
+   - Menghapus penyajian kolom `waktu_scan` dari render tabel visual di Firestore DB Manager (`database/db-manager.html`) dan menyederhanakan pemanggilan field menjadi `d.waktu` pada halaman Rekap Guru (`guru/rekap.html`).
+   - Struktur data menjadi jauh lebih bersih, konsisten, dan efisien.
+
+---
+
+### 🧪 3. Petunjuk Pengujian Lokal (*Local Verification*)
+
+1. Buka peramban di [http://localhost:8080/database/db-manager.html](http://localhost:8080/database/db-manager.html) &rarr; **Log Presensi**.
+2. Perhatikan tabel kini hanya menyajikan satu kolom **`waktu`** yang bersih dan tidak ada lagi kolom duplikat `waktu_scan`.
+3. Buka [http://localhost:8080/guru/rekap.html](http://localhost:8080/guru/rekap.html) &rarr; Tampilan waktu scan presensi tetap berjalan 100% normal.
+
+---
+
 ## 📅 Review [2026-08-10 09:34 WIB] - Penambahan Status 'Tidak Hadir' Otomatis untuk Siswa yang Belum Absen sampai Jam 17:00 WIB (Per Kelas)
 
 ### 📁 1. Berkas yang Diubah
