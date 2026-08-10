@@ -1,5 +1,14 @@
 # Changelog
 
+## [1.2.0] - 2026-08-10
+
+### Changed
+- Ditingkatkan algoritma hardware fingerprinting menjadi Multi-Layer Hybrid (Persistent Device Seed + Sub-pixel 2D Canvas + WebGL + RAM/DeviceMemory).
+- Diekstraksi fungsi `getHardwareFingerprint` ke ES module terpusat `assets/js/utils/device-fingerprint.js`.
+- Dioptimalkan Firestore DB Manager (`db-manager.html`) dengan Batch Chunking per 400 dokumen pada hapus masal & impor Excel.
+- Diproteksi tipe data NIS agar selalu disimpan sebagai String (mencegah hilangnya angka `0` di depan).
+- Dihapus duplikasi skrip partikel canvas inline dan dikonsolidasikan menggunakan `assets/js/particle-bg.js`.
+
 ## [1.1.0] - 2026-08-09
 
 ### Changed

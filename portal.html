@@ -108,12 +108,9 @@
 
   <!-- FIREBASE LOGIC & HARDWARE DEVICE CHECK FOR GREETING -->
   <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-    import { getFirestore, collection, doc, onSnapshot, query, where, getDocs, orderBy } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
-    import { firebaseConfig } from "./assets/js/config/firebase-config.js";
-
-    const app = initializeApp(firebaseConfig);
-    const db = getFirestore(app);
+    import { db } from "./assets/js/config/firebase-config.js";
+    import { getHardwareFingerprint } from "./assets/js/utils/device-fingerprint.js";
+    import { collection, doc, onSnapshot, query, where, getDocs, orderBy } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
     const marqueeWrapper = document.getElementById('marquee-wrapper');
     const runningTextContent = document.getElementById('running-text-content');
@@ -125,34 +122,6 @@
     const greetingWrapper = document.getElementById('greeting-wrapper');
     const greetingStudentName = document.getElementById('greeting-student-name');
     const greetingStudentClass = document.getElementById('greeting-student-class');
-
-    // FUNGSI HARDWARE FINGERPRINT KONSISTEN
-    async function getHardwareFingerprint() {
-      const gl = document.createElement('canvas').getContext('webgl');
-      let gpuVendor = '';
-      if (gl) {
-        const debugInfo = gl.getExtension('WEBGL_debug_renderer_info');
-        if (debugInfo) {
-          gpuVendor = gl.getParameter(debugInfo.UNMASKED_RENDERER_WEBGL) || '';
-        }
-      }
-
-      const rawString = [
-        navigator.userAgent,
-        screen.width + 'x' + screen.height,
-        screen.colorDepth,
-        navigator.hardwareConcurrency || 2,
-        gpuVendor,
-        Intl.DateTimeFormat().resolvedOptions().timeZone
-      ].join('||');
-
-      const msgBuffer = new TextEncoder().encode(rawString);
-      const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
-      const hashArray = Array.from(new Uint8Array(hashBuffer));
-      const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
-      
-      return 'HW-' + hashHex.substring(0, 16).toUpperCase();
-    }
 
     // MEMERIKSA STATUS IKATAN DEVICE UNTUK TAMPILKAN "Hai, [Nama]"
     document.addEventListener('DOMContentLoaded', async () => {

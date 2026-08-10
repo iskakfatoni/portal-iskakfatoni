@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="id" class="auth-guard">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -15,8 +16,10 @@
   <script defer src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap"
+    rel="stylesheet">
 </head>
+
 <body class="theme-dashboard min-h-screen flex flex-col justify-start items-center p-3 md:p-6 relative">
 
   <!-- BACKGROUND PARTICLE CANVAS -->
@@ -24,11 +27,13 @@
 
   <!-- KONTEN UTAMA DIBUAT FULL SCREEN (W-FULL) -->
   <main class="w-full space-y-4 relative z-10">
-    
+
     <!-- TOP BAR HEADER -->
-    <header class="flex flex-col sm:flex-row items-start sm:items-center justify-between glass-card p-4 rounded-2xl shadow-xl gap-4 w-full">
+    <header
+      class="flex flex-col sm:flex-row items-start sm:items-center justify-between glass-card p-4 rounded-2xl shadow-xl gap-4 w-full">
       <div class="flex items-center gap-3.5">
-        <div class="w-11 h-11 rounded-xl bg-cyan-500/10 border border-cyan-500/30 flex items-center justify-center text-cyan-400 font-bold">
+        <div
+          class="w-11 h-11 rounded-xl bg-cyan-500/10 border border-cyan-500/30 flex items-center justify-center text-cyan-400 font-bold">
           <i class="fa-solid fa-database text-xl"></i>
         </div>
         <div>
@@ -38,7 +43,8 @@
       </div>
 
       <div class="flex items-center gap-3 w-full sm:w-auto justify-end">
-        <button id="btn-logout" title="Kembali ke Hub Admin" class="py-2.5 px-4 bg-red-500/15 hover:bg-red-500/30 text-red-400 border border-red-500/40 font-bold text-xs rounded-xl transition flex items-center gap-2 cursor-pointer">
+        <button id="btn-logout" title="Kembali ke Hub Admin"
+          class="py-2.5 px-4 bg-red-500/15 hover:bg-red-500/30 text-red-400 border border-red-500/40 font-bold text-xs rounded-xl transition flex items-center gap-2 cursor-pointer">
           <i class="fa-solid fa-arrow-left"></i> <span>Kembali ke Admin</span>
         </button>
       </div>
@@ -46,37 +52,50 @@
 
     <!-- DASHBOARD PANEL FULL WIDTH -->
     <div class="grid grid-cols-1 lg:grid-cols-12 gap-4 w-full">
-      
+
       <!-- NAVIGASI KOLEKSI DATABASE (KOLOM KIRI) -->
       <aside class="lg:col-span-2 space-y-3">
         <div class="glass-card p-4 rounded-2xl shadow-xl space-y-2">
-          <h2 class="text-xs font-bold text-cyan-400 border-b border-slate-800 pb-2 flex items-center gap-2 uppercase tracking-wider">
+          <h2
+            class="text-xs font-bold text-cyan-400 border-b border-slate-800 pb-2 flex items-center gap-2 uppercase tracking-wider">
             <i class="fa-solid fa-folder-tree"></i> Koleksi Database
           </h2>
           <nav id="collection-list" class="space-y-1.5 pt-1">
-            <button data-collection="siswa" class="btn-col w-full text-left px-3.5 py-2.5 rounded-xl text-xs font-bold transition flex items-center justify-between cursor-pointer bg-cyan-500/20 text-cyan-300 border border-cyan-500/40">
+            <button data-collection="siswa"
+              class="btn-col w-full text-left px-3.5 py-2.5 rounded-xl text-xs font-bold transition flex items-center justify-between cursor-pointer bg-cyan-500/20 text-cyan-300 border border-cyan-500/40">
               <span class="flex items-center gap-2"><i class="fa-solid fa-users"></i> siswa</span>
-              <span id="badge-siswa" class="px-2 py-0.5 rounded-full text-[10px] bg-slate-900 border border-slate-700 font-mono text-slate-300">0</span>
+              <span id="badge-siswa"
+                class="px-2 py-0.5 rounded-full text-[10px] bg-slate-900 border border-slate-700 font-mono text-slate-300">0</span>
             </button>
-            <button data-collection="kelas" class="btn-col w-full text-left px-3.5 py-2.5 rounded-xl text-xs font-bold transition flex items-center justify-between cursor-pointer bg-slate-900/60 text-slate-400 hover:bg-slate-800 border border-slate-800">
+            <button data-collection="kelas"
+              class="btn-col w-full text-left px-3.5 py-2.5 rounded-xl text-xs font-bold transition flex items-center justify-between cursor-pointer bg-slate-900/60 text-slate-400 hover:bg-slate-800 border border-slate-800">
               <span class="flex items-center gap-2"><i class="fa-solid fa-door-open"></i> kelas</span>
-              <span id="badge-kelas" class="px-2 py-0.5 rounded-full text-[10px] bg-slate-900 border border-slate-700 font-mono text-slate-300">0</span>
+              <span id="badge-kelas"
+                class="px-2 py-0.5 rounded-full text-[10px] bg-slate-900 border border-slate-700 font-mono text-slate-300">0</span>
             </button>
-            <button data-collection="mapel" class="btn-col w-full text-left px-3.5 py-2.5 rounded-xl text-xs font-bold transition flex items-center justify-between cursor-pointer bg-slate-900/60 text-slate-400 hover:bg-slate-800 border border-slate-800">
+            <button data-collection="mapel"
+              class="btn-col w-full text-left px-3.5 py-2.5 rounded-xl text-xs font-bold transition flex items-center justify-between cursor-pointer bg-slate-900/60 text-slate-400 hover:bg-slate-800 border border-slate-800">
               <span class="flex items-center gap-2"><i class="fa-solid fa-book"></i> mapel</span>
-              <span id="badge-mapel" class="px-2 py-0.5 rounded-full text-[10px] bg-slate-900 border border-slate-700 font-mono text-slate-300">0</span>
+              <span id="badge-mapel"
+                class="px-2 py-0.5 rounded-full text-[10px] bg-slate-900 border border-slate-700 font-mono text-slate-300">0</span>
             </button>
-            <button data-collection="sesi_absensi" class="btn-col w-full text-left px-3.5 py-2.5 rounded-xl text-xs font-bold transition flex items-center justify-between cursor-pointer bg-slate-900/60 text-slate-400 hover:bg-slate-800 border border-slate-800">
+            <button data-collection="sesi_absensi"
+              class="btn-col w-full text-left px-3.5 py-2.5 rounded-xl text-xs font-bold transition flex items-center justify-between cursor-pointer bg-slate-900/60 text-slate-400 hover:bg-slate-800 border border-slate-800">
               <span class="flex items-center gap-2"><i class="fa-solid fa-calendar-check"></i> sesi_absensi</span>
-              <span id="badge-sesi_absensi" class="px-2 py-0.5 rounded-full text-[10px] bg-slate-900 border border-slate-700 font-mono text-slate-300">0</span>
+              <span id="badge-sesi_absensi"
+                class="px-2 py-0.5 rounded-full text-[10px] bg-slate-900 border border-slate-700 font-mono text-slate-300">0</span>
             </button>
-            <button data-collection="log_absensi" class="btn-col w-full text-left px-3.5 py-2.5 rounded-xl text-xs font-bold transition flex items-center justify-between cursor-pointer bg-slate-900/60 text-slate-400 hover:bg-slate-800 border border-slate-800">
+            <button data-collection="log_absensi"
+              class="btn-col w-full text-left px-3.5 py-2.5 rounded-xl text-xs font-bold transition flex items-center justify-between cursor-pointer bg-slate-900/60 text-slate-400 hover:bg-slate-800 border border-slate-800">
               <span class="flex items-center gap-2"><i class="fa-solid fa-clipboard-user"></i> log_absensi</span>
-              <span id="badge-log_absensi" class="px-2 py-0.5 rounded-full text-[10px] bg-slate-900 border border-slate-700 font-mono text-slate-300">0</span>
+              <span id="badge-log_absensi"
+                class="px-2 py-0.5 rounded-full text-[10px] bg-slate-900 border border-slate-700 font-mono text-slate-300">0</span>
             </button>
-            <button data-collection="links" class="btn-col w-full text-left px-3.5 py-2.5 rounded-xl text-xs font-bold transition flex items-center justify-between cursor-pointer bg-slate-900/60 text-slate-400 hover:bg-slate-800 border border-slate-800">
+            <button data-collection="links"
+              class="btn-col w-full text-left px-3.5 py-2.5 rounded-xl text-xs font-bold transition flex items-center justify-between cursor-pointer bg-slate-900/60 text-slate-400 hover:bg-slate-800 border border-slate-800">
               <span class="flex items-center gap-2"><i class="fa-solid fa-link"></i> links</span>
-              <span id="badge-links" class="px-2 py-0.5 rounded-full text-[10px] bg-slate-900 border border-slate-700 font-mono text-slate-300">0</span>
+              <span id="badge-links"
+                class="px-2 py-0.5 rounded-full text-[10px] bg-slate-900 border border-slate-700 font-mono text-slate-300">0</span>
             </button>
           </nav>
         </div>
@@ -85,55 +104,70 @@
       <!-- KONTEN TABEL MATRIKS DINAMIS (KOLOM KANAN) -->
       <section class="lg:col-span-10 space-y-4">
         <div class="glass-card p-4 md:p-5 rounded-2xl shadow-xl space-y-4 w-full">
-          
+
           <!-- TOOLBAR TABLE -->
-          <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 border-b border-slate-800 pb-3">
+          <div
+            class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 border-b border-slate-800 pb-3">
             <div>
-              <h2 id="active-collection-title" class="text-sm font-extrabold text-white flex items-center gap-2 uppercase tracking-wide">
-                <i class="fa-solid fa-table-list text-cyan-400"></i> Koleksi: <span class="text-cyan-400 font-mono">siswa</span>
+              <h2 id="active-collection-title"
+                class="text-sm font-extrabold text-white flex items-center gap-2 uppercase tracking-wide">
+                <i class="fa-solid fa-table-list text-cyan-400"></i> Koleksi: <span
+                  class="text-cyan-400 font-mono">siswa</span>
               </h2>
-              <p class="text-[11px] text-slate-400 font-mono mt-0.5">Total dokumen: <span id="total-doc-count" class="text-emerald-400 font-bold">0</span></p>
+              <p class="text-[11px] text-slate-400 font-mono mt-0.5">Total dokumen: <span id="total-doc-count"
+                  class="text-emerald-400 font-bold">0</span></p>
             </div>
 
             <!-- AKSI SELEKSI, TAMBAH, IMPORT, EXPORT, & HAPUS MASAL -->
             <div class="flex flex-wrap items-center gap-2 w-full sm:w-auto justify-end">
               <!-- TOMBOL DATA BARU MANUAL -->
-              <button id="btn-add-new-data" class="py-2 px-3.5 bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-bold text-xs rounded-xl transition flex items-center gap-1.5 cursor-pointer shadow-lg shadow-cyan-500/20">
+              <button id="btn-add-new-data"
+                class="py-2 px-3.5 bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-bold text-xs rounded-xl transition flex items-center gap-1.5 cursor-pointer shadow-lg shadow-cyan-500/20">
                 <i class="fa-solid fa-plus"></i> <span>+ Data Baru</span>
               </button>
 
               <!-- TOMBOL IMPORT FILE EXCEL/CSV/JSON -->
-              <button id="btn-open-import-modal" class="py-2 px-3.5 bg-teal-500/15 hover:bg-teal-500/30 text-teal-300 border border-teal-500/30 font-bold text-xs rounded-xl transition flex items-center gap-1.5 cursor-pointer">
+              <button id="btn-open-import-modal"
+                class="py-2 px-3.5 bg-teal-500/15 hover:bg-teal-500/30 text-teal-300 border border-teal-500/30 font-bold text-xs rounded-xl transition flex items-center gap-1.5 cursor-pointer">
                 <i class="fa-solid fa-file-import"></i> <span>Import Data</span>
               </button>
 
               <!-- TOMBOL EKSPOR PERANGKAT EXCEL (KHUSUS KOLEKSI SISWA) -->
-              <button id="btn-export-device-excel" class="py-2 px-3.5 bg-emerald-500/10 hover:bg-emerald-500/25 text-emerald-400 border border-emerald-500/30 font-bold text-xs rounded-xl transition flex items-center gap-1.5 cursor-pointer">
+              <button id="btn-export-device-excel"
+                class="py-2 px-3.5 bg-emerald-500/10 hover:bg-emerald-500/25 text-emerald-400 border border-emerald-500/30 font-bold text-xs rounded-xl transition flex items-center gap-1.5 cursor-pointer">
                 <i class="fa-solid fa-file-excel"></i> <span>Ekspor Perangkat (.xlsx)</span>
               </button>
 
-              <button id="btn-delete-selected" disabled class="py-2 px-3.5 bg-red-500/10 hover:bg-red-500/25 text-red-400 border border-red-500/30 font-bold text-xs rounded-xl transition flex items-center gap-1.5 cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed">
+              <button id="btn-delete-selected" disabled
+                class="py-2 px-3.5 bg-red-500/10 hover:bg-red-500/25 text-red-400 border border-red-500/30 font-bold text-xs rounded-xl transition flex items-center gap-1.5 cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed">
                 <i class="fa-solid fa-trash-can"></i> <span>Hapus Terpilih (<span id="selected-count">0</span>)</span>
               </button>
-              
-              <button id="btn-clear-collection" class="py-2 px-3.5 bg-rose-950/40 hover:bg-rose-900/60 text-rose-300 border border-rose-800/60 font-bold text-xs rounded-xl transition flex items-center gap-1.5 cursor-pointer">
+
+              <button id="btn-clear-collection"
+                class="py-2 px-3.5 bg-rose-950/40 hover:bg-rose-900/60 text-rose-300 border border-rose-800/60 font-bold text-xs rounded-xl transition flex items-center gap-1.5 cursor-pointer">
                 <i class="fa-solid fa-triangle-exclamation"></i> <span>Kosongkan Koleksi</span>
               </button>
             </div>
           </div>
 
           <!-- TABEL FIRESTORE DINAMIS WIDE -->
-          <div class="overflow-x-auto max-h-[640px] overflow-y-auto rounded-xl border border-slate-800 bg-slate-950/70 w-full">
+          <div
+            class="overflow-x-auto max-h-[640px] overflow-y-auto rounded-xl border border-slate-800 bg-slate-950/70 w-full">
             <table class="w-full text-left border-collapse text-xs whitespace-nowrap">
-              <thead class="sticky top-0 bg-slate-900/95 backdrop-blur border-b border-slate-800 text-slate-300 uppercase tracking-wider font-mono text-[11px] z-10">
+              <thead
+                class="sticky top-0 bg-slate-900/95 backdrop-blur border-b border-slate-800 text-slate-300 uppercase tracking-wider font-mono text-[11px] z-10">
                 <tr id="table-header-row">
                   <th class="p-3 w-12 text-center border-r border-slate-800 font-bold text-slate-400">NO</th>
-                  <th class="p-3 font-bold text-cyan-400 border-r border-slate-800 cursor-pointer hover:bg-slate-800/60 select-none" data-sort="id">
+                  <th
+                    class="p-3 font-bold text-cyan-400 border-r border-slate-800 cursor-pointer hover:bg-slate-800/60 select-none"
+                    data-sort="id">
                     Document ID <span class="sort-icon text-[10px] ml-1">⇅</span>
                   </th>
                   <!-- FIELD DINAMIS -->
                   <th class="p-3 w-10 text-center border-r border-slate-800">
-                    <input type="checkbox" id="select-all-checkbox" class="rounded bg-slate-900 border-slate-700 text-cyan-500 focus:ring-0 cursor-pointer" title="Pilih Semua">
+                    <input type="checkbox" id="select-all-checkbox"
+                      class="rounded bg-slate-900 border-slate-700 text-cyan-500 focus:ring-0 cursor-pointer"
+                      title="Pilih Semua">
                   </th>
                   <th class="p-3 w-28 text-center">Aksi</th>
                 </tr>
@@ -165,11 +199,13 @@
   </main>
 
   <!-- MODAL 1: TAMBAH DATA BARU MANUAL -->
-  <div id="modal-add-data" class="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-50 hidden flex items-center justify-center p-4">
+  <div id="modal-add-data"
+    class="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-50 hidden flex items-center justify-center p-4">
     <div class="glass-card max-w-lg w-full p-6 rounded-2xl shadow-2xl space-y-4 border border-slate-700">
       <div class="flex items-center justify-between border-b border-slate-800 pb-3">
         <h3 class="text-sm font-bold text-cyan-400 flex items-center gap-2 uppercase tracking-wider">
-          <i class="fa-solid fa-plus-circle"></i> Tambah Data Baru (<span id="modal-col-name" class="font-mono text-emerald-400">siswa</span>)
+          <i class="fa-solid fa-plus-circle"></i> Tambah Data Baru (<span id="modal-col-name"
+            class="font-mono text-emerald-400">siswa</span>)
         </h3>
         <button id="btn-close-add-modal" class="text-slate-400 hover:text-white transition">
           <i class="fa-solid fa-xmark text-lg"></i>
@@ -179,7 +215,8 @@
       <form id="form-add-manual" class="space-y-3">
         <div class="space-y-1">
           <label class="block text-xs font-semibold text-slate-300">Document ID (Opsional, kosongkan jika acak)</label>
-          <input type="text" id="input-doc-id" placeholder="Misal: 9177-413 (Ganti '/' dengan '-')" class="w-full px-3.5 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-slate-100 text-xs focus:outline-none focus:border-cyan-500 font-mono">
+          <input type="text" id="input-doc-id" placeholder="Misal: 9177-413 (Ganti '/' dengan '-')"
+            class="w-full px-3.5 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-slate-100 text-xs focus:outline-none focus:border-cyan-500 font-mono">
         </div>
 
         <div id="dynamic-input-fields" class="space-y-3 max-h-60 overflow-y-auto pr-1">
@@ -187,10 +224,12 @@
         </div>
 
         <div class="flex gap-2 pt-2 border-t border-slate-800">
-          <button type="button" id="btn-cancel-add-modal" class="flex-1 py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold text-xs rounded-xl transition">
+          <button type="button" id="btn-cancel-add-modal"
+            class="flex-1 py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold text-xs rounded-xl transition">
             Batal
           </button>
-          <button type="submit" class="flex-1 py-2.5 bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-bold text-xs rounded-xl transition shadow-lg shadow-cyan-500/20">
+          <button type="submit"
+            class="flex-1 py-2.5 bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-bold text-xs rounded-xl transition shadow-lg shadow-cyan-500/20">
             Simpan ke Firestore
           </button>
         </div>
@@ -199,11 +238,13 @@
   </div>
 
   <!-- MODAL 2: IMPORT DATA FILE (.XLSX / .CSV / .JSON) -->
-  <div id="modal-import-file" class="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-50 hidden flex items-center justify-center p-4">
+  <div id="modal-import-file"
+    class="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-50 hidden flex items-center justify-center p-4">
     <div class="glass-card max-w-lg w-full p-6 rounded-2xl shadow-2xl space-y-4 border border-slate-700">
       <div class="flex items-center justify-between border-b border-slate-800 pb-3">
         <h3 class="text-sm font-bold text-teal-400 flex items-center gap-2 uppercase tracking-wider">
-          <i class="fa-solid fa-file-import"></i> Import Data Koleksi: <span id="import-col-name" class="font-mono text-cyan-400">siswa</span>
+          <i class="fa-solid fa-file-import"></i> Import Data Koleksi: <span id="import-col-name"
+            class="font-mono text-cyan-400">siswa</span>
         </h3>
         <button id="btn-close-import-modal" class="text-slate-400 hover:text-white transition">
           <i class="fa-solid fa-xmark text-lg"></i>
@@ -211,28 +252,34 @@
       </div>
 
       <div class="space-y-3">
-        <p class="text-xs text-slate-300">Pilih berkas <b>.xlsx</b>, <b>.csv</b>, atau <b>.json</b>. Pastikan nama header/kolom di file cocok dengan field di Firestore.</p>
+        <p class="text-xs text-slate-300">Pilih berkas <b>.xlsx</b>, <b>.csv</b>, atau <b>.json</b>. Pastikan nama
+          header/kolom di file cocok dengan field di Firestore.</p>
 
         <div class="flex items-center justify-between bg-slate-900 p-3 rounded-xl border border-slate-800">
           <span class="text-xs text-slate-400">Unduh Format Template:</span>
-          <button id="btn-download-template" type="button" class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-cyan-400 font-semibold text-xs rounded-lg transition border border-slate-700">
+          <button id="btn-download-template" type="button"
+            class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-cyan-400 font-semibold text-xs rounded-lg transition border border-slate-700">
             <i class="fa-solid fa-download"></i> Template Excel (.xlsx)
           </button>
         </div>
 
-        <input type="file" id="import-file-input" accept=".xlsx, .xls, .csv, .json" class="block w-full text-xs text-slate-400 file:mr-3 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-slate-800 file:text-teal-400 hover:file:bg-slate-700 cursor-pointer border border-slate-800 rounded-xl p-1 bg-slate-950">
+        <input type="file" id="import-file-input" accept=".xlsx, .xls, .csv, .json"
+          class="block w-full text-xs text-slate-400 file:mr-3 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-slate-800 file:text-teal-400 hover:file:bg-slate-700 cursor-pointer border border-slate-800 rounded-xl p-1 bg-slate-950">
 
         <!-- LOG BOX IMPOR -->
-        <div id="import-log-box" class="bg-slate-950 rounded-xl p-3 border border-slate-800 font-mono text-[11px] text-slate-300 h-36 overflow-y-auto space-y-1">
+        <div id="import-log-box"
+          class="bg-slate-950 rounded-xl p-3 border border-slate-800 font-mono text-[11px] text-slate-300 h-36 overflow-y-auto space-y-1">
           <p class="text-slate-500">// Log proses impor akan tampil di sini...</p>
         </div>
       </div>
 
       <div class="flex gap-2 pt-2 border-t border-slate-800">
-        <button type="button" id="btn-cancel-import-modal" class="flex-1 py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold text-xs rounded-xl transition">
+        <button type="button" id="btn-cancel-import-modal"
+          class="flex-1 py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold text-xs rounded-xl transition">
           Batal
         </button>
-        <button type="button" id="btn-process-import" disabled class="flex-1 py-2.5 bg-gradient-to-r from-teal-400 to-cyan-400 text-slate-950 font-bold text-xs rounded-xl hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed transition shadow-lg shadow-cyan-500/10">
+        <button type="button" id="btn-process-import" disabled
+          class="flex-1 py-2.5 bg-gradient-to-r from-teal-400 to-cyan-400 text-slate-950 font-bold text-xs rounded-xl hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed transition shadow-lg shadow-cyan-500/10">
           🚀 Proses &amp; Simpan
         </button>
       </div>
@@ -240,77 +287,7 @@
   </div>
 
   <!-- PARTICLE CANVAS ANIMATION -->
-  <script>
-    const canvas = document.getElementById('particle-canvas');
-    const ctx = canvas.getContext('2d');
-    let particles = [];
-    let animationFrameId = null;
-    let shouldRun = window.innerWidth >= 768;
-
-    function initCanvas() {
-      canvas.width = Math.min(window.innerWidth, 1400);
-      canvas.height = window.innerHeight;
-      particles = [];
-
-      const particleCount = window.innerWidth < 768 ? 10 : 24;
-      for (let i = 0; i < particleCount; i++) {
-        particles.push({
-          x: Math.random() * canvas.width,
-          y: Math.random() * canvas.height,
-          radius: Math.random() * 1.6 + 0.8,
-          speedY: Math.random() * -0.35 - 0.1,
-          speedX: (Math.random() - 0.5) * 0.18,
-          opacity: Math.random() * 0.45 + 0.2
-        });
-      }
-    }
-
-    function drawParticles() {
-      if (!shouldRun) return;
-
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      const isDarkMode = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
-      const particleColor = isDarkMode ? "0, 245, 212" : "139, 92, 246";
-
-      particles.forEach(p => {
-        ctx.beginPath();
-        ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
-        ctx.fillStyle = `rgba(${particleColor}, ${p.opacity})`;
-        ctx.shadowBlur = 4;
-        ctx.shadowColor = `rgb(${particleColor})`;
-        ctx.fill();
-
-        p.y += p.speedY; p.x += p.speedX;
-        if (p.y < 0) { p.y = canvas.height; p.x = Math.random() * canvas.width; }
-      });
-      animationFrameId = requestAnimationFrame(drawParticles);
-    }
-
-    function startParticles() {
-      if (shouldRun) return;
-      shouldRun = true;
-      initCanvas();
-      drawParticles();
-    }
-
-    function stopParticles() {
-      shouldRun = false;
-      if (animationFrameId) cancelAnimationFrame(animationFrameId);
-    }
-
-    window.addEventListener('resize', () => {
-      if (window.innerWidth < 768) {
-        stopParticles();
-      } else {
-        startParticles();
-      }
-    });
-
-    if (window.innerWidth >= 768) {
-      initCanvas();
-      drawParticles();
-    }
-  </script>
+  <script src="../assets/js/particle-bg.js"></script>
 
   <!-- FIREBASE AUTH & FIRESTORE SCRIPT -->
   <script type="module">
@@ -356,7 +333,7 @@
     let selectedDocIds = new Set();
     let currentDocsList = [];
     let parsedImportData = [];
-    
+
     // STATE UNTUK SORTING
     let currentSortField = null;
     let currentSortOrder = 'asc';
@@ -399,7 +376,7 @@
         currentSortField = null;
         currentSortOrder = 'asc';
         activeCollectionTitle.innerHTML = `<i class="fa-solid fa-table-list text-cyan-400"></i> Koleksi: <span class="text-cyan-400 font-mono">${currentCollection}</span>`;
-        
+
         if (btnExportDeviceExcel) {
           btnExportDeviceExcel.style.display = currentCollection === 'siswa' ? 'inline-flex' : 'none';
         }
@@ -411,11 +388,11 @@
     // PERBAIKAN: Fungsi formatCellContent sekarang menerima docId dan fieldKey untuk merender Checkbox
     function formatCellContent(value, fieldKey = '', docId = '') {
       if (value === null || value === undefined) return '<span class="text-slate-600">-</span>';
-      
+
       if (typeof value === 'object' && value.seconds !== undefined) {
         return `<span class="text-emerald-400">${new Date(value.seconds * 1000).toLocaleString('id-ID')}</span>`;
       }
-      
+
       if (typeof value === 'object') {
         return `<span class="text-amber-300/80">${JSON.stringify(value)}</span>`;
       }
@@ -444,7 +421,7 @@
 
       selectedDocIds.clear();
       updateSelectedUI();
-      
+
       tableBody.innerHTML = `<tr><td colspan="12" class="p-8 text-center text-slate-500 font-sans">// Memuat koleksi "${colName}"...</td></tr>`;
 
       unsubscribeCurrent = onSnapshot(collection(db, colName), (snapshot) => {
@@ -474,8 +451,8 @@
     function renderTableHeaders() {
       const getSortIcon = (field) => {
         if (currentSortField !== field) return '<span class="text-[10px] text-slate-600 ml-1">⇅</span>';
-        return currentSortOrder === 'asc' 
-          ? '<span class="text-[10px] text-cyan-400 ml-1">▲</span>' 
+        return currentSortOrder === 'asc'
+          ? '<span class="text-[10px] text-cyan-400 ml-1">▲</span>'
           : '<span class="text-[10px] text-cyan-400 ml-1">▼</span>';
       };
 
@@ -561,7 +538,7 @@
 
         const tr = document.createElement('tr');
         tr.className = "hover:bg-slate-900/80 transition border-b border-slate-800/40";
-        
+
         // Perbaikan: Meneruskan data fieldKey dan docId ke formatCellContent
         const fieldCells = currentDynamicFields.map(fieldKey => {
           const val = dataObj[fieldKey];
@@ -596,10 +573,10 @@
             const targetField = e.target.getAttribute('data-field');
             const targetDocId = e.target.getAttribute('data-doc');
             const newValue = e.target.checked;
-            
+
             try {
-              await updateDoc(doc(db, currentCollection, targetDocId), { 
-                [targetField]: newValue 
+              await updateDoc(doc(db, currentCollection, targetDocId), {
+                [targetField]: newValue
               });
             } catch (err) {
               alert(`Gagal merubah status ${targetField}: ` + err.message);
@@ -673,331 +650,376 @@
         }
       });
       updateSelectedUI();
-    }
+      function updateSelectedUI() {
+        const count = selectedDocIds.size;
+        selectedCountSpan.innerText = count;
+        btnDeleteSelected.disabled = count === 0;
+      }
 
-    function updateSelectedUI() {
-      const count = selectedDocIds.size;
-      selectedCountSpan.innerText = count;
-      btnDeleteSelected.disabled = count === 0;
-    }
+      btnDeleteSelected.addEventListener('click', async () => {
+        const count = selectedDocIds.size;
+        if (count === 0) return;
 
-    btnDeleteSelected.addEventListener('click', async () => {
-      const count = selectedDocIds.size;
-      if (count === 0) return;
+        if (confirm(`Apakah Anda yakin ingin menghapus ${count} dokumen terpilih dari koleksi "${currentCollection}"?`)) {
+          try {
+            const docIdsArray = Array.from(selectedDocIds);
+            const CHUNK_SIZE = 400;
 
-      if (confirm(`Apakah Anda yakin ingin menghapus ${count} dokumen terpilih dari koleksi "${currentCollection}"?`)) {
-        try {
-          const batch = writeBatch(db);
-          selectedDocIds.forEach(id => {
-            batch.delete(doc(db, currentCollection, id));
-          });
+            for (let i = 0; i < docIdsArray.length; i += CHUNK_SIZE) {
+              const chunk = docIdsArray.slice(i, i + CHUNK_SIZE);
+              const batch = writeBatch(db);
+              chunk.forEach(id => {
+                batch.delete(doc(db, currentCollection, id));
+              });
+              await batch.commit();
+            }
 
-          await batch.commit();
-          selectedDocIds.clear();
-          updateSelectedUI();
-          const headerChk = document.getElementById('select-all-checkbox');
-          if (headerChk) headerChk.checked = false;
-          alert(`Berhasil menghapus ${count} dokumen!`);
-        } catch (err) {
-          alert("Gagal menghapus dokumen terpilih: " + err.message);
+            selectedDocIds.clear();
+            updateSelectedUI();
+            const headerChk = document.getElementById('select-all-checkbox');
+            if (headerChk) headerChk.checked = false;
+            alert(`Berhasil menghapus ${count} dokumen!`);
+          } catch (err) {
+            alert("Gagal menghapus dokumen terpilih: " + err.message);
+          }
         }
-      }
-    });
+      });
 
-    btnClearCollection.addEventListener('click', async () => {
-      if (currentDocsList.length === 0) {
-        alert(`Koleksi "${currentCollection}" sudah kosong.`);
-        return;
-      }
-
-      const promptInput = prompt(`⚠️ PERINGATAN BAHAYA!\n\nAnda akan menghapus SELURUH data (${currentDocsList.length} dokumen) dalam koleksi "${currentCollection}".\n\nKetik nama koleksi "${currentCollection}" di bawah ini untuk mengonfirmasi:`);
-
-      if (promptInput === currentCollection) {
-        try {
-          const batch = writeBatch(db);
-          currentDocsList.forEach(d => {
-            batch.delete(doc(db, currentCollection, d.id));
-          });
-
-          await batch.commit();
-          selectedDocIds.clear();
-          updateSelectedUI();
-          const headerChk = document.getElementById('select-all-checkbox');
-          if (headerChk) headerChk.checked = false;
-          alert(`Koleksi "${currentCollection}" berhasil dikosongkan!`);
-        } catch (err) {
-          alert("Gagal mengosongkan koleksi: " + err.message);
+      btnClearCollection.addEventListener('click', async () => {
+        if (currentDocsList.length === 0) {
+          alert(`Koleksi "${currentCollection}" sudah kosong.`);
+          return;
         }
-      } else if (promptInput !== null) {
-        alert("Konfirmasi dibatalkan: Nama koleksi yang dimasukkan tidak cocok.");
-      }
-    });
 
-    // -------------------------------------------------------------
-    // LOGIKA FITUR 1: TAMBAH DATA BARU MANUAL
-    // -------------------------------------------------------------
-    btnAddNewData.addEventListener('click', () => {
-      modalColName.innerText = currentCollection;
-      inputDocId.value = '';
-      dynamicInputFields.innerHTML = '';
+        const promptInput = prompt(`⚠️ PERINGATAN BAHAYA!\n\nAnda akan menghapus SELURUH data (${currentDocsList.length} dokumen) dalam koleksi "${currentCollection}".\n\nKetik nama koleksi "${currentCollection}" di bawah ini untuk mengonfirmasi:`);
 
-      // Tentukan struktur field standar berdasarkan koleksi aktif
-      let fieldsToRender = [...currentDynamicFields];
-      if (fieldsToRender.length === 0) {
-        if (currentCollection === 'siswa') fieldsToRender = ['nis', 'nama_siswa', 'id_kelas', 'nama_kelas'];
-        else if (currentCollection === 'kelas') fieldsToRender = ['id_kelas', 'nama_kelas', 'wali_kelas'];
-        else if (currentCollection === 'mapel') fieldsToRender = ['id_mapel', 'nama_mapel'];
-        else if (currentCollection === 'links') fieldsToRender = ['title', 'url', 'is_active', 'order'];
-        else fieldsToRender = ['nama', 'keterangan'];
-      }
+        if (promptInput === currentCollection) {
+          try {
+            const CHUNK_SIZE = 400;
+            for (let i = 0; i < currentDocsList.length; i += CHUNK_SIZE) {
+              const chunk = currentDocsList.slice(i, i + CHUNK_SIZE);
+              const batch = writeBatch(db);
+              chunk.forEach(d => {
+                batch.delete(doc(db, currentCollection, d.id));
+              });
+              await batch.commit();
+            }
 
-      fieldsToRender.forEach(fieldKey => {
-        const div = document.createElement('div');
-        div.className = 'space-y-1';
-        div.innerHTML = `
+            selectedDocIds.clear();
+            updateSelectedUI();
+            const headerChk = document.getElementById('select-all-checkbox');
+            if (headerChk) headerChk.checked = false;
+            alert(`Koleksi "${currentCollection}" berhasil dikosongkan!`);
+          } catch (err) {
+            alert("Gagal mengosongkan koleksi: " + err.message);
+          }
+        } else if (promptInput !== null) {
+          alert("Konfirmasi dibatalkan: Nama koleksi yang dimasukkan tidak cocok.");
+        }
+      });
+
+      // -------------------------------------------------------------
+      // LOGIKA FITUR 1: TAMBAH DATA BARU MANUAL
+      // -------------------------------------------------------------
+      btnAddNewData.addEventListener('click', () => {
+        modalColName.innerText = currentCollection;
+        inputDocId.value = '';
+        dynamicInputFields.innerHTML = '';
+
+        // Tentukan struktur field standar berdasarkan koleksi aktif
+        let fieldsToRender = [...currentDynamicFields];
+        if (fieldsToRender.length === 0) {
+          if (currentCollection === 'siswa') fieldsToRender = ['nis', 'nama_siswa', 'id_kelas', 'nama_kelas'];
+          else if (currentCollection === 'kelas') fieldsToRender = ['id_kelas', 'nama_kelas', 'wali_kelas'];
+          else if (currentCollection === 'mapel') fieldsToRender = ['id_mapel', 'nama_mapel'];
+          else if (currentCollection === 'links') fieldsToRender = ['title', 'url', 'is_active', 'order'];
+          else fieldsToRender = ['nama', 'keterangan'];
+        }
+
+        fieldsToRender.forEach(fieldKey => {
+          const div = document.createElement('div');
+          div.className = 'space-y-1';
+          div.innerHTML = `
           <label class="block text-xs font-semibold text-slate-300 capitalize">${formatHeaderName(fieldKey)}</label>
           <input type="text" data-field="${fieldKey}" placeholder="Masukkan ${fieldKey}..." class="dynamic-input w-full px-3.5 py-2 bg-slate-950 border border-slate-800 rounded-xl text-slate-100 text-xs focus:outline-none focus:border-cyan-500">
         `;
-        dynamicInputFields.appendChild(div);
+          dynamicInputFields.appendChild(div);
+        });
+
+        modalAddData.classList.remove('hidden');
       });
 
-      modalAddData.classList.remove('hidden');
-    });
+      btnCloseAddModal.onclick = () => modalAddData.classList.add('hidden');
+      btnCancelAddModal.onclick = () => modalAddData.classList.add('hidden');
 
-    btnCloseAddModal.onclick = () => modalAddData.classList.add('hidden');
-    btnCancelAddModal.onclick = () => modalAddData.classList.add('hidden');
+      formAddManual.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const rawDocId = inputDocId.value.trim();
+        const safeDocId = rawDocId ? rawDocId.replace(/\//g, '-') : null;
 
-    formAddManual.addEventListener('submit', async (e) => {
-      e.preventDefault();
-      const rawDocId = inputDocId.value.trim();
-      const safeDocId = rawDocId ? rawDocId.replace(/\//g, '-') : null;
+        const newObj = {};
+        document.querySelectorAll('.dynamic-input').forEach(inp => {
+          const key = inp.getAttribute('data-field');
+          const val = inp.value.trim();
+          const lowerKey = key.toLowerCase();
 
-      const newObj = {};
-      document.querySelectorAll('.dynamic-input').forEach(inp => {
-        const key = inp.getAttribute('data-field');
-        const val = inp.value.trim();
-        if (val === 'true') newObj[key] = true;
-        else if (val === 'false') newObj[key] = false;
-        else if (!isNaN(val) && val !== '') newObj[key] = Number(val);
-        else newObj[key] = val;
-      });
-
-      newObj.created_at = serverTimestamp();
-
-      try {
-        if (safeDocId) {
-          await setDoc(doc(db, currentCollection, safeDocId), newObj);
-        } else {
-          await addDoc(collection(db, currentCollection), newObj);
-        }
-
-        modalAddData.classList.add('hidden');
-        alert(`Berhasil menambahkan data baru ke koleksi "${currentCollection}"!`);
-      } catch (err) {
-        alert("Gagal menyimpan data baru: " + err.message);
-      }
-    });
-
-    // -------------------------------------------------------------
-    // LOGIKA FITUR 2: IMPORT DATA FILE (.XLSX / .CSV / .JSON)
-    // -------------------------------------------------------------
-    btnOpenImportModal.addEventListener('click', () => {
-      importColName.innerText = currentCollection;
-      importFileInput.value = '';
-      parsedImportData = [];
-      btnProcessImport.disabled = true;
-      importLogBox.innerHTML = '<p class="text-slate-500">// Log proses impor akan tampil di sini...</p>';
-      modalImportFile.classList.remove('hidden');
-    });
-
-    btnCloseImportModal.onclick = () => modalImportFile.classList.add('hidden');
-    btnCancelImportModal.onclick = () => modalImportFile.classList.add('hidden');
-
-    function logImport(msg, type = 'info') {
-      const p = document.createElement('p');
-      if (type === 'success') p.className = 'text-emerald-400 font-semibold';
-      else if (type === 'error') p.className = 'text-red-400 font-semibold';
-      else if (type === 'warn') p.className = 'text-amber-400';
-      else p.className = 'text-slate-300';
-      
-      const timestamp = new Date().toLocaleTimeString();
-      p.innerText = `[${timestamp}] ${msg}`;
-      importLogBox.appendChild(p);
-      importLogBox.scrollTop = importLogBox.scrollHeight;
-    }
-
-    // BACA FILE YANG DIUNGGAH
-    importFileInput.addEventListener('change', (e) => {
-      const file = e.target.files[0];
-      if (!file) {
-        btnProcessImport.disabled = true;
-        return;
-      }
-
-      const fileName = file.name.toLowerCase();
-      const reader = new FileReader();
-
-      reader.onload = (evt) => {
-        try {
-          if (fileName.endsWith('.json')) {
-            const rawJson = JSON.parse(evt.target.result);
-            parsedImportData = Array.isArray(rawJson) ? rawJson : [rawJson];
+          if (val === 'true') newObj[key] = true;
+          else if (val === 'false') newObj[key] = false;
+          // Proteksi NIS, ID & No HP agar SELALU disimpan sebagai String (Mencegah terhapusnya angka 0 di depan)
+          else if (!isNaN(val) && val !== '' && !lowerKey.includes('nis') && !lowerKey.includes('id') && !lowerKey.includes('phone') && !lowerKey.includes('hp')) {
+            newObj[key] = Number(val);
           } else {
-            const data = new Uint8Array(evt.target.result);
-            const workbook = XLSX.read(data, { type: 'array' });
-            const firstSheet = workbook.SheetNames[0];
-            parsedImportData = XLSX.utils.sheet_to_json(workbook.Sheets[firstSheet]);
+            newObj[key] = val;
+          }
+        });
+
+        newObj.created_at = serverTimestamp();
+
+        try {
+          if (safeDocId) {
+            await setDoc(doc(db, currentCollection, safeDocId), newObj);
+          } else {
+            await addDoc(collection(db, currentCollection), newObj);
           }
 
-          if (parsedImportData.length === 0) {
-            logImport("Berkas kosong atau format tidak valid.", "error");
+          modalAddData.classList.add('hidden');
+          alert(`Berhasil menambahkan data baru ke koleksi "${currentCollection}"!`);
+        } catch (err) {
+          alert("Gagal menyimpan data baru: " + err.message);
+        }
+      });
+
+      // -------------------------------------------------------------
+      // LOGIKA FITUR 2: IMPORT DATA FILE (.XLSX / .CSV / .JSON)
+      // -------------------------------------------------------------
+      btnOpenImportModal.addEventListener('click', () => {
+        importColName.innerText = currentCollection;
+        importFileInput.value = '';
+        parsedImportData = [];
+        btnProcessImport.disabled = true;
+        importLogBox.innerHTML = '<p class="text-slate-500">// Log proses impor akan tampil di sini...</p>';
+        modalImportFile.classList.remove('hidden');
+      });
+
+      btnCloseImportModal.onclick = () => modalImportFile.classList.add('hidden');
+      btnCancelImportModal.onclick = () => modalImportFile.classList.add('hidden');
+
+      function logImport(msg, type = 'info') {
+        const p = document.createElement('p');
+        if (type === 'success') p.className = 'text-emerald-400 font-semibold';
+        else if (type === 'error') p.className = 'text-red-400 font-semibold';
+        else if (type === 'warn') p.className = 'text-amber-400';
+        else p.className = 'text-slate-300';
+
+        const timestamp = new Date().toLocaleTimeString();
+        p.innerText = `[${timestamp}] ${msg}`;
+        importLogBox.appendChild(p);
+        importLogBox.scrollTop = importLogBox.scrollHeight;
+      }
+
+      // BACA FILE YANG DIUNGGAH
+      importFileInput.addEventListener('change', (e) => {
+        const file = e.target.files[0];
+        if (!file) {
+          btnProcessImport.disabled = true;
+          return;
+        }
+
+        const fileName = file.name.toLowerCase();
+        const reader = new FileReader();
+
+        reader.onload = (evt) => {
+          try {
+            if (fileName.endsWith('.json')) {
+              const rawJson = JSON.parse(evt.target.result);
+              parsedImportData = Array.isArray(rawJson) ? rawJson : [rawJson];
+            } else {
+              const data = new Uint8Array(evt.target.result);
+              const workbook = XLSX.read(data, { type: 'array' });
+              const firstSheet = workbook.SheetNames[0];
+              parsedImportData = XLSX.utils.sheet_to_json(workbook.Sheets[firstSheet]);
+            }
+
+            if (parsedImportData.length === 0) {
+              logImport("Berkas kosong atau format tidak valid.", "error");
+              btnProcessImport.disabled = true;
+              return;
+            }
+
+            logImport(`Berkas berhasil dibaca: Terdeteksi ${parsedImportData.length} baris data siap diimpor.`, "warn");
+            btnProcessImport.disabled = false;
+
+          } catch (err) {
+            logImport("Gagal membaca berkas: " + err.message, "error");
             btnProcessImport.disabled = true;
+          }
+        };
+
+        if (fileName.endsWith('.json')) {
+          reader.readAsText(file);
+        } else {
+          reader.readAsArrayBuffer(file);
+        }
+      });
+
+      // PROSES EKSEKUSI IMPOR KE FIRESTORE DENGAN BATCH CHUNKING (OPTIMAL 400 DOCS/BATCH) & SANITASI ID/NIS
+      btnProcessImport.addEventListener('click', async () => {
+        if (parsedImportData.length === 0) return;
+
+        btnProcessImport.disabled = true;
+        logImport(`Memulai impor ${parsedImportData.length} data ke koleksi "${currentCollection}"...`, "warn");
+
+        let successCount = 0;
+        let failCount = 0;
+        const CHUNK_SIZE = 400;
+
+        // Persiapkan payload terstruktur & ter-sanitasi terlebih dahulu
+        const preparedRows = [];
+        parsedImportData.forEach((row, idx) => {
+          try {
+            const cleanRow = {};
+            let targetDocId = null;
+
+            Object.keys(row).forEach(key => {
+              const cleanKey = key.trim();
+              const lowerKey = cleanKey.toLowerCase();
+              let val = row[key];
+
+              if (typeof val === 'string') val = val.trim();
+
+              // Cek apakah key berfungsi sebagai ID (NIS / ID Kelas / Document ID)
+              if (lowerKey === 'nis' || lowerKey === 'id' || lowerKey === 'doc_id' || lowerKey === 'document id' || lowerKey === 'id_kelas' || lowerKey === 'id_mapel') {
+                if (val !== null && val !== undefined && val !== '') {
+                  targetDocId = String(val).trim().replace(/\//g, '-'); // Sanitasi ID & pastikan String
+                }
+              }
+
+              // Normalisasi nama key standar jika mengimpor dari file template (Memastikan NIS selalu String)
+              if (lowerKey === 'nis') {
+                cleanRow['nis'] = String(val).trim();
+              } else if (lowerKey === 'nama siswa') {
+                cleanRow['nama_siswa'] = String(val);
+              } else if (lowerKey === 'id kelas') {
+                cleanRow['id_kelas'] = String(val);
+              } else if (lowerKey === 'nama kelas') {
+                cleanRow['nama_kelas'] = String(val);
+              } else {
+                // Proteksi NIS & ID agar selalu String meskipun di-excel formatnya angka
+                if (lowerKey.includes('nis') || lowerKey.includes('id_') || lowerKey.endsWith('_id') || lowerKey === 'id') {
+                  cleanRow[cleanKey] = String(val).trim();
+                } else {
+                  cleanRow[cleanKey] = val;
+                }
+              }
+            });
+
+            cleanRow.created_at = serverTimestamp();
+            preparedRows.push({ targetDocId, cleanRow, rowIndex: idx + 1 });
+          } catch (err) {
+            failCount++;
+            logImport(`❌ Baris ${idx + 1} Gagal diproses: ${err.message}`, "error");
+          }
+        });
+
+        // Eksekusi penulisan masal per-chunk 400 dokumen via writeBatch
+        for (let i = 0; i < preparedRows.length; i += CHUNK_SIZE) {
+          const chunk = preparedRows.slice(i, i + CHUNK_SIZE);
+          const batch = writeBatch(db);
+
+          chunk.forEach(item => {
+            let docRef;
+            if (item.targetDocId) {
+              docRef = doc(db, currentCollection, item.targetDocId);
+            } else {
+              docRef = doc(collection(db, currentCollection));
+            }
+            batch.set(docRef, item.cleanRow, { merge: true });
+          });
+
+          try {
+            await batch.commit();
+            successCount += chunk.length;
+            logImport(`✔ Batch ${Math.floor(i / CHUNK_SIZE) + 1}: ${chunk.length} data berhasil disimpan ke Firestore.`, "success");
+          } catch (err) {
+            failCount += chunk.length;
+            logImport(`❌ Batch ${Math.floor(i / CHUNK_SIZE) + 1} Gagal: ${err.message}`, "error");
+          }
+        }
+
+        logImport(`🎉 IMPOR SELESAI! Sukses: ${successCount} | Gagal: ${failCount}`, "success");
+        btnProcessImport.disabled = false;
+      });
+
+      // TEMPLATE DOWNLOAD EXCEL
+      btnDownloadTemplate.addEventListener('click', () => {
+        let sampleData = [];
+        if (currentCollection === 'siswa') {
+          sampleData = [{ "NIS": "9177/413", "Nama Siswa": "ACHMAD HAMDHANI", "ID Kelas": "XI-TEI-1", "Nama Kelas": "XI TEI 1" }];
+        } else if (currentCollection === 'kelas') {
+          sampleData = [{ "id_kelas": "XI-TEI-1", "nama_kelas": "XI TEI 1", "wali_kelas": "Nama Guru" }];
+        } else if (currentCollection === 'mapel') {
+          sampleData = [{ "id_mapel": "TEI-01", "nama_mapel": "Pemrograman Terstruktur" }];
+        } else {
+          sampleData = [{ "id": "DOC-01", "title": "Contoh Data", "keterangan": "Deskripsi" }];
+        }
+
+        const ws = XLSX.utils.json_to_sheet(sampleData);
+        const wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, ws, `Template_${currentCollection}`);
+        XLSX.writeFile(wb, `Template_Import_${currentCollection}.xlsx`);
+      });
+
+      // -------------------------------------------------------------
+      // LOGIKA FITUR 3: EKSPOR DATA PERANGKAT HP SISWA KE EXCEL
+      // -------------------------------------------------------------
+      if (btnExportDeviceExcel) {
+        btnExportDeviceExcel.addEventListener('click', () => {
+          if (currentCollection !== 'siswa') {
+            alert('Fitur ekspor perangkat HP hanya tersedia untuk koleksi "siswa".');
             return;
           }
 
-          logImport(`Berkas berhasil dibaca: Terdeteksi ${parsedImportData.length} baris data siap diimpor.`, "warn");
-          btnProcessImport.disabled = false;
-
-        } catch (err) {
-          logImport("Gagal membaca berkas: " + err.message, "error");
-          btnProcessImport.disabled = true;
-        }
-      };
-
-      if (fileName.endsWith('.json')) {
-        reader.readAsText(file);
-      } else {
-        reader.readAsArrayBuffer(file);
-      }
-    });
-
-    // PROSES EKSEKUSI IMPOR KE FIRESTORE DENGAN SANITASI DOCUMENT ID
-    btnProcessImport.addEventListener('click', async () => {
-      if (parsedImportData.length === 0) return;
-
-      btnProcessImport.disabled = true;
-      logImport(`Memulai impor ${parsedImportData.length} data ke koleksi "${currentCollection}"...`, "warn");
-
-      let successCount = 0;
-      let failCount = 0;
-
-      for (const row of parsedImportData) {
-        try {
-          const cleanRow = {};
-          let targetDocId = null;
-
-          Object.keys(row).forEach(key => {
-            const cleanKey = key.trim();
-            const lowerKey = cleanKey.toLowerCase();
-            let val = row[key];
-
-            if (typeof val === 'string') val = val.trim();
-
-            // Cek apakah ada key yang berfungsi sebagai ID (NIS / ID Kelas / Document ID)
-            if (lowerKey === 'nis' || lowerKey === 'id' || lowerKey === 'doc_id' || lowerKey === 'document id' || lowerKey === 'id_kelas' || lowerKey === 'id_mapel') {
-              if (val) {
-                targetDocId = String(val).replace(/\//g, '-'); // Sanitasi ID
-              }
-            }
-
-            // Normalisasi nama key standar jika mengimpor dari file template
-            if (lowerKey === 'nis') cleanRow['nis'] = String(val);
-            else if (lowerKey === 'nama siswa') cleanRow['nama_siswa'] = String(val);
-            else if (lowerKey === 'id kelas') cleanRow['id_kelas'] = String(val);
-            else if (lowerKey === 'nama kelas') cleanRow['nama_kelas'] = String(val);
-            else cleanRow[cleanKey] = val;
-          });
-
-          cleanRow.created_at = serverTimestamp();
-
-          if (targetDocId) {
-            await setDoc(doc(db, currentCollection, targetDocId), cleanRow, { merge: true });
-          } else {
-            await addDoc(collection(db, currentCollection), cleanRow);
+          if (!currentDocsList || currentDocsList.length === 0) {
+            alert('Tidak ada data siswa untuk diekspor.');
+            return;
           }
 
-          successCount++;
-          logImport(`✔ [Row ${successCount}] ${targetDocId ? 'ID: ' + targetDocId : 'Auto-ID'} - Sukses`, "success");
+          const exportData = currentDocsList.map((docSnap, index) => {
+            const data = docSnap.data();
+            const isBound = Boolean(data.device_id || data.device_token || data.mac_address);
 
-        } catch (err) {
-          failCount++;
-          logImport(`❌ Baris Gagal: ${err.message}`, "error");
-        }
-      }
+            return {
+              "No": index + 1,
+              "Document ID": docSnap.id,
+              "NIS": data.nis || docSnap.id,
+              "Nama Siswa": data.nama_siswa || data.nama || "-",
+              "ID Kelas": data.id_kelas || "-",
+              "Nama Kelas": data.nama_kelas || "-",
+              "Status Perangkat": isBound ? "TERIKAT (BOUND)" : "BELUM TERIKAT",
+              "Device ID / Fingerprint": data.device_id || "-",
+              "Device Token": data.device_token || "-",
+              "Waktu Terikat": data.registered_at && data.registered_at.seconds
+                ? new Date(data.registered_at.seconds * 1000).toLocaleString('id-ID')
+                : "-"
+            };
+          });
 
-      logImport(`🎉 IMPOR SELESAI! Sukses: ${successCount} | Gagal: ${failCount}`, "success");
-      btnProcessImport.disabled = false;
-    });
+          const worksheet = XLSX.utils.json_to_sheet(exportData);
 
-    // TEMPLATE DOWNLOAD EXCEL
-    btnDownloadTemplate.addEventListener('click', () => {
-      let sampleData = [];
-      if (currentCollection === 'siswa') {
-        sampleData = [{ "NIS": "9177/413", "Nama Siswa": "ACHMAD HAMDHANI", "ID Kelas": "XI-TEI-1", "Nama Kelas": "XI TEI 1" }];
-      } else if (currentCollection === 'kelas') {
-        sampleData = [{ "id_kelas": "XI-TEI-1", "nama_kelas": "XI TEI 1", "wali_kelas": "Nama Guru" }];
-      } else if (currentCollection === 'mapel') {
-        sampleData = [{ "id_mapel": "TEI-01", "nama_mapel": "Pemrograman Terstruktur" }];
-      } else {
-        sampleData = [{ "id": "DOC-01", "title": "Contoh Data", "keterangan": "Deskripsi" }];
-      }
+          worksheet['!cols'] = [
+            { wch: 5 }, { wch: 15 }, { wch: 15 },
+            { wch: 28 }, { wch: 12 }, { wch: 15 },
+            { wch: 20 }, { wch: 35 }, { wch: 30 }, { wch: 22 }
+          ];
 
-      const ws = XLSX.utils.json_to_sheet(sampleData);
-      const wb = XLSX.utils.book_new();
-      XLSX.utils.book_append_sheet(wb, ws, `Template_${currentCollection}`);
-      XLSX.writeFile(wb, `Template_Import_${currentCollection}.xlsx`);
-    });
+          const workbook = XLSX.utils.book_new();
+          XLSX.utils.book_append_sheet(workbook, worksheet, "Perangkat Siswa");
 
-    // -------------------------------------------------------------
-    // LOGIKA FITUR 3: EKSPOR DATA PERANGKAT HP SISWA KE EXCEL
-    // -------------------------------------------------------------
-    if (btnExportDeviceExcel) {
-      btnExportDeviceExcel.addEventListener('click', () => {
-        if (currentCollection !== 'siswa') {
-          alert('Fitur ekspor perangkat HP hanya tersedia untuk koleksi "siswa".');
-          return;
-        }
-
-        if (!currentDocsList || currentDocsList.length === 0) {
-          alert('Tidak ada data siswa untuk diekspor.');
-          return;
-        }
-
-        const exportData = currentDocsList.map((docSnap, index) => {
-          const data = docSnap.data();
-          const isBound = Boolean(data.device_id || data.device_token || data.mac_address);
-
-          return {
-            "No": index + 1,
-            "Document ID": docSnap.id,
-            "NIS": data.nis || docSnap.id,
-            "Nama Siswa": data.nama_siswa || data.nama || "-",
-            "ID Kelas": data.id_kelas || "-",
-            "Nama Kelas": data.nama_kelas || "-",
-            "Status Perangkat": isBound ? "TERIKAT (BOUND)" : "BELUM TERIKAT",
-            "Device ID / Fingerprint": data.device_id || "-",
-            "Device Token": data.device_token || "-",
-            "Waktu Terikat": data.registered_at && data.registered_at.seconds 
-              ? new Date(data.registered_at.seconds * 1000).toLocaleString('id-ID') 
-              : "-"
-          };
+          const today = new Date().toISOString().split('T')[0];
+          XLSX.writeFile(workbook, `Rekap_Perangkat_Siswa_${today}.xlsx`);
         });
-
-        const worksheet = XLSX.utils.json_to_sheet(exportData);
-        
-        worksheet['!cols'] = [
-          { wch: 5 },  { wch: 15 }, { wch: 15 }, 
-          { wch: 28 }, { wch: 12 }, { wch: 15 }, 
-          { wch: 20 }, { wch: 35 }, { wch: 30 }, { wch: 22 }
-        ];
-
-        const workbook = XLSX.utils.book_new();
-        XLSX.utils.book_append_sheet(workbook, worksheet, "Perangkat Siswa");
-
-        const today = new Date().toISOString().split('T')[0];
-        XLSX.writeFile(workbook, `Rekap_Perangkat_Siswa_${today}.xlsx`);
-      });
-    }
+      }
   </script>
 </body>
+
 </html>

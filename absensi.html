@@ -123,9 +123,9 @@
 
   <!-- LOGIC FIREBASE & HARDWARE FINGERPRINTING -->
   <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+    import { db } from "./assets/js/config/firebase-config.js";
+    import { getHardwareFingerprint } from "./assets/js/utils/device-fingerprint.js";
     import { 
-      getFirestore, 
       doc, 
       getDoc, 
       updateDoc,
@@ -134,19 +134,6 @@
       where,
       getDocs 
     } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
-
-    const firebaseConfig = {
-      apiKey: "AIzaSyDhq4QoCn00GkfpKXSP8PnvSvEKa2yn0ic",
-      authDomain: "portal-iskakfatoni.firebaseapp.com",
-      projectId: "portal-iskakfatoni",
-      storageBucket: "portal-iskakfatoni.firebasestorage.app",
-      messagingSenderId: "367350728822",
-      appId: "1:367350728822:web:6b0c6fd4824102d8acf757",
-      measurementId: "G-0BNNKQQ24V"
-    };
-
-    const app = initializeApp(firebaseConfig);
-    const db = getFirestore(app);
 
     const sectionLoading = document.getElementById('section-loading-absensi');
     const sectionLogin = document.getElementById('section-login-absensi');
@@ -160,35 +147,6 @@
     const profileNis = document.getElementById('profile-nis');
     const profileKelas = document.getElementById('profile-kelas');
     const btnBukaScanner = document.getElementById('btn-buka-scanner');
-
-    // FUNGSI FINGERPRINT HARDWARE HP (TAHAN HAPUS CACHE BROWSER)
-    async function getHardwareFingerprint() {
-      const gl = document.createElement('canvas').getContext('webgl');
-      let gpuVendor = '';
-      if (gl) {
-        const debugInfo = gl.getExtension('WEBGL_debug_renderer_info');
-        if (debugInfo) {
-          gpuVendor = gl.getParameter(debugInfo.UNMASKED_RENDERER_WEBGL) || '';
-        }
-      }
-
-      const rawString = [
-        navigator.userAgent,
-        screen.width + 'x' + screen.height,
-        screen.colorDepth,
-        navigator.hardwareConcurrency || 2,
-        gpuVendor,
-        Intl.DateTimeFormat().resolvedOptions().timeZone
-      ].join('||');
-
-      // Hash string menggunakan SHA-256 bawaan Crypto API browser
-      const msgBuffer = new TextEncoder().encode(rawString);
-      const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
-      const hashArray = Array.from(new Uint8Array(hashBuffer));
-      const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
-      
-      return 'HW-' + hashHex.substring(0, 16).toUpperCase();
-    }
 
     let currentDeviceId = '';
 
