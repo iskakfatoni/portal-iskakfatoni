@@ -4,6 +4,41 @@ Dokumen ini berisi rangkuman review perubahan kode (*code review*) terbaru yang 
 
 ---
 
+## 📅 Review [2026-08-10 09:02 WIB] - Adaptasi Kontekstual Ekspor Excel Perangkat Siswa (Terikat / Belum Terikat / Search Filter)
+
+### 📁 1. Berkas yang Diubah
+* 📄 **[database/db-manager.html](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/database/db-manager.html)**
+
+---
+
+### 📝 2. Rincian Baris & Logika yang Diperbarui
+
+1. **Penyesuaian Data Ekspor (`TableEngine.getFilteredAndSortedDocs`)**:
+   - Mengubah fungsi ekspor `btnExportDeviceExcel` dari yang sebelumnya mengekspor *seluruh* data siswa di koleksi `siswa`, menjadi **hanya mengekspor data yang saat ini tersaring di tabel** (`TableEngine.getFilteredAndSortedDocs()`).
+   - Apabila Admin memilih filter **"HP Terikat"**, yang diekspor *hanya* siswa yang HP-nya sudah terikat.
+   - Apabila Admin memilih filter **"Belum Terikat"**, yang diekspor *hanya* siswa yang belum melakukan pendaftaran HP.
+   - Jika Admin mengetikkan kata kunci di *Live Search Bar*, maka hasil pencarian spesifik tersebut yang diekspor.
+
+2. **Dinamisme Label Tombol & Nama Berkas (.xlsx)**:
+   - Teks tombol di toolbar atas otomatis menyesuaikan label:
+     - Filter HP Terikat: `Ekspor HP Terikat (.xlsx)`
+     - Filter Belum Terikat: `Ekspor Belum Terikat (.xlsx)`
+   - Nama file `.xlsx` yang diunduh menyesuaikan secara otomatis:
+     - `Rekap_HP_Terikat_Siswa_YYYY-MM-DD.xlsx`
+     - `Rekap_HP_Belum_Terikat_Siswa_YYYY-MM-DD.xlsx`
+
+---
+
+### 🧪 3. Petunjuk Pengujian Lokal (*Local Verification*)
+
+1. Buka peramban di [http://localhost:8080/database/db-manager.html](http://localhost:8080/database/db-manager.html).
+2. Klik menu **"HP Terikat"** di sidebar kiri.
+3. Perhatikan tombol hijau di toolbar kanan atas telah berubah label menjadi **"Ekspor HP Terikat (.xlsx)"**.
+4. Klik tombol ekspor tersebut &rarr; berkas terunduh dengan nama `Rekap_HP_Terikat_Siswa_2026-08-10.xlsx` dan hanya berisi baris siswa yang terikat.
+5. Ulangi untuk menu **"Belum Terikat"** &rarr; tombol berubah label menjadi **"Ekspor Belum Terikat (.xlsx)"** dan hanya mengekspor siswa belum terikat.
+
+---
+
 ## 📅 Review [2026-08-10 08:57 WIB] - Penambahan Card Perangkat HP pada Sidebar Firestore DB Manager
 
 ### 📁 1. Berkas yang Diubah

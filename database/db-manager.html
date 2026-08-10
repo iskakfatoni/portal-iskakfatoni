@@ -1108,6 +1108,7 @@
 
         if (dom.btnExportDeviceExcel) {
           dom.btnExportDeviceExcel.style.display = state.currentCollection === 'siswa' ? 'inline-flex' : 'none';
+          dom.btnExportDeviceExcel.innerHTML = '<i class="fa-solid fa-file-excel"></i> <span>Ekspor Perangkat (.xlsx)</span>';
         }
 
         loadCollectionData(state.currentCollection);
@@ -1143,6 +1144,9 @@
 
         if (dom.btnExportDeviceExcel) {
           dom.btnExportDeviceExcel.style.display = 'inline-flex';
+          dom.btnExportDeviceExcel.innerHTML = filter === 'bound'
+            ? '<i class="fa-solid fa-file-excel"></i> <span>Ekspor HP Terikat (.xlsx)</span>'
+            : '<i class="fa-solid fa-file-excel"></i> <span>Ekspor Belum Terikat (.xlsx)</span>';
         }
 
         loadCollectionData('siswa');
@@ -1448,7 +1452,7 @@
       XLSX.writeFile(wb, `Template_Import_${state.currentCollection}.xlsx`);
     });
 
-    // 📤 Export Perangkat Siswa Excel
+    // 📤 Export Perangkat Siswa Excel (Smart Contextual Filtered Export)
     if (dom.btnExportDeviceExcel) {
       dom.btnExportDeviceExcel.addEventListener('click', () => {
         if (state.currentCollection !== 'siswa') {
@@ -1456,12 +1460,13 @@
           return;
         }
 
-        if (!state.currentDocsList || state.currentDocsList.length === 0) {
-          alert('Tidak ada data siswa untuk diekspor.');
+        const filteredDocs = TableEngine.getFilteredAndSortedDocs();
+        if (!filteredDocs || filteredDocs.length === 0) {
+          alert('Tidak ada data siswa yang cocok dengan filter saat ini untuk diekspor.');
           return;
         }
 
-        const exportData = state.currentDocsList.map((docSnap, index) => {
+        const exportData = filteredDocs.map((docSnap, index) => {
           const data = docSnap.data();
           const isBound = Boolean(data.device_id || data.device_token || data.mac_address);
 
@@ -1489,10 +1494,22 @@
         ];
 
         const workbook = XLSX.utils.book_new();
-        XLSX.utils.book_append_sheet(workbook, worksheet, "Perangkat Siswa");
+        
+        let sheetName = "Perangkat Siswa";
+        let filePrefix = "Rekap_Perangkat_Siswa";
+
+        if (state.deviceFilter === 'bound') {
+          sheetName = "HP Terikat";
+          filePrefix = "Rekap_HP_Terikat_Siswa";
+        } else if (state.deviceFilter === 'unbound') {
+          sheetName = "Belum Terikat";
+          filePrefix = "Rekap_HP_Belum_Terikat_Siswa";
+        }
+
+        XLSX.utils.book_append_sheet(workbook, worksheet, sheetName);
 
         const today = new Date().toISOString().split('T')[0];
-        XLSX.writeFile(workbook, `Rekap_Perangkat_Siswa_${today}.xlsx`);
+        XLSX.writeFile(workbook, `${filePrefix}_${today}.xlsx`);
       });
     }
   </script>
