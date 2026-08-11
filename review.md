@@ -4,6 +4,30 @@ Dokumen ini berisi rangkuman review perubahan kode (*code review*) terbaru yang 
 
 ---
 
+## 📅 Review [2026-08-11 18:39 WIB] - Penambahan Label & Keterangan Tooltip 3 Tombol Kanan Atas `db-manager.html`
+
+### 📁 1. Berkas yang Diubah
+* 📄 **[database/db-manager.html](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/database/db-manager.html)**
+
+---
+
+### 📝 2. Rincian Baris & Logika yang Diperbarui
+
+1. **Penambahan Label & Tooltip pada Tombol Header Kanan Atas (`db-manager.html`)**:
+   - **Tombol 1 (`#btn-toggle-fullscreen`)**: Menambahkan label `Layar Penuh` dan tooltip `🖥️ Layar Penuh (Fullscreen) - Memperluas area tampilan database ke seluruh layar monitor`.
+   - **Tombol 2 (`<a>` Navigasi Hub Admin)**: Menambahkan tooltip `↩️ Kembali ke Hub Admin - Navigasi kembali ke Dashboard Utama Master Admin Hub`.
+   - **Tombol 3 (`#btn-logout`)**: Menambahkan label `Keluar` dan tooltip `🚪 Keluar (Logout) - Mengakhiri sesi login admin dan mengunci kembali sistem`.
+
+---
+
+### 🧪 3. Petunjuk Pengujian Lokal (*Local Verification*)
+
+1. Buka [database/db-manager.html](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/database/db-manager.html).
+2. Arahkan kursor (*hover*) ke 3 tombol di kanan atas header (Layar Penuh, Kembali ke Hub Admin, Keluar).
+3. **Hasil**: Tooltip keterangan fungsi tombol muncul secara informatif dan label teks tampil dengan jelas.
+
+---
+
 ## 📅 Review [2026-08-11 18:35 WIB] - Implementasi Validasi Kelas Ketat pada Scanner QR Siswa (`siswa/index.html`)
 
 ### 📁 1. Berkas yang Diubah
