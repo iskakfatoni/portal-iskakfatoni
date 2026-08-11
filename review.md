@@ -6,11 +6,13 @@ Dokumen ini berisi rangkuman review perubahan kode (*code review*) terbaru yang 
 
 ## 📅 Review [2026-08-11 20:35 WIB] - Fitur Ikat Ponsel Admin (Auto-Login Perangkat Terikat, Deteksi Perangkat, & Panel History Login)
 
-### 📁 1. Berkas yang Diubah
+### 📁 1. Berkas yang Diubah / Dibuat
 * 📄 **[admin.html](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/admin.html)**
 * 📄 **[assets/js/auth/auth-guard.js](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/assets/js/auth/auth-guard.js)**
 * 📄 **[style/style.css](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/style/style.css)**
 * 📄 **[firestore.rules](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/firestore.rules)**
+* 📄 **[firebase.json](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/firebase.json)** [NEW]
+* 📄 **[.firebaserc](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/.firebaserc)** [NEW]
 
 ---
 
