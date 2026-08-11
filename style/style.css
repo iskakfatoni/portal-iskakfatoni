@@ -172,7 +172,7 @@ body.theme-glass #particle-canvas {
 /* CARD UTAMA GLASSMORPHISM */
 .container {
   width: 100%;
-  max-width: 360px;
+  max-width: 480px;
   margin-left: auto !important;
   margin-right: auto !important;
 
@@ -851,17 +851,20 @@ body.theme-glass #particle-canvas {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 10px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-  padding-bottom: 6px;
+  margin-bottom: 14px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+  padding-bottom: 10px;
 }
 
 .section-header-title {
-  font-size: 0.85rem;
+  font-size: 0.95rem;
   font-weight: 800;
   color: #ffffff;
   text-transform: uppercase;
-  letter-spacing: 0.05em;
+  letter-spacing: 0.06em;
+  display: flex;
+  align-items: center;
+  gap: 6px;
 }
 
 .icon-accent {
@@ -870,13 +873,14 @@ body.theme-glass #particle-canvas {
 
 .section-header-title-icon {
   margin-right: 4px;
+  font-size: 1.15rem;
 }
 
 /* Grid daftar link publik & masing-masing kartu link */
 .links-grid {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 12px;
   width: 100%;
 }
 
@@ -884,114 +888,129 @@ body.theme-glass #particle-canvas {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 10px 12px;
-  background: rgba(3, 7, 18, 0.6);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 12px;
+  padding: 14px 16px;
+  background: rgba(3, 7, 18, 0.75);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 16px;
   text-decoration: none;
   color: #ffffff;
-  transition: all 0.2s ease;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
   text-align: left;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.3);
 }
 
 .link-card-item:hover {
-  transform: translateY(-1px);
+  transform: translateY(-2px) scale(1.01);
   border-color: var(--dash-accent);
-  background: rgba(56, 189, 248, 0.08);
-  box-shadow: 0 6px 16px -4px rgba(56, 189, 248, 0.2);
+  background: rgba(56, 189, 248, 0.12);
+  box-shadow: 0 10px 25px -5px rgba(56, 189, 248, 0.35);
 }
 
 .link-info {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 14px;
+  width: 100%;
 }
 
 .link-icon-box {
-  width: 36px;
-  height: 36px;
-  border-radius: 10px;
+  width: 48px;
+  height: 48px;
+  border-radius: 14px;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 1rem;
+  font-size: 1.35rem;
   flex-shrink: 0;
-  transition: all 0.2s ease;
+  transition: all 0.25s ease;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.link-text {
+  flex: 1;
+  min-width: 0;
 }
 
 .link-text h3 {
-  font-size: 0.85rem;
+  font-size: 1rem;
   font-weight: 700;
   color: #ffffff;
   margin: 0;
-  line-height: 1.25;
+  line-height: 1.35;
+  letter-spacing: -0.01em;
 }
 
 /* Jarak penomoran urut link pada portal.html */
 .link-number {
   margin-right: 8px;
   display: inline-block;
-  font-weight: 700;
+  font-weight: 800;
+  font-size: 1.05rem;
+  color: var(--dash-accent);
 }
 
 .link-card-item .arrow-icon {
-  color: #64748b;
-  font-size: 0.75rem;
-  transition: transform 0.2s ease, color 0.2s ease;
+  color: #94a3b8;
+  font-size: 0.95rem;
+  transition: transform 0.25s ease, color 0.25s ease;
+  margin-left: 8px;
+  flex-shrink: 0;
 }
 
 .link-card-item:hover .arrow-icon {
-  color: var(--dash-accent);
-  transform: translateX(3px);
+  color: var(--dash-accent-bright);
+  transform: translateX(4px) translateY(-1px);
 }
 
 /* Warna kategori kotak ikon link (dipetakan dari getLinkIconConfig di JS) */
 .link-type-form {
-  color: #7248b9;
-  background: rgba(114, 72, 185, 0.15);
-  border: 1px solid rgba(114, 72, 185, 0.3);
+  color: #c084fc;
+  background: rgba(114, 72, 185, 0.25);
+  border: 1px solid rgba(192, 132, 252, 0.4);
 }
 
 .link-type-canva {
-  color: #00c4cc;
-  background: rgba(0, 196, 204, 0.15);
-  border: 1px solid rgba(0, 196, 204, 0.3);
+  color: #22d3ee;
+  background: rgba(0, 196, 204, 0.25);
+  border: 1px solid rgba(34, 211, 238, 0.4);
 }
 
 .link-type-drive {
-  color: #ea4335;
-  background: rgba(234, 67, 53, 0.15);
-  border: 1px solid rgba(234, 67, 53, 0.3);
+  color: #f87171;
+  background: rgba(234, 67, 53, 0.25);
+  border: 1px solid rgba(248, 113, 113, 0.4);
 }
 
 .link-type-youtube {
-  color: #ff0000;
-  background: rgba(255, 0, 0, 0.15);
-  border: 1px solid rgba(255, 0, 0, 0.3);
+  color: #ff4d4d;
+  background: rgba(255, 0, 0, 0.25);
+  border: 1px solid rgba(255, 77, 77, 0.4);
 }
 
 .link-type-quiz {
-  color: #8854d0;
-  background: rgba(136, 84, 208, 0.15);
-  border: 1px solid rgba(136, 84, 208, 0.3);
+  color: #a855f7;
+  background: rgba(136, 84, 208, 0.25);
+  border: 1px solid rgba(168, 85, 247, 0.4);
 }
 
 .link-type-whatsapp {
-  color: #25d366;
-  background: rgba(37, 211, 102, 0.15);
-  border: 1px solid rgba(37, 211, 102, 0.3);
+  color: #4ade80;
+  background: rgba(37, 211, 102, 0.25);
+  border: 1px solid rgba(74, 222, 128, 0.4);
 }
 
 .link-type-github {
-  color: #f0f6fc;
-  background: rgba(240, 246, 252, 0.15);
-  border: 1px solid rgba(240, 246, 252, 0.3);
+  color: #f1f5f9;
+  background: rgba(240, 246, 252, 0.25);
+  border: 1px solid rgba(241, 245, 249, 0.4);
 }
 
 .link-type-default {
-  color: var(--dash-accent);
-  background: rgba(56, 189, 248, 0.15);
-  border: 1px solid rgba(56, 189, 248, 0.3);
+  color: var(--dash-accent-bright);
+  background: rgba(56, 189, 248, 0.25);
+  border: 1px solid rgba(56, 189, 248, 0.4);
 }
 
 /* ==========================================================================

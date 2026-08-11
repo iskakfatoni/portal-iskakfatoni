@@ -4,6 +4,42 @@ Dokumen ini berisi rangkuman review perubahan kode (*code review*) terbaru yang 
 
 ---
 
+## 📅 Review [2026-08-11 20:12 WIB] - Peningkatan Ukuran Tampilan & Fokus Visual Daftar Link Portal (`style.css` & `link/index.html`)
+
+### 📁 1. Berkas yang Diubah
+* 📄 **[style/style.css](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/style/style.css)**
+* 📄 **[link/index.html](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/link/index.html)**
+
+---
+
+### 📝 2. Rincian Baris & Logika yang Diperbarui
+
+1. **Perluasan Container Card Utama (`style/style.css`)**:
+   - Memperbesar `max-width` pada `.container` dari `360px` menjadi `480px`.
+   - Memberikan ruang yang jauh lebih lapang pada layar HP, tablet, maupun desktop agar daftar link tidak berhimpitan dan mudah ditatap serta di-klik.
+
+2. **Perbesar Tampilan Kartu Link Publik (`style/style.css`)**:
+   - **Kartu Item (`.link-card-item`)**: Padding ditingkatkan dari `10px 12px` menjadi `14px 16px`, radius sudut menjadi `16px`, serta border & bayangan disempurnakan (`box-shadow: 0 4px 14px rgba(0, 0, 0, 0.3)`).
+   - **Kotak Ikon (`.link-icon-box`)**: Diperbesar dari `36px × 36px` menjadi `48px × 48px`, ukuran ikon menjadi `1.35rem`, serta radius `14px`.
+   - **Teks Judul (`.link-text h3`)**: Ukuran font ditingkatkan dari `0.85rem` (13.6px) menjadi `1rem` (16px) dengan `font-weight: 700` dan jarak baris `1.35`.
+   - **Nomor Urut (`.link-number`)**: Ukuran font diperbesar menjadi `1.05rem` dengan penegasan font `800` dan warna cyan accent (`var(--dash-accent)`).
+   - **Ikon Panah (`.arrow-icon`)**: Ukuran diperbesar menjadi `0.95rem` dengan efek transisi hover bergeser yang lebih dinamis.
+   - **Header Section (`.section-header-title`)**: Judul "Daftar Link:" diperbesar menjadi `0.95rem` dengan huruf kapital tebal (`font-weight: 800`).
+
+3. **Perbesar Tampilan Daftar Link di Panel Kelola Admin (`link/index.html`)**:
+   - Mengubah ukuran item drag link (`.link-drag-item`) dengan padding `p-3.5 sm:p-4`, icon container `w-10 h-10` (`text-base`), judul link `text-sm sm:text-base font-bold`, dan tombol aksi edit/hapus `p-2.5` (`rounded-xl`).
+
+---
+
+### 🧪 3. Petunjuk Pengujian Lokal (*Local Verification*)
+
+1. Buka [portal.html](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/portal.html) di peramban.
+2. Perhatikan kartu portal utama kini tampil lebih lebar (`480px`), daftar link terlihat sangat fokus, jelas, teks judul besar, dan ikon kategori berwarna menarik & berukuran `48px`.
+3. Arahkan kursor (*hover*) atau sentuh kartu link &rarr; Pastikan animasi hover terangkat halus (`translateY(-2px)`), garis tepi bersinar, dan ikon panah bergeser ke kanan atas.
+4. Buka [link/index.html](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/link/index.html) di panel admin &rarr; Pastikan daftar item link drag-and-drop tampil lebih besar, rapi, dan tombol edit/hapus mudah ditekan.
+
+---
+
 ## 📅 Review [2026-08-11 18:54 WIB] - Audit Performa Tinggi: Optimasi Kuota Firestore, Baterai HP, Cache Service Worker & DNS Preconnect
 
 ### 📁 1. Berkas yang Diubah

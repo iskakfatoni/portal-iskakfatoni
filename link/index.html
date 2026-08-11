@@ -390,33 +390,33 @@
           const item = document.createElement('div');
           item.draggable = true;
           item.dataset.id = docId;
-          item.className = `link-drag-item flex items-center justify-between p-3 rounded-xl border text-xs transition ${isActive ? 'bg-slate-950/90 border-slate-800 hover:border-cyan-500/30' : 'bg-slate-950/40 border-slate-900 opacity-60'}`;
+          item.className = `link-drag-item flex items-center justify-between p-3.5 sm:p-4 rounded-2xl border text-xs transition ${isActive ? 'bg-slate-950/90 border-slate-800 hover:border-cyan-500/40 shadow-lg' : 'bg-slate-950/40 border-slate-900 opacity-60'}`;
           
           item.innerHTML = `
-            <div class="flex items-center gap-3 w-[70%]">
+            <div class="flex items-center gap-3.5 w-[75%]">
               <div class="drag-handle cursor-grab text-slate-500 hover:text-cyan-400 p-1 shrink-0" title="Geser untuk mengubah urutan">
-                <i class="fa-solid fa-grip-vertical text-sm"></i>
+                <i class="fa-solid fa-grip-vertical text-base"></i>
               </div>
               <input type="checkbox" ${isActive ? 'checked' : ''} class="toggle-active shrink-0 rounded bg-slate-900 border-slate-700 text-emerald-500 focus:ring-0 cursor-pointer w-4 h-4" title="${isActive ? 'Aktif (Klik untuk nonaktifkan)' : 'Nonaktif (Klik untuk aktifkan)'}">
               
               <!-- TAMPILAN ICON LINK -->
-              <div class="w-8 h-8 rounded-lg bg-slate-900 border border-slate-800 flex items-center justify-center shrink-0">
-                  <i class="${linkIconClass} text-slate-300"></i>
+              <div class="w-10 h-10 rounded-xl bg-slate-900 border border-slate-800 flex items-center justify-center shrink-0 text-base">
+                  <i class="${linkIconClass} text-slate-200"></i>
               </div>
 
               <div class="space-y-0.5 truncate">
-                <p class="font-bold text-white text-sm flex items-center gap-1.5 truncate">
+                <p class="font-bold text-white text-sm sm:text-base flex items-center gap-2 truncate">
                   ${data.title}
                   ${!isActive ? '<span class="text-[10px] text-red-400 bg-red-500/10 px-2 py-0.5 rounded-full border border-red-500/20 shrink-0">Nonaktif</span>' : ''}
                 </p>
-                <a href="${data.url}" target="_blank" class="text-cyan-400 font-mono text-[11px] hover:underline block truncate">${data.url}</a>
+                <a href="${data.url}" target="_blank" class="text-cyan-400 font-mono text-[11px] sm:text-xs hover:underline block truncate">${data.url}</a>
               </div>
             </div>
-            <div class="flex items-center gap-1.5 shrink-0">
-              <button class="btn-edit p-2 bg-cyan-500/15 hover:bg-cyan-500/30 text-cyan-400 border border-cyan-500/30 rounded-lg text-xs font-semibold cursor-pointer transition" title="Edit Link">
+            <div class="flex items-center gap-2 shrink-0">
+              <button class="btn-edit p-2.5 bg-cyan-500/15 hover:bg-cyan-500/30 text-cyan-400 border border-cyan-500/30 rounded-xl text-xs font-semibold cursor-pointer transition" title="Edit Link">
                 <i class="fa-solid fa-pen-to-square"></i>
               </button>
-              <button class="btn-del p-2 bg-red-500/15 hover:bg-red-500/30 text-red-400 border border-red-500/30 rounded-lg text-xs font-semibold cursor-pointer transition" title="Hapus Link">
+              <button class="btn-del p-2.5 bg-red-500/15 hover:bg-red-500/30 text-red-400 border border-red-500/30 rounded-lg text-xs font-semibold cursor-pointer transition" title="Hapus Link">
                 <i class="fa-solid fa-trash"></i>
               </button>
             </div>
