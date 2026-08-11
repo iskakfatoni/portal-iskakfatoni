@@ -1,5 +1,5 @@
 // sw.js - Service Worker Optimized for Performance
-const CACHE_NAME = 'portal-iskakfatoni-v6';
+const CACHE_NAME = 'portal-iskakfatoni-v7';
 
 const LOCAL_ASSETS = [
   './',
@@ -7,9 +7,9 @@ const LOCAL_ASSETS = [
   'portal.html',
   'admin.html',
   'style/style.css',
-  'manifest.json',
-  'foto_asn_profile.webp',
-  'nisnas_logo_colorful.webp'
+  'assets/manifest.json',
+  'assets/img/foto_asn_profile.webp',
+  'assets/img/nisnas_logo_colorful.webp'
 ];
 
 self.addEventListener('install', (event) => {

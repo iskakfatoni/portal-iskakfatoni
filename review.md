@@ -4,6 +4,53 @@ Dokumen ini berisi rangkuman review perubahan kode (*code review*) terbaru yang 
 
 ---
 
+## 📅 Review [2026-08-11 17:46 WIB] - Penataan Ulang Struktur Folder Aset Gambar & Manifest di Root Workspace
+
+### 📁 1. Berkas yang Diubah & Dipindahkan
+* 📁 **[NEW DIRECTORY] `assets/img/`**
+* 🚚 **[MOVE] `foto_asn_profile.webp`** &rarr; **`assets/img/foto_asn_profile.webp`**
+* 🚚 **[MOVE] `nisnas_logo_colorful.webp`** &rarr; **`assets/img/nisnas_logo_colorful.webp`**
+* 🚚 **[MOVE] `manifest.json`** &rarr; **`assets/manifest.json`**
+* 📄 **[assets/manifest.json](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/assets/manifest.json)**
+* 📄 **[sw.js](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/sw.js)**
+* 📄 **[index.html](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/index.html)**
+* 📄 **[portal.html](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/portal.html)**
+* 📄 **[admin.html](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/admin.html)**
+* 📄 **[absensi.html](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/absensi.html)**
+* 📄 **[database/db-manager.html](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/database/db-manager.html)**
+
+---
+
+### 📝 2. Rincian Baris & Logika yang Diperbarui
+
+1. **Relokasi Berkas Gambar ke Folder `assets/img/`**:
+   - Memindahkan `foto_asn_profile.webp` dan `nisnas_logo_colorful.webp` dari *root* workspace ke folder dedicated `assets/img/` demi keteraturan struktur proyek.
+   - Memperbarui tag `<img>` dan favicon `<link rel="icon">` di seluruh file HTML (`index.html`, `portal.html`, `admin.html`, `absensi.html`, `database/db-manager.html`).
+
+2. **Relokasi & Pembaruan `manifest.json`**:
+   - Memindahkan `manifest.json` ke folder `assets/manifest.json`.
+   - Memperbarui tag `<link rel="manifest" href="assets/manifest.json">` di `portal.html` dan `admin.html`.
+   - Memperbarui path ikon internal `manifest.json` menjadi `"src": "img/nisnas_logo_colorful.webp"`.
+
+3. **Pembaruan Service Worker Caching (`sw.js`)**:
+   - Mengubah daftar cache `LOCAL_ASSETS` di `sw.js` menjadi `'assets/manifest.json'`, `'assets/img/foto_asn_profile.webp'`, dan `'assets/img/nisnas_logo_colorful.webp'`.
+   - Mengubah `CACHE_NAME` menjadi `'portal-iskakfatoni-v7'`.
+   - **Service Worker (`sw.js`) dipertahankan di root** untuk menjaga keutuhan PWA Scope (`/`).
+
+---
+
+### 🧪 3. Petunjuk Pengujian Lokal (*Local Verification*)
+
+1. **Pengujian Tampilan Visual**:
+   - Buka `index.html`, `portal.html`, `admin.html`, `absensi.html`, dan `database/db-manager.html` di browser.
+   - Pastikan foto avatar profil dan logo NisNas Computer tampil dengan sempurna tanpa *broken image*.
+2. **Pengujian PWA & Service Worker**:
+   - Buka DevTools (F12) &rarr; Tab **Application**.
+   - Cek menu **Manifest**: Pastikan manifest terdeteksi di `assets/manifest.json` dan icon PWA terbaca dengan benar.
+   - Cek menu **Service Workers** & **Cache Storage**: Pastikan cache versi `portal-iskakfatoni-v7` berisi file dari lokasi `assets/img/` dan `assets/manifest.json`.
+
+---
+
 ## 📅 Review [2026-08-10 18:52 WIB] - Penggantian Tombol Keluar Menjadi Tombol Kembali pada Scanner QR Siswa
 
 ### 📁 1. Berkas yang Diubah
