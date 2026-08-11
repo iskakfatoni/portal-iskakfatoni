@@ -1,5 +1,5 @@
 // sw.js - Service Worker Optimized for Performance
-const CACHE_NAME = 'portal-iskakfatoni-v7';
+const CACHE_NAME = 'portal-iskakfatoni-v8';
 
 const LOCAL_ASSETS = [
   './',
@@ -9,7 +9,9 @@ const LOCAL_ASSETS = [
   'style/style.css',
   'assets/manifest.json',
   'assets/img/foto_asn_profile.webp',
-  'assets/img/nisnas_logo_colorful.webp'
+  'assets/img/nisnas_logo_colorful.webp',
+  'assets/js/particle/particle-bg.js',
+  'assets/js/utils/device-fingerprint.js'
 ];
 
 self.addEventListener('install', (event) => {

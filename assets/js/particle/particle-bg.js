@@ -78,6 +78,19 @@
     }
   });
 
+  document.addEventListener('visibilitychange', () => {
+    if (document.hidden) {
+      if (animationFrameId) {
+        window.cancelAnimationFrame(animationFrameId);
+        animationFrameId = null;
+      }
+    } else {
+      if (shouldRun && !animationFrameId) {
+        drawParticles();
+      }
+    }
+  });
+
   if (window.innerWidth >= 768) {
     startParticles();
   }

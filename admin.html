@@ -8,6 +8,7 @@
   <!-- INTEGRASI PWA & CACHING -->
   <link rel="manifest" href="assets/manifest.json">
   <meta name="theme-color" content="#0b0f19">
+  <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
   <link rel="preload" href="style/style.css" as="style">
   <link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" as="style" crossorigin="anonymous" referrerpolicy="no-referrer">
 
@@ -24,7 +25,7 @@
     <!-- Profil Header -->
     <header class="profile">
       <div class="avatar-ring">
-        <img src="assets/img/foto_asn_profile.webp" alt="Muchamad Iskak Fatoni" class="avatar">
+        <img src="assets/img/foto_asn_profile.webp" alt="Muchamad Iskak Fatoni" class="avatar" decoding="async" fetchpriority="high">
       </div>
       <h1 class="name">PORTAL::Iskak Fatoni</h1>
       <p class="bio">I'am certified electronical and computer teacher, also a former Kamen Rider</p>

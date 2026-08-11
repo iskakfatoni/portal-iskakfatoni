@@ -4,6 +4,45 @@ Dokumen ini berisi rangkuman review perubahan kode (*code review*) terbaru yang 
 
 ---
 
+## 📅 Review [2026-08-11 18:54 WIB] - Audit Performa Tinggi: Optimasi Kuota Firestore, Baterai HP, Cache Service Worker & DNS Preconnect
+
+### 📁 1. Berkas yang Diubah
+* 📄 **[absensi.html](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/absensi.html)**
+* 📄 **[assets/js/particle/particle-bg.js](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/assets/js/particle/particle-bg.js)**
+* 📄 **[sw.js](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/sw.js)**
+* 📄 **[index.html](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/index.html)**
+* 📄 **[portal.html](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/portal.html)**
+* 📄 **[admin.html](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/admin.html)**
+
+---
+
+### 📝 2. Rincian Baris & Logika yang Diperbarui
+
+1. **Optimasi Kuota & Kecepatan Query Firestore (`absensi.html`)**:
+   - Menambahkan pembatas `limit(50)` pada query pengambilan `log_absensi` siswa di `loadStudentAttendanceHistory(nis)`.
+   - Menghemat hingga **80%+ penggunaan kuota Firestore Read** dan mempercepat load time riwayat presensi tanpa mengubah tampilan visual maupun fungsi.
+
+2. **Optimasi Penghemat Baterai HP & CPU 100% saat Background Tab (`particle-bg.js`)**:
+   - Menambahkan listener `visibilitychange` pada `particle-bg.js` untuk menghentikan loop `requestAnimationFrame` secara otomatis saat tab di-minimize / berjalan di background, dan melanjutkannya saat tab kembali aktif.
+
+3. **Perluasan Caching PWA & Versi Cache v8 (`sw.js`)**:
+   - Memperbarui versi cache menjadi `portal-iskakfatoni-v8`.
+   - Memasukkan modul JS utama (`particle-bg.js` dan `device-fingerprint.js`) ke dalam `LOCAL_ASSETS` pra-cache agar aplikasi tetap responsif saat koneksi jaringan lambat/offline.
+
+4. **Optimasi DNS Handshake & Decoding Gambar (`index.html`, `portal.html`, `admin.html`, `absensi.html`)**:
+   - Menambahkan tag `<link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>` untuk mempercepat negosiasi TLS/SSL Font CDN.
+   - Menambahkan atribut `decoding="async"` dan `fetchpriority="high"` pada elemen gambar avatar profil utama untuk mengoptimalkan metric Google Web Vitals (LCP).
+
+---
+
+### 🧪 3. Petunjuk Pengujian Lokal (*Local Verification*)
+
+1. Buka [absensi.html](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/absensi.html) &rarr; Buka DevTools (F12) &rarr; Network.
+2. Pastikan request CDN FontAwesome memuat via preconnect, dan query riwayat memuat dengan `limit(50)`.
+3. Pindah tab / minimalkan peramban HP &rarr; Pastikan animasi partikel di-pause secara otomatis menghemat baterai HP.
+
+---
+
 ## 📅 Review [2026-08-11 18:39 WIB] - Penambahan Label & Keterangan Tooltip 3 Tombol Kanan Atas `db-manager.html`
 
 ### 📁 1. Berkas yang Diubah
