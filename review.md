@@ -4,6 +4,29 @@ Dokumen ini berisi rangkuman review perubahan kode (*code review*) terbaru yang 
 
 ---
 
+## 📅 Review [2026-08-11 18:33 WIB] - Perbaikan Bug Sintaks Event Listener Logout pada Dashboard Guru (`guru/index.html`)
+
+### 📁 1. Berkas yang Diubah
+* 📄 **[guru/index.html](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/guru/index.html)**
+
+---
+
+### 📝 2. Rincian Baris & Logika yang Diperbarui
+
+1. **Perbaikan Penutupan Blok Event Listener `btnLogout`**:
+   - Memperbaiki bug sintaksis di mana deklarasi fungsi `async function checkAndRestoreActiveSesi()` tidak sengaja terselip di dalam handler `btnLogout.addEventListener('click', ...)` karena penutup `});` yang hilang.
+   - Mengisolasi dan menutup blok handler `btnLogout` secara benar, sehingga `checkAndRestoreActiveSesi()` kini kembali terdeklarasi pada *scope module* utama dan dipanggil dengan sempurna oleh `initializeAuthGuard`.
+
+---
+
+### 🧪 3. Petunjuk Pengujian Lokal (*Local Verification*)
+
+1. Buka dashboard guru [guru/index.html](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/guru/index.html).
+2. Buka DevTools (F12) &rarr; Console.
+3. **Hasil**: Bebas dari error `ReferenceError: checkAndRestoreActiveSesi is not defined`, dan pemulihan sesi persisten berjalan 100% mulus saat memuat halaman.
+
+---
+
 ## 📅 Review [2026-08-11 18:25 WIB] - Penambahan Fitur View Riwayat Presensi Siswa (Hadir & Tidak Hadir)
 
 ### 📁 1. Berkas yang Diubah

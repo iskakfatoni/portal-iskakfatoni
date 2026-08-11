@@ -216,7 +216,9 @@
     // ↩️ KEMBALI KE HUB ADMIN (TANPA LOGOUT)
     btnLogout.addEventListener('click', () => {
       window.location.href = "../admin.html";
-      async function checkAndRestoreActiveSesi() {
+    });
+
+    async function checkAndRestoreActiveSesi() {
       try {
         let activeDocId = localStorage.getItem('portal_guru_active_sesi_id');
         let activeDocData = null;
