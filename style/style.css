@@ -888,7 +888,7 @@ body.theme-glass #particle-canvas {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 14px 16px;
+  padding: 16px 18px;
   background: rgba(3, 7, 18, 0.75);
   border: 1px solid rgba(255, 255, 255, 0.14);
   border-radius: 16px;
@@ -916,13 +916,13 @@ body.theme-glass #particle-canvas {
 }
 
 .link-icon-box {
-  width: 48px;
-  height: 48px;
+  width: 52px;
+  height: 52px;
   border-radius: 14px;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 1.35rem;
+  font-size: 1.5rem;
   flex-shrink: 0;
   transition: all 0.25s ease;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
@@ -934,11 +934,11 @@ body.theme-glass #particle-canvas {
 }
 
 .link-text h3 {
-  font-size: 1rem;
-  font-weight: 700;
+  font-size: 1.18rem;
+  font-weight: 800;
   color: #ffffff;
   margin: 0;
-  line-height: 1.35;
+  line-height: 1.4;
   letter-spacing: -0.01em;
 }
 
@@ -947,13 +947,13 @@ body.theme-glass #particle-canvas {
   margin-right: 8px;
   display: inline-block;
   font-weight: 800;
-  font-size: 1.05rem;
+  font-size: 1.25rem;
   color: var(--dash-accent);
 }
 
 .link-card-item .arrow-icon {
   color: #94a3b8;
-  font-size: 0.95rem;
+  font-size: 1.1rem;
   transition: transform 0.25s ease, color 0.25s ease;
   margin-left: 8px;
   flex-shrink: 0;

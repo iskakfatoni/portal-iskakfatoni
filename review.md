@@ -4,6 +4,38 @@ Dokumen ini berisi rangkuman review perubahan kode (*code review*) terbaru yang 
 
 ---
 
+## 📅 Review [2026-08-11 20:30 WIB] - Peningkatan Ukuran Font & Aksentuasi Fokus Item Link (`portal.html` via `style/style.css`)
+
+### 📁 1. Berkas yang Diubah
+* 📄 **[style/style.css](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/style/style.css)**
+
+---
+
+### 📝 2. Rincian Baris & Logika yang Diperbarui
+
+1. **Peningkatan Ukuran Teks Link (`.link-text h3`)**:
+   - Memperbesar ukuran font dari `1rem` (16px) menjadi `1.18rem` (~19px).
+   - Mempertegas ketebalan font dari `font-weight: 700` menjadi `font-weight: 800` serta penyesuaian `line-height: 1.4` agar judul link utama lebih menonjol dan menjadi pusat perhatian visual.
+
+2. **Peningkatan Aksentuasi Nomor Urut (`.link-number`)**:
+   - Memperbesar ukuran font penomoran dari `1.05rem` menjadi `1.25rem` dengan warna cyan aksen (`var(--dash-accent)`) yang tebal.
+
+3. **Proporsionalitas Kartu & Ikon (`.link-card-item`, `.link-icon-box`, `.arrow-icon`)**:
+   - Padding kartu item link ditingkatkan dari `14px 16px` menjadi `16px 18px` untuk memberikan kenyamanan membaca.
+   - Ukuran kotak ikon diperbesar dari `48px × 48px` (font-size `1.35rem`) menjadi `52px × 52px` (font-size `1.5rem`).
+   - Ukuran ikon panah penunjuk diperbesar dari `0.95rem` menjadi `1.1rem`.
+
+---
+
+### 🧪 3. Petunjuk Pengujian Lokal (*Local Verification*)
+
+1. Buka [portal.html](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/portal.html) di peramban.
+2. Amati daftar link aktif yang dimuat dari Firestore.
+3. Verifikasi bahwa teks judul link, nomor urut, dan ikon kini tampil jauh lebih besar, jelas, tegas, serta sangat mudah dijadikan fokus perhatian oleh pengguna.
+4. Coba lakukan hover atau sentuh pada salah satu item link &rarr; Pastikan animasi pergeseran dan respons visual tetap halus.
+
+---
+
 ## 📅 Review [2026-08-11 20:12 WIB] - Peningkatan Ukuran Tampilan & Fokus Visual Daftar Link Portal (`style.css` & `link/index.html`)
 
 ### 📁 1. Berkas yang Diubah
