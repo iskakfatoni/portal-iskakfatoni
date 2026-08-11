@@ -69,7 +69,7 @@
         <span class="text-xs font-bold text-cyan-400 flex items-center gap-2 uppercase tracking-wider">
           <i class="fa-solid fa-camera"></i> Scan QR Absensi Guru
         </span>
-        <span id="scan-status-badge" class="px-2.5 py-0.5 rounded-full text-[10px] font-bold font-mono bg-cyan-500/15 text-cyan-400 border border-cyan-500/30">
+        <span id="scan-status-badge" class="px-3 py-1 rounded-full text-xs font-bold font-mono bg-cyan-500/15 text-cyan-400 border border-cyan-500/30">
           Siap
         </span>
       </div>
@@ -99,7 +99,7 @@
 
       <p class="text-xs text-slate-400 font-mono">Arahkan kamera ke QR Code di layar Ponsel/Laptop Guru</p>
 
-      <div id="notif-box" class="hidden p-3.5 rounded-xl text-xs font-semibold text-center font-mono"></div>
+      <div id="notif-box" class="hidden p-4 sm:p-5 rounded-2xl text-base sm:text-lg font-extrabold text-center font-mono shadow-xl"></div>
 
     </div>
 
@@ -241,7 +241,7 @@
 
         cameraLoading.classList.add('hidden');
         scanStatusBadge.innerText = "Siap Scan";
-        scanStatusBadge.className = "px-2.5 py-0.5 rounded-full text-[10px] font-bold font-mono bg-emerald-500/15 text-emerald-400 border border-emerald-500/30";
+        scanStatusBadge.className = "px-3 py-1 rounded-full text-xs font-extrabold font-mono bg-emerald-500/15 text-emerald-400 border border-emerald-500/30";
 
       } catch (err) {
         console.error("Gagal membuka kamera:", err);
@@ -259,7 +259,7 @@
       isProcessingScan = true;
 
       scanStatusBadge.innerText = "Memproses...";
-      scanStatusBadge.className = "px-2.5 py-0.5 rounded-full text-[10px] font-bold font-mono bg-amber-500/15 text-amber-400 border border-amber-500/30";
+      scanStatusBadge.className = "px-3 py-1 rounded-full text-xs font-extrabold font-mono bg-amber-500/15 text-amber-400 border border-amber-500/30 animate-pulse";
 
       const scannedToken = decodedText.trim();
 
@@ -324,7 +324,7 @@
         showNotif(`🎉 ABSENSI BERHASIL!\n${namaSiswaVal}\n[${sesiData.id_kelas} - ${sesiData.nama_mapel}]`, "success");
 
         scanStatusBadge.innerText = "Sukses";
-        scanStatusBadge.className = "px-2.5 py-0.5 rounded-full text-[10px] font-bold font-mono bg-emerald-500/15 text-emerald-400 border border-emerald-500/30";
+        scanStatusBadge.className = "px-3 py-1 rounded-full text-xs font-extrabold font-mono bg-emerald-500/25 text-emerald-300 border border-emerald-500/50 shadow-sm";
 
         setTimeout(() => {
           resetProcessingLock(1000);
@@ -343,7 +343,7 @@
         isProcessingScan = false;
         notifBox.classList.add('hidden');
         scanStatusBadge.innerText = "Siap Scan";
-        scanStatusBadge.className = "px-2.5 py-0.5 rounded-full text-[10px] font-bold font-mono bg-cyan-500/15 text-cyan-400 border border-cyan-500/30";
+        scanStatusBadge.className = "px-3 py-1 rounded-full text-xs font-extrabold font-mono bg-cyan-500/15 text-cyan-400 border border-cyan-500/30";
       }, delayMs);
     }
 
@@ -352,11 +352,11 @@
       notifBox.classList.remove('hidden');
 
       if (type === 'success') {
-        notifBox.className = "p-3.5 rounded-xl text-xs font-semibold text-center font-mono bg-emerald-500/15 text-emerald-300 border border-emerald-500/30 whitespace-pre-line";
+        notifBox.className = "p-4 sm:p-5 rounded-2xl text-base sm:text-lg font-extrabold text-center font-mono bg-emerald-500/20 text-emerald-200 border-2 border-emerald-400/60 shadow-lg shadow-emerald-500/20 whitespace-pre-line leading-relaxed backdrop-blur-md";
       } else if (type === 'warn') {
-        notifBox.className = "p-3.5 rounded-xl text-xs font-semibold text-center font-mono bg-amber-500/15 text-amber-300 border border-amber-500/30 whitespace-pre-line";
+        notifBox.className = "p-4 sm:p-5 rounded-2xl text-base sm:text-lg font-extrabold text-center font-mono bg-amber-500/20 text-amber-200 border-2 border-amber-400/60 shadow-lg shadow-amber-500/20 whitespace-pre-line leading-relaxed backdrop-blur-md";
       } else {
-        notifBox.className = "p-3.5 rounded-xl text-xs font-semibold text-center font-mono bg-red-500/15 text-red-300 border border-red-500/30 whitespace-pre-line";
+        notifBox.className = "p-4 sm:p-5 rounded-2xl text-base sm:text-lg font-extrabold text-center font-mono bg-red-500/20 text-red-200 border-2 border-red-400/60 shadow-lg shadow-red-500/20 whitespace-pre-line leading-relaxed backdrop-blur-md";
       }
     }
 

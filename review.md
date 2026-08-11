@@ -4,6 +4,66 @@ Dokumen ini berisi rangkuman review perubahan kode (*code review*) terbaru yang 
 
 ---
 
+## 📅 Review [2026-08-11 18:15 WIB] - Implementasi Persistensi Sesi QR Absensi Guru berbasis Storage & Batas Keamanan 1 Jam
+
+### 📁 1. Berkas yang Diubah
+* 📄 **[guru/index.html](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/guru/index.html)**
+
+---
+
+### 📝 2. Rincian Baris & Logika yang Diperbarui
+
+1. **Penyimpanan ID Sesi Aktif di LocalStorage (`portal_guru_active_sesi_id`)**:
+   - Saat Guru mengklik tombol **"Mulai Sesi Absensi"**, ID dokumen sesi yang dibuat disimpan secara persisten ke `localStorage.setItem('portal_guru_active_sesi_id', docRef.id)`.
+   - Hal ini menjamin sesi QR Guru **100% persisten** dan tidak akan hilang saat Guru berpindah halaman (`rekap.html`, `admin.html`, dll.), merefresh peramban, atau menutup tab.
+
+2. **Pemulihan Sesi Cepat & Fallback tanpa Error Composite Index**:
+   - `checkAndRestoreActiveSesi()` kini terlebih dahulu mencoba mengambil dokumen sesi secara langsung via `getDoc(doc(db, "sesi_absensi", activeDocId))`.
+   - Apabila ID lokal kosong, dilakukan query fallback `where("is_active", "==", true)` yang diurutkan pada memori JavaScript untuk menghindari crash akibat requirement *Composite Index* Firestore.
+
+3. **Aturan Penutupan Sesi (Kondisi Ganda)**:
+   - **Manual**: Sesi HANYA akan berhenti jika Guru mengklik tombol **"Tutup Sesi Absensi"** (misal saat seluruh siswa telah selesai scan absensi). Kunci `portal_guru_active_sesi_id` langsung dibersihkan dari `localStorage`.
+   - **Otomatis (> 1 Jam)**: Apabila sesi dibiarkan aktif tanpa ditutup manual, sistem secara otomatis mengecek durasi `created_at`. Jika telah melebihi **60 menit (1 jam)**, status sesi diubah menjadi `is_active: false` dan kunci lokal dibersihkan demi keamanan.
+
+---
+
+### 🧪 3. Petunjuk Pengujian Lokal (*Local Verification*)
+
+1. Buka dashboard guru [guru/index.html](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/guru/index.html).
+2. Pilih Kelas & Mapel lalu klik **Mulai Sesi Absensi**.
+3. Navigasi / buka halaman lain (misal `admin.html` atau `rekap.html`) atau refresh peramban, lalu kembali ke `guru/index.html`.
+4. **Hasil**: Sesi QR Code, status aktif, dan daftar log siswa yang sudah scan tetap utuh dan aktif kembali secara otomatis.
+5. Klik **Tutup Sesi Absensi**.
+6. **Hasil**: Sesi ditutup secara bersih dan status kembali ke "Off".
+
+---
+
+## 📅 Review [2026-08-11 17:51 WIB] - Peningkatan Ukuran & Kontras Teks Informasi Hasil Scan QR Absensi Siswa
+
+### 📁 1. Berkas yang Diubah
+* 📄 **[siswa/index.html](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/siswa/index.html)**
+
+---
+
+### 📝 2. Rincian Baris & Logika yang Diperbarui
+
+1. **Pembesaran Ukuran Teks Notifikasi Hasil Scan (`#notif-box`)**:
+   - Mengubah ukuran teks dari `text-xs` (12px) menjadi `text-base sm:text-lg` (16px–18px) dengan bobot `font-extrabold` agar notifikasi (Sukses, Peringatan, atau Gagal) sangat kontras, tegas, dan mudah dibaca pada layar HP siswa saat melakukan scan absensi.
+   - Menambahkan padding `p-4 sm:p-5`, sudut membulat `rounded-2xl`, serta ketebalan border `border-2` dengan bayangan *glow* semi-transparan (`shadow-lg backdrop-blur-md`) sesuai jenis notifikasi (Emerald untuk sukses, Amber untuk peringatan, Red untuk error).
+
+2. **Peningkatan Badge Status Scanner (`#scan-status-badge`)**:
+   - Memperbesar ukuran teks badge status dari `text-[10px]` menjadi `text-xs` dengan padding `px-3 py-1` dan bobot `font-extrabold` agar status kamera (Siap Scan, Memproses..., Sukses) terlihat jelas di bagian atas kartu scanner.
+
+---
+
+### 🧪 3. Petunjuk Pengujian Lokal (*Local Verification*)
+
+1. Buka halaman scanner absensi siswa di HP/Browser: [siswa/index.html](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/siswa/index.html).
+2. Lakukan pengujian scan QR Code.
+3. **Hasil**: Kotak notifikasi hasil scan (berhasil/gagal/sudah presensi) kini muncul dengan huruf jauh lebih besar, tebal, menonjol, dan sangat mudah dibaca.
+
+---
+
 ## 📅 Review [2026-08-11 17:46 WIB] - Penataan Ulang Struktur Folder Aset Gambar & Manifest di Root Workspace
 
 ### 📁 1. Berkas yang Diubah & Dipindahkan
