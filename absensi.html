@@ -83,10 +83,37 @@
           </div>
         </div>
 
-        <button id="btn-buka-scanner" type="button" class="btn btn-emerald">
+        <button id="btn-buka-scanner" type="button" class="btn btn-emerald" style="margin-bottom: 16px;">
           <i class="fa-solid fa-camera"></i>
           <span>Buka Scanner QR Absensi</span>
         </button>
+
+        <!-- SECTION RIWAYAT PRESENSI SISWA -->
+        <div class="riwayat-section" style="margin-top: 16px; padding-top: 16px; border-top: 1px solid rgba(255, 255, 255, 0.1);">
+          <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px;">
+            <span style="font-size: 0.75rem; font-weight: 700; color: #38bdf8; text-transform: uppercase; letter-spacing: 0.05em; display: flex; align-items: center; gap: 6px;">
+              <i class="fa-solid fa-clock-rotate-left"></i> Riwayat Presensi Saya
+            </span>
+            <span id="riwayat-status-tag" style="font-size: 0.65rem; font-family: monospace; color: #94a3b8; font-weight: 700;">Loading...</span>
+          </div>
+
+          <!-- SUMMARY COUNTERS: HADIR VS TIDAK HADIR -->
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 12px;">
+            <div style="padding: 10px; border-radius: 12px; background: rgba(16, 185, 129, 0.12); border: 1px solid rgba(16, 185, 129, 0.3); text-align: center;">
+              <span style="display: block; font-size: 0.65rem; color: #34d399; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em;">Hadir</span>
+              <span id="count-hadir" style="font-size: 1.1rem; font-weight: 800; color: #6ee7b7; font-family: monospace;">0</span>
+            </div>
+            <div style="padding: 10px; border-radius: 12px; background: rgba(239, 68, 68, 0.12); border: 1px solid rgba(239, 68, 68, 0.3); text-align: center;">
+              <span style="display: block; font-size: 0.65rem; color: #f87171; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em;">Tidak Hadir</span>
+              <span id="count-tidak-hadir" style="font-size: 1.1rem; font-weight: 800; color: #fca5a5; font-family: monospace;">0</span>
+            </div>
+          </div>
+
+          <!-- LIST ITEM RIWAYAT -->
+          <div id="riwayat-log-container" style="display: flex; flex-direction: column; gap: 8px; max-height: 320px; overflow-y: auto; padding-right: 2px;">
+            <p style="font-size: 0.75rem; color: #94a3b8; text-align: center; padding: 24px 0; font-family: monospace;">Memuat riwayat presensi...</p>
+          </div>
+        </div>
       </div>
 
     </section>
@@ -274,6 +301,8 @@
       sectionLoading.classList.add('hidden');
       sectionLogin.classList.add('hidden');
       sectionProfile.classList.remove('hidden');
+
+      loadStudentAttendanceHistory(user.nis);
     }
 
     function showLoginForm() {
@@ -294,6 +323,80 @@
     function hideError() {
       errorMsg.innerText = '';
       errorMsg.classList.add('hidden');
+    }
+
+    async function loadStudentAttendanceHistory(nis) {
+      const container = document.getElementById('riwayat-log-container');
+      const countHadir = document.getElementById('count-hadir');
+      const countTidakHadir = document.getElementById('count-tidak-hadir');
+      const riwayatStatusTag = document.getElementById('riwayat-status-tag');
+
+      if (!nis || !container) return;
+
+      try {
+        const qLog = query(
+          collection(db, "log_absensi"),
+          where("nis", "==", nis)
+        );
+
+        const snap = await getDocs(qLog);
+
+        if (snap.empty) {
+          container.innerHTML = '<p style="font-size:0.75rem; color:#94a3b8; text-align:center; padding:20px 0; font-family:monospace;">Belum ada riwayat presensi tercatat.</p>';
+          countHadir.innerText = "0";
+          countTidakHadir.innerText = "0";
+          riwayatStatusTag.innerText = "0 Log";
+          return;
+        }
+
+        const docs = snap.docs.map(d => ({ id: d.id, ...d.data() })).sort((a, b) => {
+          const timeA = a.created_at?.seconds || 0;
+          const timeB = b.created_at?.seconds || 0;
+          if (timeA !== timeB) return timeB - timeA;
+          return (b.tanggal || '').localeCompare(a.tanggal || '');
+        });
+
+        let hadirCount = 0;
+        let tidakHadirCount = 0;
+        container.innerHTML = '';
+
+        docs.forEach(data => {
+          const rawStatus = (data.status || 'Hadir').trim();
+          const isHadir = rawStatus.toLowerCase().includes('hadir') && !rawStatus.toLowerCase().includes('tidak');
+
+          if (isHadir) hadirCount++;
+          else tidakHadirCount++;
+
+          const badgeBg = isHadir ? 'rgba(16, 185, 129, 0.15)' : 'rgba(239, 68, 68, 0.15)';
+          const badgeColor = isHadir ? '#6ee7b7' : '#fca5a5';
+          const badgeBorder = isHadir ? 'rgba(16, 185, 129, 0.3)' : 'rgba(239, 68, 68, 0.3)';
+          const badgeText = isHadir ? '✔ Hadir' : '❌ Tidak Hadir';
+
+          const item = document.createElement('div');
+          item.style.cssText = 'padding: 10px 12px; border-radius: 12px; background: rgba(15, 23, 42, 0.8); border: 1px solid rgba(255, 255, 255, 0.08); display: flex; align-items: center; justify-content: space-between; font-size: 0.75rem; text-align: left;';
+          item.innerHTML = `
+            <div>
+              <div style="display:flex; align-items:center; gap:6px; margin-bottom:2px;">
+                <span style="font-weight:700; color:#ffffff; font-family:monospace;">${data.hari || ''} ${data.tanggal || ''}</span>
+                <span style="font-size:0.65rem; color:#94a3b8; font-family:monospace;">(${data.waktu || '-'})</span>
+              </div>
+              <p style="font-size:0.7rem; color:#38bdf8; font-weight:600; margin:0;">${data.nama_mapel || 'Presensi Kelas'} <span style="color:#94a3b8;">[${data.id_kelas || '-'}]</span></p>
+            </div>
+            <span style="padding: 4px 10px; border-radius: 20px; font-size: 0.65rem; font-weight: 700; font-family: monospace; background: ${badgeBg}; color: ${badgeColor}; border: 1px solid ${badgeBorder}; whitespace: nowrap;">
+              ${badgeText}
+            </span>
+          `;
+          container.appendChild(item);
+        });
+
+        countHadir.innerText = hadirCount;
+        countTidakHadir.innerText = tidakHadirCount;
+        riwayatStatusTag.innerText = `${docs.length} Log`;
+
+      } catch (err) {
+        console.error("Gagal memuat riwayat presensi:", err);
+        container.innerHTML = '<p style="font-size:0.75rem; color:#ef4444; text-align:center; padding:16px 0; font-family:monospace;">Gagal memuat data riwayat.</p>';
+      }
     }
 
     function setLoading(isLoading) {

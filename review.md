@@ -4,6 +4,37 @@ Dokumen ini berisi rangkuman review perubahan kode (*code review*) terbaru yang 
 
 ---
 
+## 📅 Review [2026-08-11 18:25 WIB] - Penambahan Fitur View Riwayat Presensi Siswa (Hadir & Tidak Hadir)
+
+### 📁 1. Berkas yang Diubah
+* 📄 **[absensi.html](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/absensi.html)**
+* 📄 **[siswa/index.html](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/siswa/index.html)**
+
+---
+
+### 📝 2. Rincian Baris & Logika yang Diperbarui
+
+1. **Penambahan Section "Riwayat Presensi Saya" pada `absensi.html`**:
+   - Menambahkan komponen kartu visual baru di dalam `#section-profile-absensi` untuk menampilkan riwayat presensi siswa yang sedang aktif.
+   - **Counter Statistik**: Menyediakan ringkasan jumlah presensi **Hadir** (Badge Hijau) dan **Tidak Hadir** (Badge Merah).
+   - **Query & Rendering Firestore**: Membuat fungsi `loadStudentAttendanceHistory(nis)` yang mengambil log presensi dari koleksi `log_absensi` khusus untuk NIS siswa aktif (`where("nis", "==", nis)`), diurutkan dari yang terbaru.
+   - **Penyederhanaan Status**: Status presensi disajikan secara bersih dengan 2 kategori utama: **`✔ Hadir`** (Emerald) dan **`❌ Tidak Hadir`** (Red).
+
+2. **Pintasan Navigasi pada `siswa/index.html`**:
+   - Menambahkan tombol pintas **`[ 📋 Lihat Riwayat Presensi Saya ]`** di bawah kontrol kamera scanner QR agar siswa dapat beralih melihat riwayat presensi dengan mudah.
+
+---
+
+### 🧪 3. Petunjuk Pengujian Lokal (*Local Verification*)
+
+1. Buka dashboard absensi siswa [absensi.html](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/absensi.html).
+2. Verifikasi NIS atau muat sesi profil siswa terikat.
+3. **Hasil**: Kartu **Riwayat Presensi Saya** memuat daftar presensi beserta jumlah counter **Hadir** dan **Tidak Hadir** secara otomatis.
+4. Buka scanner [siswa/index.html](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/siswa/index.html) dan klik tombol **Lihat Riwayat Presensi Saya**.
+5. **Hasil**: Kamera dilepas secara bersih dan peramban kembali ke halaman dashboard `absensi.html` menampilkan riwayat presensi siswa.
+
+---
+
 ## 📅 Review [2026-08-11 18:15 WIB] - Implementasi Persistensi Sesi QR Absensi Guru berbasis Storage & Batas Keamanan 1 Jam
 
 ### 📁 1. Berkas yang Diubah

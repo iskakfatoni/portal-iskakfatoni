@@ -97,6 +97,10 @@
         </button>
       </div>
 
+      <button id="btn-lihat-riwayat" class="w-full py-2.5 bg-slate-900/90 hover:bg-slate-800 text-cyan-300 font-bold text-xs rounded-xl transition border border-cyan-500/30 flex items-center justify-center gap-2 cursor-pointer shadow-sm">
+        <i class="fa-solid fa-clock-rotate-left text-cyan-400"></i> Lihat Riwayat Presensi Saya
+      </button>
+
       <p class="text-xs text-slate-400 font-mono">Arahkan kamera ke QR Code di layar Ponsel/Laptop Guru</p>
 
       <div id="notif-box" class="hidden p-4 sm:p-5 rounded-2xl text-base sm:text-lg font-extrabold text-center font-mono shadow-xl"></div>
@@ -173,6 +177,14 @@
       await hardReleaseCamera();
       window.location.href = "../absensi.html";
     });
+
+    const btnLihatRiwayat = document.getElementById('btn-lihat-riwayat');
+    if (btnLihatRiwayat) {
+      btnLihatRiwayat.addEventListener('click', async () => {
+        await hardReleaseCamera();
+        window.location.href = "../absensi.html";
+      });
+    }
 
     btnRestartCam.addEventListener('click', () => {
       cameraLoading.classList.remove('hidden');
