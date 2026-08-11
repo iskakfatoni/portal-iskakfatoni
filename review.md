@@ -4,6 +4,27 @@ Dokumen ini berisi rangkuman review perubahan kode (*code review*) terbaru yang 
 
 ---
 
+## 📅 Review [2026-08-11 21:06 WIB] - Dokumentasi Skema Database Tersembunyi (`.agents/DATABASE_SCHEMA.md`)
+
+### 📁 1. Berkas yang Diubah / Dibuat
+* 📄 **[.agents/DATABASE_SCHEMA.md](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/.agents/DATABASE_SCHEMA.md)** [NEW]
+
+---
+
+### 📝 2. Rincian Baris & Logika yang Diperbarui
+
+1. **Pembuatan Dokumentasi Skema Database Internal Tersembunyi**:
+   - Dibuat berkas tersimpan pada direktori tersembunyi `file:///.agents/DATABASE_SCHEMA.md` yang memuat seluruh rancangan 8 koleksi Cloud Firestore (`siswa`, `kelas`, `mapel`, `links`, `sesi_absensi`, `log_absensi`, `admin_devices`, `settings`).
+   - Dilengkapi diagram ERD (Mermaid) serta tabel perincian kolom, tipe data, dan sampel nilainya.
+
+---
+
+### 🧪 3. Petunjuk Pengujian Lokal (*Local Verification*)
+
+1. Buka berkas internal [.agents/DATABASE_SCHEMA.md](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/.agents/DATABASE_SCHEMA.md) di editor untuk meninjau dokumentasi skema database lengkap.
+
+---
+
 ## 📅 Review [2026-08-11 20:45 WIB] - Penyempurnaan UX: Menyembunyikan Tombol Logout saat Perangkat Terikat (`admin.html`)
 
 ### 📁 1. Berkas yang Diubah
