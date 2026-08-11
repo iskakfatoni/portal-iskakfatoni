@@ -4,6 +4,42 @@ Dokumen ini berisi rangkuman review perubahan kode (*code review*) terbaru yang 
 
 ---
 
+## 📅 Review [2026-08-11 20:35 WIB] - Fitur Ikat Ponsel Admin (Auto-Login Perangkat Terikat, Deteksi Perangkat, & Panel History Login)
+
+### 📁 1. Berkas yang Diubah
+* 📄 **[admin.html](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/admin.html)**
+* 📄 **[assets/js/auth/auth-guard.js](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/assets/js/auth/auth-guard.js)**
+* 📄 **[style/style.css](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/style/style.css)**
+* 📄 **[firestore.rules](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/firestore.rules)**
+
+---
+
+### 📝 2. Rincian Baris & Logika yang Diperbarui
+
+1. **Aturan Keamanan Firestore (`firestore.rules`)**:
+   - Menambahkan aturan akses untuk koleksi `admin_devices` & `settings` agar pengikatan dan verifikasi perangkat terikat admin dapat berjalan lancar.
+
+2. **Perluasan Auth Guard Admin (`assets/js/auth/auth-guard.js`)**:
+   - Menambahkan verifikasi status *Hardware Device Binding* (`admin_devices`) ketika session Firebase Auth tidak aktif. Jika perangkat terikat & aktif, akses langsung diberikan tanpa perlu mengetik ulang password.
+
+3. **Komponen Banner Binding & Panel Pemantauan (`admin.html` & `style/style.css`)**:
+   - **Banner Status Perangkat Saat Ini**: Menampilkan deteksi tipe perangkat (📱 Ponsel / 💻 Laptop), Hardware ID (`HW-XXXXXX`), badge status (`Terikat 🟢` / `Belum Terikat ⚪`), dan tombol **"Ikat Perangkat Ini"** / **"Lepas Ikat Perangkat Ini"**.
+   - **Panel Monitoring Log Login Admin**: Menampilkan daftar seluruh perangkat admin yang terikat secara realtime (`onSnapshot`), waktu login terakhir, serta tombol **"Cabut Akses"** (Remote Revoke).
+   - **Deteksi Jenis Perangkat**: Menentukan secara otomatis apakah perangkat pengguna adalah 📱 Mobile Phone atau 💻 Laptop/PC. Pengikatan bersifat opsional sehingga laptop dapat tetap mewajibkan login manual jika diinginkan.
+
+---
+
+### 🧪 3. Petunjuk Pengujian Lokal (*Local Verification*)
+
+1. Buka [admin.html](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/admin.html) di peramban.
+2. Login manual dengan email & password admin.
+3. Di bagian atas Master Admin Dashboard, perhatikan banner status perangkat. Klik tombol **"Ikat Perangkat Ini"** &rarr; Verifikasi badge berubah menjadi **"Terikat 🟢"** dan pesan konfirmasi muncul.
+4. Perhatikan bagian bawah panel **"Perangkat Admin Terikat & History Login"** &rarr; Verifikasi perangkat Anda masuk dalam daftar log lengkap dengan informasi tipe perangkat (📱/💻) dan timestamp login.
+5. Lakukan Logout atau buka tab baru &rarr; Verifikasi bahwa sistem mengenali perangkat terikat dan langsung memberikan akses auto-login tanpa meminta password.
+6. Pada daftar log perangkat, coba klik **"Cabut"** pada salah satu perangkat &rarr; Verifikasi akses auto-login perangkat tersebut dicabut.
+
+---
+
 ## 📅 Review [2026-08-11 20:30 WIB] - Peningkatan Ukuran Font & Aksentuasi Fokus Item Link (`portal.html` via `style/style.css`)
 
 ### 📁 1. Berkas yang Diubah

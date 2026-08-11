@@ -30,5 +30,12 @@ service cloud.firestore {
     match /links/{docId} {
       allow read, create, update, delete: if true;
     }
+    // 5. Koleksi admin_devices & settings: Pengikatan HP/perangkat admin & pengaturan portal
+    match /admin_devices/{docId} {
+      allow read, create, update, delete: if true;
+    }
+    match /settings/{docId} {
+      allow read, create, update, delete: if true;
+    }
   }
 }

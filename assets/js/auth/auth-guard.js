@@ -1,6 +1,8 @@
 // assets/js/auth/auth-guard.js
-import { auth } from "../config/firebase-config.js";
+import { auth, db } from "../config/firebase-config.js";
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+import { doc, getDoc, serverTimestamp, updateDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+import { getHardwareFingerprint } from "../utils/device-fingerprint.js";
 
 const DEFAULT_REDIRECT_PATH = "../admin.html";
 
@@ -10,7 +12,7 @@ function revealPage() {
 }
 
 function redirectToLogin(redirectPath = DEFAULT_REDIRECT_PATH) {
-  alert("Akses ditolak! Anda harus login terlebih dahulu.");
+  alert("Akses ditolak! Anda harus login atau mengikat perangkat terlebih dahulu.");
   window.location.href = redirectPath;
 }
 
@@ -22,20 +24,42 @@ export function initializeAuthGuard({
   document.documentElement.style.display = "none";
   document.documentElement.classList.add("auth-guard");
 
-  return onAuthStateChanged(auth, (user) => {
-    if (!user) {
-      if (onUnauthenticated) {
-        onUnauthenticated();
-      } else {
-        redirectToLogin(redirectTo);
-      }
+  return onAuthStateChanged(auth, async (user) => {
+    if (user) {
+      revealPage();
+      if (onAuthenticated) onAuthenticated(user);
       return;
     }
 
-    revealPage();
+    // Jika user belum login via Firebase Auth, cek status Hardware Device Binding
+    try {
+      const hwId = await getHardwareFingerprint();
+      const deviceRef = doc(db, "admin_devices", hwId);
+      const docSnap = await getDoc(deviceRef);
 
-    if (onAuthenticated) {
-      onAuthenticated(user);
+      if (docSnap.exists() && docSnap.data().is_active === true) {
+        const data = docSnap.data();
+        revealPage();
+        // Update timestamp login terakhir
+        updateDoc(deviceRef, { last_login: serverTimestamp() }).catch(() => {});
+        if (onAuthenticated) {
+          onAuthenticated({
+            email: data.admin_email || "admin@portal",
+            isBoundDevice: true,
+            deviceId: hwId,
+            deviceName: data.device_name || "Bound Device"
+          });
+        }
+        return;
+      }
+    } catch (err) {
+      console.warn("[AuthGuard] Gagal memeriksa status device binding:", err);
+    }
+
+    if (onUnauthenticated) {
+      onUnauthenticated();
+    } else {
+      redirectToLogin(redirectTo);
     }
   });
 }

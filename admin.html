@@ -75,6 +75,23 @@
           </button>
         </div>
 
+        <!-- CARD BANNER BINDING PERANGKAT SAAT INI -->
+        <div id="current-device-card" class="device-bind-banner">
+          <div class="device-bind-info">
+            <i id="current-device-icon" class="fa-solid fa-mobile-screen-button device-bind-icon"></i>
+            <div class="text-left">
+              <div style="display: flex; align-items: center; gap: 6px;">
+                <span id="current-device-name" class="device-bind-name">Mendeteksi perangkat...</span>
+                <span id="current-device-badge" class="badge-pill badge-pill--muted">Memeriksa</span>
+              </div>
+              <p id="current-device-id" class="device-bind-hwid">// HW-FINGERPRINT</p>
+            </div>
+          </div>
+          <button id="btn-bind-device" class="btn-bind-action">
+            <i class="fa-solid fa-shield-cat"></i> Ikat Perangkat Ini
+          </button>
+        </div>
+
         <div class="menu-container">
           
           <!-- Option 1: Kelola Portal Link -->
@@ -127,6 +144,19 @@
 
         </div>
 
+        <!-- PANEL LOG PEMANTAUAN PERANGKAT ADMIN -->
+        <div class="admin-devices-panel">
+          <div class="panel-header">
+            <h3 class="panel-title">
+              <i class="fa-solid fa-shield-halved icon-accent"></i> Perangkat Admin Terikat &amp; History Login
+            </h3>
+            <span id="devices-count-badge" class="badge-pill badge-pill--accent">0 Perangkat</span>
+          </div>
+          <div id="admin-devices-list" class="devices-grid">
+            <p class="muted-note">// Memuat daftar perangkat admin...</p>
+          </div>
+        </div>
+
       </div>
 
     </section>
@@ -152,9 +182,9 @@
   <!-- PARTICLE CANVAS -->
   <script src="assets/js/particle/particle-bg.js"></script>
 
-  <!-- FIREBASE AUTH (PERBAIKAN PERSISTENSI LOGIN) -->
+  <!-- FIREBASE AUTH & ADMIN DEVICE BINDING LOGIC -->
   <script type="module">
-    import { auth } from "./assets/js/config/firebase-config.js";
+    import { auth, db } from "./assets/js/config/firebase-config.js";
     import { 
       signInWithEmailAndPassword, 
       onAuthStateChanged, 
@@ -162,6 +192,19 @@
       setPersistence, 
       browserLocalPersistence 
     } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+    import { 
+      collection, 
+      doc, 
+      setDoc, 
+      getDoc, 
+      deleteDoc, 
+      onSnapshot, 
+      query, 
+      orderBy, 
+      serverTimestamp, 
+      updateDoc 
+    } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+    import { getHardwareFingerprint } from "./assets/js/utils/device-fingerprint.js";
 
     const sectionLogin = document.getElementById('section-login-admin');
     const sectionDashboard = document.getElementById('section-dashboard-admin');
@@ -174,16 +217,223 @@
     const userEmailDisplay = document.getElementById('user-email-display');
     const btnLogout = document.getElementById('btn-logout');
 
+    const currentDeviceIcon = document.getElementById('current-device-icon');
+    const currentDeviceName = document.getElementById('current-device-name');
+    const currentDeviceBadge = document.getElementById('current-device-badge');
+    const currentDeviceId = document.getElementById('current-device-id');
+    const btnBindDevice = document.getElementById('btn-bind-device');
+    const adminDevicesList = document.getElementById('admin-devices-list');
+    const devicesCountBadge = document.getElementById('devices-count-badge');
+
+    let currentHwFingerprint = null;
+    let isCurrentDeviceBound = false;
+    let activeAdminEmail = "";
+
+    function detectDeviceType() {
+      const ua = navigator.userAgent;
+      const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(ua) || (navigator.maxTouchPoints && navigator.maxTouchPoints > 1 && /Macintosh/i.test(ua));
+      
+      let os = "Desktop";
+      if (/Android/i.test(ua)) os = "Android";
+      else if (/iPhone|iPad|iPod/i.test(ua)) os = "iOS";
+      else if (/Windows/i.test(ua)) os = "Windows";
+      else if (/Macintosh|Mac OS X/i.test(ua)) os = "Mac";
+      else if (/Linux/i.test(ua)) os = "Linux";
+
+      let browser = "Browser";
+      if (/Chrome/i.test(ua) && !/Edg/i.test(ua)) browser = "Chrome";
+      else if (/Edg/i.test(ua)) browser = "Edge";
+      else if (/Safari/i.test(ua) && !/Chrome/i.test(ua)) browser = "Safari";
+      else if (/Firefox/i.test(ua)) browser = "Firefox";
+
+      const deviceTypeName = isMobile ? `📱 ${os} (${browser})` : `💻 ${os} (${browser})`;
+      const iconClass = isMobile ? 'fa-solid fa-mobile-screen-button' : 'fa-solid fa-laptop';
+
+      return { isMobile, os, browser, name: deviceTypeName, icon: iconClass };
+    }
+
+    const deviceType = detectDeviceType();
+
+    // 1. INSIALISASI PERANGKAT & CEK DEVICE BINDING AUTO-LOGIN
+    document.addEventListener('DOMContentLoaded', async () => {
+      try {
+        currentHwFingerprint = await getHardwareFingerprint();
+        currentDeviceId.innerText = currentHwFingerprint;
+        currentDeviceName.innerText = deviceType.name;
+        currentDeviceIcon.className = `${deviceType.icon} device-bind-icon`;
+
+        // Cek apakah perangkat ini terikat di Firestore
+        const deviceRef = doc(db, "admin_devices", currentHwFingerprint);
+        const docSnap = await getDoc(deviceRef);
+
+        if (docSnap.exists() && docSnap.data().is_active === true) {
+          const data = docSnap.data();
+          isCurrentDeviceBound = true;
+          activeAdminEmail = data.admin_email || "admin@bound-device";
+          
+          renderDeviceBindStatus(true);
+          
+          // Jika Firebase Auth belum terautentikasi, izinkan auto-login instant perangkat terikat
+          if (!auth.currentUser) {
+            userEmailDisplay.innerText = `${activeAdminEmail} (Perangkat Terikat)`;
+            sectionLogin.classList.add('hidden');
+            sectionDashboard.classList.remove('hidden');
+            updateDoc(deviceRef, { last_login: serverTimestamp() }).catch(() => {});
+            listenAdminDevices();
+          }
+        } else {
+          renderDeviceBindStatus(false);
+        }
+      } catch (err) {
+        console.error("Gagal mendeteksi device binding:", err);
+      }
+    });
+
     onAuthStateChanged(auth, (user) => {
       if (user) {
+        activeAdminEmail = user.email;
         sectionLogin.classList.add('hidden');
         sectionDashboard.classList.remove('hidden');
         userEmailDisplay.innerText = user.email;
-      } else {
+        listenAdminDevices();
+        checkCurrentDeviceBindStatus();
+      } else if (!isCurrentDeviceBound) {
         sectionLogin.classList.remove('hidden');
         sectionDashboard.classList.add('hidden');
       }
     });
+
+    async function checkCurrentDeviceBindStatus() {
+      if (!currentHwFingerprint) return;
+      try {
+        const deviceRef = doc(db, "admin_devices", currentHwFingerprint);
+        const docSnap = await getDoc(deviceRef);
+        if (docSnap.exists() && docSnap.data().is_active === true) {
+          isCurrentDeviceBound = true;
+          renderDeviceBindStatus(true);
+        } else {
+          isCurrentDeviceBound = false;
+          renderDeviceBindStatus(false);
+        }
+      } catch (e) {}
+    }
+
+    function renderDeviceBindStatus(isBound) {
+      if (isBound) {
+        currentDeviceBadge.className = 'badge-pill badge-pill--active';
+        currentDeviceBadge.innerText = 'Terikat 🟢';
+        btnBindDevice.className = 'btn-bind-action is-bound';
+        btnBindDevice.innerHTML = '<i class="fa-solid fa-link-slash"></i> Lepas Ikat Perangkat Ini';
+      } else {
+        currentDeviceBadge.className = 'badge-pill badge-pill--muted';
+        currentDeviceBadge.innerText = 'Belum Terikat ⚪';
+        btnBindDevice.className = 'btn-bind-action';
+        btnBindDevice.innerHTML = '<i class="fa-solid fa-shield-cat"></i> Ikat Perangkat Ini';
+      }
+    }
+
+    // 2. HANDLER TOMBOL BIND / UNBIND PERANGKAT SAAT INI
+    btnBindDevice.addEventListener('click', async () => {
+      if (!currentHwFingerprint) return;
+      btnBindDevice.disabled = true;
+
+      try {
+        const deviceRef = doc(db, "admin_devices", currentHwFingerprint);
+
+        if (isCurrentDeviceBound) {
+          if (confirm("Apakah Anda yakin ingin melepas ikat perangkat ini? Anda perlu login password manual di perangkat ini selanjutnya.")) {
+            await deleteDoc(deviceRef);
+            isCurrentDeviceBound = false;
+            renderDeviceBindStatus(false);
+            alert("Ikat perangkat berhasil dilepas.");
+          }
+        } else {
+          const emailToBind = activeAdminEmail || (auth.currentUser ? auth.currentUser.email : "admin@portal");
+          await setDoc(deviceRef, {
+            device_id: currentHwFingerprint,
+            device_name: deviceType.name,
+            is_mobile: deviceType.isMobile,
+            admin_email: emailToBind,
+            is_active: true,
+            user_agent: navigator.userAgent,
+            bound_at: serverTimestamp(),
+            last_login: serverTimestamp()
+          });
+          isCurrentDeviceBound = true;
+          renderDeviceBindStatus(true);
+          alert("📱 Perangkat berhasil diikat! Selanjutnya Anda bisa auto-login tanpa password di perangkat ini.");
+        }
+      } catch (err) {
+        console.error("Gagal mengubah status binding:", err);
+        alert("Gagal memperbarui status pengikatan perangkat: " + err.message);
+      } finally {
+        btnBindDevice.disabled = false;
+      }
+    });
+
+    // 3. LISTEN REALTIME LIST DAFTAR PERANGKAT ADMIN & LOG HISTORY LOGIN
+    let unsubscribeDevices = null;
+    function listenAdminDevices() {
+      if (unsubscribeDevices) return;
+      const qDevices = query(collection(db, "admin_devices"), orderBy("last_login", "desc"));
+      unsubscribeDevices = onSnapshot(qDevices, (snapshot) => {
+        adminDevicesList.innerHTML = '';
+        let totalCount = 0;
+
+        snapshot.forEach((docSnap) => {
+          totalCount++;
+          const data = docSnap.data();
+          const devId = docSnap.id;
+          const isThisDevice = devId === currentHwFingerprint;
+
+          const lastLoginStr = data.last_login && data.last_login.toDate ? data.last_login.toDate().toLocaleString('id-ID') : 'Baru saja';
+
+          const card = document.createElement('div');
+          card.className = 'device-card-item';
+          card.innerHTML = `
+            <div class="device-item-left">
+              <div class="device-item-icon">
+                <i class="${data.is_mobile ? 'fa-solid fa-mobile-screen-button' : 'fa-solid fa-laptop'}"></i>
+              </div>
+              <div class="device-item-details">
+                <div style="display: flex; align-items: center; gap: 6px;">
+                  <span class="device-item-name">${data.device_name || 'Perangkat Admin'}</span>
+                  ${isThisDevice ? '<span class="badge-pill badge-pill--accent">Ponsel Ini</span>' : '<span class="badge-pill badge-pill--active">Terikat</span>'}
+                </div>
+                <p class="device-item-sub">HW: ${devId} • ${data.admin_email || 'admin'}</p>
+                <p class="device-item-time">Login Terakhir: ${lastLoginStr}</p>
+              </div>
+            </div>
+            <button class="btn-revoke-device" data-id="${devId}">
+              <i class="fa-solid fa-trash-can"></i> Cabut
+            </button>
+          `;
+
+          const btnRevoke = card.querySelector('.btn-revoke-device');
+          btnRevoke.addEventListener('click', async () => {
+            if (confirm(`Cabut akses auto-login untuk perangkat ${data.device_name || devId}?`)) {
+              try {
+                await deleteDoc(doc(db, "admin_devices", devId));
+                if (isThisDevice) {
+                  isCurrentDeviceBound = false;
+                  renderDeviceBindStatus(false);
+                }
+              } catch (err) {
+                alert("Gagal mencabut akses perangkat: " + err.message);
+              }
+            }
+          });
+
+          adminDevicesList.appendChild(card);
+        });
+
+        devicesCountBadge.innerText = `${totalCount} Perangkat`;
+
+        if (totalCount === 0) {
+          adminDevicesList.innerHTML = '<p class="muted-note">// Belum ada perangkat admin yang diikat.</p>';
+        }
+      });
+    }
 
     loginForm.addEventListener('submit', async (e) => {
       e.preventDefault();
