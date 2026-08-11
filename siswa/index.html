@@ -296,6 +296,19 @@
 
         const namaSiswaVal = currentSiswaUser.nama_siswa || currentSiswaUser.nama || "Siswa";
 
+        // VALIDASI KETAT KELAS: Pengecekan Kelas Siswa vs Kelas Sesi QR
+        const studentKelasDisplay = (currentSiswaUser.nama_kelas || currentSiswaUser.id_kelas || "-").trim();
+        const sessionKelasDisplay = (sesiData.id_kelas || "-").trim();
+
+        const studentKelasNorm = studentKelasDisplay.toLowerCase().replace(/[^a-z0-9]/g, '');
+        const sessionKelasNorm = sessionKelasDisplay.toLowerCase().replace(/[^a-z0-9]/g, '');
+
+        if (studentKelasNorm && sessionKelasNorm && studentKelasNorm !== sessionKelasNorm) {
+          showNotif(`❌ GAGAL PRESENSI!\nAnda terdaftar di kelas [${studentKelasDisplay}], bukan kelas [${sessionKelasDisplay}]!`, "error");
+          resetProcessingLock(3500);
+          return;
+        }
+
         const qLog = query(
           collection(db, "log_absensi"),
           where("id_sesi", "==", idSesi),

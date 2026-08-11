@@ -4,6 +4,35 @@ Dokumen ini berisi rangkuman review perubahan kode (*code review*) terbaru yang 
 
 ---
 
+## 📅 Review [2026-08-11 18:35 WIB] - Implementasi Validasi Kelas Ketat pada Scanner QR Siswa (`siswa/index.html`)
+
+### 📁 1. Berkas yang Diubah
+* 📄 **[siswa/index.html](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/siswa/index.html)**
+
+---
+
+### 📝 2. Rincian Baris & Logika yang Diperbarui
+
+1. **Penyekatan Presensi Lintas Kelas (*Cross-Class Validation Guard*)**:
+   - Menambahkan pemeriksaan pencocokan kelas ketat pada fungsi `onScanSuccess` di `siswa/index.html`.
+   - Mengomparasi kelas terdaftar siswa (`currentSiswaUser.nama_kelas` / `id_kelas`) dengan kelas target sesi QR yang sedang aktif di Firestore (`sesiData.id_kelas`).
+   - Jika kelas tidak cocok (misal: siswa `XI TEI 2` memindai QR sesi kelas `XI TEI 1`), proses presensi **langsung ditolak secara permanen** tanpa menyimpan data ke `log_absensi`.
+   - Menampilkan notifikasi error yang tegas:
+     `❌ GAGAL PRESENSI!`
+     `Anda terdaftar di kelas [XI TEI 2], bukan kelas [XI TEI 1]!`
+
+---
+
+### 🧪 3. Petunjuk Pengujian Lokal (*Local Verification*)
+
+1. Buka `guru/index.html` &rarr; Buka Sesi QR Absensi untuk kelas **X TEI 1**.
+2. Di HP/Browser Siswa terdaftar pada kelas **X TEI 2** &rarr; Buka scanner `siswa/index.html` dan pindai QR Code tersebut.
+3. **Hasil**: Sistem menampilkan notifikasi merah `❌ GAGAL PRESENSI! Anda terdaftar di kelas [X TEI 2], bukan kelas [X TEI 1]!`, dan data tidak tersimpan di database `log_absensi`.
+4. Di HP/Browser Siswa terdaftar pada kelas **X TEI 1** &rarr; Pindai QR Code yang sama.
+5. **Hasil**: Presensi diterima `🎉 ABSENSI BERHASIL!`.
+
+---
+
 ## 📅 Review [2026-08-11 18:33 WIB] - Perbaikan Bug Sintaks Event Listener Logout pada Dashboard Guru (`guru/index.html`)
 
 ### 📁 1. Berkas yang Diubah
