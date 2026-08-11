@@ -324,11 +324,13 @@
         currentDeviceBadge.innerText = 'Terikat 🟢';
         btnBindDevice.className = 'btn-bind-action is-bound';
         btnBindDevice.innerHTML = '<i class="fa-solid fa-link-slash"></i> Lepas Ikat Perangkat Ini';
+        if (btnLogout) btnLogout.classList.add('hidden');
       } else {
         currentDeviceBadge.className = 'badge-pill badge-pill--muted';
         currentDeviceBadge.innerText = 'Belum Terikat ⚪';
         btnBindDevice.className = 'btn-bind-action';
         btnBindDevice.innerHTML = '<i class="fa-solid fa-shield-cat"></i> Ikat Perangkat Ini';
+        if (btnLogout) btnLogout.classList.remove('hidden');
       }
     }
 

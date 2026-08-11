@@ -4,6 +4,29 @@ Dokumen ini berisi rangkuman review perubahan kode (*code review*) terbaru yang 
 
 ---
 
+## 📅 Review [2026-08-11 20:45 WIB] - Penyempurnaan UX: Menyembunyikan Tombol Logout saat Perangkat Terikat (`admin.html`)
+
+### 📁 1. Berkas yang Diubah
+* 📄 **[admin.html](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/admin.html)**
+
+---
+
+### 📝 2. Rincian Baris & Logika yang Diperbarui
+
+1. **Visibilitas Tombol Logout (`renderDeviceBindStatus`)**:
+   - Ketika status perangkat saat ini terikat (`isBound === true`), tombol **Logout** (`#btn-logout`) secara otomatis disembunyikan (`hidden`). Hal ini mencegah kebingungan pengguna karena perangkat yang terikat akan selalu auto-login tanpa password.
+   - Tombol **Logout** hanya akan ditampilkan kembali ketika pengikatan perangkat dilepas (`isBound === false`) atau pada perangkat bebas yang tidak diikat.
+
+---
+
+### 🧪 3. Petunjuk Pengujian Lokal (*Local Verification*)
+
+1. Buka [admin.html](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/admin.html) di peramban.
+2. Ketika perangkat dalam keadaan terikat (**Terikat 🟢**), perhatikan tombol Logout pada sudut kanan atas header tersembunyi secara rapi.
+3. Klik tombol **"Lepas Ikat Perangkat Ini"** &rarr; Verifikasi bahwa tombol Logout secara otomatis muncul kembali saat perangkat dalam status tidak terikat (**Belum Terikat ⚪**).
+
+---
+
 ## 📅 Review [2026-08-11 20:35 WIB] - Fitur Ikat Ponsel Admin (Auto-Login Perangkat Terikat, Deteksi Perangkat, & Panel History Login)
 
 ### 📁 1. Berkas yang Diubah / Dibuat
