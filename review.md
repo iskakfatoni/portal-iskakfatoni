@@ -4,6 +4,43 @@ Dokumen ini berisi rangkuman review perubahan kode (*code review*) terbaru yang 
 
 ---
 
+## 📅 Review [2026-08-12 21:28 WIB] - Halaman Deteksi Perangkat Otomatis iPhone (iOS) & Android (`download.html` / `perangkat.html`)
+
+### 📁 1. Berkas yang Diubah / Dibuat
+* 📄 **[download.html](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/download.html)** [NEW]
+* 📄 **[perangkat.html](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/perangkat.html)** [NEW]
+* 📄 **[index.html](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/index.html)**
+* 📄 **[style/style.css](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/style/style.css)**
+
+---
+
+### 📝 2. Rincian Baris & Logika yang Diperbarui
+
+1. **Pembuatan Halaman Deteksi Perangkat (`download.html` & `perangkat.html`)**:
+   - Menambahkan halaman antarmuka berbasis `theme-glass` yang secara otomatis mendeteksi sistem operasi peramban pengguna (iPhone/iPad iOS vs Android Device vs PC/Laptop).
+   - Menyiapkan panduan lengkap PWA *Add to Home Screen* bagi pengguna iPhone/iPad via Safari beserta akses langsung ke Portal Web.
+   - Menyiapkan tombol unduh APK resmi via Google Drive beserta panduan instalasi *Unknown Sources* untuk pengguna Android.
+   - Menyediakan fitur *Tab Switcher* manual (iPhone / Android / PC) agar pengguna dapat beralih melihat petunjuk untuk perangkat lain.
+
+2. **Pembaruan Banner Halaman Utama (`index.html`)**:
+   - Memperbarui tautan banner update dari link langsung Google Drive menjadi tombol **"UNDUH APLIKASI & PANDUAN IPHONE / ANDROID"** yang mengarah ke `download.html`.
+
+3. **Penambahan Komponen Styling (`style/style.css`)**:
+   - Menambahkan animasi badge deteksi perangkat (`pulseBadge`), tab switcher (`.device-tab-group`), kartu instruksi (`.step-guide-box`), dan tombol aksi bernuansa glassmorphism.
+
+---
+
+### 🧪 3. Petunjuk Pengujian Lokal (*Local Verification*)
+
+1. Buka [index.html](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/index.html) pada peramban.
+2. Klik banner **"UNDUH APLIKASI & PANDUAN IPHONE / ANDROID"** &rarr; Verifikasi diarahkan ke [download.html](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/download.html).
+3. Pada halaman [download.html](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/download.html), amati badge status di bagian atas (akan secara otomatis mendeteksi perangkat Anda).
+4. Uji tombol tab **iPhone / iOS**, **Android**, dan **PC / Laptop** &rarr; Verifikasi panel instruksi dan tombol aksi berganti secara mulus.
+5. Coba juga akses URL [perangkat.html](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/perangkat.html) &rarr; Verifikasi halaman yang sama tampil sempurna.
+
+---
+
+
 ## 📅 Review [2026-08-11 21:06 WIB] - Dokumentasi Skema Database Tersembunyi (`.agents/DATABASE_SCHEMA.md`)
 
 ### 📁 1. Berkas yang Diubah / Dibuat

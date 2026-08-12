@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+  <title>Aplikasi &amp; Deteksi Perangkat - PORTAL::IskakFatoni</title>
+  <meta name="description" content="Unduh aplikasi portal sekolah untuk Android atau pasang Web App PWA di iPhone (iOS). Deteksi perangkat otomatis.">
+  <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
+  <link rel="preload" href="style/style.css" as="style">
+  <link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" as="style" crossorigin="anonymous" referrerpolicy="no-referrer">
+  <link rel="stylesheet" href="style/style.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer">
+  <link rel="manifest" href="assets/manifest.json">
+  <meta name="theme-color" content="#0b0f19">
+</head>
+<body class="theme-glass">
+
+  <!-- PARTICLE CANVAS -->
+  <canvas id="particle-canvas"></canvas>
+
+  <main class="container">
+    
+    <!-- Profil Header -->
+    <header class="profile">
+      <div class="avatar-ring">
+        <img src="assets/img/foto_asn_profile.webp" alt="Muchamad Iskak Fatoni" class="avatar" decoding="async" fetchpriority="high">
+      </div>
+      <h1 class="name">PORTAL::Iskak Fatoni</h1>
+      <p class="bio">Aplikasi &amp; Panduan Instalasi Perangkat</p>
+    </header>
+
+    <!-- SECTION DETEKSI & UNDUH PERANGKAT -->
+    <section class="device-detect-card">
+      
+      <!-- BADGE DETEKSI OTOMATIS -->
+      <div class="device-badge-row">
+        <div id="detected-badge" class="device-detected-badge">
+          <i class="fa-solid fa-microchip"></i>
+          <span id="detected-text">Mendeteksi Perangkat Anda...</span>
+        </div>
+      </div>
+
+      <!-- TAB SWITCHER MANUAL -->
+      <div class="device-tab-group" role="tablist">
+        <button id="tab-ios" class="device-tab-btn" role="tab" onclick="switchTab('ios')">
+          <i class="fa-brands fa-apple"></i>
+          <span>iPhone / iOS</span>
+        </button>
+        <button id="tab-android" class="device-tab-btn" role="tab" onclick="switchTab('android')">
+          <i class="fa-brands fa-android"></i>
+          <span>Android</span>
+        </button>
+        <button id="tab-desktop" class="device-tab-btn" role="tab" onclick="switchTab('desktop')">
+          <i class="fa-solid fa-laptop"></i>
+          <span>PC / Laptop</span>
+        </button>
+      </div>
+
+      <!-- PANEL 1: iOS (IPHONE / IPAD) -->
+      <div id="panel-ios" class="device-panel hidden">
+        <div class="device-panel-title">
+          <i class="fa-brands fa-apple" style="color: #cbd5e1;"></i>
+          <span>Panduan Pengguna iPhone &amp; iPad</span>
+        </div>
+        <p class="device-panel-desc">
+          Perangkat Apple iOS tidak menggunakan berkas APK. Anda dapat memasang <strong>Portal Web App (PWA)</strong> secara langsung ke Layar Utama iPhone Anda tanpa melalui App Store!
+        </p>
+
+        <!-- TIPS PWA IOS -->
+        <div class="ios-tip-badge">
+          <i class="fa-solid fa-circle-info"></i>
+          <div>
+            <strong>Info iOS:</strong> Menambahkan ke Layar Utama memberikan tampilan full-screen dan kecepatan akses yang sama persis seperti aplikasi native.
+          </div>
+        </div>
+
+        <!-- LANGKAH-LANGKAH PWA IOS -->
+        <div class="step-guide-box">
+          <div class="step-guide-header">
+            <i class="fa-solid fa-list-check"></i> Cara Tambahkan ke Layar Utama (iPhone):
+          </div>
+          <div class="step-list">
+            <div class="step-item">
+              <span class="step-number">1</span>
+              <div class="step-text">
+                Buka portal menggunakan peramban <strong>Safari</strong> di iPhone/iPad Anda.
+              </div>
+            </div>
+            <div class="step-item">
+              <span class="step-number">2</span>
+              <div class="step-text">
+                Ketuk tombol <strong>Bagikan (Share)</strong> <i class="fa-solid fa-arrow-up-from-bracket" style="color: #38bdf8;"></i> di bagian bawah layar Safari.
+              </div>
+            </div>
+            <div class="step-item">
+              <span class="step-number">3</span>
+              <div class="step-text">
+                Gulir ke bawah dan pilih menu <strong>"Tambah ke Layar Utama" (Add to Home Screen)</strong> <i class="fa-solid fa-square-plus" style="color: #38bdf8;"></i>.
+              </div>
+            </div>
+            <div class="step-item">
+              <span class="step-number">4</span>
+              <div class="step-text">
+                Ketuk <strong>"Tambah"</strong> di sudut kanan atas. Ikon Portal Iskak Fatoni kini siap di layar utama!
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ACTION BUTTONS IOS -->
+        <div class="action-card action-card--highlight">
+          <a href="portal.html" class="btn-device-action btn-device-action--secondary">
+            <i class="fa-solid fa-arrow-right-to-bracket"></i>
+            Buka Portal Web Sekarang
+          </a>
+        </div>
+      </div>
+
+      <!-- PANEL 2: ANDROID -->
+      <div id="panel-android" class="device-panel hidden">
+        <div class="device-panel-title">
+          <i class="fa-brands fa-android" style="color: #34d399;"></i>
+          <span>Pengunduhan Aplikasi Android</span>
+        </div>
+        <p class="device-panel-desc">
+          Unduh berkas APK resmi versi terbaru untuk smartphone Android Anda dari penyimpanan cloud Google Drive.
+        </p>
+
+        <!-- DOWNLOAD APK ACTION -->
+        <div class="action-card action-card--highlight">
+          <a href="https://drive.google.com/drive/folders/1Ir-6Ha4rOyHFyeMt7YbL7R9o3qICuI9I?usp=sharing" target="_blank" rel="noopener noreferrer" class="btn-device-action btn-device-action--primary">
+            <i class="fa-brands fa-google-drive"></i>
+            Unduh APK Versi Terbaru (Google Drive)
+          </a>
+          <a href="portal.html" class="btn-device-action btn-device-action--secondary">
+            <i class="fa-solid fa-globe"></i>
+            Atau Buka Portal Versi Web
+          </a>
+        </div>
+
+        <!-- PANDUAN INSTALL ANDROID -->
+        <div class="step-guide-box">
+          <div class="step-guide-header">
+            <i class="fa-solid fa-wrench"></i> Panduan Pemasangan APK Android:
+          </div>
+          <div class="step-list">
+            <div class="step-item">
+              <span class="step-number">1</span>
+              <div class="step-text">
+                Klik tombol hijau di atas untuk membuka folder Google Drive.
+              </div>
+            </div>
+            <div class="step-item">
+              <span class="step-number">2</span>
+              <div class="step-text">
+                Unduh berkas APK paling baru (versi terbaru) ke HP Anda.
+              </div>
+            </div>
+            <div class="step-item">
+              <span class="step-number">3</span>
+              <div class="step-text">
+                Buka file APK yang diunduh. Jika muncul peringatan keamanan, izinkan <strong>"Instal dari Sumber Tidak Dikenal"</strong> (Unknown Sources).
+              </div>
+            </div>
+            <div class="step-item">
+              <span class="step-number">4</span>
+              <div class="step-text">
+                Selesaikan proses instalasi dan jalankan aplikasi dari menu HP.
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- PANEL 3: DESKTOP / PC / LAPTOP -->
+      <div id="panel-desktop" class="device-panel hidden">
+        <div class="device-panel-title">
+          <i class="fa-solid fa-laptop" style="color: #60a5fa;"></i>
+          <span>Pengguna Komputer &amp; Laptop</span>
+        </div>
+        <p class="device-panel-desc">
+          Anda mengakses portal melalui perangkat komputer/laptop. Anda dapat membuka portal langsung atau memasangnya sebagai aplikasi desktop via peramban (Chrome/Edge).
+        </p>
+
+        <div class="action-card action-card--highlight">
+          <a href="portal.html" class="btn-device-action btn-device-action--secondary">
+            <i class="fa-solid fa-desktop"></i>
+            Masuk ke Portal Sekolah
+          </a>
+          <a href="https://drive.google.com/drive/folders/1Ir-6Ha4rOyHFyeMt7YbL7R9o3qICuI9I?usp=sharing" target="_blank" rel="noopener noreferrer" class="btn-device-action btn-device-action--apple">
+            <i class="fa-brands fa-google-drive"></i>
+            Unduh APK Android (Untuk Dikirim ke HP)
+          </a>
+        </div>
+
+        <div class="step-guide-box">
+          <div class="step-guide-header">
+            <i class="fa-solid fa-laptop-code"></i> Install PWA di Chrome / Edge:
+          </div>
+          <div class="step-list">
+            <div class="step-item">
+              <span class="step-number">1</span>
+              <div class="step-text">
+                Buka halaman portal di Google Chrome atau Microsoft Edge.
+              </div>
+            </div>
+            <div class="step-item">
+              <span class="step-number">2</span>
+              <div class="step-text">
+                Klik ikon <strong>Install Portal</strong> <i class="fa-solid fa-download" style="color: #38bdf8;"></i> pada bilah alamat (address bar) di bagian atas peramban.
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- TOMBOL KEMBALI KE HOME -->
+      <div style="margin-top: 20px; text-align: center;">
+        <a href="index.html" class="update-link" style="justify-content: center; opacity: 0.85;">
+          <i class="fa-solid fa-house"></i>
+          <span>Kembali ke Halaman Utama</span>
+        </a>
+      </div>
+
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+      <div class="social-icons">
+        <a href="https://wa.me/085645453111" target="_blank" rel="noopener noreferrer" class="social-btn wa" title="WhatsApp Iskak"><i class="fa-brands fa-whatsapp"></i></a>
+        <a href="https://facebook.com/iskakfatoni" target="_blank" rel="noopener noreferrer" class="social-btn fb" title="Facebook Iskak"><i class="fa-brands fa-facebook-f"></i></a>
+        <a href="https://instagram.com/iskakfatoni" target="_blank" rel="noopener noreferrer" class="social-btn ig" title="Instagram Iskak"><i class="fa-brands fa-instagram"></i></a>
+        <a href="https://youtube.com/iskakfatoni" target="_blank" rel="noopener noreferrer" class="social-btn yt" title="YouTube Iskak"><i class="fa-brands fa-youtube"></i></a>
+        <a href="https://tiktok.com/@iskakfatoni" target="_blank" rel="noopener noreferrer" class="social-btn tt" title="TikTok"><i class="fa-brands fa-tiktok"></i></a>
+      </div>
+
+      <div class="supported-by">
+        <img src="assets/img/nisnas_logo_colorful.webp" alt="Logo NisNas Computer" class="supporter-logo" loading="lazy" decoding="async">
+        <p>Supported by <span>NisNas Computer</span></p>
+      </div>
+    </footer>
+
+  </main>
+
+  <!-- JS DETEKSI PERANGKAT -->
+  <script>
+    function detectDeviceType() {
+      const ua = navigator.userAgent || navigator.vendor || window.opera || '';
+      
+      // Deteksi iOS (iPhone, iPad, iPod)
+      const isIOS = /iPhone|iPod/.test(ua) || 
+                    (/iPad/.test(ua)) || 
+                    (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+      
+      // Deteksi Android
+      const isAndroid = /Android/i.test(ua);
+
+      if (isIOS) return 'ios';
+      if (isAndroid) return 'android';
+      return 'desktop';
+    }
+
+    function switchTab(device) {
+      // Sembunyikan semua panel
+      document.querySelectorAll('.device-panel').forEach(p => p.classList.add('hidden'));
+      document.querySelectorAll('.device-tab-btn').forEach(b => b.classList.remove('active'));
+
+      // Tampilkan panel pilihan
+      const targetPanel = document.getElementById('panel-' + device);
+      const targetTab = document.getElementById('tab-' + device);
+
+      if (targetPanel) targetPanel.classList.remove('hidden');
+      if (targetTab) targetTab.classList.add('active');
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      const currentDevice = detectDeviceType();
+      const badgeText = document.getElementById('detected-text');
+      const badgeEl = document.getElementById('detected-badge');
+
+      if (currentDevice === 'ios') {
+        badgeText.innerHTML = '<i class="fa-brands fa-apple"></i> Terdeteksi: <strong>iPhone / iPad (iOS)</strong>';
+        badgeEl.style.borderColor = 'rgba(255, 255, 255, 0.4)';
+        badgeEl.style.color = '#ffffff';
+        switchTab('ios');
+      } else if (currentDevice === 'android') {
+        badgeText.innerHTML = '<i class="fa-brands fa-android"></i> Terdeteksi: <strong>Android Device</strong>';
+        badgeEl.style.borderColor = 'rgba(52, 211, 153, 0.4)';
+        badgeEl.style.color = '#34d399';
+        switchTab('android');
+      } else {
+        badgeText.innerHTML = '<i class="fa-solid fa-laptop"></i> Terdeteksi: <strong>PC / Laptop</strong>';
+        badgeEl.style.borderColor = 'rgba(96, 165, 250, 0.4)';
+        badgeEl.style.color = '#60a5fa';
+        switchTab('desktop');
+      }
+    });
+  </script>
+
+  <!-- PARTICLE CANVAS SCRIPT -->
+  <script src="assets/js/particle/particle-bg.js"></script>
+
+</body>
+</html>

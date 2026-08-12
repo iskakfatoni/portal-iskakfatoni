@@ -1518,3 +1518,251 @@ body.theme-dashboard::-webkit-scrollbar-thumb:hover {
   0% { background-position: 200% 0; }
   100% { background-position: -200% 0; }
 }
+
+/* ==========================================================================
+   8. HALAMAN: download.html / perangkat.html — Deteksi Perangkat iPhone & Android
+   ========================================================================== */
+.device-detect-card {
+  background: var(--card-bg);
+  border: var(--card-border);
+  border-radius: 20px;
+  padding: 20px;
+  margin-top: 16px;
+  width: 100%;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  box-shadow: 0 15px 35px -10px rgba(0, 0, 0, 0.4);
+}
+
+.device-badge-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 16px;
+}
+
+.device-detected-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  background: rgba(56, 189, 248, 0.15);
+  border: 1px solid rgba(56, 189, 248, 0.4);
+  color: #38bdf8;
+  padding: 8px 16px;
+  border-radius: 999px;
+  font-size: 0.85rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  box-shadow: 0 0 15px rgba(56, 189, 248, 0.2);
+  animation: pulseBadge 2s infinite alternate;
+}
+
+@keyframes pulseBadge {
+  0% { box-shadow: 0 0 10px rgba(56, 189, 248, 0.2); }
+  100% { box-shadow: 0 0 20px rgba(56, 189, 248, 0.5); }
+}
+
+.device-tab-group {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  background: rgba(15, 23, 42, 0.6);
+  padding: 6px;
+  border-radius: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  margin-bottom: 20px;
+}
+
+.device-tab-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  padding: 10px 6px;
+  border-radius: 10px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.25s ease;
+}
+
+.device-tab-btn i {
+  font-size: 1.25rem;
+}
+
+.device-tab-btn:hover {
+  color: var(--text-main);
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.device-tab-btn.active {
+  background: linear-gradient(135deg, rgba(56, 189, 248, 0.25), rgba(59, 130, 246, 0.3));
+  color: #ffffff;
+  border: 1px solid rgba(56, 189, 248, 0.4);
+  box-shadow: 0 4px 12px rgba(56, 189, 248, 0.25);
+}
+
+.device-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  animation: fadeIn 0.35s ease;
+}
+
+.device-panel-title {
+  font-size: 1.1rem;
+  font-weight: 800;
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 4px;
+}
+
+.device-panel-desc {
+  font-size: 0.84rem;
+  color: var(--text-sub);
+  line-height: 1.5;
+}
+
+.action-card {
+  background: rgba(30, 41, 59, 0.7);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 14px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.action-card--highlight {
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.15), rgba(56, 189, 248, 0.1));
+  border-color: rgba(16, 185, 129, 0.4);
+}
+
+.btn-device-action {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  width: 100%;
+  padding: 12px 20px;
+  border-radius: 12px;
+  font-weight: 800;
+  font-size: 0.9rem;
+  text-decoration: none;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  border: none;
+}
+
+.btn-device-action--primary {
+  background: linear-gradient(135deg, #10b981, #059669);
+  color: #ffffff;
+  box-shadow: 0 6px 20px rgba(16, 185, 129, 0.3);
+}
+
+.btn-device-action--primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(16, 185, 129, 0.45);
+}
+
+.btn-device-action--secondary {
+  background: linear-gradient(135deg, #38bdf8, #2563eb);
+  color: #ffffff;
+  box-shadow: 0 6px 20px rgba(56, 189, 248, 0.3);
+}
+
+.btn-device-action--secondary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(56, 189, 248, 0.45);
+}
+
+.btn-device-action--apple {
+  background: linear-gradient(135deg, #334155, #0f172a);
+  color: #ffffff;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
+}
+
+.btn-device-action--apple:hover {
+  transform: translateY(-2px);
+  border-color: rgba(255, 255, 255, 0.4);
+}
+
+.step-guide-box {
+  background: rgba(15, 23, 42, 0.7);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 14px;
+  padding: 16px;
+}
+
+.step-guide-header {
+  font-size: 0.9rem;
+  font-weight: 800;
+  color: #38bdf8;
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.step-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.step-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.step-number {
+  min-width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: rgba(56, 189, 248, 0.2);
+  color: #38bdf8;
+  border: 1px solid rgba(56, 189, 248, 0.4);
+  font-weight: 800;
+  font-size: 0.75rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 1px;
+}
+
+.step-text {
+  font-size: 0.82rem;
+  color: var(--text-sub);
+  line-height: 1.45;
+}
+
+.step-text strong {
+  color: #ffffff;
+}
+
+.ios-tip-badge {
+  background: rgba(234, 179, 8, 0.12);
+  border: 1px solid rgba(234, 179, 8, 0.3);
+  color: #fde047;
+  padding: 10px 14px;
+  border-radius: 12px;
+  font-size: 0.8rem;
+  line-height: 1.4;
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+}
+
+.ios-tip-badge i {
+  font-size: 1rem;
+  margin-top: 2px;
+}
+
