@@ -4,6 +4,33 @@ Dokumen ini berisi rangkuman review perubahan kode (*code review*) terbaru yang 
 
 ---
 
+## 📅 Review [2026-08-12 21:52 WIB] - Penyembunyian Bilah URL di iPhone PWA via Meta Tag iOS Standalone (`index.html`, `iphone.html`, `portal.html`, & `absensi.html`)
+
+### 📁 1. Berkas yang Diubah
+* 📄 **[index.html](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/index.html)**
+* 📄 **[iphone.html](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/iphone.html)**
+* 📄 **[portal.html](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/portal.html)**
+* 📄 **[absensi.html](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/absensi.html)**
+
+---
+
+### 📝 2. Rincian Baris & Logika yang Diperbarui
+
+1. **Penyembunyian Alamat URL di iPhone PWA**:
+   - Menambahkan tag meta `apple-mobile-web-app-capable` (`content="yes"`), `apple-mobile-web-app-status-bar-style` (`content="black-translucent"`), dan `apple-mobile-web-app-title` pada `<head>` seluruh file HTML utama.
+   - Dengan meta tag ini, ketika siswa di iPhone memilih **"Tambah ke Layar Utama" (Add to Home Screen)** di Safari dan membuka aplikasi dari ikon Layar Utama, peramban iOS Safari akan secara otomatis menyembunyikan bilah alamat URL (*address bar*), bilah navigasi bawah, serta parameter query URL sehingga tampilan menjadi layar penuh (*full-screen app mode*).
+
+---
+
+### 🧪 3. Petunjuk Pengujian Lokal (*Local Verification*)
+
+1. Buka [iphone.html](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/iphone.html) di iPhone via Safari.
+2. Tambahkan aplikasi ke Layar Utama (*Add to Home Screen*).
+3. Buka portal dari ikon di Layar Utama iPhone &rarr; Verifikasi bilah alamat URL bagian atas dan navigasi browser hilang sepenuhnya, menampilkan aplikasi secara full-screen tanpa mengekspos alamat URL.
+
+---
+
+
 ## 📅 Review [2026-08-12 21:49 WIB] - Integrasi Deteksi PWA iPhone (`iphone.html`, `portal.html`, & `absensi.html`)
 
 ### 📁 1. Berkas yang Diubah
