@@ -4,6 +4,35 @@ Dokumen ini berisi rangkuman review perubahan kode (*code review*) terbaru yang 
 
 ---
 
+## 📅 Review [2026-08-12 21:40 WIB] - Alur Deteksi iPhone (`iphone.html`) & Tampilan Asli Android/PC (`index.html`)
+
+### 📁 1. Berkas yang Diubah / Dibuat
+* 📄 **[iphone.html](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/iphone.html)** [NEW]
+* 📄 **[index.html](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/index.html)**
+
+---
+
+### 📝 2. Rincian Baris & Logika yang Diperbarui
+
+1. **Pembuatan Halaman Khusus iPhone (`iphone.html`)**:
+   - Menyiapkan halaman antarmuka khusus perangkat Apple iOS yang memuat tautan ke **Portal Pembelajaran (`portal.html`)** dan **Absensi Online Siswa (`absensi.html`)**.
+   - Dilengkapi kartu panduan langkah demi langkah pemasangan Web App (PWA) di Layar Utama iPhone via peramban Safari (*Add to Home Screen*).
+
+2. **Perubahan Alur Deteksi di Root (`index.html`)**:
+   - Menambahkan skrip deteksi otomatis peramban pada `<head>` `index.html`: jika perangkat terdeteksi iPhone/iPad (iOS), sistem akan otomatis melakukan *redirect* langsung ke `iphone.html`.
+   - Jika terdeteksi Android atau PC/Laptop, `index.html` akan tetap menampilkan layar awal original (banner update APK Google Drive + Profil + Sosial Media).
+
+---
+
+### 🧪 3. Petunjuk Pengujian Lokal (*Local Verification*)
+
+1. Buka [index.html](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/index.html) menggunakan simulator/browser iPhone atau ubah User-Agent menjadi iPhone/iPad &rarr; Verifikasi peramban langsung berpindah secara otomatis ke [iphone.html](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/iphone.html).
+2. Di halaman [iphone.html](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/iphone.html), verifikasi tombol **"Portal Pembelajaran & Link Tugas"** mengarah ke `portal.html` dan tombol **"Absensi Online Siswa"** mengarah ke `absensi.html`.
+3. Buka [index.html](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/index.html) menggunakan HP Android atau PC/Laptop &rarr; Verifikasi peramban tetap menampilkan tampilan awal `index.html` dengan banner update Google Drive.
+
+---
+
+
 ## 📅 Review [2026-08-12 21:37 WIB] - Penghapusan Opsi PC/Laptop & Tombol Akses Web Portal (`download.html` & `perangkat.html`)
 
 ### 📁 1. Berkas yang Diubah

@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+  <title>PORTAL::IskakFatoni - Khusus Pengguna iPhone &amp; iPad</title>
+  <meta name="description" content="Halaman akses khusus pengguna iPhone (iOS) untuk Portal Pembelajaran dan Absensi Online Iskak Fatoni.">
+  <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
+  <link rel="preload" href="style/style.css" as="style">
+  <link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" as="style" crossorigin="anonymous" referrerpolicy="no-referrer">
+  <link rel="stylesheet" href="style/style.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer">
+  <link rel="manifest" href="assets/manifest.json">
+  <meta name="theme-color" content="#0b0f19">
+</head>
+<body class="theme-glass">
+
+  <!-- PARTICLE CANVAS -->
+  <canvas id="particle-canvas"></canvas>
+
+  <main class="container">
+    
+    <!-- Profil Header -->
+    <header class="profile">
+      <div class="avatar-ring">
+        <img src="assets/img/foto_asn_profile.webp" alt="Muchamad Iskak Fatoni" class="avatar" decoding="async" fetchpriority="high">
+      </div>
+      <h1 class="name">PORTAL::Iskak Fatoni</h1>
+      <p class="bio">Akses Khusus Perangkat iOS (iPhone / iPad)</p>
+    </header>
+
+    <!-- KARTU UTAMA IPHONE -->
+    <section class="device-detect-card">
+      
+      <!-- BADGE STATUS IPHONE -->
+      <div class="device-badge-row">
+        <div class="device-detected-badge" style="border-color: rgba(255, 255, 255, 0.4); color: #ffffff;">
+          <i class="fa-brands fa-apple"></i>
+          <span>Terdeteksi: <strong>iPhone / iPad (iOS)</strong></span>
+        </div>
+      </div>
+
+      <!-- DAFTAR PINTASAN UTAMA (PORTAL & ABSENSI) -->
+      <div class="action-card action-card--highlight" style="margin-bottom: 20px;">
+        <h2 style="font-size: 1rem; font-weight: 800; color: #ffffff; text-align: center; margin-bottom: 6px;">
+          <i class="fa-solid fa-compass icon-accent"></i> Pilih Layanan Portal:
+        </h2>
+
+        <!-- LINK 1: PORTAL PEMBELAJARAN -->
+        <a href="portal.html" class="btn-device-action btn-device-action--secondary" style="font-size: 0.95rem; padding: 14px 20px;">
+          <i class="fa-solid fa-graduation-cap" style="font-size: 1.2rem;"></i>
+          <span>Portal Pembelajaran &amp; Link Tugas</span>
+        </a>
+
+        <!-- LINK 2: ABSENSI SISWA -->
+        <a href="absensi.html" class="btn-device-action btn-device-action--primary" style="font-size: 0.95rem; padding: 14px 20px;">
+          <i class="fa-solid fa-clipboard-user" style="font-size: 1.2rem;"></i>
+          <span>Absensi Online Siswa</span>
+        </a>
+      </div>
+
+      <!-- PANDUAN ADD TO HOME SCREEN SAFARI -->
+      <div class="step-guide-box">
+        <div class="step-guide-header">
+          <i class="fa-solid fa-mobile-screen-button"></i> Cara Tambahkan ke Layar Utama (PWA iPhone):
+        </div>
+        <p style="font-size: 0.8rem; color: var(--text-sub); margin-bottom: 12px; line-height: 1.4;">
+          Agar dapat dibuka cepat tanpa perlu mengetik ulang alamat web, tambahkan portal ke Layar Utama iPhone Anda:
+        </p>
+        <div class="step-list">
+          <div class="step-item">
+            <span class="step-number">1</span>
+            <div class="step-text">
+              Buka halaman ini menggunakan peramban <strong>Safari</strong> di iPhone Anda.
+            </div>
+          </div>
+          <div class="step-item">
+            <span class="step-number">2</span>
+            <div class="step-text">
+              Ketuk tombol <strong>Bagikan (Share)</strong> <i class="fa-solid fa-arrow-up-from-bracket" style="color: #38bdf8;"></i> di bagian bawah layar Safari.
+            </div>
+          </div>
+          <div class="step-item">
+            <span class="step-number">3</span>
+            <div class="step-text">
+              Gulir ke bawah dan pilih menu <strong>"Tambah ke Layar Utama" (Add to Home Screen)</strong> <i class="fa-solid fa-square-plus" style="color: #38bdf8;"></i>.
+            </div>
+          </div>
+          <div class="step-item">
+            <span class="step-number">4</span>
+            <div class="step-text">
+              Ketuk <strong>"Tambah"</strong> di sudut kanan atas. Aplikasi Portal Iskak Fatoni kini ada di layar utama iPhone Anda!
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- LINK OPSIONAL KE HALAMAN UTAMA KEMBALI -->
+      <div style="margin-top: 20px; text-align: center;">
+        <a href="index.html?no_redirect=true" class="update-link" style="justify-content: center; opacity: 0.85; font-size: 0.78rem;">
+          <i class="fa-solid fa-desktop"></i>
+          <span>Buka Tampilan Asli Beranda (Android/PC)</span>
+        </a>
+      </div>
+
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+      <div class="social-icons">
+        <a href="https://wa.me/085645453111" target="_blank" rel="noopener noreferrer" class="social-btn wa" title="WhatsApp Iskak"><i class="fa-brands fa-whatsapp"></i></a>
+        <a href="https://facebook.com/iskakfatoni" target="_blank" rel="noopener noreferrer" class="social-btn fb" title="Facebook Iskak"><i class="fa-brands fa-facebook-f"></i></a>
+        <a href="https://instagram.com/iskakfatoni" target="_blank" rel="noopener noreferrer" class="social-btn ig" title="Instagram Iskak"><i class="fa-brands fa-instagram"></i></a>
+        <a href="https://youtube.com/iskakfatoni" target="_blank" rel="noopener noreferrer" class="social-btn yt" title="YouTube Iskak"><i class="fa-brands fa-youtube"></i></a>
+        <a href="https://tiktok.com/@iskakfatoni" target="_blank" rel="noopener noreferrer" class="social-btn tt" title="TikTok"><i class="fa-brands fa-tiktok"></i></a>
+      </div>
+
+      <div class="supported-by">
+        <img src="assets/img/nisnas_logo_colorful.webp" alt="Logo NisNas Computer" class="supporter-logo" loading="lazy" decoding="async">
+        <p>Supported by <span>NisNas Computer</span></p>
+      </div>
+    </footer>
+
+  </main>
+
+  <!-- PARTICLE CANVAS SCRIPT -->
+  <script src="assets/js/particle/particle-bg.js"></script>
+
+</body>
+</html>
