@@ -4,6 +4,40 @@ Dokumen ini berisi rangkuman review perubahan kode (*code review*) terbaru yang 
 
 ---
 
+## 📅 Review [2026-08-12 21:49 WIB] - Integrasi Deteksi PWA iPhone (`iphone.html`, `portal.html`, & `absensi.html`)
+
+### 📁 1. Berkas yang Diubah
+* 📄 **[iphone.html](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/iphone.html)**
+* 📄 **[portal.html](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/portal.html)**
+* 📄 **[absensi.html](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/absensi.html)**
+
+---
+
+### 📝 2. Rincian Baris & Logika yang Diperbarui
+
+1. **Peningkatan Tampilan Berbasis Status PWA pada `iphone.html`**:
+   - Menambahkan pemeriksaan JS `isIOSPWA()` menggunakan `window.navigator.standalone` dan `(display-mode: standalone)`.
+   - **Jika diakses dari PWA Layar Utama iPhone**: Menampilkan badge *PWA Layar Utama (Aktif)* dan menyembunyikan kotak petunjuk pembuatan PWA agar antarmuka lebih bersih.
+   - **Jika diakses dari Browser Safari biasa**: Menampilkan badge *Browser Safari (Belum PWA)* dan menampilkan kotak panduan *Add to Home Screen*.
+
+2. **Proteksi Akses PWA iPhone pada `portal.html` & `absensi.html`**:
+   - Menambahkan skrip proteksi di `<head>` `portal.html` dan `absensi.html`: jika perangkat terdeteksi iPhone dan diakses melalui peramban web biasa (Non-PWA), sistem otomatis mengalihkan pengguna kembali ke `index.html` (lalu ke `iphone.html` untuk memasang PWA terlebih dahulu).
+   - **Untuk Pengguna iPhone PWA**: Halaman `portal.html` dan `absensi.html` dapat diakses dan berjalan normal.
+   - **Untuk Pengguna Android & PC/Laptop**: Halaman `portal.html` dan `absensi.html` selalu dapat diakses dan berjalan normal tanpa pengalihan.
+
+---
+
+### 🧪 3. Petunjuk Pengujian Lokal (*Local Verification*)
+
+1. Buka [iphone.html](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/iphone.html) di Safari iPhone dalam tab biasa &rarr; Verifikasi kotak petunjuk PWA muncul dan badge menunjukkan *Browser Safari (Belum PWA)*.
+2. Tambahkan `iphone.html` ke Layar Utama iPhone (Add to Home Screen) lalu buka dari ikon Layar Utama &rarr; Verifikasi badge berubah menjadi *PWA Layar Utama (Aktif)* dan kotak petunjuk PWA otomatis tersembunyi.
+3. Buka [portal.html](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/portal.html) atau [absensi.html](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/absensi.html) langsung dari tab Safari biasa iPhone &rarr; Verifikasi otomatis dialihkan ke `index.html` -> `iphone.html`.
+4. Buka [portal.html](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/portal.html) atau [absensi.html](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/absensi.html) melalui ikon PWA Layar Utama iPhone &rarr; Verifikasi halaman terbuka normal.
+5. Buka [portal.html](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/portal.html) atau [absensi.html](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/absensi.html) dari HP Android atau PC/Laptop &rarr; Verifikasi halaman terbuka normal tanpa redirect.
+
+---
+
+
 ## 📅 Review [2026-08-12 21:40 WIB] - Alur Deteksi iPhone (`iphone.html`) & Tampilan Asli Android/PC (`index.html`)
 
 ### 📁 1. Berkas yang Diubah / Dibuat

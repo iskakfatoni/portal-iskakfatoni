@@ -26,17 +26,17 @@
         <img src="assets/img/foto_asn_profile.webp" alt="Muchamad Iskak Fatoni" class="avatar" decoding="async" fetchpriority="high">
       </div>
       <h1 class="name">PORTAL::Iskak Fatoni</h1>
-      <p class="bio">Akses Khusus Perangkat iOS (iPhone / iPad)</p>
+      <p class="bio">Akses Perangkat iOS (iPhone / iPad)</p>
     </header>
 
     <!-- KARTU UTAMA IPHONE -->
     <section class="device-detect-card">
       
-      <!-- BADGE STATUS IPHONE -->
+      <!-- BADGE STATUS DETEKSI PWA IPHONE -->
       <div class="device-badge-row">
-        <div class="device-detected-badge" style="border-color: rgba(255, 255, 255, 0.4); color: #ffffff;">
+        <div id="iphone-badge-el" class="device-detected-badge" style="border-color: rgba(255, 255, 255, 0.4); color: #ffffff;">
           <i class="fa-brands fa-apple"></i>
-          <span>Terdeteksi: <strong>iPhone / iPad (iOS)</strong></span>
+          <span id="iphone-badge-text">Mendeteksi Mode iPhone...</span>
         </div>
       </div>
 
@@ -47,25 +47,25 @@
         </h2>
 
         <!-- LINK 1: PORTAL PEMBELAJARAN -->
-        <a href="portal.html" class="btn-device-action btn-device-action--secondary" style="font-size: 0.95rem; padding: 14px 20px;">
+        <a id="btn-link-portal" href="portal.html" class="btn-device-action btn-device-action--secondary" style="font-size: 0.95rem; padding: 14px 20px;">
           <i class="fa-solid fa-graduation-cap" style="font-size: 1.2rem;"></i>
           <span>Portal Pembelajaran &amp; Link Tugas</span>
         </a>
 
         <!-- LINK 2: ABSENSI SISWA -->
-        <a href="absensi.html" class="btn-device-action btn-device-action--primary" style="font-size: 0.95rem; padding: 14px 20px;">
+        <a id="btn-link-absensi" href="absensi.html" class="btn-device-action btn-device-action--primary" style="font-size: 0.95rem; padding: 14px 20px;">
           <i class="fa-solid fa-clipboard-user" style="font-size: 1.2rem;"></i>
           <span>Absensi Online Siswa</span>
         </a>
       </div>
 
-      <!-- PANDUAN ADD TO HOME SCREEN SAFARI -->
-      <div class="step-guide-box">
+      <!-- PANDUAN ADD TO HOME SCREEN SAFARI (HANYA TAMPIL DI NON-PWA) -->
+      <div id="pwa-guide-box" class="step-guide-box">
         <div class="step-guide-header">
           <i class="fa-solid fa-mobile-screen-button"></i> Cara Tambahkan ke Layar Utama (PWA iPhone):
         </div>
         <p style="font-size: 0.8rem; color: var(--text-sub); margin-bottom: 12px; line-height: 1.4;">
-          Agar dapat dibuka cepat tanpa perlu mengetik ulang alamat web, tambahkan portal ke Layar Utama iPhone Anda:
+          Agar aplikasi Portal &amp; Absensi dapat dibuka langsung tanpa hambatan di iPhone Anda, tambahkan ke Layar Utama:
         </p>
         <div class="step-list">
           <div class="step-item">
@@ -89,7 +89,7 @@
           <div class="step-item">
             <span class="step-number">4</span>
             <div class="step-text">
-              Ketuk <strong>"Tambah"</strong> di sudut kanan atas. Aplikasi Portal Iskak Fatoni kini ada di layar utama iPhone Anda!
+              Ketuk <strong>"Tambah"</strong> di sudut kanan atas. Setelah itu, buka portal dari <strong>Ikon Layar Utama HP</strong> Anda!
             </div>
           </div>
         </div>
@@ -122,6 +122,46 @@
     </footer>
 
   </main>
+
+  <!-- LOGIKA DETEKSI PWA IPHONE -->
+  <script>
+    function isIOSPWA() {
+      const ua = navigator.userAgent || navigator.vendor || window.opera || '';
+      const isIOS = /iPhone|iPod/.test(ua) || 
+                    (/iPad/.test(ua)) || 
+                    (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+      if (!isIOS) return false;
+
+      const isStandaloneIOS = ('standalone' in window.navigator) && window.navigator.standalone;
+      const isStandaloneCSS = window.matchMedia('(display-mode: standalone)').matches;
+      return Boolean(isStandaloneIOS || isStandaloneCSS);
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      const pwaBox = document.getElementById('pwa-guide-box');
+      const badgeText = document.getElementById('iphone-badge-text');
+      const badgeEl = document.getElementById('iphone-badge-el');
+      const isPWA = isIOSPWA();
+
+      if (isPWA) {
+        // JIKA DIARSES DARI PWA IPHONE (IKON LAYAR UTAMA)
+        if (pwaBox) pwaBox.classList.add('hidden'); // Sembunyikan petunjuk PWA
+        if (badgeText) {
+          badgeText.innerHTML = '<i class="fa-solid fa-circle-check" style="color: #34d399;"></i> Mode: <strong>PWA Layar Utama (Aktif)</strong>';
+        }
+        if (badgeEl) {
+          badgeEl.style.borderColor = 'rgba(52, 211, 153, 0.4)';
+          badgeEl.style.color = '#34d399';
+        }
+      } else {
+        // JIKA DIBUKA DARI BROWSER SAFARI BIASA (NON-PWA)
+        if (pwaBox) pwaBox.classList.remove('hidden'); // Tampilkan petunjuk pembuatan PWA
+        if (badgeText) {
+          badgeText.innerHTML = '<i class="fa-brands fa-apple"></i> Mode: <strong>Browser Safari (Belum PWA)</strong>';
+        }
+      }
+    });
+  </script>
 
   <!-- PARTICLE CANVAS SCRIPT -->
   <script src="assets/js/particle/particle-bg.js"></script>

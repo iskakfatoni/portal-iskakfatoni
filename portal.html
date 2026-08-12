@@ -10,6 +10,28 @@
   <link rel="stylesheet" href="style/style.css"><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer">
   <link rel="manifest" href="assets/manifest.json">
   <meta name="theme-color" content="#0b0f19">  
+
+  <!-- PROTEKSI AKSES PERANGKAT IPHONE (WAJIB PWA) -->
+  <script>
+    (function checkIOSPWARequirement() {
+      const ua = navigator.userAgent || navigator.vendor || window.opera || '';
+      const isIOS = /iPhone|iPod/.test(ua) || 
+                    (/iPad/.test(ua)) || 
+                    (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+
+      if (isIOS) {
+        const isStandaloneIOS = ('standalone' in window.navigator) && window.navigator.standalone;
+        const isStandaloneCSS = window.matchMedia('(display-mode: standalone)').matches;
+        const isPWA = isStandaloneIOS || isStandaloneCSS;
+
+        // Jika iPhone mengakses dari browser biasa (Non-PWA), alihkan ke index.html
+        if (!isPWA) {
+          window.location.replace('index.html');
+        }
+      }
+    })();
+  </script>
+
   <style>
     /* Style pendukung jarak nomor urut */
     .link-number {
