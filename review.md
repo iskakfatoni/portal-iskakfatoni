@@ -4,6 +4,38 @@ Dokumen ini berisi rangkuman review perubahan kode (*code review*) terbaru yang 
 
 ---
 
+## 📅 Review [2026-08-12 21:37 WIB] - Penghapusan Opsi PC/Laptop & Tombol Akses Web Portal (`download.html` & `perangkat.html`)
+
+### 📁 1. Berkas yang Diubah
+* 📄 **[download.html](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/download.html)**
+* 📄 **[perangkat.html](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/perangkat.html)**
+* 📄 **[style/style.css](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/style/style.css)**
+
+---
+
+### 📝 2. Rincian Baris & Logika yang Diperbarui
+
+1. **Penghapusan Opsi PC/Laptop**:
+   - Menghapus tab `PC / Laptop` (`#tab-desktop`) serta panel pendukungnya (`#panel-desktop`) dari `download.html` dan `perangkat.html`.
+   - Mengubah grid tab switcher pada `style/style.css` (`.device-tab-group`) dari 3 kolom menjadi 2 kolom (`grid-template-columns: repeat(2, 1fr)`).
+   - Memperbarui logika JavaScript deteksi perangkat agar fallback bagi peramban non-mobile langsung menyarankan pilihan jenis HP (iPhone / Android).
+
+2. **Penghapusan Tautan Akses Web Portal**:
+   - Menghapus tombol **"Buka Portal Web Sekarang"** pada panel iPhone (iOS).
+   - Menghapus tombol **"Atau Buka Portal Versi Web"** pada panel Android.
+   - Halaman `download.html` kini berfokus murni pada petunjuk instalasi PWA untuk iPhone dan tombol unduh berkas APK Android.
+
+---
+
+### 🧪 3. Petunjuk Pengujian Lokal (*Local Verification*)
+
+1. Buka [download.html](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/download.html) atau [perangkat.html](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/perangkat.html) pada peramban.
+2. Perhatikan bagian tab switcher kini hanya memiliki 2 opsi: **iPhone / iOS** dan **Android**.
+3. Verifikasi bahwa tidak ada lagi tombol "Buka Portal Web Sekarang" di dalam kartu panel iOS maupun Android.
+
+---
+
+
 ## 📅 Review [2026-08-12 21:28 WIB] - Halaman Deteksi Perangkat Otomatis iPhone (iOS) & Android (`download.html` / `perangkat.html`)
 
 ### 📁 1. Berkas yang Diubah / Dibuat

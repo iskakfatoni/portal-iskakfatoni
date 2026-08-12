@@ -50,10 +50,6 @@
           <i class="fa-brands fa-android"></i>
           <span>Android</span>
         </button>
-        <button id="tab-desktop" class="device-tab-btn" role="tab" onclick="switchTab('desktop')">
-          <i class="fa-solid fa-laptop"></i>
-          <span>PC / Laptop</span>
-        </button>
       </div>
 
       <!-- PANEL 1: iOS (IPHONE / IPAD) -->
@@ -106,14 +102,6 @@
             </div>
           </div>
         </div>
-
-        <!-- ACTION BUTTONS IOS -->
-        <div class="action-card action-card--highlight">
-          <a href="portal.html" class="btn-device-action btn-device-action--secondary">
-            <i class="fa-solid fa-arrow-right-to-bracket"></i>
-            Buka Portal Web Sekarang
-          </a>
-        </div>
       </div>
 
       <!-- PANEL 2: ANDROID -->
@@ -131,10 +119,6 @@
           <a href="https://drive.google.com/drive/folders/1Ir-6Ha4rOyHFyeMt7YbL7R9o3qICuI9I?usp=sharing" target="_blank" rel="noopener noreferrer" class="btn-device-action btn-device-action--primary">
             <i class="fa-brands fa-google-drive"></i>
             Unduh APK Versi Terbaru (Google Drive)
-          </a>
-          <a href="portal.html" class="btn-device-action btn-device-action--secondary">
-            <i class="fa-solid fa-globe"></i>
-            Atau Buka Portal Versi Web
           </a>
         </div>
 
@@ -166,48 +150,6 @@
               <span class="step-number">4</span>
               <div class="step-text">
                 Selesaikan proses instalasi dan jalankan aplikasi dari menu HP.
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- PANEL 3: DESKTOP / PC / LAPTOP -->
-      <div id="panel-desktop" class="device-panel hidden">
-        <div class="device-panel-title">
-          <i class="fa-solid fa-laptop" style="color: #60a5fa;"></i>
-          <span>Pengguna Komputer &amp; Laptop</span>
-        </div>
-        <p class="device-panel-desc">
-          Anda mengakses portal melalui perangkat komputer/laptop. Anda dapat membuka portal langsung atau memasangnya sebagai aplikasi desktop via peramban (Chrome/Edge).
-        </p>
-
-        <div class="action-card action-card--highlight">
-          <a href="portal.html" class="btn-device-action btn-device-action--secondary">
-            <i class="fa-solid fa-desktop"></i>
-            Masuk ke Portal Sekolah
-          </a>
-          <a href="https://drive.google.com/drive/folders/1Ir-6Ha4rOyHFyeMt7YbL7R9o3qICuI9I?usp=sharing" target="_blank" rel="noopener noreferrer" class="btn-device-action btn-device-action--apple">
-            <i class="fa-brands fa-google-drive"></i>
-            Unduh APK Android (Untuk Dikirim ke HP)
-          </a>
-        </div>
-
-        <div class="step-guide-box">
-          <div class="step-guide-header">
-            <i class="fa-solid fa-laptop-code"></i> Install PWA di Chrome / Edge:
-          </div>
-          <div class="step-list">
-            <div class="step-item">
-              <span class="step-number">1</span>
-              <div class="step-text">
-                Buka halaman portal di Google Chrome atau Microsoft Edge.
-              </div>
-            </div>
-            <div class="step-item">
-              <span class="step-number">2</span>
-              <div class="step-text">
-                Klik ikon <strong>Install Portal</strong> <i class="fa-solid fa-download" style="color: #38bdf8;"></i> pada bilah alamat (address bar) di bagian atas peramban.
               </div>
             </div>
           </div>
@@ -257,7 +199,7 @@
 
       if (isIOS) return 'ios';
       if (isAndroid) return 'android';
-      return 'desktop';
+      return 'other';
     }
 
     function switchTab(device) {
@@ -289,10 +231,10 @@
         badgeEl.style.color = '#34d399';
         switchTab('android');
       } else {
-        badgeText.innerHTML = '<i class="fa-solid fa-laptop"></i> Terdeteksi: <strong>PC / Laptop</strong>';
-        badgeEl.style.borderColor = 'rgba(96, 165, 250, 0.4)';
-        badgeEl.style.color = '#60a5fa';
-        switchTab('desktop');
+        badgeText.innerHTML = '<i class="fa-solid fa-mobile-screen"></i> Pilih Tipe Perangkat Ponsel Anda';
+        badgeEl.style.borderColor = 'rgba(56, 189, 248, 0.4)';
+        badgeEl.style.color = '#38bdf8';
+        switchTab('android');
       }
     });
   </script>
