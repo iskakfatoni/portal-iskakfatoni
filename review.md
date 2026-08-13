@@ -4,6 +4,43 @@ Dokumen ini berisi rangkuman review perubahan kode (*code review*) terbaru yang 
 
 ---
 
+## 📅 Review [2026-08-14 05:51 WIB] - Perbaikan Bug 404 pada PWA iPhone via `manifest.json`, `sw.js`, & Link Meta Icon
+
+### 📁 1. Berkas yang Diubah
+* 📄 **[assets/manifest.json](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/assets/manifest.json)**
+* 📄 **[sw.js](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/sw.js)**
+* 📄 **[index.html](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/index.html)**
+* 📄 **[iphone.html](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/iphone.html)**
+* 📄 **[portal.html](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/portal.html)**
+* 📄 **[absensi.html](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/absensi.html)**
+* 📄 **[admin.html](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/admin.html)**
+
+---
+
+### 📝 2. Rincian Baris & Logika yang Diperbarui
+
+1. **Perbaikan `start_url` & `scope` pada `assets/manifest.json` (Penyebab Utama 404)**:
+   - **Akar Masalah**: Nilai `start_url` sebelumnya dikonfigurasi ke `/portal.html` (menggunakan garis miring diawal `/`). Pada layanan GitHub Pages, repositori dihosting di bawah *subpath* (`https://iskakfatoni.github.io/portal-iskakfatoni/`). Penggunaan jalur absolut `/portal.html` menyebabkan peramban iOS Safari PWA membuka `https://iskakfatoni.github.io/portal.html` (di luar subpath repositori) sehingga menghasilkan halaman **404 Not Found**.
+   - **Solusi**: Mengubah `start_url` menjadi jalur relatif `"../iphone.html"` dan menambahkan `"scope": "../"`. Ketika siswa membuka ikon PWA dari Layar Utama iPhone, PWA akan membuka halaman peluncur PWA khusus iOS `iphone.html` yang terverifikasi aktif tanpa error 404.
+
+2. **Pembaruan Service Worker (`sw.js`)**:
+   - Menambahkan `'iphone.html'` dan `'absensi.html'` ke dalam daftar `LOCAL_ASSETS` agar Service Worker menyimpan cache offline untuk halaman khusus iOS dan absensi.
+
+3. **Penambahan Integrasi `<link rel="apple-touch-icon">` & Manifest Tag**:
+   - Menambahkan tag `<link rel="apple-touch-icon" href="assets/img/nisnas_logo_colorful.webp">` pada seluruh file HTML utama (`iphone.html`, `index.html`, `portal.html`, `absensi.html`, `admin.html`) agar ketika siswa menambah aplikasi ke Layar Utama iPhone, iOS Safari secara otomatis menggunakan logo resmi NisNas yang tajam.
+   - Menambahkan tag `<link rel="manifest" href="assets/manifest.json">` pada `index.html` dan `absensi.html`.
+
+---
+
+### 🧪 3. Petunjuk Pengujian Lokal (*Local Verification*)
+
+1. Buka peramban Safari di iPhone dan akses URL utama portal: `https://iskakfatoni.github.io/portal-iskakfatoni/` (atau `iphone.html`).
+2. Tekan tombol **Share** di Safari lalu pilih **"Tambah ke Layar Utama" (Add to Home Screen)**.
+3. Buka ikon **Portal Iskak** yang baru saja muncul di Layar Utama iPhone.
+4. Verifikasi aplikasi terbuka dengan lancar tanpa error 404, menampilkan badge *Mode: PWA Layar Utama (Aktif)* dan tombol pilihan portal/absensi.
+
+---
+
 ## 📅 Review [2026-08-12 21:52 WIB] - Penyembunyian Bilah URL di iPhone PWA via Meta Tag iOS Standalone (`index.html`, `iphone.html`, `portal.html`, & `absensi.html`)
 
 ### 📁 1. Berkas yang Diubah

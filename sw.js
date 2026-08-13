@@ -4,7 +4,9 @@ const CACHE_NAME = 'portal-iskakfatoni-v8';
 const LOCAL_ASSETS = [
   './',
   'index.html',
+  'iphone.html',
   'portal.html',
+  'absensi.html',
   'admin.html',
   'style/style.css',
   'assets/manifest.json',

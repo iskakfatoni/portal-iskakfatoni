@@ -9,7 +9,8 @@
       "purpose": "any maskable"
     }
   ],
-  "start_url": "/portal.html",
+  "start_url": "../iphone.html",
+  "scope": "../",
   "background_color": "#0b0f19",
   "theme_color": "#0b0f19",
   "display": "standalone",
