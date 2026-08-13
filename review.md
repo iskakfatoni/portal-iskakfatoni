@@ -1556,3 +1556,28 @@ Dokumen ini berisi rangkuman review perubahan kode (*code review*) terbaru yang 
 1. Periksa file [.agents/AGENTS.md](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/.agents/AGENTS.md) pada seksi `Project Info & Live Domain`.
 2. Pastikan alamat URL `https://iskakfatoni.github.io/portal-iskakfatoni/` tercatat dengan benar.
 
+---
+
+## 📅 Review [2026-08-13 08:21 WIB] - Proteksi Akses `iphone.html` (Redirect Otomatis Pengguna Android/PC ke `portal.html`)
+
+### 📁 1. Berkas yang Diubah
+* 📄 **[iphone.html](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/iphone.html)**
+
+---
+
+### 📝 2. Rincian Baris & Logika yang Diperbarui
+
+1. **Skrip Pembatas Perangkat iOS (`iphone.html`)**:
+   - Menambahkan skrip proteksi di bagian `<head>` [iphone.html](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/iphone.html#L20-L37) yang memeriksa *User-Agent* peramban.
+   - Jika halaman `iphone.html` diakses dari perangkat selain iOS (misalnya Android, Windows PC, atau Mac tanpa layar sentuh), sistem secara otomatis mengalihkan (*redirect*) pengguna langsung ke `portal.html` menggunakan `window.location.replace('portal.html')`.
+   - Menyediakan parameter opsional `?no_redirect=true` agar pengembang tetap dapat membuka `iphone.html` di PC tanpa terlempar jika diperlukan untuk pengujian.
+   - Memperbarui tautan tombol bagian bawah dari `index.html?no_redirect=true` menjadi langsung menuju `portal.html`.
+
+---
+
+### 🧪 3. Petunjuk Pengujian Lokal (*Local Verification*)
+
+1. Buka peramban di Komputer/Laptop atau perangkat Android biasa.
+2. Akses halaman [iphone.html](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/iphone.html) secara langsung &rarr; Verifikasi bahwa peramban seketika mengalihkan layar ke [portal.html](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/portal.html).
+3. Buka DevTools (`F12`), aktifkan Toggle Device Toolbar (`Ctrl + Shift + M`), lalu pilih **iPhone SE / iPhone 12 Pro** (User-Agent terdeteksi iPhone) &rarr; Akses [iphone.html](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/iphone.html) &rarr; Verifikasi halaman `iphone.html` dapat diakses dan tidak terlempar.
+

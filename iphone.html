@@ -18,6 +18,24 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="Portal Iskak">
 
+  <!-- PROTEKSI AKSES: HANYA UNTUK IPHONE & IPAD (iOS). ANDROID / PC DIALIHKAN KE PORTAL.HTML -->
+  <script>
+    (function checkOnlyIOS() {
+      // Abaikan redirect jika ada parameter ?no_redirect=true untuk pengujian
+      const urlParams = new URLSearchParams(window.location.search);
+      if (urlParams.get('no_redirect') === 'true') return;
+
+      const ua = navigator.userAgent || navigator.vendor || window.opera || '';
+      const isIOS = /iPhone|iPod/.test(ua) || 
+                    (/iPad/.test(ua)) || 
+                    (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+
+      if (!isIOS) {
+        window.location.replace('portal.html');
+      }
+    })();
+  </script>
+
 </head>
 <body class="theme-glass">
 
@@ -101,11 +119,11 @@
         </div>
       </div>
 
-      <!-- LINK OPSIONAL KE HALAMAN UTAMA KEMBALI -->
+      <!-- LINK OPSIONAL KE HALAMAN PORTAL -->
       <div style="margin-top: 20px; text-align: center;">
-        <a href="index.html?no_redirect=true" class="update-link" style="justify-content: center; opacity: 0.85; font-size: 0.78rem;">
-          <i class="fa-solid fa-desktop"></i>
-          <span>Buka Tampilan Asli Beranda (Android/PC)</span>
+        <a href="portal.html" class="update-link" style="justify-content: center; opacity: 0.85; font-size: 0.78rem;">
+          <i class="fa-solid fa-graduation-cap"></i>
+          <span>Buka Langsung Portal Pembelajaran</span>
         </a>
       </div>
 
