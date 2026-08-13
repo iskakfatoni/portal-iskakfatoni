@@ -64,8 +64,8 @@
         </div>
       </div>
 
-      <!-- DAFTAR PINTASAN UTAMA (PORTAL & ABSENSI) -->
-      <div class="action-card action-card--highlight" style="margin-bottom: 20px;">
+      <!-- DAFTAR PINTASAN UTAMA (PORTAL & ABSENSI) - HANYA TAMPIL SAAT DIUTAK-ATIK VIA PWA IPHONE -->
+      <div id="iphone-action-card" class="action-card action-card--highlight hidden" style="margin-bottom: 20px;">
         <h2 style="font-size: 1rem; font-weight: 800; color: #ffffff; text-align: center; margin-bottom: 6px;">
           <i class="fa-solid fa-compass icon-accent"></i> Pilih Layanan Portal:
         </h2>
@@ -163,13 +163,15 @@
 
     document.addEventListener('DOMContentLoaded', () => {
       const pwaBox = document.getElementById('pwa-guide-box');
+      const actionCard = document.getElementById('iphone-action-card');
       const badgeText = document.getElementById('iphone-badge-text');
       const badgeEl = document.getElementById('iphone-badge-el');
       const isPWA = isIOSPWA();
 
       if (isPWA) {
-        // JIKA DIARSES DARI PWA IPHONE (IKON LAYAR UTAMA)
+        // JIKA DIAKSES DARI PWA IPHONE (IKON LAYAR UTAMA)
         if (pwaBox) pwaBox.classList.add('hidden'); // Sembunyikan petunjuk PWA
+        if (actionCard) actionCard.classList.remove('hidden'); // Tampilkan menu link & absensi
         if (badgeText) {
           badgeText.innerHTML = '<i class="fa-solid fa-circle-check" style="color: #34d399;"></i> Mode: <strong>PWA Layar Utama (Aktif)</strong>';
         }
@@ -180,6 +182,7 @@
       } else {
         // JIKA DIBUKA DARI BROWSER SAFARI BIASA (NON-PWA)
         if (pwaBox) pwaBox.classList.remove('hidden'); // Tampilkan petunjuk pembuatan PWA
+        if (actionCard) actionCard.classList.add('hidden'); // Sembunyikan menu link & absensi
         if (badgeText) {
           badgeText.innerHTML = '<i class="fa-brands fa-apple"></i> Mode: <strong>Browser Safari (Belum PWA)</strong>';
         }

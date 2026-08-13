@@ -1581,3 +1581,45 @@ Dokumen ini berisi rangkuman review perubahan kode (*code review*) terbaru yang 
 2. Akses halaman [iphone.html](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/iphone.html) secara langsung &rarr; Verifikasi bahwa peramban seketika mengalihkan layar ke [portal.html](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/portal.html).
 3. Buka DevTools (`F12`), aktifkan Toggle Device Toolbar (`Ctrl + Shift + M`), lalu pilih **iPhone SE / iPhone 12 Pro** (User-Agent terdeteksi iPhone) &rarr; Akses [iphone.html](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/iphone.html) &rarr; Verifikasi halaman `iphone.html` dapat diakses dan tidak terlempar.
 
+---
+
+## 📅 Review [2026-08-13 08:30 WIB] - Penyesuaian Alur Navigasi & Proteksi Akses PWA Perangkat (`index.html`, `iphone.html`, `portal.html`, `absensi.html`, & `admin.html`)
+
+### 📁 1. Berkas yang Diubah
+* 📄 **[index.html](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/index.html)**
+* 📄 **[iphone.html](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/iphone.html)**
+* 📄 **[portal.html](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/portal.html)**
+* 📄 **[absensi.html](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/absensi.html)**
+* 📄 **[admin.html](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/admin.html)**
+
+---
+
+### 📝 2. Rincian Baris & Logika yang Diperbarui
+
+1. **Pengaturan Alur Navigasi `index.html`**:
+   - Pengguna Android & PC/Laptop yang mengakses `index.html` mendapatkan tampilan beranda normal.
+   - Pengguna iPhone/iPad (baik Safari browser biasa maupun PWA) yang membuka `index.html` otomatis dilempar (*redirect*) ke `iphone.html`.
+
+2. **Pengaturan Alur Navigasi & Tampilan `iphone.html`**:
+   - Jika `iphone.html` diakses dari Android atau PC/Laptop (`!isIOS`), sistem otomatis melempar (*redirect*) ke `portal.html`.
+   - Jika `iphone.html` diakses dari **iPhone Safari biasa (non-PWA)**, sistem hanya menampilkan petunjuk pembuatan PWA (*Add to Home Screen*) dan **menyembunyikan** kartu menu pintasan.
+   - Jika `iphone.html` diakses dari **iPhone PWA (Standalone / Layar Utama)**, sistem menyembunyikan petunjuk PWA dan **menampilkan** kartu menu pintasan (`portal.html` & `absensi.html`).
+
+3. **Proteksi Akses `portal.html`, `absensi.html`, dan `admin.html`**:
+   - Halaman `portal.html`, `absensi.html`, dan `admin.html` dapat diakses secara normal oleh **Android**, **PC/Laptop Windows**, dan **iPhone PWA**.
+   - Jika diakses dari **iPhone browser Safari biasa (non-PWA)**, sistem otomatis melempar (*redirect*) pengguna langsung ke `iphone.html` agar memasang PWA terlebih dahulu.
+
+---
+
+### 🧪 3. Petunjuk Pengujian Lokal (*Local Verification*)
+
+1. **Uji dari PC/Android biasa**:
+   - Buka [index.html](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/index.html) &rarr; Tampilan normal.
+   - Buka [iphone.html](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/iphone.html) &rarr; Otomatis terlempar ke [portal.html](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/portal.html).
+   - Buka [portal.html](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/portal.html), [absensi.html](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/absensi.html), atau [admin.html](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/admin.html) &rarr; Tampilan normal.
+2. **Uji dari iPhone Safari (Non-PWA)**:
+   - Buka [index.html](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/index.html), [portal.html](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/portal.html), [absensi.html](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/absensi.html), atau [admin.html](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/admin.html) &rarr; Otomatis terlempar ke [iphone.html](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/iphone.html).
+   - Di [iphone.html](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/iphone.html) &rarr; Petunjuk PWA muncul, menu tombol tersembunyi.
+3. **Uji dari iPhone PWA (Ikon Layar Utama)**:
+   - Buka ikon dari Layar Utama iPhone &rarr; [iphone.html](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/iphone.html) menyembunyikan petunjuk PWA dan menampilkan menu tombol pintasan `portal.html` & `absensi.html`.
+
