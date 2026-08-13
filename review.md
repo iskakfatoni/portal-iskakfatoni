@@ -1504,3 +1504,34 @@ Dokumen ini berisi rangkuman review perubahan kode (*code review*) terbaru yang 
 4. Klik tombol **"Belum Terikat"**:
    - Tabel matriks kanan menyaring siswa yang belum memiliki data perangkat.
 5. Klik salah satu tombol koleksi di atasnya (misal: `kelas` atau `mapel`) untuk kembali ke tampilan koleksi standar.
+
+---
+
+## 📅 Review [2026-08-13 07:13 WIB] - Penyesuaian Ukuran Font & Ringkas Tampilan Daftar Link Portal
+
+### 📁 1. Berkas yang Diubah
+* 📄 **[style/style.css](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/style/style.css)**
+* 📄 **[link/index.html](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/link/index.html)**
+
+---
+
+### 📝 2. Rincian Baris & Logika yang Diperbarui
+
+1. **Penyesuaian Font & Kompaktifikasi Kartu Link Publik (`style/style.css`)**:
+   - Memperkecil ukuran font judul link (`.link-text h3`) dari `1.18rem` (~19px, font-weight 800) menjadi **`0.95rem` (~15px, font-weight 600)** agar lebih bersih dan tidak terlalu besar.
+   - Memperkecil ukuran font nomor urut link (`.link-number`) dari `1.25rem` menjadi **`0.95rem` (font-weight 700)**.
+   - Memperkecil dimensi wadah ikon (`.link-icon-box`) dari `52px x 52px` (font-size 1.5rem) menjadi **`40px x 40px` (font-size 1.1rem, border-radius 10px)**.
+   - Menyesuaikan padding kartu link (`.link-card-item`) dari `16px 18px` menjadi **`12px 16px`** dan border-radius dari `16px` ke `14px` serta ikon panah (`.arrow-icon`) menjadi `0.85rem`.
+
+2. **Pembaruan Tampilan Panel Admin Kelola Link (`link/index.html`)**:
+   - Memperkecil ukuran font judul item pada daftar link di panel admin dari `text-sm sm:text-base` (font-bold) menjadi **`text-xs sm:text-sm` (font-semibold)**.
+   - Memperkecil wadah ikon item dari `w-10 h-10` (`text-base`) menjadi **`w-8 h-8` (`text-xs`)**.
+
+---
+
+### 🧪 3. Petunjuk Pengujian Lokal (*Local Verification*)
+
+1. Buka peramban ke halaman portal utama: [portal.html](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/portal.html).
+2. Perhatikan item pada daftar link; judul link, nomor urut, dan ikon kini berukuran lebih proporsional, rapi, dan nyaman dibaca tanpa terasa terlalu besar.
+3. Buka halaman kelola link admin: [link/index.html](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/link/index.html) untuk memastikan daftar link di panel kontrol juga tampil lebih compact dan serasi.
+

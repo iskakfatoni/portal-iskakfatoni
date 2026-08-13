@@ -400,16 +400,16 @@
               <input type="checkbox" ${isActive ? 'checked' : ''} class="toggle-active shrink-0 rounded bg-slate-900 border-slate-700 text-emerald-500 focus:ring-0 cursor-pointer w-4 h-4" title="${isActive ? 'Aktif (Klik untuk nonaktifkan)' : 'Nonaktif (Klik untuk aktifkan)'}">
               
               <!-- TAMPILAN ICON LINK -->
-              <div class="w-10 h-10 rounded-xl bg-slate-900 border border-slate-800 flex items-center justify-center shrink-0 text-base">
+              <div class="w-8 h-8 rounded-lg bg-slate-900 border border-slate-800 flex items-center justify-center shrink-0 text-xs">
                   <i class="${linkIconClass} text-slate-200"></i>
               </div>
 
               <div class="space-y-0.5 truncate">
-                <p class="font-bold text-white text-sm sm:text-base flex items-center gap-2 truncate">
+                <p class="font-semibold text-white text-xs sm:text-sm flex items-center gap-2 truncate">
                   ${data.title}
                   ${!isActive ? '<span class="text-[10px] text-red-400 bg-red-500/10 px-2 py-0.5 rounded-full border border-red-500/20 shrink-0">Nonaktif</span>' : ''}
                 </p>
-                <a href="${data.url}" target="_blank" class="text-cyan-400 font-mono text-[11px] sm:text-xs hover:underline block truncate">${data.url}</a>
+                <a href="${data.url}" target="_blank" class="text-cyan-400 font-mono text-[10px] sm:text-[11px] hover:underline block truncate">${data.url}</a>
               </div>
             </div>
             <div class="flex items-center gap-2 shrink-0">
