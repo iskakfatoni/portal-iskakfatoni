@@ -1535,3 +1535,24 @@ Dokumen ini berisi rangkuman review perubahan kode (*code review*) terbaru yang 
 2. Perhatikan item pada daftar link; judul link, nomor urut, dan ikon kini berukuran lebih proporsional, rapi, dan nyaman dibaca tanpa terasa terlalu besar.
 3. Buka halaman kelola link admin: [link/index.html](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/link/index.html) untuk memastikan daftar link di panel kontrol juga tampil lebih compact dan serasi.
 
+---
+
+## 📅 Review [2026-08-13 08:15 WIB] - Penambahan Informasi Domain Live ke Aturan Workspace AGENTS.md
+
+### 📁 1. Berkas yang Diubah
+* 📄 **[.agents/AGENTS.md](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/.agents/AGENTS.md)**
+
+---
+
+### 📝 2. Rincian Baris & Logika yang Diperbarui
+
+1. **Catatan Domain Publik / Live URL (`.agents/AGENTS.md`)**:
+   - Menambahkan alamat domain publik/live URL utama proyek (`https://iskakfatoni.github.io/portal-iskakfatoni/`) ke dalam dokumen aturan workspace `AGENTS.md` agar tersimpan secara permanen untuk acuan pengujian dan pengembangan agen AI.
+
+---
+
+### 🧪 3. Petunjuk Pengujian Lokal (*Local Verification*)
+
+1. Periksa file [.agents/AGENTS.md](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/.agents/AGENTS.md) pada seksi `Project Info & Live Domain`.
+2. Pastikan alamat URL `https://iskakfatoni.github.io/portal-iskakfatoni/` tercatat dengan benar.
+

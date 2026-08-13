@@ -1,5 +1,8 @@
 # AGENTS.md - Workspace Rules
 
+## Project Info & Live Domain
+- **Live Domain / URL**: https://iskakfatoni.github.io/portal-iskakfatoni/
+
 ## Git & Review Workflow Rules
 - **Commit & Push Otomatis**: Setiap kali selesai melakukan perubahan atau edit kode pada file lokal dan mencatat review ke `review.md`, AI asisten diperbolehkan dan dapat langsung menjalankan `git add`, `git commit`, serta `git push` secara otomatis tanpa perlu meminta konfirmasi ulang.
 - **Selalu Catat Review ke `review.md`**: Setiap kali selesai melakukan perubahan atau edit kode pada file lokal, selalu tambahkan (*append*) entri ulasan baru ke dalam file [review.md](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/review.md) yang mencakup:
