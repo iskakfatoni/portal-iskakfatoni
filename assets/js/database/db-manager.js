@@ -309,15 +309,29 @@ const TableEngine = {
     }
 
     // 2. Sorting Logic
-    if (state.currentSortField) {
+    let sortField = state.currentSortField;
+    let sortOrder = state.currentSortOrder;
+
+    // FITUR: Default sort "Terbaru" untuk Log & Sesi jika user belum memilih sorting manual
+    if (!sortField) {
+      if (state.currentCollection === 'log_absensi' || state.currentCollection === 'sesi_absensi') {
+        sortField = 'created_at';
+        sortOrder = 'desc';
+      } else {
+        sortField = '__id__';
+        sortOrder = 'asc';
+      }
+    }
+
+    if (sortField) {
       docs.sort((a, b) => {
         let valA, valB;
-        if (state.currentSortField === '__id__') {
+        if (sortField === '__id__') {
           valA = a.id;
           valB = b.id;
         } else {
-          valA = a.data()[state.currentSortField];
-          valB = b.data()[state.currentSortField];
+          valA = a.data()[sortField];
+          valB = b.data()[sortField];
         }
 
         if (valA === undefined || valA === null) valA = '';
@@ -329,8 +343,8 @@ const TableEngine = {
         if (typeof valA === 'string') valA = valA.toLowerCase();
         if (typeof valB === 'string') valB = valB.toLowerCase();
 
-        if (valA < valB) return state.currentSortOrder === 'asc' ? -1 : 1;
-        if (valA > valB) return state.currentSortOrder === 'asc' ? 1 : -1;
+        if (valA < valB) return sortOrder === 'asc' ? -1 : 1;
+        if (valA > valB) return sortOrder === 'asc' ? 1 : -1;
         return 0;
       });
     }
