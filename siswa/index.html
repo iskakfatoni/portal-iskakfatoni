@@ -163,7 +163,14 @@
         siswaNisKelas.innerText = `NIS: ${currentSiswaUser.nis} | ${kelasSiswa}`;
         
         // INSIALISASI KAMERA LANGSUNG DENGAN ZERO DELAY
-        startCameraEngine();
+        if (window.AndroidNativeBridge && window.AndroidNativeBridge.isNativeApp()) {
+          console.log("Mode Native Terdeteksi");
+          cameraLoading.classList.add('hidden');
+          scanStatusBadge.innerText = "Mode Native";
+          scanStatusBadge.className = "px-3 py-1 rounded-full text-xs font-extrabold font-mono bg-blue-500/15 text-blue-400 border border-blue-500/30";
+        } else {
+          startCameraEngine();
+        }
 
       } catch (e) {
         console.error("Session Error:", e);
@@ -220,6 +227,11 @@
     }
 
     async function startCameraEngine() {
+      if (window.AndroidNativeBridge && window.AndroidNativeBridge.isNativeApp()) {
+        window.AndroidNativeBridge.startScanner();
+        return;
+      }
+
       if (isStartingCamera) return;
       isStartingCamera = true;
       try {
@@ -265,6 +277,12 @@
     }
 
     function onScanError(error) {}
+
+    // JEMBATAN UNTUK NATIVE ANDROID
+    window.receiveNativeScan = function(decodedText) {
+      console.log("Menerima hasil scan native:", decodedText);
+      onScanSuccess(decodedText);
+    };
 
     async function onScanSuccess(decodedText) {
       if (isProcessingScan) return;
