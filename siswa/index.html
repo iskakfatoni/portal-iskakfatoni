@@ -318,7 +318,7 @@
 
         if (sesiSnap.empty) {
           showNotif("❌ QR Code tidak valid / Sesi absensi telah dikadaluarsakan!", "error");
-          resetProcessingLock(3000);
+          resetProcessingLock(3000, true); // Sembunyikan jika error agar bisa coba lagi
           return;
         }
 
@@ -337,7 +337,7 @@
 
         if (studentKelasNorm && sessionKelasNorm && studentKelasNorm !== sessionKelasNorm) {
           showNotif(`❌ GAGAL PRESENSI!\nAnda terdaftar di kelas [${studentKelasDisplay}], bukan kelas [${sessionKelasDisplay}]!`, "error");
-          resetProcessingLock(3500);
+          resetProcessingLock(3500, true);
           return;
         }
 
@@ -351,7 +351,7 @@
 
         if (!logSnap.empty) {
           showNotif(`⚠️ ${namaSiswaVal}, Anda sudah presensi sebelumnya!`, "warn");
-          resetProcessingLock(3000);
+          resetProcessingLock(1000, false); // PERTAHANKAN PESAN (Jangan sembunyikan)
           return;
         }
 
@@ -386,27 +386,28 @@
         // FIX 1.5.0: Jika di mode native, jangan restart kamera otomatis agar tidak loop
         if (window.AndroidNativeBridge && typeof window.AndroidNativeBridge.isNativeApp === 'function' && window.AndroidNativeBridge.isNativeApp()) {
           setTimeout(() => {
-            resetProcessingLock(1000);
-            // Tetap di halaman sukses tanpa membuka kamera
+            resetProcessingLock(1000, false); // PERTAHANKAN PESAN
           }, 3500);
         } else {
           setTimeout(() => {
-            resetProcessingLock(1000);
-            startCameraEngine();
+            resetProcessingLock(1000, false); // PERTAHANKAN PESAN
+            // startCameraEngine(); // Jangan buka kamera lagi agar pesan terbaca
           }, 3500);
         }
 
       } catch (err) {
         console.error(err);
         showNotif("❌ Gagal menyimpan presensi: " + err.message, "error");
-        resetProcessingLock(3000);
+        resetProcessingLock(3000, true);
       }
     }
 
-    function resetProcessingLock(delayMs) {
+    function resetProcessingLock(delayMs, shouldHideNotif = true) {
       setTimeout(() => {
         isProcessingScan = false;
-        notifBox.classList.add('hidden');
+        if (shouldHideNotif) {
+          notifBox.classList.add('hidden');
+        }
         scanStatusBadge.innerText = "Siap Scan";
         scanStatusBadge.className = "px-3 py-1 rounded-full text-xs font-extrabold font-mono bg-cyan-500/15 text-cyan-400 border border-cyan-500/30";
       }, delayMs);
