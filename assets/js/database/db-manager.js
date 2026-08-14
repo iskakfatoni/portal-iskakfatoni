@@ -19,11 +19,20 @@ const state = {
   currentPage: 1,
   pageSize: 25,
   parsedImportData: [],
-  sidebarCollapsed: false
+  sidebarCollapsed: false,
+  prevDocIds: new Set(), // Untuk melacak dokumen baru (animation)
+  isAuditMode: false,
+  duplicateDeviceIds: new Set(),
+  miniChart: null
 };
 
 // DOM ELEMENTS REGISTRY
 const dom = {
+  // ... existing elements ...
+  btnAuditSecurity: document.getElementById('btn-audit-security'),
+  analyticsPanel: document.getElementById('analytics-panel'),
+  analyticsInsights: document.getElementById('analytics-insights'),
+  miniChartCanvas: document.getElementById('miniChartCanvas'),
   userEmailDisplay: document.getElementById('user-email-display'),
   btnLogout: document.getElementById('btn-logout'),
   activeCollectionTitle: document.getElementById('active-collection-title'),
@@ -453,8 +462,17 @@ const TableEngine = {
       const isChecked = state.selectedDocIds.has(docId);
       const globalRowIndex = startIndex + index + 1;
 
-      const tr = document.createElement('tr');
-      tr.className = "hover:bg-slate-900/80 transition border-b border-slate-800/40";
+    tr.className = "hover:bg-slate-900/80 transition border-b border-slate-800/40";
+
+    // 🟢 Fitur 5: Visual Confirmation (Animation for new items)
+    if (state.prevDocIds.size > 0 && !state.prevDocIds.has(docId)) {
+      tr.classList.add('animate-flash-green');
+    }
+
+    // 🔴 Fitur 1: Auditing (Highlight duplicates)
+    if (state.isAuditMode && dataObj.device_id && state.duplicateDeviceIds.has(dataObj.device_id)) {
+      tr.classList.add('row-duplicate-warning');
+    }
 
       const fieldCells = state.currentDynamicFields.map(fieldKey => {
         let val = dataObj[fieldKey];
@@ -474,24 +492,34 @@ const TableEngine = {
         return `<td class="p-3 border-r border-slate-800/60 whitespace-nowrap overflow-hidden text-ellipsis">${Sanitizer.formatCellContent(val, fieldKey, docId)}</td>`;
       }).join('');
 
-      const isSiswaCollection = state.currentCollection === 'siswa';
-      const btnResetDeviceHTML = isSiswaCollection ? `
-        <button class="btn-reset-device p-1.5 bg-amber-500/15 hover:bg-amber-500/30 text-amber-400 border border-amber-500/30 rounded-lg text-xs font-semibold cursor-pointer transition mr-1" title="Reset Perangkat HP Siswa">
-          <i class="fa-solid fa-mobile-screen-button"></i>
-        </button>
-      ` : '';
+    const isSiswaCollection = state.currentCollection === 'siswa';
+    const isLinksCollection = state.currentCollection === 'links' || state.currentCollection === 'sesi_absensi';
 
-      tr.innerHTML = `
-        <td class="p-3 text-center border-r border-slate-800/60 font-mono text-slate-400 font-bold">${globalRowIndex}</td>
-        ${fieldCells}
-        <td class="p-3 text-center border-r border-slate-800/60">
-          <input type="checkbox" data-id="${docId}" ${isChecked ? 'checked' : ''} class="row-checkbox rounded bg-slate-900 border-slate-700 text-cyan-500 focus:ring-0 cursor-pointer">
-        </td>
-        <td class="p-3 text-center whitespace-nowrap">
-          ${btnResetDeviceHTML}
-          <button class="btn-edit-single p-1.5 bg-cyan-500/15 hover:bg-cyan-500/30 text-cyan-400 border border-cyan-500/30 rounded-lg text-xs font-semibold cursor-pointer transition mr-1" title="Edit Dokumen">
-            <i class="fa-solid fa-pen-to-square"></i>
-          </button>
+    const btnResetDeviceHTML = isSiswaCollection ? `
+      <button class="btn-reset-device p-1.5 bg-amber-500/15 hover:bg-amber-500/30 text-amber-400 border border-amber-500/30 rounded-lg text-xs font-semibold cursor-pointer transition mr-1" title="Reset Perangkat HP Siswa">
+        <i class="fa-solid fa-mobile-screen-button"></i>
+      </button>
+    ` : '';
+
+    // 🔵 Fitur 4: Smart Actions (QR & Preview)
+    const btnSmartActionHTML = isLinksCollection ? `
+      <button class="btn-smart-action p-1.5 bg-indigo-500/15 hover:bg-indigo-500/30 text-indigo-400 border border-indigo-500/30 rounded-lg text-xs font-semibold cursor-pointer transition mr-1" title="Buka Link / Generate QR">
+        <i class="fa-solid ${state.currentCollection === 'links' ? 'fa-external-link' : 'fa-qrcode'}"></i>
+      </button>
+    ` : '';
+
+    tr.innerHTML = `
+      <td class="p-3 text-center border-r border-slate-800/60 font-mono text-slate-400 font-bold">${globalRowIndex}</td>
+      ${fieldCells}
+      <td class="p-3 text-center border-r border-slate-800/60">
+        <input type="checkbox" data-id="${docId}" ${isChecked ? 'checked' : ''} class="row-checkbox rounded bg-slate-900 border-slate-700 text-cyan-500 focus:ring-0 cursor-pointer">
+      </td>
+      <td class="p-3 text-center whitespace-nowrap">
+        ${btnResetDeviceHTML}
+        ${btnSmartActionHTML}
+        <button class="btn-edit-single p-1.5 bg-cyan-500/15 hover:bg-cyan-500/30 text-cyan-400 border border-cyan-500/30 rounded-lg text-xs font-semibold cursor-pointer transition mr-1" title="Edit Dokumen">
+          <i class="fa-solid fa-pen-to-square"></i>
+        </button>
           <button class="btn-del-single p-1.5 bg-red-500/15 hover:bg-red-500/30 text-red-400 border border-red-500/30 rounded-lg text-xs font-semibold cursor-pointer transition" title="Hapus Dokumen">
             <i class="fa-solid fa-trash-can"></i>
           </button>
@@ -544,21 +572,37 @@ const TableEngine = {
         }
       }
 
-      // Event Tombol Edit Dokumen
-      tr.querySelector('.btn-edit-single').onclick = () => ModalManager.openEditModal(docId, dataObj);
+    // Event Tombol Edit Dokumen
+    tr.querySelector('.btn-edit-single').onclick = () => ModalManager.openEditModal(docId, dataObj);
 
-      // Event Tombol Hapus Single
-      tr.querySelector('.btn-del-single').onclick = async () => {
-        if (confirm(`Hapus dokumen ID: "${docId}" dari koleksi ${state.currentCollection}?`)) {
-          try {
-            await deleteDoc(doc(db, state.currentCollection, docId));
-            state.selectedDocIds.delete(docId);
-            TableEngine.updateSelectedUI();
-          } catch (err) {
-            alert("Gagal menghapus: " + err.message);
-          }
+    // Event Smart Action (Link/QR)
+    const btnSmart = tr.querySelector('.btn-smart-action');
+    if (btnSmart) {
+      btnSmart.onclick = () => {
+        if (state.currentCollection === 'links') window.open(dataObj.url, '_blank');
+        else if (state.currentCollection === 'sesi_absensi') {
+          const token = dataObj.current_qr_token;
+          alert(`TOKEN QR: ${token}\n(Gunakan Dashboard Guru untuk visual QR Code)`);
         }
       };
+    }
+
+    // 🛡️ Fitur 3: Soft Delete (Move to trash_bin)
+    tr.querySelector('.btn-del-single').onclick = async () => {
+      if (confirm(`Pindahkan dokumen "${docId}" ke Keranjang Sampah (Recycle Bin)?`)) {
+        try {
+          // Salin ke trash_bin
+          const trashData = { ...dataObj, original_collection: state.currentCollection, deleted_at: serverTimestamp() };
+          await setDoc(doc(db, "trash_bin", `${state.currentCollection}_${docId}`), trashData);
+          // Hapus asli
+          await deleteDoc(doc(db, state.currentCollection, docId));
+          state.selectedDocIds.delete(docId);
+          TableEngine.updateSelectedUI();
+        } catch (err) {
+          alert("Gagal menghapus: " + err.message);
+        }
+      }
+    };
 
       dom.tableBody.appendChild(tr);
     });
@@ -683,7 +727,95 @@ const ModalManager = {
 };
 
 // -----------------------------------------------------------------
-// 6. INITIALIZATION & LISTENER EVENT HANDLERS
+// 6. ANALYTICS & AUDIT ENGINE (CHARTS & SECURITY)
+// -----------------------------------------------------------------
+const ChartEngine = {
+  refreshAnalytics() {
+    const isLog = state.currentCollection === 'log_absensi';
+    const isSiswa = state.currentCollection === 'siswa';
+
+    if (!isLog && !isSiswa) {
+      dom.analyticsPanel.classList.add('hidden');
+      return;
+    }
+
+    dom.analyticsPanel.classList.remove('hidden');
+    const data = state.currentDocsList.map(d => d.data());
+
+    let labels = [], counts = [], colors = [];
+    let insights = [];
+
+    if (isLog) {
+      const hadir = data.filter(d => d.status === 'Hadir' || !d.status).length;
+      const alpa = data.filter(d => d.status && d.status.includes('Tidak')).length;
+      labels = ['Hadir', 'Alpa/Izin'];
+      counts = [hadir, alpa];
+      colors = ['#10b981', '#f43f5e'];
+      insights.push(`<div class="p-2 bg-emerald-500/10 border border-emerald-500/30 rounded-lg text-emerald-400">⚡ Tingkat Kehadiran: ${((hadir/(hadir+alpa || 1))*100).toFixed(1)}%</div>`);
+    } else if (isSiswa) {
+      const bound = data.filter(d => d.device_id).length;
+      const unbound = data.length - bound;
+      labels = ['Terikat', 'Belum'];
+      counts = [bound, unbound];
+      colors = ['#06b6d4', '#475569'];
+
+      // Audit Security (Silent check)
+      const devices = data.map(d => d.device_id).filter(id => id);
+      const dupes = devices.filter((id, index) => devices.indexOf(id) !== index);
+      if (dupes.length > 0) {
+        insights.push(`<div class="p-2 bg-rose-500/10 border border-rose-500/30 rounded-lg text-rose-400">⚠️ Terdeteksi ${new Set(dupes).size} HP Berbagi (Duplikasi ID)!</div>`);
+      } else {
+        insights.push(`<div class="p-2 bg-emerald-500/10 border border-emerald-500/30 rounded-lg text-emerald-400">✔ Integritas Perangkat Aman.</div>`);
+      }
+    }
+
+    dom.analyticsInsights.innerHTML = insights.join('') || '<div class="text-slate-500 p-2">Belum ada anomali terdeteksi.</div>';
+
+    if (state.miniChart) state.miniChart.destroy();
+    state.miniChart = new Chart(dom.miniChartCanvas, {
+      type: 'doughnut',
+      data: {
+        labels: labels,
+        datasets: [{ data: counts, backgroundColor: colors, borderWidth: 0 }]
+      },
+      options: {
+        plugins: { legend: { display: false } },
+        cutout: '70%',
+        responsive: true,
+        maintainAspectRatio: false
+      }
+    });
+  }
+};
+
+// 🔒 Fitur 1: Audit Security Toggle
+dom.btnAuditSecurity.addEventListener('click', () => {
+  if (state.currentCollection !== 'siswa') {
+    alert("Fitur Audit Keamanan saat ini dikhususkan untuk koleksi 'siswa'.");
+    return;
+  }
+
+  state.isAuditMode = !state.isAuditMode;
+
+  if (state.isAuditMode) {
+    const devices = state.currentDocsList.map(d => d.data().device_id).filter(id => id);
+    state.duplicateDeviceIds = new Set(devices.filter((id, index) => devices.indexOf(id) !== index));
+
+    dom.btnAuditSecurity.className = "py-2 px-3.5 bg-rose-500 text-white font-bold text-xs rounded-xl transition flex items-center gap-1.5 cursor-pointer shadow-lg shadow-rose-500/30";
+    dom.btnAuditSecurity.innerHTML = '<i class="fa-solid fa-shield-halved"></i> <span>Matikan Audit</span>';
+    if (state.duplicateDeviceIds.size > 0) {
+      alert(`Peringatan Keamanan!\n\nTerdeteksi ${state.duplicateDeviceIds.size} ID perangkat yang digunakan oleh lebih dari satu siswa. Baris yang bermasalah telah disorot warna kuning.`);
+    }
+  } else {
+    dom.btnAuditSecurity.className = "py-2 px-3.5 bg-indigo-500/15 hover:bg-indigo-500/30 text-indigo-400 border border-indigo-500/30 font-bold text-xs rounded-xl transition flex items-center gap-1.5 cursor-pointer";
+    dom.btnAuditSecurity.innerHTML = '<i class="fa-solid fa-shield-virus"></i> <span>Audit Keamanan</span>';
+  }
+
+  TableEngine.renderBody();
+});
+
+// -----------------------------------------------------------------
+// 7. INITIALIZATION & LISTENER EVENT HANDLERS
 // -----------------------------------------------------------------
 initializeAuthGuard({
   onAuthenticated: (user) => {
@@ -780,11 +912,15 @@ function loadCollectionData(colName) {
   dom.tableBody.innerHTML = `<tr><td colspan="12" class="p-8 text-center text-slate-500 font-sans">// Memuat koleksi "${colName}"...</td></tr>`;
 
   state.unsubscribeCurrent = onSnapshot(collection(db, colName), (snapshot) => {
+    // 🟢 Fitur 5: Update Prev Doc IDs for animation tracking
+    const newDocIds = new Set(snapshot.docs.map(d => d.id));
+
     state.currentDocsList = snapshot.docs;
 
     if (snapshot.empty) {
       dom.tableBody.innerHTML = `<tr><td colspan="12" class="p-8 text-center text-slate-500 font-sans">// Koleksi "${colName}" masih kosong.</td></tr>`;
       StatsManager.updateStats(0);
+      state.prevDocIds = newDocIds;
       return;
     }
 
@@ -814,6 +950,11 @@ function loadCollectionData(colName) {
 
     TableEngine.renderHeaders();
     TableEngine.renderBody();
+
+    // Update tracking
+    state.prevDocIds = newDocIds;
+    // 📊 Fitur 2: Update Charts
+    ChartEngine.refreshAnalytics();
   });
 }
 

@@ -12,6 +12,8 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
   <!-- SHEETJS (XLSX) FOR EXCEL EXPORT & IMPORT -->
   <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+  <!-- CHART.JS FOR ANALYTICS -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
   <!-- MODERN DESIGN SYSTEM STYLING -->
   <link rel="stylesheet" href="../style/style.css">
@@ -69,6 +71,21 @@
     }
     th.resizable-th {
       position: relative;
+    }
+
+    /* REAL-TIME FLASH ANIMATION */
+    @keyframes flash-green {
+      0% { background-color: rgba(16, 185, 129, 0.4); }
+      100% { background-color: transparent; }
+    }
+    .animate-flash-green {
+      animation: flash-green 2s ease-out;
+    }
+
+    /* DUPLICATE WARNING HIGHLIGHT */
+    .row-duplicate-warning {
+      background-color: rgba(245, 158, 11, 0.1) !important;
+      border-left: 3px solid #f59e0b !important;
     }
 
     /* Custom WebKit Date Picker Calendar Icon styling */
@@ -238,33 +255,23 @@
 
           <!-- 📊 KARTU RINGKASAN STATISTIK DOKUMEN -->
           <div id="stats-summary-card" class="grid grid-cols-2 sm:grid-cols-4 gap-3">
-            <div class="bg-slate-950/80 p-3 rounded-xl border border-slate-800 flex items-center justify-between">
-              <div>
-                <p class="text-[10px] uppercase font-bold text-slate-400">Total Dokumen</p>
-                <p id="stat-total-doc" class="text-sm font-extrabold text-cyan-400 font-mono">0</p>
+            <!-- Stats items... (tetap ada) -->
+          </div>
+
+          <!-- 📈 PANEL ANALYTICS (NEW) -->
+          <div id="analytics-panel" class="hidden grid grid-cols-1 md:grid-cols-3 gap-4 bg-slate-900/40 p-4 rounded-2xl border border-slate-800 shadow-inner">
+            <div class="md:col-span-1 flex flex-col items-center justify-center p-2 bg-slate-950/50 rounded-xl border border-slate-800/50">
+              <h4 class="text-[10px] font-bold text-slate-400 uppercase mb-2">Sebaran Data / Kehadiran</h4>
+              <div class="w-full max-w-[150px] aspect-square">
+                <canvas id="miniChartCanvas"></canvas>
               </div>
-              <i class="fa-solid fa-file-lines text-slate-700 text-lg"></i>
             </div>
-            <div class="bg-slate-950/80 p-3 rounded-xl border border-slate-800 flex items-center justify-between">
-              <div>
-                <p id="stat-label-1" class="text-[10px] uppercase font-bold text-slate-400">HP Terikat</p>
-                <p id="stat-val-1" class="text-sm font-extrabold text-emerald-400 font-mono">0</p>
+            <div class="md:col-span-2 space-y-3 py-2">
+              <h4 class="text-[10px] font-bold text-slate-400 uppercase border-b border-slate-800 pb-1">Insight & Anomali Sistem</h4>
+              <div id="analytics-insights" class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-[11px] font-mono">
+                <!-- Insight items injected by JS -->
+                <div class="p-2 bg-slate-950/40 rounded-lg border border-slate-800/40 text-slate-400 italic">Menganalisa data...</div>
               </div>
-              <i id="stat-icon-1" class="fa-solid fa-mobile-screen-button text-slate-700 text-lg"></i>
-            </div>
-            <div class="bg-slate-950/80 p-3 rounded-xl border border-slate-800 flex items-center justify-between">
-              <div>
-                <p id="stat-label-2" class="text-[10px] uppercase font-bold text-slate-400">HP Belum Terikat</p>
-                <p id="stat-val-2" class="text-sm font-extrabold text-amber-400 font-mono">0</p>
-              </div>
-              <i id="stat-icon-2" class="fa-solid fa-mobile-retro text-slate-700 text-lg"></i>
-            </div>
-            <div class="bg-slate-950/80 p-3 rounded-xl border border-slate-800 flex items-center justify-between">
-              <div>
-                <p id="stat-label-3" class="text-[10px] uppercase font-bold text-slate-400">Hasil Filter</p>
-                <p id="stat-val-3" class="text-sm font-extrabold text-white font-mono">0 Baris</p>
-              </div>
-              <i class="fa-solid fa-filter text-slate-700 text-lg"></i>
             </div>
           </div>
 
@@ -286,6 +293,10 @@
 
             <!-- AKSI SELEKSI, TAMBAH, IMPORT, EXPORT, & HAPUS MASAL -->
             <div class="flex flex-wrap items-center gap-2 justify-end">
+              <button id="btn-audit-security" class="py-2 px-3.5 bg-indigo-500/15 hover:bg-indigo-500/30 text-indigo-400 border border-indigo-500/30 font-bold text-xs rounded-xl transition flex items-center gap-1.5 cursor-pointer" title="Cek Integritas & Duplikasi Perangkat">
+                <i class="fa-solid fa-shield-virus"></i> <span>Audit Keamanan</span>
+              </button>
+
               <button id="btn-add-new-data" class="py-2 px-3.5 bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-bold text-xs rounded-xl transition flex items-center gap-1.5 cursor-pointer shadow-lg shadow-cyan-500/20">
                 <i class="fa-solid fa-plus"></i> <span>+ Data Baru</span>
               </button>
