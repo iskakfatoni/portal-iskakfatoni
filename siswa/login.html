@@ -120,7 +120,7 @@
           const dataSiswa = JSON.parse(existingSession);
           if (dataSiswa && dataSiswa.nis) {
             // Jika sesi sudah ada, langsung redirect ke Scanner Siswa
-            window.location.href = 'index.html';
+            window.location.href = 'scanner.html';
           }
         } catch (e) {
           localStorage.removeItem('siswa_session');
@@ -194,10 +194,10 @@
 
           localStorage.setItem('siswa_session', JSON.stringify(sessionPayload));
 
-          // Transisi Pindah Halaman ke Scanner Siswa (index.html)
+          // Transisi Pindah Halaman ke Scanner Siswa (scanner.html)
           btnText.innerText = "Login Berhasil!";
           setTimeout(() => {
-            window.location.href = 'index.html';
+            window.location.href = 'scanner.html';
           }, 500);
 
         } else {
