@@ -478,17 +478,17 @@ const TableEngine = {
       const globalRowIndex = startIndex + index + 1;
 
       const tr = document.createElement('tr');
-      tr.className = "hover:bg-slate-900/80 transition border-b border-slate-800/40";
+        tr.className = "hover:bg-slate-900/80 transition border-b border-slate-800/40";
 
-    // 🟢 Fitur 5: Visual Confirmation (Animation for new items)
-    if (state.prevDocIds.size > 0 && !state.prevDocIds.has(docId)) {
-      tr.classList.add('animate-flash-green');
-    }
+      // 🟢 Fitur 5: Visual Flash Animation (Real-time Feedback)
+      if (state.prevDocIds.size > 0 && !state.prevDocIds.has(docId)) {
+        tr.classList.add('animate-flash-green');
+      }
 
-    // 🔴 Fitur 1: Auditing (Highlight duplicates)
-    if (state.isAuditMode && dataObj.device_id && state.duplicateDeviceIds.has(dataObj.device_id)) {
-      tr.classList.add('row-duplicate-warning');
-    }
+      // 🔴 Fitur 1: Auditing (Highlight duplicates)
+      if (state.isAuditMode && dataObj.device_id && state.duplicateDeviceIds.has(dataObj.device_id)) {
+        tr.classList.add('row-duplicate-warning');
+      }
 
       const fieldCells = state.currentDynamicFields.map(fieldKey => {
         let val = dataObj[fieldKey];
