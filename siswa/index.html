@@ -227,8 +227,12 @@
     }
 
     async function startCameraEngine() {
-      if (window.AndroidNativeBridge && window.AndroidNativeBridge.isNativeApp()) {
-        window.AndroidNativeBridge.startScanner();
+      // FIX 1.5.0: Jika di aplikasi native, JANGAN tampilkan UI kamera lama & jangan buka scanner otomatis
+      if (window.AndroidNativeBridge && typeof window.AndroidNativeBridge.isNativeApp === 'function' && window.AndroidNativeBridge.isNativeApp()) {
+        const cameraBox = document.querySelector('.relative.w-full.aspect-square');
+        if (cameraBox) {
+          cameraBox.style.display = 'none'; // Sembunyikan kotak kamera lama
+        }
         return;
       }
 
@@ -369,10 +373,18 @@
         scanStatusBadge.innerText = "Sukses";
         scanStatusBadge.className = "px-3 py-1 rounded-full text-xs font-extrabold font-mono bg-emerald-500/25 text-emerald-300 border border-emerald-500/50 shadow-sm";
 
-        setTimeout(() => {
-          resetProcessingLock(1000);
-          startCameraEngine();
-        }, 3500);
+        // FIX 1.5.0: Jika di mode native, jangan restart kamera otomatis agar tidak loop
+        if (window.AndroidNativeBridge && typeof window.AndroidNativeBridge.isNativeApp === 'function' && window.AndroidNativeBridge.isNativeApp()) {
+          setTimeout(() => {
+            resetProcessingLock(1000);
+            // Tetap di halaman sukses tanpa membuka kamera
+          }, 3500);
+        } else {
+          setTimeout(() => {
+            resetProcessingLock(1000);
+            startCameraEngine();
+          }, 3500);
+        }
 
       } catch (err) {
         console.error(err);
