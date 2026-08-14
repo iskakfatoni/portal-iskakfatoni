@@ -23,7 +23,8 @@ const state = {
   prevDocIds: new Set(), // Untuk melacak dokumen baru (animation)
   isAuditMode: false,
   duplicateDeviceIds: new Set(),
-  miniChart: null
+  miniChart: null,
+  allStudents: [] // Cache data siswa untuk cross-check alpa
 };
 
 // DOM ELEMENTS REGISTRY
@@ -623,6 +624,38 @@ const TableEngine = {
     TableEngine.updateSelectedUI();
   },
 
+  async checkAbsenceAnomalies() {
+    if (state.allStudents.length === 0) {
+      const snap = await getDocs(collection(db, "siswa"));
+      state.allStudents = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    }
+
+    const currentLogs = state.currentDocsList.map(d => d.data());
+    const absentSiswa = [];
+
+    // Jika filter tanggal aktif, kita bisa cek siapa yang belum ada di log hari itu
+    if (state.logDateFilter !== 'all') {
+      const logNisList = new Set(currentLogs.map(l => l.nis));
+
+      // Ambil kelas dari sesi jika memungkinkan
+      const activeClassesInLog = new Set(currentLogs.map(l => l.id_kelas));
+
+      state.allStudents.forEach(s => {
+        if (activeClassesInLog.has(s.id_kelas) && !logNisList.has(s.nis)) {
+          absentSiswa.push(s);
+        }
+      });
+    }
+
+    if (absentSiswa.length > 0) {
+      const insight = `<div class="p-2 bg-rose-500/10 border border-rose-500/30 rounded-lg text-rose-400">🚨 Terdeteksi ${absentSiswa.length} siswa belum absen di kelas aktif!</div>`;
+      dom.analyticsInsights.innerHTML += insight;
+
+      // Tambahkan baris virtual ke tabel?
+      // Untuk menjaga integritas data, kita tampilkan saja di analytics atau buat tombol "Tampilkan Alpa"
+    }
+  },
+
   updateSelectedUI() {
     const count = state.selectedDocIds.size;
     if (dom.selectedCountSpan) dom.selectedCountSpan.innerText = count;
@@ -959,6 +992,11 @@ function loadCollectionData(colName) {
     state.prevDocIds = newDocIds;
     // 📊 Fitur 2: Update Charts
     ChartEngine.refreshAnalytics();
+
+    // 🔍 Fitur 6: Cross-check alpa jika di log_absensi
+    if (colName === 'log_absensi') {
+      TableEngine.checkAbsenceAnomalies();
+    }
   });
 }
 
