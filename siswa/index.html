@@ -168,6 +168,16 @@
           cameraLoading.classList.add('hidden');
           scanStatusBadge.innerText = "Mode Native";
           scanStatusBadge.className = "px-3 py-1 rounded-full text-xs font-extrabold font-mono bg-blue-500/15 text-blue-400 border border-blue-500/30";
+
+          // FIX 1.5.1: Sembunyikan UI kamera lama & tombol kontrolnya secara paksa
+          const cameraBox = document.querySelector('.relative.w-full.aspect-square');
+          if (cameraBox) cameraBox.style.display = 'none';
+
+          const cameraControls = document.querySelector('.grid.grid-cols-2.gap-2.pt-1');
+          if (cameraControls) cameraControls.style.display = 'none';
+
+          const infoText = document.querySelector('p.text-xs.text-slate-400.font-mono');
+          if (infoText) infoText.style.display = 'none';
         } else {
           startCameraEngine();
         }
