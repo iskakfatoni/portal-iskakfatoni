@@ -4,6 +4,49 @@ Dokumen ini berisi rangkuman review perubahan kode (*code review*) terbaru yang 
 
 ---
 
+## 📅 Review [2026-08-14 08:50 WIB] - Implementasi Native QR Scanner Bridge & Refaktorisasi Modular Sistem Absensi
+
+### 📁 1. Berkas yang Diubah / Dibuat
+* 📄 **[absensi.html](file:///c:/Users/iskak/AndroidStudioProjects/PortalIskakFatoni/web_portal/absensi.html)**
+* 📄 **[siswa/scanner.html](file:///c:/Users/iskak/AndroidStudioProjects/PortalIskakFatoni/web_portal/siswa/scanner.html)** [NEW - RENAME FROM index.html]
+* 📄 **[siswa/result.html](file:///c:/Users/iskak/AndroidStudioProjects/PortalIskakFatoni/web_portal/siswa/result.html)** [NEW]
+* 📄 **[siswa/index.html](file:///c:/Users/iskak/AndroidStudioProjects/PortalIskakFatoni/web_portal/siswa/index.html)** [REPLACED - INSTANT REDIRECT]
+* 📄 **[siswa/login.html](file:///c:/Users/iskak/AndroidStudioProjects/PortalIskakFatoni/web_portal/siswa/login.html)**
+* 📄 **[guru/index.html](file:///c:/Users/iskak/AndroidStudioProjects/PortalIskakFatoni/web_portal/guru/index.html)**
+
+---
+
+### 📝 2. Rincian Baris & Logika yang Diperbarui
+
+1. **Integrasi Jembatan Native Android (`AndroidNativeBridge`)**:
+   - Menambahkan logika deteksi aplikasi native pada `absensi.html` dan `scanner.html`. Jika diakses via aplikasi Android v1.5.0+, tombol scan akan langsung memicu kamera native (`startScanner()`) alih-alih scanner berbasis web yang lambat.
+   - Menyediakan fungsi `window.receiveNativeScan(result)` untuk menerima data dari sensor kamera Android dan memprosesnya secara instan di latar belakang web.
+
+2. **Refaktorisasi Modular & Pemisahan Halaman Hasil (`result.html`)**:
+   - Memisahkan tampilan sukses/gagal dari logika pemindaian. Halaman baru `result.html` memberikan pengalaman visual yang lebih mewah dengan **efek konfeti** dan detail informasi kehadiran yang persisten (tidak menghilang otomatis).
+   - Mengganti nama `siswa/index.html` menjadi `siswa/scanner.html` untuk kejelasan fungsi teknis.
+
+3. **Integritas Sesi Tunggal Guru (`guru/index.html`)**:
+   - Menambahkan mekanisme pembersihan sesi otomatis. Saat Guru membuka sesi baru, sistem secara paksa menutup semua sesi aktif lainnya di Firestore untuk mencegah kebocoran data atau duplikasi QR Code yang membingungkan sistem scanner.
+
+4. **Pembaruan Keamanan & Redirect Folder**:
+   - Membuat `siswa/index.html` baru yang melakukan pengalihan instan ke `portal.html` untuk mencegah akses direktori terbuka.
+   - Memperkuat validasi silang kelas pada `scanner.html`: Siswa hanya dapat melakukan presensi jika ID kelas pada profil mereka cocok 100% dengan ID kelas pada sesi QR aktif.
+
+---
+
+### 🧪 3. Petunjuk Pengujian Lokal (*Local Verification*)
+
+1. **Uji Aplikasi Android (Native Mode)**: 
+   - Gunakan aplikasi Android Portal v1.5.0+, tekan "Buka Scanner" pada tab Absensi. 
+   - Verifikasi kamera native (layar penuh) muncul instan. Setelah scan, pastikan otomatis diarahkan ke `result.html` dengan tampilan konfeti.
+2. **Uji Sesi Ganda Guru**: 
+   - Buka dashboard guru di dua perangkat berbeda. Mulai sesi di perangkat B, lalu verifikasi sesi di perangkat A otomatis menjadi "Off".
+3. **Uji Validasi Kelas**: 
+   - Coba lakukan scan QR kelas X menggunakan akun siswa kelas XI. Verifikasi muncul notifikasi error yang tegas dan data tidak tersimpan ke database.
+
+---
+
 ## 📅 Review [2026-08-14 05:51 WIB] - Perbaikan Bug 404 pada PWA iPhone via `manifest.json`, `sw.js`, & Link Meta Icon
 
 ### 📁 1. Berkas yang Diubah
