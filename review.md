@@ -4,6 +4,47 @@ Dokumen ini berisi rangkuman review perubahan kode (*code review*) terbaru yang 
 
 ---
 
+## 📅 Review [2026-08-14 14:30 WIB] - Peningkatan Dashboard Admin: 5 Fitur Canggih Pengelola Data (Audit, Analytics, & Keamanan)
+
+### 📁 1. Berkas yang Diubah
+* 📄 **[database/db-manager.html](file:///c:/Users/iskak/AndroidStudioProjects/PortalIskakFatoni/web_portal/database/db-manager.html)**
+* 📄 **[assets/js/database/db-manager.js](file:///c:/Users/iskak/AndroidStudioProjects/PortalIskakFatoni/web_portal/assets/js/database/db-manager.js)**
+
+---
+
+### 📝 2. Rincian Baris & Logika yang Diperbarui
+
+1.  🛡️ **Audit Keamanan (Security Audit)**:
+    - Menambahkan tombol **"Audit Keamanan"** pada koleksi `siswa`.
+    - **Logika**: Melakukan pemindaian instan terhadap duplikasi `device_id`. Jika ditemukan satu ID perangkat yang digunakan oleh lebih dari satu siswa, baris terkait akan otomatis **disorot warna oranye/amber** untuk mempermudah investigasi indikasi kecurangan.
+
+2.  📊 **Mini Chart Analytics (Real-time Insight)**:
+    - Integrasi library **Chart.js** untuk menampilkan grafik donat (*Doughnut Chart*) secara dinamis.
+    - Menampilkan persentase **Hadir vs Alpa** pada koleksi `log_absensi` dan status kesehatan integritas perangkat pada koleksi `siswa` secara realtime sesuai filter yang aktif.
+
+3.  ♻️ **Recycle Bin (Soft Delete)**:
+    - Mengubah perilaku tombol hapus standar. Data yang dihapus kini tidak langsung hilang permanen, melainkan dipindahkan ke koleksi internal **`trash_bin`** di Firestore.
+    - Menyertakan informasi `original_collection` dan `deleted_at` untuk memungkinkan pemulihan data (*data recovery*) jika terjadi kesalahan penghapusan.
+
+4.  🔗 **Smart Actions (QR & Preview)**:
+    - **Preview Link**: Menambahkan tombol aksi cepat pada koleksi `links` untuk membuka URL tujuan di tab baru tanpa meninggalkan dashboard.
+    - **QR Token Viewer**: Menambahkan tombol aksi pada koleksi `sesi_absensi` untuk melihat token QR aktif secara langsung, mempermudah admin dalam verifikasi teknis sesi.
+
+5.  ✨ **Visual Flash Animation (Real-time Feedback)**:
+    - Implementasi pelacakan dokumen baru berbasis state memori.
+    - Setiap kali ada data absensi baru yang masuk secara realtime (via `onSnapshot`), baris tabel terkait akan memberikan efek **"Flash Green"** selama 2 detik. Memberikan indikasi visual yang tegas bahwa sistem sedang bekerja dan menerima data.
+
+---
+
+### 🧪 3. Petunjuk Pengujian Lokal (*Local Verification*)
+
+1. **Uji Audit**: Buka koleksi `siswa`, klik "Audit Keamanan". Pastikan baris dengan ID perangkat ganda berubah warna.
+2. **Uji Analytics**: Buka `log_absensi` hari ini, pastikan grafik donat muncul dan angka persentasenya sesuai dengan jumlah baris Hadir/Alpa.
+3. **Uji Recycle Bin**: Hapus satu dokumen, lalu cek koleksi `trash_bin` di Firebase Console untuk memastikan data berpindah ke sana.
+4. **Uji Flash**: Lakukan absensi dari HP siswa dan perhatikan apakah baris baru di DB Manager berkedip hijau secara otomatis.
+
+---
+
 ## 📅 Review [2026-08-14 08:50 WIB] - Implementasi Native QR Scanner Bridge & Refaktorisasi Modular Sistem Absensi
 
 ### 📁 1. Berkas yang Diubah / Dibuat
