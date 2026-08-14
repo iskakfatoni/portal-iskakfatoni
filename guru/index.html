@@ -364,11 +364,18 @@
       try {
         btnStartSesi.disabled = true;
 
-        const oldActiveId = currentSesiId || localStorage.getItem('portal_guru_active_sesi_id');
-        if (oldActiveId) {
-          try {
-            await updateDoc(doc(db, "sesi_absensi", oldActiveId), { is_active: false });
-          } catch(e) {}
+        // FIX 1.5.1: Pastikan HANYA SATU sesi yang aktif di seluruh database
+        const qActive = query(collection(db, "sesi_absensi"), where("is_active", "==", true));
+        const activeSnap = await getDocs(qActive);
+
+        const deactivatePromises = [];
+        activeSnap.forEach((activeDoc) => {
+          deactivatePromises.push(updateDoc(doc(db, "sesi_absensi", activeDoc.id), { is_active: false }));
+        });
+
+        if (deactivatePromises.length > 0) {
+          await Promise.all(deactivatePromises);
+          console.log(`Berhasil menonaktifkan ${deactivatePromises.length} sesi lama.`);
         }
 
         const now = new Date();

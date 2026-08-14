@@ -80,46 +80,67 @@
       const currentSiswaUser = JSON.parse(savedUserJson);
       const scannedToken = decodedText.trim();
 
+      // Standarisasi data user
+      const namaSiswaVal = currentSiswaUser.nama_siswa || currentSiswaUser.nama || "Siswa";
+      const idKelasSiswa = currentSiswaUser.id_kelas || "-";
+      const namaKelasSiswa = currentSiswaUser.nama_kelas || currentSiswaUser.id_kelas || "-";
+
       try {
+        // 1. Validasi Sesi QR yang Aktif
         const qSesi = query(collection(db, "sesi_absensi"), where("current_qr_token", "==", scannedToken), where("is_active", "==", true));
         const sesiSnap = await getDocs(qSesi);
 
         if (sesiSnap.empty) {
-          window.location.href = `result.html?status=error&msg=${encodeURIComponent('QR Code tidak valid atau sudah kadaluarsa.')}`;
+          window.location.href = `result.html?status=error&msg=${encodeURIComponent('QR Code tidak valid atau sesi guru sudah ditutup.')}`;
           return;
         }
 
         const sesiDoc = sesiSnap.docs[0];
         const sesiData = sesiDoc.data();
 
+        // 2. VALIDASI KETAT KELAS: Siswa harus berada di kelas yang sama dengan sesi QR
+        const studentKelasNorm = namaKelasSiswa.toLowerCase().replace(/[^a-z0-9]/g, '');
+        const sessionKelasNorm = (sesiData.id_kelas || "").toLowerCase().replace(/[^a-z0-9]/g, '');
+
+        if (studentKelasNorm && sessionKelasNorm && studentKelasNorm !== sessionKelasNorm) {
+          window.location.href = `result.html?status=error&msg=${encodeURIComponent(`Gagal! Anda terdaftar di kelas [${namaKelasSiswa}], bukan kelas [${sesiData.id_kelas}].`)}`;
+          return;
+        }
+
+        // 3. Cek apakah sudah absen di sesi ini
         const qLog = query(collection(db, "log_absensi"), where("id_sesi", "==", sesiDoc.id), where("nis", "==", currentSiswaUser.nis));
         const logSnap = await getDocs(qLog);
 
         if (!logSnap.empty) {
-          window.location.href = `result.html?status=already&nama=${encodeURIComponent(currentSiswaUser.nama)}&msg=${encodeURIComponent('Anda sudah presensi sebelumnya.')}`;
+          window.location.href = `result.html?status=already&nama=${encodeURIComponent(namaSiswaVal)}&msg=${encodeURIComponent('Anda sudah melakukan presensi sebelumnya pada sesi ini.')}`;
           return;
         }
 
+        // 4. Simpan Absensi ke Firestore
         const now = new Date();
-        const waktuStr = now.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }) + ' WIB';
+        const waktuStr = now.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', second: '2-digit' }) + ' WIB';
+        const currentDeviceId = currentSiswaUser.device_id || localStorage.getItem('portal_device_id') || '';
 
         await addDoc(collection(db, "log_absensi"), {
           id_sesi: sesiDoc.id,
           id_kelas: sesiData.id_kelas,
           nama_mapel: sesiData.nama_mapel,
           nis: currentSiswaUser.nis,
-          nama_siswa: currentSiswaUser.nama,
+          nama_siswa: namaSiswaVal,
           hari: now.toLocaleDateString('id-ID', { weekday: 'long' }),
           tanggal: now.toLocaleDateString('id-ID', { year: 'numeric', month: '2-digit', day: '2-digit' }).split('/').reverse().join('-'),
           waktu: waktuStr,
           status: 'Hadir',
+          device_id: currentDeviceId,
           created_at: serverTimestamp()
         });
 
-        window.location.href = `result.html?status=success&nama=${encodeURIComponent(currentSiswaUser.nama)}&mapel=${encodeURIComponent(sesiData.nama_mapel)}&waktu=${encodeURIComponent(waktuStr)}`;
+        // 5. REDIRECT KE HALAMAN HASIL
+        window.location.href = `result.html?status=success&nama=${encodeURIComponent(namaSiswaVal)}&mapel=${encodeURIComponent(sesiData.nama_mapel)}&waktu=${encodeURIComponent(waktuStr)}`;
 
       } catch (err) {
-        window.location.href = `result.html?status=error&msg=${encodeURIComponent(err.message)}`;
+        console.error("Absensi Error:", err);
+        window.location.href = `result.html?status=error&msg=${encodeURIComponent("Terjadi kesalahan teknis: " + err.message)}`;
       }
     }
 
@@ -129,8 +150,12 @@
 
       if (typeof Html5Qrcode === 'undefined') return;
       html5QrCode = new Html5Qrcode("reader");
-      await html5QrCode.start({ facingMode: "environment" }, { fps: 10, qrbox: 250 }, onScanSuccess);
-      document.getElementById('camera-loading').classList.add('hidden');
+      try {
+        await html5QrCode.start({ facingMode: "environment" }, { fps: 10, qrbox: 250 }, onScanSuccess);
+        document.getElementById('camera-loading').classList.add('hidden');
+      } catch (e) {
+        console.error("Gagal start kamera web:", e);
+      }
     }
 
     document.addEventListener('DOMContentLoaded', () => {
@@ -139,7 +164,7 @@
         localStorage.removeItem('pending_native_scan');
         onScanSuccess(pendingScan);
       } else if (window.AndroidNativeBridge && window.AndroidNativeBridge.isNativeApp()) {
-        // Native Mode: Do nothing, wait for bridge
+        // Mode Native: Tunggu instruksi dari QRScannerActivity.kt
       } else {
         startWebScanner();
       }
