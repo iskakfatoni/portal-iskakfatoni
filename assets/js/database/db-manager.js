@@ -28,7 +28,6 @@ const state = {
 
 // DOM ELEMENTS REGISTRY
 const dom = {
-  // ... existing elements ...
   btnAuditSecurity: document.getElementById('btn-audit-security'),
   analyticsPanel: document.getElementById('analytics-panel'),
   analyticsInsights: document.getElementById('analytics-insights'),
@@ -462,7 +461,8 @@ const TableEngine = {
       const isChecked = state.selectedDocIds.has(docId);
       const globalRowIndex = startIndex + index + 1;
 
-    tr.className = "hover:bg-slate-900/80 transition border-b border-slate-800/40";
+      const tr = document.createElement('tr');
+      tr.className = "hover:bg-slate-900/80 transition border-b border-slate-800/40";
 
     // 🟢 Fitur 5: Visual Confirmation (Animation for new items)
     if (state.prevDocIds.size > 0 && !state.prevDocIds.has(docId)) {
@@ -772,6 +772,10 @@ const ChartEngine = {
     dom.analyticsInsights.innerHTML = insights.join('') || '<div class="text-slate-500 p-2">Belum ada anomali terdeteksi.</div>';
 
     if (state.miniChart) state.miniChart.destroy();
+    if (typeof Chart === 'undefined') {
+      console.warn("Chart.js not loaded.");
+      return;
+    }
     state.miniChart = new Chart(dom.miniChartCanvas, {
       type: 'doughnut',
       data: {
