@@ -33,6 +33,10 @@ Dokumen ini berisi rangkuman review perubahan kode (*code review*) terbaru yang 
    - Membuat `siswa/index.html` baru yang melakukan pengalihan instan ke `portal.html` untuk mencegah akses direktori terbuka.
    - Memperkuat validasi silang kelas pada `scanner.html`: Siswa hanya dapat melakukan presensi jika ID kelas pada profil mereka cocok 100% dengan ID kelas pada sesi QR aktif.
 
+5. **Visual Flash Animation (Real-time Feedback)**:
+   - Implementasi deteksi perubahan dokumen secara instan pada Firestore DB Manager.
+   - Setiap data baru yang masuk (misal: siswa berhasil absen) akan memicu efek **"Flash Green"** selama 2 detik pada baris tabel terkait. Memberikan sensasi visual "detak jantung" sistem yang aktif dan responsif.
+
 ---
 
 ### 🧪 3. Petunjuk Pengujian Lokal (*Local Verification*)
