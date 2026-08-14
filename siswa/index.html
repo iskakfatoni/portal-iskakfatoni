@@ -404,7 +404,17 @@
     }
 
     // Jalankan inisialisasi sesi saat DOM siap
-    document.addEventListener('DOMContentLoaded', initSiswaSession);
+    document.addEventListener('DOMContentLoaded', () => {
+      initSiswaSession();
+
+      // FIX 1.5.0: Jika ada hasil scan native yang tertunda dari halaman sebelumnya
+      const pendingScan = localStorage.getItem('pending_native_scan');
+      if (pendingScan) {
+        localStorage.removeItem('pending_native_scan');
+        console.log("Memproses scan native tertunda:", pendingScan);
+        setTimeout(() => onScanSuccess(pendingScan), 500);
+      }
+    });
     // Jalankan fallback jika event DOMContentLoaded sudah lewat saat script di-load
     if (document.readyState === 'interactive' || document.readyState === 'complete') {
       initSiswaSession();

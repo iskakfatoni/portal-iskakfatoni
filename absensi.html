@@ -345,8 +345,21 @@
     }
 
     btnBukaScanner.addEventListener('click', () => {
-      window.location.href = "siswa/index.html";
+      // FIX 1.5.0: Jika di dalam aplikasi Android, jangan pindah halaman
+      if (window.AndroidNativeBridge && typeof window.AndroidNativeBridge.startScanner === 'function') {
+        window.AndroidNativeBridge.startScanner();
+      } else {
+        window.location.href = "siswa/index.html";
+      }
     });
+
+    // JEMBATAN UNTUK NATIVE ANDROID (DIPANGGIL DARI QRScannerActivity)
+    window.receiveNativeScan = function(decodedText) {
+      console.log("Menerima hasil scan native:", decodedText);
+      // Simpan sementara di localStorage agar siswa/index.html bisa memprosesnya
+      localStorage.setItem('pending_native_scan', decodedText);
+      window.location.href = "siswa/index.html";
+    };
 
     function showError(msg) {
       errorMsg.innerText = msg;
