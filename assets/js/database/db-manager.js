@@ -24,7 +24,8 @@ const state = {
   isAuditMode: false,
   duplicateDeviceIds: new Set(),
   miniChart: null,
-  allStudents: [] // Cache data siswa untuk cross-check alpa
+  allStudents: [], // Cache data siswa untuk cross-check alpa
+  refreshTimer: null
 };
 
 // DOM ELEMENTS REGISTRY
@@ -631,28 +632,51 @@ const TableEngine = {
     }
 
     const currentLogs = state.currentDocsList.map(d => d.data());
-    const absentSiswa = [];
+    const now = new Date();
+    const isPastDeadline = (now.getHours() > 15 || (now.getHours() === 15 && now.getMinutes() >= 30));
 
-    // Jika filter tanggal aktif, kita bisa cek siapa yang belum ada di log hari itu
-    if (state.logDateFilter !== 'all') {
+    const absentStudents = [];
+    const notYetPresentStudents = [];
+
+    // Jika filter tanggal aktif (Today), kita bisa cek anomali
+    if (state.logDateFilter === 'today' || state.logDateFilter === now.toLocaleDateString('id-ID', { year: 'numeric', month: '2-digit', day: '2-digit' }).split('/').reverse().join('-')) {
       const logNisList = new Set(currentLogs.map(l => l.nis));
-
-      // Ambil kelas dari sesi jika memungkinkan
       const activeClassesInLog = new Set(currentLogs.map(l => l.id_kelas));
 
       state.allStudents.forEach(s => {
         if (activeClassesInLog.has(s.id_kelas) && !logNisList.has(s.nis)) {
-          absentSiswa.push(s);
+          if (isPastDeadline) absentStudents.push(s);
+          else notYetPresentStudents.push(s);
         }
       });
     }
 
-    if (absentSiswa.length > 0) {
-      const insight = `<div class="p-2 bg-rose-500/10 border border-rose-500/30 rounded-lg text-rose-400">🚨 Terdeteksi ${absentSiswa.length} siswa belum absen di kelas aktif!</div>`;
-      dom.analyticsInsights.innerHTML += insight;
+    // Update Insights UI
+    let absenceInsights = '';
+    if (notYetPresentStudents.length > 0) {
+      absenceInsights += `<div class="p-2 bg-amber-500/10 border border-amber-500/30 rounded-lg text-amber-400">⏳ Belum Hadir: ${notYetPresentStudents.length} Siswa (Ditunggu s.d 15:30)</div>`;
+    }
+    if (absentStudents.length > 0) {
+      absenceInsights += `<div class="p-2 bg-rose-500/10 border border-rose-500/30 rounded-lg text-rose-400">🚫 Tidak Hadir: ${absentStudents.length} Siswa (Sudah lewat 15:30)</div>`;
+    }
 
-      // Tambahkan baris virtual ke tabel?
-      // Untuk menjaga integritas data, kita tampilkan saja di analytics atau buat tombol "Tampilkan Alpa"
+    // Gabungkan dengan insight audit jika ada
+    const existingInsights = dom.analyticsInsights.querySelectorAll('div:not(.absence-insight)');
+    dom.analyticsInsights.innerHTML = '';
+    existingInsights.forEach(i => dom.analyticsInsights.appendChild(i));
+
+    const div = document.createElement('div');
+    div.className = 'absence-insight contents';
+    div.innerHTML = absenceInsights;
+    dom.analyticsInsights.appendChild(div);
+
+    // Auto-refresh timer logic
+    if (!state.refreshTimer) {
+      state.refreshTimer = setInterval(() => {
+        if (state.currentCollection === 'log_absensi' && state.logDateFilter === 'today') {
+          TableEngine.checkAbsenceAnomalies();
+        }
+      }, 30000); // Cek setiap 30 detik
     }
   },
 
