@@ -255,7 +255,34 @@
 
           <!-- 📊 KARTU RINGKASAN STATISTIK DOKUMEN -->
           <div id="stats-summary-card" class="grid grid-cols-2 sm:grid-cols-4 gap-3">
-            <!-- Stats items... (tetap ada) -->
+            <div class="bg-slate-950/80 p-3 rounded-xl border border-slate-800 flex items-center justify-between">
+              <div>
+                <p class="text-[10px] uppercase font-bold text-slate-400">Total Dokumen</p>
+                <p id="stat-total-doc" class="text-sm font-extrabold text-cyan-400 font-mono">0</p>
+              </div>
+              <i class="fa-solid fa-file-lines text-slate-700 text-lg"></i>
+            </div>
+            <div class="bg-slate-950/80 p-3 rounded-xl border border-slate-800 flex items-center justify-between">
+              <div>
+                <p id="stat-label-1" class="text-[10px] uppercase font-bold text-slate-400">HP Terikat</p>
+                <p id="stat-val-1" class="text-sm font-extrabold text-emerald-400 font-mono">0</p>
+              </div>
+              <i id="stat-icon-1" class="fa-solid fa-mobile-screen-button text-slate-700 text-lg"></i>
+            </div>
+            <div class="bg-slate-950/80 p-3 rounded-xl border border-slate-800 flex items-center justify-between">
+              <div>
+                <p id="stat-label-2" class="text-[10px] uppercase font-bold text-slate-400">HP Belum Terikat</p>
+                <p id="stat-val-2" class="text-sm font-extrabold text-amber-400 font-mono">0</p>
+              </div>
+              <i id="stat-icon-2" class="fa-solid fa-mobile-retro text-slate-700 text-lg"></i>
+            </div>
+            <div class="bg-slate-950/80 p-3 rounded-xl border border-slate-800 flex items-center justify-between">
+              <div>
+                <p id="stat-label-3" class="text-[10px] uppercase font-bold text-slate-400">Hasil Filter</p>
+                <p id="stat-val-3" class="text-sm font-extrabold text-white font-mono">0 Baris</p>
+              </div>
+              <i class="fa-solid fa-filter text-slate-700 text-lg"></i>
+            </div>
           </div>
 
           <!-- 📈 PANEL ANALYTICS (NEW) -->
