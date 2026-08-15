@@ -294,6 +294,15 @@
         a.rel = "noopener noreferrer";
         a.className = "link-card-item";
 
+        // FIX NATIVE 1.5.0: Jika di Android Native, buka di browser eksternal
+        a.addEventListener('click', (e) => {
+          if (window.AndroidNativeBridge && typeof window.AndroidNativeBridge.openExternalBrowser === 'function') {
+            e.preventDefault();
+            console.log("Membuka via Native Browser:", data.url);
+            window.AndroidNativeBridge.openExternalBrowser(data.url);
+          }
+        });
+
         a.innerHTML = `
           <div class="link-info">
             <div class="link-icon-box ${iconConfig.cls}">
