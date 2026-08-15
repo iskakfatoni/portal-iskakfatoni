@@ -78,6 +78,10 @@ Dokumen ini berisi rangkuman review perubahan kode (*code review*) terbaru yang 
    - Implementasi deteksi perubahan dokumen secara instan pada Firestore DB Manager.
    - Setiap data baru yang masuk (misal: siswa berhasil absen) akan memicu efek **"Flash Green"** selama 2 detik pada baris tabel terkait. Memberikan sensasi visual "detak jantung" sistem yang aktif dan responsif.
 
+6. **Native External Browser Bridge**:
+   - Menambahkan fungsi `openExternalBrowser(url)` pada `AndroidNativeBridge`.
+   - **Optimasi Performa**: Seluruh link materi dan tugas pada `portal.html` kini otomatis dibuka menggunakan browser default HP (Chrome/Samsung Browser) alih-alih di dalam WebView aplikasi. Ini membebaskan penggunaan RAM aplikasi dan memudahkan siswa menggunakan akun Google yang sudah tersimpan di browser mereka.
+
 ---
 
 ### 🧪 3. Petunjuk Pengujian Lokal (*Local Verification*)
