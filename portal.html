@@ -132,6 +132,8 @@
 
   <!-- FIREBASE LOGIC & HARDWARE DEVICE CHECK FOR GREETING -->
   <script type="module">
+    import { db } from "./assets/js/config/firebase-config.js";
+    import { getHardwareFingerprint } from "./assets/js/utils/device-fingerprint.js";
     import {
       collection,
       doc,
