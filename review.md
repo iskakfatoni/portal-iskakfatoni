@@ -4,6 +4,41 @@ Dokumen ini berisi rangkuman review perubahan kode (*code review*) terbaru yang 
 
 ---
 
+## 📅 Review [2026-08-20 18:40 WIB] - Perbaikan Algoritma Deteksi Siswa Tidak Hadir (Alpa) pada `guru/rekap.html`
+
+### 📁 1. Berkas yang Diubah
+* 📄 **[guru/rekap.html](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/guru/rekap.html)** `[MODIFY]`
+* 📄 **[assets/js/guru/rekap.js](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/assets/js/guru/rekap.js)** `[MODIFY]`
+
+---
+
+### 📝 2. Rincian Baris & Logika yang Diperbarui
+
+1. 🔍 **Penyebab Masalah Sebelumnya**:
+   - Filter kelas menggunakan teks manual dan pencocokan string biasa (`includes()`), sehingga format kelas dengan spasi seperti `"XI TEI 2 MUTU"` tidak cocok dengan format database `"XI-TEI-2-MUTU"` (karena tanda hubung `-` vs spasi).
+   - Ketika dropdown sesi tidak dipilih dan filter kelas kosong, sistem tidak menjalankan pengecekan alpa untuk kelas yang memiliki sesi/log hari ini.
+
+2. 🛠️ **Solusi & Peningkatan**:
+   - **Fungsi Normalisasi Cerdas (`normClass`)**: Menghilangkan tanda spasi, tanda hubung, dan huruf kapital (`replace(/[^a-z0-9]/g, '')`), sehingga `"XI-TEI-2-MUTU"` dan `"XI TEI 2 MUTU"` 100% cocok.
+   - **Dropdown Pilihan Kelas Dinamis (`#filter-kelas`)**: Mengubah input teks manual menjadi `<select>` dropdown yang otomatis memuat seluruh kelas dari koleksi `kelas` di Firestore.
+   - **Pencarian Alpa Otomatis Multi-Kelas**: Jika pengguna tidak memilih sesi spesifik atau kelas tertentu, sistem secara cerdas memeriksa seluruh kelas yang memiliki sesi atau log absensi aktif pada hari tersebut.
+   - **Badge Counter Real-Time**: Menambahkan ringkasan statistik **Hadir**, **Tidak Hadir**, dan **Total Baris** di bagian atas tabel rekapitulasi.
+   - **Auto-Reload Interaktif**: Tabel rekapitulasi langsung dimuat ulang otomatis saat pengguna mengganti pilihan kelas, sesi, atau mencentang/membatalkan centang opsi filter.
+
+---
+
+### 🧪 3. Petunjuk Pengujian Lokal (*Local Verification*)
+
+1. Buka [guru/rekap.html](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/guru/rekap.html) di peramban.
+2. Centang opsi **"📅 Absensi Hari Ini"** dan **"⚠️ Sertakan Siswa Tidak Hadir (S.d. 17:00 WIB)"**.
+3. Verifikasi:
+   - Siswa yang hadir ditampilkan dengan badge hijau **`Hadir`** (beserta jam scan).
+   - Siswa yang belum absen pada kelas hari ini (misal 9 siswa XI TEI 2 MUTU) langsung muncul dengan badge merah **`Tidak Hadir`** bertuliskan *(Tidak Absen s.d. 17:00 WIB)*.
+   - Badge counter di atas tabel menunjukkan statistik akurat (**Hadir: 16**, **Tidak Hadir: 9**, **Total: 25 Baris**).
+4. Coba pilih kelas lain di dropdown **Filter Kelas** untuk melihat data per rombel secara instan.
+
+---
+
 ## 📅 Review [2026-08-20 18:29 WIB] - Optimasi Responsif Komprehensif & Standarisasi Komponen pada `db-manager.html`
 
 ### 📁 1. Berkas yang Diubah

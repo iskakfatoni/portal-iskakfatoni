@@ -92,14 +92,16 @@
 
         <div>
           <label class="block text-xs font-semibold text-slate-300 mb-1">Filter Kelas</label>
-          <input type="text" id="filter-kelas" placeholder="Contoh: X IPA 1" class="w-full px-3.5 py-2.5 bg-slate-900 border border-slate-700 rounded-xl text-white text-sm focus:outline-none focus:border-accentCyan">
+          <select id="filter-kelas" class="w-full px-3.5 py-2.5 bg-slate-900 border border-slate-700 rounded-xl text-white text-sm focus:outline-none focus:border-accentCyan cursor-pointer">
+            <option value="">-- Semua Kelas --</option>
+          </select>
         </div>
 
         <div class="flex items-end gap-2">
-          <button id="btn-tampilkan" class="flex-1 py-2.5 px-4 bg-slate-700 hover:bg-slate-600 text-white font-semibold text-sm rounded-xl transition border border-slate-600">
+          <button id="btn-tampilkan" class="flex-1 py-2.5 px-4 bg-slate-700 hover:bg-slate-600 text-white font-semibold text-sm rounded-xl transition border border-slate-600 cursor-pointer">
             🔍 Muat Data
           </button>
-          <button id="btn-export-excel" class="flex-1 py-2.5 px-4 bg-gradient-to-r from-emerald-500 to-teal-400 text-slate-950 font-bold text-sm rounded-xl hover:opacity-90 active:scale-[0.99] transition shadow-lg shadow-emerald-500/20 flex items-center justify-center gap-2">
+          <button id="btn-export-excel" class="flex-1 py-2.5 px-4 bg-gradient-to-r from-emerald-500 to-teal-400 text-slate-950 font-bold text-sm rounded-xl hover:opacity-90 active:scale-[0.99] transition shadow-lg shadow-emerald-500/20 flex items-center justify-center gap-2 cursor-pointer">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
             </svg>
@@ -112,11 +114,26 @@
 
     <!-- TABEL REKAP ABSENSI -->
     <div class="bg-slate-800/80 backdrop-blur-md rounded-2xl border border-slate-700/50 shadow-xl overflow-hidden space-y-4 p-5">
-      <div class="flex items-center justify-between border-b border-slate-700/50 pb-3">
-        <h2 class="text-sm font-bold text-white uppercase tracking-wider">Preview Data Laporan Kehadiran</h2>
-        <span id="total-record" class="text-xs bg-slate-900 px-3 py-1 rounded-lg text-accentCyan border border-slate-700 font-mono">
-          Total: 0 Baris
-        </span>
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between border-b border-slate-700/50 pb-3 gap-2.5">
+        <h2 class="text-sm font-bold text-white uppercase tracking-wider flex items-center gap-2">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-accentCyan" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+          </svg>
+          Preview Laporan Kehadiran
+        </h2>
+        
+        <!-- COUNTER STATS BADGES -->
+        <div class="flex flex-wrap items-center gap-2 font-mono text-xs">
+          <span class="px-2.5 py-1 bg-emerald-500/15 border border-emerald-500/30 text-emerald-400 rounded-lg">
+            Hadir: <strong id="stat-hadir-count">0</strong>
+          </span>
+          <span class="px-2.5 py-1 bg-rose-500/15 border border-rose-500/30 text-rose-400 rounded-lg">
+            Tidak Hadir: <strong id="stat-alpa-count">0</strong>
+          </span>
+          <span id="total-record" class="bg-slate-900 px-3 py-1 rounded-lg text-accentCyan border border-slate-700">
+            Total: 0 Baris
+          </span>
+        </div>
       </div>
 
       <div class="overflow-x-auto">

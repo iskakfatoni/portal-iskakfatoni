@@ -4,12 +4,12 @@ import {
   collection, 
   getDocs, 
   getDoc,
-  doc,
+  doc, 
   query, 
-  orderBy,
-  where,
-  writeBatch,
-  serverTimestamp
+  orderBy, 
+  where, 
+  writeBatch, 
+  serverTimestamp 
 } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
 // -----------------------------------------------------------------
@@ -36,6 +36,8 @@ const DateUtils = {
   }
 };
 
+const normClass = (k) => (k || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+
 // DOM Elements
 const selectSesi = document.getElementById('select-sesi');
 const filterKelas = document.getElementById('filter-kelas');
@@ -47,6 +49,8 @@ const chkOnlyToday = document.getElementById('chk-only-today');
 const chkIncludeAlpa = document.getElementById('chk-include-alpa');
 const btnSaveAlpaLogs = document.getElementById('btn-save-alpa-logs');
 const todayDateStrSpan = document.getElementById('today-date-str');
+const statHadirCount = document.getElementById('stat-hadir-count');
+const statAlpaCount = document.getElementById('stat-alpa-count');
 
 let currentData = [];
 
@@ -54,16 +58,39 @@ if (todayDateStrSpan) todayDateStrSpan.innerText = DateUtils.getTodayFormattedTe
 
 // 🔒 AUTH GUARD: Verifikasi Sesi sebelum menampilkan halaman
 initializeAuthGuard({
-  onAuthenticated: () => {
+  onAuthenticated: async () => {
     document.documentElement.style.display = 'block';
-    initSesiDropdown();
+    await Promise.all([
+      initKelasDropdown(),
+      initSesiDropdown()
+    ]);
     loadData();
   }
 });
 
 // -----------------------------------------------------------------
-// 2. INSIALISASI DROPDOWN SESI ABSENSI
+// 2. INISIALISASI DROPDOWN KELAS & SESI ABSENSI
 // -----------------------------------------------------------------
+async function initKelasDropdown() {
+  try {
+    const qKelas = query(collection(db, "kelas"));
+    const snapKelas = await getDocs(qKelas);
+    if (!snapKelas.empty) {
+      filterKelas.innerHTML = '<option value="">-- Semua Kelas --</option>';
+      snapKelas.forEach(docSnap => {
+        const d = docSnap.data();
+        const kName = d.nama_kelas || d.id_kelas || docSnap.id;
+        const opt = document.createElement('option');
+        opt.value = kName;
+        opt.innerText = kName;
+        filterKelas.appendChild(opt);
+      });
+    }
+  } catch (err) {
+    console.error("Gagal memuat daftar kelas:", err);
+  }
+}
+
 async function initSesiDropdown() {
   try {
     const qSesi = query(collection(db, "sesi_absensi"), orderBy("created_at", "desc"));
@@ -85,6 +112,8 @@ async function initSesiDropdown() {
 // 3. FETCH DATA REKAP & LOGIKA SISWA TIDAK HADIR
 // -----------------------------------------------------------------
 btnTampilkan.addEventListener('click', loadData);
+if (selectSesi) selectSesi.addEventListener('change', loadData);
+if (filterKelas) filterKelas.addEventListener('change', loadData);
 if (chkOnlyToday) chkOnlyToday.addEventListener('change', loadData);
 if (chkIncludeAlpa) chkIncludeAlpa.addEventListener('change', loadData);
 
@@ -101,7 +130,8 @@ async function loadData() {
 
   try {
     const selectedSesiId = selectSesi.value;
-    const inputKelasVal = filterKelas.value.trim().toLowerCase();
+    const inputKelasVal = filterKelas.value.trim();
+    const normInputKelas = normClass(inputKelasVal);
     const onlyToday = chkOnlyToday ? chkOnlyToday.checked : true;
     const includeAlpa = chkIncludeAlpa ? chkIncludeAlpa.checked : true;
     const todayISOStr = DateUtils.getTodayISO();
@@ -131,17 +161,20 @@ async function loadData() {
         if (!isToday) return;
       }
 
-      // Filter 2: Filter kelas
-      if (inputKelasVal) {
-        const k = (d.id_kelas || "").toLowerCase();
-        if (!k.includes(inputKelasVal)) return;
+      // Filter 2: Filter kelas menggunakan normalisasi cerdas
+      if (normInputKelas) {
+        const k1 = normClass(d.id_kelas);
+        const k2 = normClass(d.nama_kelas);
+        if (k1 !== normInputKelas && k2 !== normInputKelas && !k1.includes(normInputKelas) && !k2.includes(normInputKelas)) {
+          return;
+        }
       }
 
       currentData.push({
         id: docSnap.id,
         nis: d.nis || "-",
         nama: d.nama_siswa || "-",
-        kelas: d.id_kelas || "-",
+        kelas: d.id_kelas || d.nama_kelas || "-",
         waktu: DateUtils.formatLogTime(d),
         status: d.status || "Hadir",
         device_id: d.device_id || ""
@@ -163,39 +196,70 @@ async function loadData() {
       }
     });
 
-    // Deteksi Siswa Tidak Hadir (S.d. 17:00 WIB untuk 1 kelas spesifik)
+    // Deteksi Siswa Tidak Hadir (S.d. 17:00 WIB)
     if (includeAlpa) {
       try {
-        let targetKelasName = inputKelasVal;
-        if (!targetKelasName && selectedSesiId) {
+        const snapSiswa = await getDocs(collection(db, "siswa"));
+        const presentNisSet = new Set(currentData.map(d => String(d.nis).trim()));
+
+        // Tentukan daftar kelas yang akan disaring alpa
+        const targetClassSet = new Set();
+
+        if (selectedSesiId) {
           const sesiDoc = await getDoc(doc(db, "sesi_absensi", selectedSesiId));
-          if (sesiDoc.exists()) targetKelasName = (sesiDoc.data().id_kelas || '').toLowerCase();
+          if (sesiDoc.exists()) {
+            const sKelas = sesiDoc.data().id_kelas || '';
+            if (sKelas) targetClassSet.add(sKelas);
+          }
+        } else if (inputKelasVal) {
+          targetClassSet.add(inputKelasVal);
+        } else {
+          // Ambil semua kelas yang memiliki log aktif
+          currentData.forEach(item => {
+            if (item.kelas && item.kelas !== '-') targetClassSet.add(item.kelas);
+          });
+
+          // Juga masukkan kelas dari sesi hari ini jika mode hari ini aktif
+          if (onlyToday) {
+            const qTodaySesi = query(collection(db, "sesi_absensi"), where("tanggal", "==", todayISOStr));
+            const todaySesiSnap = await getDocs(qTodaySesi);
+            todaySesiSnap.forEach(s => {
+              const k = s.data().id_kelas || '';
+              if (k) targetClassSet.add(k);
+            });
+          }
         }
 
-        if (targetKelasName) {
-          const snapSiswa = await getDocs(collection(db, "siswa"));
-          const presentNisSet = new Set(currentData.map(d => String(d.nis).trim()));
+        // Loop setiap kelas target & identifikasi siswa yang belum absen
+        targetClassSet.forEach(targetClass => {
+          const normTarget = normClass(targetClass);
+          if (!normTarget) return;
 
           snapSiswa.forEach(siswaDoc => {
             const s = siswaDoc.data();
-            const sKelas = (s.id_kelas || s.nama_kelas || '').toLowerCase();
+            const sK1 = normClass(s.id_kelas);
+            const sK2 = normClass(s.nama_kelas);
+            const sK3 = normClass(s.kelas);
 
-            if (sKelas.includes(targetKelasName)) {
+            const match = (sK1 === normTarget || sK2 === normTarget || sK3 === normTarget);
+
+            if (match) {
               const sNis = String(s.nis || siswaDoc.id).trim();
               if (!presentNisSet.has(sNis)) {
                 currentData.push({
                   id: `alpa-${sNis}`,
                   isVirtualAlpa: true,
-                  nis: s.nis || "-",
+                  nis: s.nis || siswaDoc.id || "-",
                   nama: s.nama_siswa || s.nama || "-",
-                  kelas: s.id_kelas || s.nama_kelas || "-",
+                  kelas: s.nama_kelas || targetClass,
                   waktu: `Tidak Absen (s.d. 17:00 WIB)`,
                   status: "Tidak Hadir"
                 });
               }
             }
           });
-        }
+        });
+
       } catch (errAlpa) {
         console.warn("Gagal menyaring siswa alpa kelas:", errAlpa);
       }
@@ -224,6 +288,12 @@ async function loadData() {
 function renderTable(data) {
   totalRecord.innerText = `Total: ${data.length} Baris`;
 
+  const countHadir = data.filter(d => d.status.toLowerCase().includes('hadir') && !d.status.toLowerCase().includes('tidak')).length;
+  const countAlpa = data.filter(d => d.status.toLowerCase().includes('tidak') || d.status.toLowerCase().includes('alpa')).length;
+
+  if (statHadirCount) statHadirCount.innerText = countHadir;
+  if (statAlpaCount) statAlpaCount.innerText = countAlpa;
+
   if (data.length === 0) {
     tableBody.innerHTML = `
       <tr>
@@ -239,7 +309,7 @@ function renderTable(data) {
   data.forEach((item, idx) => {
     const isHadir = item.status.toLowerCase().includes('hadir') && !item.status.toLowerCase().includes('tidak');
     const badgeClass = isHadir 
-      ? 'bg-emerald-500/15 text-emerald-400 border-emerald-500/30'
+      ? 'bg-emerald-500/15 text-emerald-400 border-emerald-500/30 font-semibold' 
       : 'bg-rose-500/15 text-rose-400 border-rose-500/40 font-bold';
 
     const iconHTML = isHadir 
@@ -282,7 +352,7 @@ if (btnSaveAlpaLogs) {
   btnSaveAlpaLogs.addEventListener('click', async () => {
     const virtualAlpaItems = currentData.filter(d => d.isVirtualAlpa);
     if (virtualAlpaItems.length === 0) {
-      alert("Tidak ada data siswa 'Tidak Hadir' yang perlu disimpan untuk kelas ini.\n\nTips: Masukkan nama kelas pada 'Filter Kelas' atau pilih sesi untuk mendeteksi siswa yang belum absen.");
+      alert("Tidak ada data siswa 'Tidak Hadir' yang perlu disimpan untuk kelas ini.\n\nTips: Pilih Sesi atau pilih Nama Kelas pada filter untuk mendeteksi siswa yang belum absen.");
       return;
     }
 
