@@ -1,6 +1,6 @@
 import { db } from "../config/firebase-config.js";
 import { initializeAuthGuard } from "../auth/auth-guard.js";
-import { collection, doc, setDoc, addDoc, deleteDoc, updateDoc, deleteField, onSnapshot, writeBatch, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+import { collection, doc, getDocs, setDoc, addDoc, deleteDoc, updateDoc, deleteField, onSnapshot, writeBatch, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
 // -----------------------------------------------------------------
 // 1. STATE REAKTIF APLIKASI (STATE MANAGEMENT)

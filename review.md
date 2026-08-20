@@ -4,6 +4,33 @@ Dokumen ini berisi rangkuman review perubahan kode (*code review*) terbaru yang 
 
 ---
 
+## 📅 Review [2026-08-20 16:58 WIB] - Verifikasi DB Manager & Perbaikan Import `getDocs` Firestore
+
+### 📁 1. Berkas yang Diubah
+* 📄 **[assets/js/database/db-manager.js](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/assets/js/database/db-manager.js)**
+
+---
+
+### 📝 2. Rincian Baris & Logika yang Diperbarui
+
+1. 🔍 **Pemeriksaan Komprehensif DB Manager**:
+   - Struktur UI [database/db-manager.html](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/database/db-manager.html) terverifikasi lengkap: integrasi modal Add, Edit, Import Excel/CSV/JSON, Audit Keamanan, Mini Chart Analytics, dan Filter Perangkat/Tanggal.
+   - Aturan keamanan Firestore [firestore.rules](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/firestore.rules) terverifikasi telah mencakup seluruh koleksi: `siswa`, `kelas`, `mapel`, `sesi_absensi`, `log_absensi`, `links`, `admin_devices`, `settings`, `system_logs`, dan `trash_bin`.
+
+2. 🛠️ **Perbaikan Import `getDocs` pada Firestore Modular Engine**:
+   - **Masalah**: Fungsi `checkAbsenceAnomalies()` pada `db-manager.js` memanggil `getDocs(collection(db, "siswa"))`, namun `getDocs` belum diikutsertakan dalam `import` dari CDN Firebase Firestore.
+   - **Solusi**: Menambahkan `getDocs` ke dalam import statement baris 3 pada [assets/js/database/db-manager.js](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/assets/js/database/db-manager.js) untuk mencegah potensi `ReferenceError` saat mengecek anomali presensi siswa.
+
+---
+
+### 🧪 3. Petunjuk Pengujian Lokal (*Local Verification*)
+
+1. **Uji DB Manager**: Buka halaman [database/db-manager.html](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/database/db-manager.html) melalui local server atau browser setelah login admin.
+2. **Uji Navigasi Koleksi**: Klik koleksi `siswa`, `log_absensi`, `kelas`, `mapel`, `sesi_absensi`, dan `system_logs`. Pastikan data dan ringkasan statistik termuat tanpa error di console.
+3. **Uji Anomali Presensi**: Buka `log_absensi` -> filter "Hari Ini" dan periksa console browser untuk memastikan tidak ada error pemanggilan `getDocs`.
+
+---
+
 ## 📅 Review [2026-08-14 14:30 WIB] - Peningkatan Dashboard Admin: 5 Fitur Canggih Pengelola Data (Audit, Analytics, & Keamanan)
 
 ### 📁 1. Berkas yang Diubah
