@@ -54,7 +54,7 @@
   <script type="module">
     import { firebaseConfig } from "../assets/js/config/firebase-config.js";
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-    import { getFirestore, collection, addDoc, query, where, getDocs, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+    import { getFirestore, collection, addDoc, doc, updateDoc, query, where, getDocs, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
@@ -97,6 +97,17 @@
 
         const sesiDoc = sesiSnap.docs[0];
         const sesiData = sesiDoc.data();
+
+        // 1.1 Proteksi Kedaluwarsa Sesi (> 1 Jam)
+        if (sesiData.created_at && sesiData.created_at.seconds) {
+          const createdTimeMs = sesiData.created_at.seconds * 1000;
+          const nowMs = Date.now();
+          if ((nowMs - createdTimeMs) > 60 * 60 * 1000) {
+            await updateDoc(doc(db, "sesi_absensi", sesiDoc.id), { is_active: false });
+            window.location.href = `result.html?status=error&msg=${encodeURIComponent('Sesi presensi sudah kedaluwarsa (> 1 jam). Minta guru membuka sesi baru.')}`;
+            return;
+          }
+        }
 
         // 2. VALIDASI KETAT KELAS: Siswa harus berada di kelas yang sama dengan sesi QR
         const studentKelasNorm = namaKelasSiswa.toLowerCase().replace(/[^a-z0-9]/g, '');

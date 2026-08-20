@@ -4,6 +4,29 @@ Dokumen ini berisi rangkuman review perubahan kode (*code review*) terbaru yang 
 
 ---
 
+## 📅 Review [2026-08-20 20:36 WIB] - Penguatan Proteksi Kedaluwarsa Sesi Presensi (> 1 Jam)
+
+### 📁 1. Berkas yang Diubah
+* 📄 **[siswa/scanner.html](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/siswa/scanner.html)** `[MODIFY]`
+
+---
+
+### 📝 2. Rincian Baris & Logika yang Diperbarui
+
+1. ⏱️ **Mekanisme Deteksi Batas Waktu 1 Jam**:
+   - Sistem mencatat stempel waktu server `created_at` (dalam detik/milidetik) saat sesi pertama kali dibuka oleh guru.
+   - Pada halaman **Dashboard Guru ([guru/index.html](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/guru/index.html))**, saat sesi aktif dipulihkan, sistem membandingkan `Date.now() - created_at.seconds * 1000`. Jika selisihnya $> 3.600.000\text{ ms}$ (1 jam), sesi otomatis dinonaktifkan (`is_active: false`).
+   - Pada halaman **Scanner Siswa ([siswa/scanner.html](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/siswa/scanner.html))**, ditambahkan validasi kedaluwarsa 1 jam: Jika siswa memindai QR pada sesi yang sudah berumur lebih dari 1 jam (misal guru lupa menutup sesi), sistem otomatis menutup sesi tersebut di database dan menolak scan siswa dengan notifikasi *"Sesi presensi sudah kedaluwarsa (> 1 jam). Minta guru membuka sesi baru."*
+
+---
+
+### 🧪 3. Petunjuk Pengujian Lokal (*Local Verification*)
+
+1. Buka [siswa/scanner.html](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/siswa/scanner.html) dan uji pemindaian QR code sesi lama (> 1 jam).
+2. Verifikasi sistem secara otomatis menolak scan dan mengupdate dokumen sesi menjadi `is_active: false`.
+
+---
+
 ## 📅 Review [2026-08-20 20:26 WIB] - Penyesuaian Jadwal Cron Auto-Alpa & Label Waktu ke 15:30 WIB
 
 ### 📁 1. Berkas yang Diubah
