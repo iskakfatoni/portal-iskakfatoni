@@ -274,10 +274,15 @@ async function main() {
           alpaListText += `${idx + 1}. *${nis}* - ${nama}\n`;
         });
 
+        // Tentukan nama sekolah dinamis
+        const namaSekolah = sKelas.toUpperCase().includes('MUTU') 
+          ? 'SMKS Muhammadiyah 1 Kemlagi Mojokerto' 
+          : 'SMK Negeri 1 Jetis Mojokerto';
+
         const waMessage = 
 `📢 *LAPORAN PRESENSI HARIAN SISWA*
 📅 *${hariStr}, ${todayISO}* (Pukul 15:30 WIB)
-🏫 *SMK Negeri 1 Wonosobo - TEI*
+🏫 *${namaSekolah}*
 ━━━━━━━━━━━━━━━━━━━━━━━
 📌 *Kelas:* *${sKelas}*
 📖 *Mapel:* ${sMapel}

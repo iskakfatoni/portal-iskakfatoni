@@ -4,6 +4,29 @@ Dokumen ini berisi rangkuman review perubahan kode (*code review*) terbaru yang 
 
 ---
 
+## 📅 Review [2026-08-20 21:57 WIB] - Penyesuaian Nama Sekolah Resmi Dinamis di Template Notifikasi WhatsApp
+
+### 📁 1. Berkas yang Diubah
+* 📄 **[scripts/auto-alpa.js](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/scripts/auto-alpa.js)** `[MODIFY]`
+
+---
+
+### 📝 2. Rincian Baris & Logika yang Diperbarui
+
+1. 🏫 **Nama Sekolah Dinamis Berdasarkan Rombel**:
+   - Menyesuaikan header notifikasi WhatsApp agar otomatis menampilkan nama sekolah resmi sesuai kelasnya:
+     - Jika kelas mengandung `MUTU` $\rightarrow$ **`SMKS Muhammadiyah 1 Kemlagi Mojokerto`**
+     - Jika kelas JETIS / regular $\rightarrow$ **`SMK Negeri 1 Jetis Mojokerto`**
+
+---
+
+### 🧪 3. Petunjuk Pengujian Lokal (*Local Verification*)
+
+1. Jalankan `node scripts/auto-alpa.js` di terminal.
+2. Verifikasi pesan yang di-generate menampilkan nama sekolah resmi yang sesuai untuk rombel yang bersangkutan.
+
+---
+
 ## 📅 Review [2026-08-20 21:40 WIB] - Integrasi Notifikasi Laporan Presensi Otomatis via WhatsApp Fonnte (Multi-Grup Kelas)
 
 ### 📁 1. Berkas yang Diubah
