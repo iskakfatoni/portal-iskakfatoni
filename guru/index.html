@@ -440,24 +440,33 @@
         currentSesiId = activeDocId;
         activeToken = activeDocData.current_qr_token || ('QR-' + Math.random().toString(36).substring(2, 10).toUpperCase());
 
-        if (activeDocData.id_kelas) selectKelas.value = activeDocData.id_kelas;
+        if (activeDocData.id_kelas) {
+          const matchingOpt = Array.from(selectKelas.options).find(o => o.value === activeDocData.id_kelas || o.dataset.namaKelas === activeDocData.id_kelas);
+          if (matchingOpt) selectKelas.value = matchingOpt.value;
+          else selectKelas.value = activeDocData.id_kelas;
+        }
         if (activeDocData.nama_mapel) selectMapel.value = activeDocData.nama_mapel;
 
         btnStartSesi.disabled = true;
+        btnStartSesi.className = 'py-3 px-4 bg-slate-800 text-slate-500 font-bold text-xs rounded-xl transition flex items-center justify-center gap-2 cursor-not-allowed';
+
         btnStopSesi.disabled = false;
         btnStopSesi.className = 'py-3 px-4 bg-red-500 hover:bg-red-400 text-white font-bold text-xs rounded-xl transition shadow-lg shadow-red-500/20 flex items-center justify-center gap-2 cursor-pointer';
 
         btnFullscreenQr.disabled = false;
         btnFullscreenQr.className = 'w-full py-3 px-4 bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-bold text-xs rounded-xl transition flex items-center justify-center gap-2 cursor-pointer shadow-lg shadow-cyan-500/20';
 
-        sessionStatus.innerText = `Aktif [${activeDocData.id_kelas || '-'}]`;
+        const displayClassName = activeDocData.nama_kelas || activeDocData.id_kelas || '-';
+        sessionStatus.innerText = `Aktif [${displayClassName}]`;
         sessionStatus.className = 'text-xs text-emerald-400 font-mono font-bold';
 
-        document.getElementById('modal-kelas-title').innerText = activeDocData.id_kelas || '-';
+        document.getElementById('modal-kelas-title').innerText = displayClassName;
         document.getElementById('modal-mapel-title').innerText = activeDocData.nama_mapel || '-';
 
         updateQRDisplay(activeToken);
-        startCountdownTimer(createdTimeMs);
+
+        const createdMs = activeDocData.created_at?.seconds ? (activeDocData.created_at.seconds * 1000) : Date.now();
+        startCountdownTimer(createdMs);
 
         if (qrInterval) clearInterval(qrInterval);
         qrInterval = setInterval(async () => {
@@ -484,10 +493,16 @@
         if (!snapshot.empty) {
           snapshot.forEach(docSnap => {
             const data = docSnap.data();
-            const kName = data.nama_kelas || docSnap.id;
-            
+            const docId = docSnap.id;
+            const kName = data.nama_kelas || docId;
+            const schoolName = data.nama_sekolah || '';
+            const schoolTag = schoolName.includes('Kemlagi') ? 'SMK MUTU' : (schoolName.includes('Jetis') ? 'SMKN 1 JETIS' : '');
+
             const opt = document.createElement('option');
-            opt.value = kName; opt.textContent = kName;
+            opt.value = docId;
+            opt.dataset.namaKelas = kName;
+            opt.dataset.namaSekolah = schoolName;
+            opt.textContent = schoolTag ? `${kName} (${schoolTag})` : kName;
             selectKelas.appendChild(opt);
           });
         }
@@ -513,10 +528,13 @@
 
     // 🔄 ATURAN 2 (Pilar 2): Buka Sesi (Cek apakah lanjutan sesi <= 1 jam untuk Kelas & Mapel yang sama)
     btnStartSesi.addEventListener('click', async () => {
-      const kelas = selectKelas.value;
+      const selectedOpt = selectKelas.selectedOptions[0];
+      const kelasId = selectKelas.value;
+      const kelasNama = selectedOpt?.dataset?.namaKelas || selectKelas.value;
+      const sekolahNama = selectedOpt?.dataset?.namaSekolah || '';
       const mapel = selectMapel.value;
 
-      if (!kelas || !mapel) {
+      if (!kelasId || !mapel) {
         alert("Pilih Kelas dan Mata Pelajaran terlebih dahulu!");
         return;
       }
@@ -527,7 +545,7 @@
         const now = new Date();
         const tanggalStr = now.toLocaleDateString('id-ID', { year: 'numeric', month: '2-digit', day: '2-digit' }).split('/').reverse().join('-');
         const waktuStr = now.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', second: '2-digit' }) + ' WIB';
-        const normSelectedKelas = normClass(kelas);
+        const normSelectedKelas = normClass(kelasId);
         const normSelectedMapel = mapel.trim().toLowerCase();
 
         // 1. CEK APAKAH ADA SESI HARI INI DENGAN KELAS & MAPEL YANG SAMA (RENTANG <= 1 JAM)
@@ -543,7 +561,7 @@
         if (!todaySesiSnap.empty) {
           const matchingDocs = todaySesiSnap.docs.filter(docSnap => {
             const d = docSnap.data();
-            const kMatch = normClass(d.id_kelas) === normSelectedKelas;
+            const kMatch = (d.id_kelas === kelasId) || (normClass(d.id_kelas) === normSelectedKelas);
             const mMapel = (d.nama_mapel || '').trim().toLowerCase() === normSelectedMapel;
             return kMatch && mMapel;
           }).sort((a, b) => {
@@ -592,11 +610,13 @@
             current_qr_token: activeToken,
             updated_at: serverTimestamp()
           });
-          console.log(`[SESI DILANJUTKAN] Melanjutkan sesi ID: ${currentSesiId} untuk kelas [${kelas}] dan mapel [${mapel}]`);
+          console.log(`[SESI DILANJUTKAN] Melanjutkan sesi ID: ${currentSesiId} untuk kelas [${kelasNama}] dan mapel [${mapel}]`);
         } else {
           // 🆕 BUAT SESI BARU (Kelas beda, Mapel beda, atau rentang waktu > 1 jam)
           const docRef = await addDoc(collection(db, "sesi_absensi"), {
-            id_kelas: kelas,
+            id_kelas: kelasId,
+            nama_kelas: kelasNama,
+            nama_sekolah: sekolahNama,
             nama_mapel: mapel,
             tanggal: tanggalStr,
             waktu: waktuStr,
@@ -605,7 +625,7 @@
             created_at: serverTimestamp()
           });
           currentSesiId = docRef.id;
-          console.log(`[SESI BARU] Membuat sesi baru ID: ${currentSesiId} untuk kelas [${kelas}] dan mapel [${mapel}]`);
+          console.log(`[SESI BARU] Membuat sesi baru ID: ${currentSesiId} untuk kelas [${kelasNama}] dan mapel [${mapel}]`);
         }
 
         localStorage.setItem('portal_guru_active_sesi_id', currentSesiId);
@@ -616,10 +636,11 @@
         btnFullscreenQr.disabled = false;
         btnFullscreenQr.className = 'w-full py-3 px-4 bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-bold text-xs rounded-xl transition flex items-center justify-center gap-2 cursor-pointer shadow-lg shadow-cyan-500/20';
 
-        sessionStatus.innerText = isResumed ? `Dilanjutkan [${kelas}]` : `Aktif [${kelas}]`;
+        const displayStatusText = isResumed ? `Dilanjutkan [${kelasNama}]` : `Aktif [${kelasNama}]`;
+        sessionStatus.innerText = displayStatusText;
         sessionStatus.className = 'text-xs text-emerald-400 font-mono font-bold';
 
-        document.getElementById('modal-kelas-title').innerText = `${kelas}${isResumed ? ' (Lanjutan)' : ''}`;
+        document.getElementById('modal-kelas-title').innerText = `${kelasNama}${isResumed ? ' (Lanjutan)' : ''}`;
         document.getElementById('modal-mapel-title').innerText = mapel;
 
         updateQRDisplay(activeToken);

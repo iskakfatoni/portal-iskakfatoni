@@ -218,35 +218,49 @@ async function main() {
 
       if (!normSKelas) continue;
 
-      // Cari metadata kelas (misal wa_group_id)
+      // Cari metadata kelas (misal wa_group_id dan nama_sekolah)
       const matchingKelasDoc = kelasDocs.find(kd => {
         const kf = kd.fields || {};
-        const k1 = normClass(kf.nama_kelas && kf.nama_kelas.stringValue);
-        const k2 = normClass(kf.id_kelas && kf.id_kelas.stringValue);
-        const k3 = normClass(kd.name.split('/').pop());
-        return k1 === normSKelas || k2 === normSKelas || k3 === normSKelas;
+        const docId = kd.name.split('/').pop();
+        const kId = normClass(kf.id_kelas && kf.id_kelas.stringValue) || normClass(docId);
+        const kNama = normClass(kf.nama_kelas && kf.nama_kelas.stringValue);
+        return docId === sKelas || kId === normSKelas || kNama === normSKelas;
       });
 
       let targetWaGroup = '';
+      let namaSekolah = 'SMK Negeri 1 Jetis Mojokerto';
+      let namaKelasDisplay = sKelas;
+
       if (matchingKelasDoc && matchingKelasDoc.fields) {
         const kf = matchingKelasDoc.fields;
         targetWaGroup = (kf.wa_group_id && kf.wa_group_id.stringValue) || 
                          (kf.group_id && kf.group_id.stringValue) || '';
+        if (kf.nama_sekolah && kf.nama_sekolah.stringValue) {
+          namaSekolah = kf.nama_sekolah.stringValue;
+        }
+        if (kf.nama_kelas && kf.nama_kelas.stringValue) {
+          namaKelasDisplay = kf.nama_kelas.stringValue;
+        }
       }
       if (!targetWaGroup && process.env.WHATSAPP_TARGET) {
         targetWaGroup = process.env.WHATSAPP_TARGET;
       }
 
-      // Cari siswa di kelas ini
+      // Cari siswa di kelas ini (utamakan id_kelas relasional)
+      const targetDocId = matchingKelasDoc ? matchingKelasDoc.name.split('/').pop() : sKelas;
       const classStudents = siswaDocs.filter(sw => {
         const swF = sw.fields || {};
-        const k1 = normClass(swF.id_kelas && swF.id_kelas.stringValue);
-        const k2 = normClass(swF.nama_kelas && swF.nama_kelas.stringValue);
-        const k3 = normClass(swF.kelas && swF.kelas.stringValue);
-        return k1 === normSKelas || k2 === normSKelas || k3 === normSKelas;
+        const swIdKelas = (swF.id_kelas && swF.id_kelas.stringValue) || '';
+        const swNamaKelas = (swF.nama_kelas && swF.nama_kelas.stringValue) || '';
+        const swSekolah = (swF.nama_sekolah && swF.nama_sekolah.stringValue) || '';
+
+        if (swIdKelas && targetDocId && normClass(swIdKelas) === normClass(targetDocId)) return true;
+        if (swIdKelas && normClass(swIdKelas) === normSKelas) return true;
+        if (normClass(swNamaKelas) === normClass(namaKelasDisplay) && swSekolah === namaSekolah) return true;
+        return false;
       });
 
-      console.log(`\n📌 Memeriksa Kelas [${sKelas}] (Total Rombel: ${classStudents.length} siswa)...`);
+      console.log(`\n📌 Memeriksa Kelas [${namaKelasDisplay} - ${namaSekolah}] (Total Rombel: ${classStudents.length} siswa)...`);
 
       // Siswa yang Hadir
       const presentStudents = classStudents.filter(sw => {
@@ -276,13 +290,14 @@ async function main() {
           const swF = sw.fields || {};
           const nis = (swF.nis && swF.nis.stringValue || sw.name.split('/').pop()).trim();
           const nama = (swF.nama_siswa && swF.nama_siswa.stringValue) || (swF.nama && swF.nama.stringValue) || 'Siswa';
-          const namaKelas = (swF.nama_kelas && swF.nama_kelas.stringValue) || sKelas;
+          const namaKelas = (swF.nama_kelas && swF.nama_kelas.stringValue) || namaKelasDisplay;
+          const idKelasVal = (swF.id_kelas && swF.id_kelas.stringValue) || targetDocId;
 
           try {
             await createLogAbsensiDoc({
               nis,
               nama_siswa: nama,
-              id_kelas: namaKelas,
+              id_kelas: idKelasVal,
               id_sesi: sId,
               nama_mapel: sMapel,
               hari: hariStr,
@@ -299,7 +314,7 @@ async function main() {
           }
         }
       } else {
-        console.log(`   ✨ Seluruh status siswa kelas [${sKelas}] sudah tersimpan di database.`);
+        console.log(`   ✨ Seluruh status siswa kelas [${namaKelasDisplay}] sudah tersimpan di database.`);
       }
 
       // SUSUN PESAN LAPORAN WHATSAPP UNTUK GRUP KELAS INI
@@ -318,17 +333,12 @@ async function main() {
           alpaListText += `${idx + 1}. *${nis}* - ${nama}\n`;
         });
 
-        // Tentukan nama sekolah dinamis
-        const namaSekolah = sKelas.toUpperCase().includes('MUTU') 
-          ? 'SMKS Muhammadiyah 1 Kemlagi Mojokerto' 
-          : 'SMK Negeri 1 Jetis Mojokerto';
-
         const waMessage = 
 `📢 *LAPORAN PRESENSI HARIAN*
 📅 *${hariStr}, ${todayISO}* (15:30 WIB)
 🏫 *${namaSekolah}*
 ━━━━━━━━━━━━━━━━━━━━━━━
-📌 *Kelas:* *${sKelas}*
+📌 *Kelas:* *${namaKelasDisplay}*
 📖 *Mapel:* ${sMapel}
 
 📊 *Kehadiran:*

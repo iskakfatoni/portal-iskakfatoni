@@ -133,12 +133,22 @@
           }
         }
 
-        // 2. VALIDASI KETAT KELAS: Siswa harus berada di kelas yang sama dengan sesi QR
-        const studentKelasNorm = namaKelasSiswa.toLowerCase().replace(/[^a-z0-9]/g, '');
-        const sessionKelasNorm = (sesiData.id_kelas || "").toLowerCase().replace(/[^a-z0-9]/g, '');
+        // 2. VALIDASI KETAT KELAS & SEKOLAH: Siswa harus berada di rombel/sekolah yang sama dengan sesi QR
+        const studentIdKelasNorm = (idKelasSiswa || "").toLowerCase().replace(/[^a-z0-9]/g, '');
+        const studentNamaKelasNorm = (namaKelasSiswa || "").toLowerCase().replace(/[^a-z0-9]/g, '');
+        const sessionIdKelasNorm = (sesiData.id_kelas || "").toLowerCase().replace(/[^a-z0-9]/g, '');
+        const sessionNamaKelasNorm = (sesiData.nama_kelas || sesiData.id_kelas || "").toLowerCase().replace(/[^a-z0-9]/g, '');
 
-        if (studentKelasNorm && sessionKelasNorm && studentKelasNorm !== sessionKelasNorm) {
-          window.location.href = `result.html?status=error&msg=${encodeURIComponent(`Gagal! Anda terdaftar di kelas [${namaKelasSiswa}], bukan kelas [${sesiData.id_kelas}].`)}`;
+        const isIdKelasMatch = studentIdKelasNorm && sessionIdKelasNorm && (studentIdKelasNorm === sessionIdKelasNorm);
+        const isNamaKelasMatch = studentNamaKelasNorm && sessionNamaKelasNorm && (studentNamaKelasNorm === sessionNamaKelasNorm);
+
+        const studentSchoolNorm = (currentSiswaUser.nama_sekolah || "").toLowerCase().replace(/[^a-z0-9]/g, '');
+        const sessionSchoolNorm = (sesiData.nama_sekolah || "").toLowerCase().replace(/[^a-z0-9]/g, '');
+        const isSchoolMismatch = studentSchoolNorm && sessionSchoolNorm && (studentSchoolNorm !== sessionSchoolNorm);
+
+        if ((!isIdKelasMatch && !isNamaKelasMatch) || isSchoolMismatch) {
+          const sesiKelasDisplay = sesiData.nama_kelas || sesiData.id_kelas || 'Lain';
+          window.location.href = `result.html?status=error&msg=${encodeURIComponent(`Gagal! Anda terdaftar di kelas [${namaKelasSiswa}], bukan sesi kelas [${sesiKelasDisplay}].`)}`;
           return;
         }
 
@@ -153,20 +163,25 @@
 
         // 4. Simpan Absensi ke Firestore
         const now = new Date();
+        const days = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
+        const hariStr = days[now.getDay()];
+        const tanggalStr = now.toLocaleDateString('id-ID', { year: 'numeric', month: '2-digit', day: '2-digit' }).split('/').reverse().join('-');
         const waktuStr = now.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', second: '2-digit' }) + ' WIB';
         const currentDeviceId = currentSiswaUser.device_id || localStorage.getItem('portal_device_id') || '';
 
         await addDoc(collection(db, "log_absensi"), {
           id_sesi: sesiDoc.id,
-          id_kelas: sesiData.id_kelas,
-          nama_mapel: sesiData.nama_mapel,
           nis: currentSiswaUser.nis,
           nama_siswa: namaSiswaVal,
-          hari: now.toLocaleDateString('id-ID', { weekday: 'long' }),
-          tanggal: now.toLocaleDateString('id-ID', { year: 'numeric', month: '2-digit', day: '2-digit' }).split('/').reverse().join('-'),
+          id_kelas: idKelasSiswa,
+          nama_kelas: namaKelasSiswa,
+          nama_sekolah: currentSiswaUser.nama_sekolah || sesiData.nama_sekolah || '',
+          nama_mapel: sesiData.nama_mapel || "-",
+          hari: hariStr,
+          tanggal: tanggalStr,
           waktu: waktuStr,
-          status: 'Hadir',
           device_id: currentDeviceId,
+          status: "Hadir",
           created_at: serverTimestamp()
         });
 

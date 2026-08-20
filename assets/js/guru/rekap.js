@@ -79,10 +79,15 @@ async function initKelasDropdown() {
       filterKelas.innerHTML = '<option value="">-- Semua Kelas --</option>';
       snapKelas.forEach(docSnap => {
         const d = docSnap.data();
-        const kName = d.nama_kelas || d.id_kelas || docSnap.id;
+        const docId = docSnap.id;
+        const kName = d.nama_kelas || d.id_kelas || docId;
+        const sName = d.nama_sekolah || '';
+        const sTag = sName.includes('Kemlagi') ? 'SMK MUTU' : (sName.includes('Jetis') ? 'SMKN 1 JETIS' : '');
+
         const opt = document.createElement('option');
-        opt.value = kName;
-        opt.innerText = kName;
+        opt.value = docId;
+        opt.dataset.namaKelas = kName;
+        opt.innerText = sTag ? `${kName} (${sTag})` : kName;
         filterKelas.appendChild(opt);
       });
     }
@@ -130,8 +135,11 @@ async function loadData() {
 
   try {
     const selectedSesiId = selectSesi.value;
+    const selectedKelasOpt = filterKelas.selectedOptions ? filterKelas.selectedOptions[0] : null;
     const inputKelasVal = filterKelas.value.trim();
+    const inputKelasNama = selectedKelasOpt?.dataset?.namaKelas || inputKelasVal;
     const normInputKelas = normClass(inputKelasVal);
+    const normInputKelasNama = normClass(inputKelasNama);
     const onlyToday = chkOnlyToday ? chkOnlyToday.checked : true;
     const includeAlpa = chkIncludeAlpa ? chkIncludeAlpa.checked : true;
     const todayISOStr = DateUtils.getTodayISO();
@@ -165,9 +173,8 @@ async function loadData() {
       if (normInputKelas) {
         const k1 = normClass(d.id_kelas);
         const k2 = normClass(d.nama_kelas);
-        if (k1 !== normInputKelas && k2 !== normInputKelas && !k1.includes(normInputKelas) && !k2.includes(normInputKelas)) {
-          return;
-        }
+        const kMatch = (k1 === normInputKelas || k2 === normInputKelas || k1 === normInputKelasNama || k2 === normInputKelasNama || k1.includes(normInputKelas) || k2.includes(normInputKelas));
+        if (!kMatch) return;
       }
 
       currentData.push({

@@ -4,6 +4,43 @@ Dokumen ini berisi rangkuman review perubahan kode (*code review*) terbaru yang 
 
 ---
 
+## 📅 Review [2026-08-20 22:18 WIB] - Integrasi Master Sekolah & Pembersihan Label "MUTU" dari Nama Kelas
+
+### 📁 1. Berkas yang Diubah
+* 📄 **[guru/index.html](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/guru/index.html)** `[MODIFY]`
+* 📄 **[siswa/scanner.html](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/siswa/scanner.html)** `[MODIFY]`
+* 📄 **[scripts/auto-alpa.js](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/scripts/auto-alpa.js)** `[MODIFY]`
+* 📄 **[assets/js/database/db-manager.js](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/assets/js/database/db-manager.js)** `[MODIFY]`
+* 📄 **[assets/js/guru/rekap.js](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/assets/js/guru/rekap.js)** `[MODIFY]`
+
+---
+
+### 📝 2. Rincian Baris & Logika yang Diperbarui
+
+1. 🗄️ **Pembaruan Data Firestore (`kelas` & `siswa`)**:
+   - Seluruh 7 dokumen kelas dan 208 dokumen siswa telah disinkronkan dengan field `nama_sekolah` (`SMKS Muhammadiyah 1 Kemlagi Mojokerto` dan `SMK Negeri 1 Jetis Mojokerto`).
+   - `nama_kelas` untuk kelas MUTU diubah bersih menjadi murni rombel (contoh: `XI TEI 2`), dengan `id_kelas` tetap unik (`XI-TEI-2-MUTU`) sebagai penghubung relasi yang aman.
+
+2. 🖥️ **UI Guru ([guru/index.html](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/guru/index.html)) & Rekap ([assets/js/guru/rekap.js](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/assets/js/guru/rekap.js))**:
+   - Dropdown pemilihan kelas menampilkan label sekolah yang jelas: `XI TEI 2 (SMK MUTU)` dan `XI TEI 2 (SMKN 1 JETIS)`.
+   - Pembuatan sesi absensi otomatis menyertakan `id_kelas`, `nama_kelas`, dan `nama_sekolah`.
+
+3. 🔒 **Keamanan Scanner Siswa ([siswa/scanner.html](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/siswa/scanner.html))**:
+   - Validasi ketat membandingkan relasi `id_kelas` dan `nama_sekolah` sehingga siswa Kemlagi tidak bisa scan sesi Jetis dan sebaliknya.
+
+4. 🤖 **Skrip WhatsApp Auto-Alpa ([scripts/auto-alpa.js](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/scripts/auto-alpa.js))**:
+   - Mengambil `nama_sekolah` langsung dari database dokumen kelas, sehingga pesan WhatsApp selalu memuat header sekolah resmi yang akurat.
+
+---
+
+### 🧪 3. Petunjuk Pengujian Lokal (*Local Verification*)
+
+1. Jalankan `node scripts/auto-alpa.js` di terminal dan pastikan log membaca kelas `XI TEI 2 - SMKS Muhammadiyah 1 Kemlagi Mojokerto`.
+2. Buka [guru/index.html](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/guru/index.html) dan pastikan dropdown kelas memuat opsi dengan tag sekolah `(SMK MUTU)` dan `(SMKN 1 JETIS)`.
+3. Buka [guru/rekap.html](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/guru/rekap.html) dan verifikasi pemfilteran data berjalan normal.
+
+---
+
 ## 📅 Review [2026-08-20 22:07 WIB] - Penyederhanaan Format Laporan WhatsApp & Penghapusan Teks Teknis Firestore
 
 ### 📁 1. Berkas yang Diubah
