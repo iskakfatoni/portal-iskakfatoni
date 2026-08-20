@@ -998,6 +998,8 @@ function initBadgesCount() {
         if (bToday) bToday.innerText = tCount;
         if (bYesterday) bYesterday.innerText = yCount;
       }
+    }, (error) => {
+      console.warn(`[BadgeListener] Izin ditolak untuk koleksi: ${colName}. Pastikan Rules sudah di-publish.`, error);
     });
   });
 }
@@ -1061,6 +1063,9 @@ function loadCollectionData(colName) {
     if (colName === 'log_absensi') {
       TableEngine.checkAbsenceAnomalies();
     }
+  }, (error) => {
+    console.error(`[DataListener] Error loading collection ${colName}:`, error);
+    dom.tableBody.innerHTML = `<tr><td colspan="12" class="p-8 text-center text-rose-400 font-sans font-bold">❌ Error: ${error.message}<br><span class="text-xs text-slate-500 font-normal">Pastikan Rules untuk koleksi ini sudah aktif di Firebase Console.</span></td></tr>`;
   });
 }
 
