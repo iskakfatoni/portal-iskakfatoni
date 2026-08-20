@@ -223,11 +223,19 @@
             nama_siswa: dbData.nama_siswa,
             id_kelas: dbData.id_kelas,
             nama_kelas: dbData.nama_kelas || dbData.id_kelas,
-            device_id: currentDeviceId
+            device_id: currentDeviceId,
+            device_info: dbData.device_info || null
           };
 
           localStorage.setItem('portal_siswa_user', JSON.stringify(updatedUser));
           showProfile(updatedUser);
+          return;
+        } else {
+          // FIX BUG: Jika HP ini tidak terikat di Firestore, hapus sesi lokal agar sinkron
+          console.log("HP tidak terikat di server. Membersihkan sesi lokal...");
+          localStorage.removeItem('portal_siswa_user');
+          localStorage.removeItem('siswa_session');
+          showLoginForm();
           return;
         }
       } catch (e) {
