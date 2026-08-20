@@ -324,23 +324,21 @@ async function main() {
           : 'SMK Negeri 1 Jetis Mojokerto';
 
         const waMessage = 
-`📢 *LAPORAN PRESENSI HARIAN SISWA*
-📅 *${hariStr}, ${todayISO}* (Pukul 15:30 WIB)
+`📢 *LAPORAN PRESENSI HARIAN*
+📅 *${hariStr}, ${todayISO}* (15:30 WIB)
 🏫 *${namaSekolah}*
 ━━━━━━━━━━━━━━━━━━━━━━━
 📌 *Kelas:* *${sKelas}*
 📖 *Mapel:* ${sMapel}
 
-📊 *Ringkasan Kehadiran:*
+📊 *Kehadiran:*
 • Total Siswa : *${totalStudents}*
 • Hadir        : *${presentCount} Siswa* (${pctHadir}%) ✅
 • Tidak Hadir  : *${alpaCount} Siswa* (${pctAlpa}%) ⚠️
 
 ${alpaCount > 0 
-  ? `❌ *Daftar Siswa Belum Presensi (Alpa):*\n${alpaListText}` 
-  : `✨ *Alhamdulillah, seluruh siswa hadir lengkap (100%)!*`}
-━━━━━━━━━━━━━━━━━━━━━━━
-🤖 _Data telah disinkronkan otomatis ke Database Firestore._`;
+  ? `❌ *Daftar Siswa Tidak Hadir:*\n${alpaListText}` 
+  : `✨ *Alhamdulillah, seluruh siswa hadir lengkap (100%)!*`}`;
 
         await sendWhatsAppFonnte(targetWaGroup, waMessage);
       }

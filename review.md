@@ -4,6 +4,28 @@ Dokumen ini berisi rangkuman review perubahan kode (*code review*) terbaru yang 
 
 ---
 
+## 📅 Review [2026-08-20 22:07 WIB] - Penyederhanaan Format Laporan WhatsApp & Penghapusan Teks Teknis Firestore
+
+### 📁 1. Berkas yang Diubah
+* 📄 **[scripts/auto-alpa.js](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/scripts/auto-alpa.js)** `[MODIFY]`
+
+---
+
+### 📝 2. Rincian Baris & Logika yang Diperbarui
+
+1. 🧹 **Pembersihan Footer & Teks Teknis**:
+   - Menghapus referensi teknis "Database Firestore" pada footer pesan laporan WhatsApp.
+   - Menyederhanakan judul dan label ringkasan agar lebih ringkas, formal, dan fokus pada informasi penting (Kelas, Mapel, Statistik Kehadiran, dan Daftar Siswa Tidak Hadir).
+
+---
+
+### 🧪 3. Petunjuk Pengujian Lokal (*Local Verification*)
+
+1. Jalankan `node scripts/auto-alpa.js` di terminal.
+2. Verifikasi susunan teks pesan WhatsApp bersih dari istilah teknis backend/database.
+
+---
+
 ## 📅 Review [2026-08-20 22:01 WIB] - Penguatan HTTP Request & Error Handling Pengiriman WhatsApp Fonnte
 
 ### 📁 1. Berkas yang Diubah
