@@ -169,6 +169,25 @@
         if (!deviceSnap.empty) {
           const studentData = deviceSnap.docs[0].data();
           showStudentGreeting(studentData.nama_siswa, studentData.nama_kelas || studentData.id_kelas);
+
+          // Sinkronkan ke LocalStorage jika belum ada
+          const syncUser = {
+            doc_id: deviceSnap.docs[0].id,
+            nis: studentData.nis,
+            nama_siswa: studentData.nama_siswa,
+            id_kelas: studentData.id_kelas,
+            nama_kelas: studentData.nama_kelas || studentData.id_kelas,
+            device_id: currentDeviceId
+          };
+          localStorage.setItem('portal_siswa_user', JSON.stringify(syncUser));
+        } else {
+          // FIX BUG: Jika sesi lokal ada tapi di server HP tidak terikat, hapus sesi lokal
+          if (savedUserJson) {
+            console.log("Portal: Sesi tidak valid di server. Membersihkan...");
+            localStorage.removeItem('portal_siswa_user');
+            localStorage.removeItem('siswa_session');
+            greetingWrapper.classList.add('hidden');
+          }
         }
       } catch (err) {
         console.error("Gagal memuat salam siswa:", err);
