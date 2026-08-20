@@ -2,105 +2,83 @@
 <html lang="id">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
-  <title>PORTAL::IskakFatoni</title>
-  <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
-  <link rel="preload" href="style/style.css" as="style">
-  <link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" as="style" crossorigin="anonymous">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>UPDATE APLIKASI - PORTAL::IskakFatoni</title>
   <link rel="stylesheet" href="style/style.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  
-  <link rel="manifest" href="assets/manifest.json">
-  <link rel="apple-touch-icon" href="assets/img/nisnas_logo_colorful.webp">
-  <meta name="theme-color" content="#0b0f19">
-
-  <!-- META TAG UNTUK MENYEMBUNYIKAN BILAH URL PADA IPHONE PWA -->
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="apple-mobile-web-app-title" content="Portal Iskak">
-
-  
-  <!-- DETEKSI OTOMATIS PENGGUNA IPHONE / IPAD -->
-  <script>
-    (function() {
-      // Abaikan redirect jika ada parameter ?no_redirect=true
-      const urlParams = new URLSearchParams(window.location.search);
-      if (urlParams.get('no_redirect') === 'true') return;
-
-      const ua = navigator.userAgent || navigator.vendor || window.opera || '';
-      const isIOS = /iPhone|iPod/.test(ua) || 
-                    (/iPad/.test(ua)) || 
-                    (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
-
-      if (isIOS) {
-        window.location.replace('iphone.html');
-      }
-    })();
-  </script>
+  <style>
+    body {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      margin: 0;
+      background: #0b0f19;
+      color: white;
+      text-align: center;
+    }
+    .update-box {
+      padding: 40px 20px;
+      border-radius: 30px;
+      background: rgba(255, 255, 255, 0.05);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+      max-width: 90%;
+      width: 400px;
+    }
+    .warning-icon {
+      font-size: 60px;
+      color: #00F5D4;
+      margin-bottom: 20px;
+      animation: pulse 2s infinite;
+    }
+    h1 {
+      font-size: 24px;
+      margin-bottom: 10px;
+      letter-spacing: 2px;
+      font-weight: 800;
+    }
+    p {
+      color: #94a3b8;
+      font-size: 16px;
+      line-height: 1.6;
+    }
+    .contact-info {
+      margin-top: 30px;
+      padding-top: 20px;
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    .name {
+      font-weight: 700;
+      color: white;
+      display: block;
+      margin-bottom: 5px;
+    }
+    .phone {
+      font-family: monospace;
+      color: #38bdf8;
+      font-size: 18px;
+      font-weight: 700;
+      text-decoration: none;
+    }
+    @keyframes pulse {
+      0% { transform: scale(1); opacity: 1; }
+      50% { transform: scale(1.1); opacity: 0.7; }
+      100% { transform: scale(1); opacity: 1; }
+    }
+  </style>
 </head>
-<body class="theme-glass">
-
-  <!-- PARTICLE CANVAS -->
-  <canvas id="particle-canvas"></canvas>
-
-  <main class="container">
+<body>
+  <div class="update-box">
+    <i class="fa-solid fa-cloud-arrow-down warning-icon"></i>
+    <h1>UPDATE APLIKASI SEKARANG</h1>
+    <p>Aplikasi Anda sudah tidak didukung. Silakan gunakan versi terbaru untuk tetap dapat mengakses portal.</p>
     
-    <!-- Profil Header -->
-    <header class="profile">
-      <div class="avatar-ring">
-        <img src="assets/img/foto_asn_profile.webp" alt="Muchamad Iskak Fatoni" class="avatar" decoding="async" fetchpriority="high">
-      </div>
-      <h1 class="name">PORTAL::Iskak Fatoni</h1>
-      <p class="bio">I'am certified electronical and computer teacher, also a former Kamen Rider</p>
-    </header>
-
-    <!-- BANNER UPDATE APLIKASI VERSI TERBARU (TAMPILAN AWAL UNTUK ANDROID & PC/LAPTOP) -->
-    <div class="update-banner">
-      <a 
-        href="https://drive.google.com/drive/folders/1Ir-6Ha4rOyHFyeMt7YbL7R9o3qICuI9I?usp=sharing" 
-        target="_blank" 
-        rel="noopener noreferrer" 
-        class="update-link"
-      >
-        <i class="fa-brands fa-google-drive"></i>
-        <div>
-          SILAHKAN UPDATE APLIKASI VERSI TERBARU DI <span>GOOGLE DRIVE</span>
-        </div>
-      </a>
+    <div class="contact-info">
+      <span class="name">Hubungi : Iskak Fatoni</span>
+      <a href="tel:085645453111" class="phone">085645453111</a>
     </div>
-
-    <!-- Footer -->
-    <footer class="footer">
-      <!-- Deretan Logo Sosial Media -->
-      <div class="social-icons">
-        <a href="https://wa.me/085645453111" target="_blank" rel="noopener noreferrer" class="social-btn wa" title="WhatsApp Iskak">
-          <i class="fa-brands fa-whatsapp"></i>
-        </a>
-        <a href="https://facebook.com/iskakfatoni" target="_blank" rel="noopener noreferrer" class="social-btn fb" title="Facebook Iskak">
-          <i class="fa-brands fa-facebook-f"></i>
-        </a>
-        <a href="https://instagram.com/iskakfatoni" target="_blank" rel="noopener noreferrer" class="social-btn ig" title="Instagram Iskak">
-          <i class="fa-brands fa-instagram"></i>
-        </a>
-        <a href="https://youtube.com/iskakfatoni" target="_blank" rel="noopener noreferrer" class="social-btn yt" title="YouTube Iskak">
-          <i class="fa-brands fa-youtube"></i>
-        </a>
-        <a href="https://tiktok.com/@iskakfatoni" target="_blank" rel="noopener noreferrer" class="social-btn tt" title="TikTok">
-          <i class="fa-brands fa-tiktok"></i>
-        </a>
-      </div>
-
-      <!-- Supported By -->
-      <div class="supported-by">
-        <img src="assets/img/nisnas_logo_colorful.webp" alt="Logo NisNas Computer" class="supporter-logo" loading="lazy" decoding="async">
-        <p>Supported by <span>NisNas Computer</span></p>
-      </div>
-    </footer>
-
-  </main>
-
-  <!-- PARTICLE CANVAS SCRIPT -->
-  <script src="assets/js/particle/particle-bg.js"></script>
-
+  </div>
 </body>
 </html>
