@@ -584,6 +584,7 @@ const TableEngine = {
               try {
                 // LOG KE system_logs
                 const adminEmail = dom.userEmailDisplay.innerText || "Unknown Admin";
+                console.log("Mencoba menyimpan log reset...");
 
                 await addDoc(collection(db, "system_logs"), {
                   action: "RESET_DEVICE",
@@ -594,6 +595,8 @@ const TableEngine = {
                   old_device_info: dataObj.device_info || "-",
                   timestamp: serverTimestamp()
                 });
+
+                console.log("Log sistem berhasil dibuat.");
 
                 await updateDoc(doc(db, "siswa", docId), {
                   device_id: deleteField(),
