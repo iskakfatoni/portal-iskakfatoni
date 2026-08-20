@@ -4,6 +4,45 @@ Dokumen ini berisi rangkuman review perubahan kode (*code review*) terbaru yang 
 
 ---
 
+## 📅 Review [2026-08-20 17:36 WIB] - Pemisahan Halaman Mandiri Audit Trail & Log Keamanan (`system-logs.html`)
+
+### 📁 1. Berkas yang Diubah / Dibuat
+* 📄 **[database/system-logs.html](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/database/system-logs.html)** `[NEW]`
+* 📄 **[assets/js/database/system-logs.js](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/assets/js/database/system-logs.js)** `[NEW]`
+* 📄 **[database/db-manager.html](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/database/db-manager.html)** `[MODIFY]`
+
+---
+
+### 📝 2. Rincian Baris & Logika yang Diperbarui
+
+1. 🛡️ **Pembuatan Halaman Mandiri Audit Trail (`database/system-logs.html`)**:
+   - Memisahkan tampilan dan pengelolaan `system_logs` dari `db-manager.html` ke halaman khusus dengan estetika *cyber-security dark glassmorphism*.
+   - Menyediakan 4 kartu metrik keamanan: *Total Log Kejadian*, *Reset Perangkat HP*, *Admin Eksekutor*, dan *Aktivitas Hari Ini*.
+   - Dilengkapi filter tipe aksi (`RESET_DEVICE`, `BATCH_RESET_DEVICE`, `DELETE_DATA`, `OTHER`), filter rentang waktu (*Hari Ini, 7 Hari, 30 Hari, Semua*), pencarian teks instan (*live search*), pagination cerdas, ekspor Excel (`.xlsx`), dan fitur pembersihan log aman.
+
+2. 🔍 **Mesin Audit Terstruktur & Inspektor JSON (`assets/js/database/system-logs.js`)**:
+   - Terintegrasi dengan `initializeAuthGuard` untuk proteksi otentikasi admin.
+   - Real-time listener (`onSnapshot`) ke koleksi Firestore `system_logs` dengan pengurutan waktu terbalik (*newest first*).
+   - Modal Inspektor Payload JSON dengan fitur *One-click Copy* untuk pemeriksaan forensik data audit dan perangkat.
+   - Animasi indikator visual *Flash Cyan* untuk setiap data log baru yang masuk secara realtime.
+
+3. 🔗 **Integrasi Navigasi Sidebar Terpusat (`database/db-manager.html`)**:
+   - Memperbarui tombol `system_logs` pada sidebar `db-manager.html` menjadi link navigasi langsung ke `system-logs.html` dengan ikon perisai dan panah eksternal, dengan tetap mempertahankan sinkronisasi *real-time badge count*.
+
+---
+
+### 🧪 3. Petunjuk Pengujian Lokal (*Local Verification*)
+
+1. **Uji Akses dari DB Manager**: Buka [database/db-manager.html](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/database/db-manager.html) dan klik menu `system_logs` di sidebar kiri. Verifikasi peramban langsung mengarahkan ke `system-logs.html`.
+2. **Uji Fitur Halaman Audit**:
+   - Verifikasi data riwayat reset HP yang pernah dilakukan muncul di tabel dengan format waktu lokal (WIB), badge warna aksi, nama target, dan detail hardware ID.
+   - Uji filter aksi, rentang tanggal, dan search bar.
+   - Klik tombol **"Payload"** pada salah satu baris untuk membuka modal inspektor JSON dan coba tombol **"Salin JSON"**.
+   - Klik tombol **"Ekspor Log (.xlsx)"** dan pastikan berkas Excel terunduh dengan data audit yang rapi.
+3. **Uji Navigasi Balik**: Klik tombol **"DB Manager"** atau **"Admin Hub"** pada header untuk memastikan navigasi kembali berjalan mulus.
+
+---
+
 ## 📅 Review [2026-08-20 16:58 WIB] - Verifikasi DB Manager & Perbaikan Import `getDocs` Firestore
 
 ### 📁 1. Berkas yang Diubah
