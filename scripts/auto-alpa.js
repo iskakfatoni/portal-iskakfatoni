@@ -162,20 +162,29 @@ async function main() {
       console.log(`   - Kelas: ${f.id_kelas && f.id_kelas.stringValue} | Mapel: ${f.nama_mapel && f.nama_mapel.stringValue} (${s.name.split('/').pop()})`);
     });
 
-    // 2. Kumpulkan NIS siswa yang sudah memiliki log absensi hari ini
+    // 2. Kumpulkan NIS siswa yang hadir vs tidak hadir hari ini
     const todayLogs = logDocs.filter(doc => {
       const f = doc.fields || {};
       return f.tanggal && f.tanggal.stringValue === todayISO;
     });
 
-    const recordedNisSet = new Set();
+    const presentNisSet = new Set();
+    const existingAlpaNisSet = new Set();
+
     todayLogs.forEach(doc => {
       const f = doc.fields || {};
       const nis = (f.nis && f.nis.stringValue || '').trim();
-      if (nis) recordedNisSet.add(nis);
+      const status = (f.status && f.status.stringValue || '').toLowerCase();
+      if (!nis) return;
+
+      if (status.includes('hadir') && !status.includes('tidak')) {
+        presentNisSet.add(nis);
+      } else {
+        existingAlpaNisSet.add(nis);
+      }
     });
 
-    console.log(`👥 Sudah Tercatat Presensi Hari Ini: ${recordedNisSet.size} siswa`);
+    console.log(`👥 Presensi Hari Ini -> Hadir: ${presentNisSet.size} siswa | Alpa/Tidak Hadir: ${existingAlpaNisSet.size} siswa`);
 
     // 3. Proses setiap sesi untuk mencari siswa yang belum absen & kirim notifikasi WhatsApp
     let totalSavedAlpa = 0;
@@ -219,19 +228,31 @@ async function main() {
 
       console.log(`\n📌 Memeriksa Kelas [${sKelas}] (Total Rombel: ${classStudents.length} siswa)...`);
 
+      // Siswa yang Hadir
+      const presentStudents = classStudents.filter(sw => {
+        const swF = sw.fields || {};
+        const nis = (swF.nis && swF.nis.stringValue || sw.name.split('/').pop()).trim();
+        return presentNisSet.has(nis);
+      });
+
+      // Siswa yang Tidak Hadir (Alpa)
       const alpaStudents = classStudents.filter(sw => {
         const swF = sw.fields || {};
         const nis = (swF.nis && swF.nis.stringValue || sw.name.split('/').pop()).trim();
-        return !recordedNisSet.has(nis);
+        return !presentNisSet.has(nis);
       });
 
-      const presentStudentsCount = classStudents.length - alpaStudents.length;
+      // Simpan alpa yang belum tersimpan di Firestore ke database
+      const unsavedAlpaStudents = alpaStudents.filter(sw => {
+        const swF = sw.fields || {};
+        const nis = (swF.nis && swF.nis.stringValue || sw.name.split('/').pop()).trim();
+        return !existingAlpaNisSet.has(nis);
+      });
 
-      // Simpan alpa ke Firestore
-      if (alpaStudents.length > 0) {
-        console.log(`   ⚠️ Menyimpan ${alpaStudents.length} siswa 'Tidak Hadir' ke Firestore...`);
+      if (unsavedAlpaStudents.length > 0) {
+        console.log(`   ⚠️ Menyimpan ${unsavedAlpaStudents.length} siswa 'Tidak Hadir' baru ke Firestore...`);
 
-        for (const sw of alpaStudents) {
+        for (const sw of unsavedAlpaStudents) {
           const swF = sw.fields || {};
           const nis = (swF.nis && swF.nis.stringValue || sw.name.split('/').pop()).trim();
           const nama = (swF.nama_siswa && swF.nama_siswa.stringValue) || (swF.nama && swF.nama.stringValue) || 'Siswa';
@@ -250,21 +271,24 @@ async function main() {
               status: 'Tidak Hadir'
             });
 
-            recordedNisSet.add(nis);
+            existingAlpaNisSet.add(nis);
             totalSavedAlpa++;
-            console.log(`      + [Alpa] ${nis} - ${nama}`);
+            console.log(`      + [Alpa Baru] ${nis} - ${nama}`);
           } catch (errPost) {
             console.error(`      ❌ Gagal simpan alpa ${nis}:`, errPost.message);
           }
         }
       } else {
-        console.log(`   ✨ Seluruh siswa kelas [${sKelas}] sudah memiliki catatan presensi hari ini.`);
+        console.log(`   ✨ Seluruh status siswa kelas [${sKelas}] sudah tersimpan di database.`);
       }
 
       // SUSUN PESAN LAPORAN WHATSAPP UNTUK GRUP KELAS INI
       if (targetWaGroup) {
-        const pctHadir = classStudents.length > 0 ? Math.round((presentStudentsCount / classStudents.length) * 100) : 0;
-        const pctAlpa = classStudents.length > 0 ? Math.round((alpaStudents.length / classStudents.length) * 100) : 0;
+        const presentCount = presentStudents.length;
+        const alpaCount = alpaStudents.length;
+        const totalStudents = classStudents.length;
+        const pctHadir = totalStudents > 0 ? Math.round((presentCount / totalStudents) * 100) : 0;
+        const pctAlpa = totalStudents > 0 ? Math.round((alpaCount / totalStudents) * 100) : 0;
 
         let alpaListText = '';
         alpaStudents.forEach((sw, idx) => {
@@ -288,11 +312,11 @@ async function main() {
 📖 *Mapel:* ${sMapel}
 
 📊 *Ringkasan Kehadiran:*
-• Total Siswa : *${classStudents.length}*
-• Hadir        : *${presentStudentsCount} Siswa* (${pctHadir}%) ✅
-• Tidak Hadir  : *${alpaStudents.length} Siswa* (${pctAlpa}%) ⚠️
+• Total Siswa : *${totalStudents}*
+• Hadir        : *${presentCount} Siswa* (${pctHadir}%) ✅
+• Tidak Hadir  : *${alpaCount} Siswa* (${pctAlpa}%) ⚠️
 
-${alpaStudents.length > 0 
+${alpaCount > 0 
   ? `❌ *Daftar Siswa Belum Presensi (Alpa):*\n${alpaListText}` 
   : `✨ *Alhamdulillah, seluruh siswa hadir lengkap (100%)!*`}
 ━━━━━━━━━━━━━━━━━━━━━━━

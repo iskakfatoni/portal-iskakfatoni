@@ -4,6 +4,30 @@ Dokumen ini berisi rangkuman review perubahan kode (*code review*) terbaru yang 
 
 ---
 
+## 📅 Review [2026-08-20 21:59 WIB] - Perbaikan Pemisahan Siswa Hadir vs Alpa pada Pesan Notifikasi WhatsApp
+
+### 📁 1. Berkas yang Diubah
+* 📄 **[scripts/auto-alpa.js](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/scripts/auto-alpa.js)** `[MODIFY]`
+
+---
+
+### 📝 2. Rincian Baris & Logika yang Diperbarui
+
+1. 🔍 **Pemisahan Set `presentNisSet` vs `existingAlpaNisSet`**:
+   - Sebelumnya, pengecekan `recordedNisSet` mencampur siswa yang `Hadir` dan siswa yang sudah tersimpan `Tidak Hadir`, sehingga saat skrip dijalankan ulang, siswa alpa terhitung sebagai sudah memiliki log dan pesan WhatsApp menganggap seluruh siswa hadir 100%.
+   - Diperbarui: Sistem secara eksplisit memisahkan `presentNisSet` (siswa yang benar-benar scan hadir) dan `existingAlpaNisSet` (catatan alpa yang sudah tersimpan di Firestore).
+   - Dengan perbaikan ini, pesan WhatsApp selalu melaporkan rasio yang akurat (misal: Hadir 16 Siswa [64%], Tidak Hadir 9 Siswa [36%]) dan mencantumkan daftar nama seluruh 9 siswa yang alpa secara lengkap.
+
+---
+
+### 🧪 3. Petunjuk Pengujian Lokal (*Local Verification*)
+
+1. Jalankan `node scripts/auto-alpa.js` di terminal.
+2. Verifikasi output log terminal mendeteksi `Presensi Hari Ini -> Hadir: 16 siswa | Alpa/Tidak Hadir: 9 siswa`.
+3. Jalankan workflow di tab Actions GitHub dan verifikasi pesan WhatsApp yang masuk ke grup mencantumkan daftar 9 siswa alpa secara lengkap.
+
+---
+
 ## 📅 Review [2026-08-20 21:57 WIB] - Penyesuaian Nama Sekolah Resmi Dinamis di Template Notifikasi WhatsApp
 
 ### 📁 1. Berkas yang Diubah
