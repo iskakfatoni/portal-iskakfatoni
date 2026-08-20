@@ -4,6 +4,43 @@ Dokumen ini berisi rangkuman review perubahan kode (*code review*) terbaru yang 
 
 ---
 
+## 📅 Review [2026-08-20 21:40 WIB] - Integrasi Notifikasi Laporan Presensi Otomatis via WhatsApp Fonnte (Multi-Grup Kelas)
+
+### 📁 1. Berkas yang Diubah
+* 📄 **[scripts/auto-alpa.js](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/scripts/auto-alpa.js)** `[MODIFY]`
+* 📄 **[.github/workflows/auto-alpa.yml](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/.github/workflows/auto-alpa.yml)** `[MODIFY]`
+* 📄 **[assets/js/database/db-manager.js](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/assets/js/database/db-manager.js)** `[MODIFY]`
+
+---
+
+### 📝 2. Rincian Baris & Logika yang Diperbarui
+
+1. 📲 **Integrasi API Fonnte ([scripts/auto-alpa.js](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/scripts/auto-alpa.js))**:
+   - Menambahkan fungsi `sendWhatsAppFonnte(target, message)` yang memanggil REST API resmi Fonnte (`https://api.fonnte.com/send`).
+   - Mengambil data seluruh dokumen dari koleksi `kelas` di Firestore untuk mendeteksi field `wa_group_id` pada masing-masing kelas.
+   - Menyusun pesan laporan presensi harian dengan format WhatsApp (bold, italic, emoji, rekap jumlah hadir/alpa, persentase %, dan daftar siswa alpa).
+   - Mengirimkan pesan laporan secara spesifik dan terisolasi ke masing-masing ID Grup WhatsApp kelas yang membuka sesi pada hari tersebut.
+
+2. 🔒 **Konfigurasi GitHub Secrets ([.github/workflows/auto-alpa.yml](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/.github/workflows/auto-alpa.yml))**:
+   - Menambahkan environment variable `FONNTE_TOKEN` dan `WHATSAPP_TARGET` dari GitHub Secrets ke GitHub Actions Runner.
+
+3. 🗄️ **Dukungan Field `wa_group_id` ([assets/js/database/db-manager.js](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/assets/js/database/db-manager.js))**:
+   - Menambahkan `wa_group_id` pada template schema koleksi `kelas` sehingga admin/guru dapat langsung menginput dan mengedit ID Grup WhatsApp untuk tiap kelas di halaman DB Manager.
+
+---
+
+### 🧪 3. Petunjuk Pengujian Lokal (*Local Verification*)
+
+1. Masukkan `FONNTE_TOKEN` di GitHub Repository Secrets: `Settings -> Secrets and variables -> Actions`.
+2. Buka [database/db-manager.html](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/database/db-manager.html) $\rightarrow$ pilih koleksi **kelas** $\rightarrow$ klik tombol edit pada salah satu kelas $\rightarrow$ masukkan field `wa_group_id` dengan ID grup WhatsApp (misal: `120363028123456789@g.us`).
+3. Jalankan pengujian eksekusi manual via tab **Actions** di GitHub atau uji skrip via terminal:
+   ```bash
+   node scripts/auto-alpa.js
+   ```
+4. Verifikasi pesan laporan presensi berhasil terkirim ke grup WhatsApp yang bersangkutan.
+
+---
+
 ## 📅 Review [2026-08-20 21:00 WIB] - Implementasi 3 Fitur Peningkatan: Audio Feedback Chime, Countdown Timer Sesi, dan Matriks Presensi Bulanan Siap Cetak
 
 ### 📁 1. Berkas yang Diubah

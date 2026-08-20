@@ -764,7 +764,7 @@ const ModalManager = {
     let fieldsToRender = [...state.currentDynamicFields];
     if (fieldsToRender.length === 0) {
       if (state.currentCollection === 'siswa') fieldsToRender = ['nis', 'nama_siswa', 'id_kelas', 'nama_kelas'];
-      else if (state.currentCollection === 'kelas') fieldsToRender = ['id_kelas', 'nama_kelas', 'wali_kelas'];
+      else if (state.currentCollection === 'kelas') fieldsToRender = ['id_kelas', 'nama_kelas', 'wali_kelas', 'wa_group_id'];
       else if (state.currentCollection === 'mapel') fieldsToRender = ['id_mapel', 'nama_mapel'];
       else if (state.currentCollection === 'sesi_absensi') fieldsToRender = ['id_kelas', 'nama_mapel', 'tanggal', 'waktu', 'is_active'];
       else if (state.currentCollection === 'log_absensi') fieldsToRender = ['nis', 'nama_siswa', 'id_kelas', 'nama_mapel', 'hari', 'tanggal', 'waktu', 'status'];

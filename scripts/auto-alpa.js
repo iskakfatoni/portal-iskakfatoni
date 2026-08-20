@@ -95,6 +95,37 @@ async function createLogAbsensiDoc(logData) {
   }, body);
 }
 
+// Helper Pengiriman WhatsApp Fonnte
+async function sendWhatsAppFonnte(target, message) {
+  const token = process.env.FONNTE_TOKEN;
+  if (!token) {
+    console.log('   ℹ️ [WhatsApp] FONNTE_TOKEN tidak diatur di environment secrets. Pengiriman WA dilewati.');
+    return;
+  }
+  if (!target) {
+    console.log('   ℹ️ [WhatsApp] Target / wa_group_id untuk kelas ini belum diatur di database.');
+    return;
+  }
+
+  const url = 'https://api.fonnte.com/send';
+  try {
+    await httpRequest(url, {
+      method: 'POST',
+      headers: {
+        'Authorization': token,
+        'Content-Type': 'application/json'
+      }
+    }, {
+      target: target,
+      message: message,
+      countryCode: '62'
+    });
+    console.log(`   📲 [WhatsApp] Pesan laporan berhasil dikirim ke grup: ${target}`);
+  } catch (errWA) {
+    console.error(`   ❌ [WhatsApp] Gagal mengirim pesan ke ${target}:`, errWA.message);
+  }
+}
+
 // MAIN FUNCTION
 async function main() {
   const { todayISO, hariStr } = getTodayWIB();
@@ -103,14 +134,15 @@ async function main() {
   console.log(`=======================================================`);
 
   try {
-    console.log('📡 Mengambil data sesi, siswa, dan log absensi dari Firestore...');
-    const [sesiDocs, siswaDocs, logDocs] = await Promise.all([
+    console.log('📡 Mengambil data sesi, siswa, kelas, dan log absensi dari Firestore...');
+    const [sesiDocs, siswaDocs, logDocs, kelasDocs] = await Promise.all([
       fetchAllDocuments('sesi_absensi'),
       fetchAllDocuments('siswa'),
-      fetchAllDocuments('log_absensi')
+      fetchAllDocuments('log_absensi'),
+      fetchAllDocuments('kelas')
     ]);
 
-    console.log(`📊 Data Terbaca: ${sesiDocs.length} Sesi, ${siswaDocs.length} Siswa, ${logDocs.length} Total Log`);
+    console.log(`📊 Data Terbaca: ${sesiDocs.length} Sesi, ${siswaDocs.length} Siswa, ${kelasDocs.length} Kelas, ${logDocs.length} Total Log`);
 
     // 1. Temukan sesi yang aktif atau dibuka HARI INI
     const todaySessions = sesiDocs.filter(doc => {
@@ -130,7 +162,7 @@ async function main() {
       console.log(`   - Kelas: ${f.id_kelas && f.id_kelas.stringValue} | Mapel: ${f.nama_mapel && f.nama_mapel.stringValue} (${s.name.split('/').pop()})`);
     });
 
-    // 2. Kumpulkan NIS siswa yang sudah memiliki log absensi hari ini (baik Hadir maupun Tidak Hadir)
+    // 2. Kumpulkan NIS siswa yang sudah memiliki log absensi hari ini
     const todayLogs = logDocs.filter(doc => {
       const f = doc.fields || {};
       return f.tanggal && f.tanggal.stringValue === todayISO;
@@ -145,7 +177,7 @@ async function main() {
 
     console.log(`👥 Sudah Tercatat Presensi Hari Ini: ${recordedNisSet.size} siswa`);
 
-    // 3. Proses setiap sesi untuk mencari siswa yang belum absen
+    // 3. Proses setiap sesi untuk mencari siswa yang belum absen & kirim notifikasi WhatsApp
     let totalSavedAlpa = 0;
 
     for (const sessionDoc of todaySessions) {
@@ -156,6 +188,25 @@ async function main() {
       const normSKelas = normClass(sKelas);
 
       if (!normSKelas) continue;
+
+      // Cari metadata kelas (misal wa_group_id)
+      const matchingKelasDoc = kelasDocs.find(kd => {
+        const kf = kd.fields || {};
+        const k1 = normClass(kf.nama_kelas && kf.nama_kelas.stringValue);
+        const k2 = normClass(kf.id_kelas && kf.id_kelas.stringValue);
+        const k3 = normClass(kd.name.split('/').pop());
+        return k1 === normSKelas || k2 === normSKelas || k3 === normSKelas;
+      });
+
+      let targetWaGroup = '';
+      if (matchingKelasDoc && matchingKelasDoc.fields) {
+        const kf = matchingKelasDoc.fields;
+        targetWaGroup = (kf.wa_group_id && kf.wa_group_id.stringValue) || 
+                         (kf.group_id && kf.group_id.stringValue) || '';
+      }
+      if (!targetWaGroup && process.env.WHATSAPP_TARGET) {
+        targetWaGroup = process.env.WHATSAPP_TARGET;
+      }
 
       // Cari siswa di kelas ini
       const classStudents = siswaDocs.filter(sw => {
@@ -174,39 +225,75 @@ async function main() {
         return !recordedNisSet.has(nis);
       });
 
-      if (alpaStudents.length === 0) {
+      const presentStudentsCount = classStudents.length - alpaStudents.length;
+
+      // Simpan alpa ke Firestore
+      if (alpaStudents.length > 0) {
+        console.log(`   ⚠️ Menyimpan ${alpaStudents.length} siswa 'Tidak Hadir' ke Firestore...`);
+
+        for (const sw of alpaStudents) {
+          const swF = sw.fields || {};
+          const nis = (swF.nis && swF.nis.stringValue || sw.name.split('/').pop()).trim();
+          const nama = (swF.nama_siswa && swF.nama_siswa.stringValue) || (swF.nama && swF.nama.stringValue) || 'Siswa';
+          const namaKelas = (swF.nama_kelas && swF.nama_kelas.stringValue) || sKelas;
+
+          try {
+            await createLogAbsensiDoc({
+              nis,
+              nama_siswa: nama,
+              id_kelas: namaKelas,
+              id_sesi: sId,
+              nama_mapel: sMapel,
+              hari: hariStr,
+              tanggal: todayISO,
+              waktu: '15:30 WIB',
+              status: 'Tidak Hadir'
+            });
+
+            recordedNisSet.add(nis);
+            totalSavedAlpa++;
+            console.log(`      + [Alpa] ${nis} - ${nama}`);
+          } catch (errPost) {
+            console.error(`      ❌ Gagal simpan alpa ${nis}:`, errPost.message);
+          }
+        }
+      } else {
         console.log(`   ✨ Seluruh siswa kelas [${sKelas}] sudah memiliki catatan presensi hari ini.`);
-        continue;
       }
 
-      console.log(`   ⚠️ Menyimpan ${alpaStudents.length} siswa 'Tidak Hadir' ke Firestore...`);
+      // SUSUN PESAN LAPORAN WHATSAPP UNTUK GRUP KELAS INI
+      if (targetWaGroup) {
+        const pctHadir = classStudents.length > 0 ? Math.round((presentStudentsCount / classStudents.length) * 100) : 0;
+        const pctAlpa = classStudents.length > 0 ? Math.round((alpaStudents.length / classStudents.length) * 100) : 0;
 
-      for (const sw of alpaStudents) {
-        const swF = sw.fields || {};
-        const nis = (swF.nis && swF.nis.stringValue || sw.name.split('/').pop()).trim();
-        const nama = (swF.nama_siswa && swF.nama_siswa.stringValue) || (swF.nama && swF.nama.stringValue) || 'Siswa';
-        const namaKelas = (swF.nama_kelas && swF.nama_kelas.stringValue) || sKelas;
+        let alpaListText = '';
+        alpaStudents.forEach((sw, idx) => {
+          const swF = sw.fields || {};
+          const nis = (swF.nis && swF.nis.stringValue || sw.name.split('/').pop()).trim();
+          const nama = (swF.nama_siswa && swF.nama_siswa.stringValue) || (swF.nama && swF.nama.stringValue) || 'Siswa';
+          alpaListText += `${idx + 1}. *${nis}* - ${nama}\n`;
+        });
 
-        try {
-          await createLogAbsensiDoc({
-            nis,
-            nama_siswa: nama,
-            id_kelas: namaKelas,
-            id_sesi: sId,
-            nama_mapel: sMapel,
-            hari: hariStr,
-            tanggal: todayISO,
-            waktu: '15:30 WIB',
-            status: 'Tidak Hadir'
-          });
+        const waMessage = 
+`📢 *LAPORAN PRESENSI HARIAN SISWA*
+📅 *${hariStr}, ${todayISO}* (Pukul 15:30 WIB)
+🏫 *SMK Negeri 1 Wonosobo - TEI*
+━━━━━━━━━━━━━━━━━━━━━━━
+📌 *Kelas:* *${sKelas}*
+📖 *Mapel:* ${sMapel}
 
-          // Tandai NIS ini sudah disimpan agar tidak dobel
-          recordedNisSet.add(nis);
-          totalSavedAlpa++;
-          console.log(`      + [Alpa] ${nis} - ${nama}`);
-        } catch (errPost) {
-          console.error(`      ❌ Gagal simpan alpa ${nis}:`, errPost.message);
-        }
+📊 *Ringkasan Kehadiran:*
+• Total Siswa : *${classStudents.length}*
+• Hadir        : *${presentStudentsCount} Siswa* (${pctHadir}%) ✅
+• Tidak Hadir  : *${alpaStudents.length} Siswa* (${pctAlpa}%) ⚠️
+
+${alpaStudents.length > 0 
+  ? `❌ *Daftar Siswa Belum Presensi (Alpa):*\n${alpaListText}` 
+  : `✨ *Alhamdulillah, seluruh siswa hadir lengkap (100%)!*`}
+━━━━━━━━━━━━━━━━━━━━━━━
+🤖 _Data telah disinkronkan otomatis ke Database Firestore._`;
+
+        await sendWhatsAppFonnte(targetWaGroup, waMessage);
       }
     }
 
@@ -221,3 +308,4 @@ async function main() {
 }
 
 main();
+

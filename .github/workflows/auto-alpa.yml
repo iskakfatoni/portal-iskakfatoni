@@ -22,3 +22,7 @@ jobs:
 
       - name: 🤖 Jalankan Auto-Alpa Script (15:30 WIB)
         run: node scripts/auto-alpa.js
+        env:
+          FONNTE_TOKEN: ${{ secrets.FONNTE_TOKEN }}
+          WHATSAPP_TARGET: ${{ secrets.WHATSAPP_TARGET }}
+
