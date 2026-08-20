@@ -239,6 +239,39 @@
       showLoginForm();
     });
 
+    // FUNGSI UNTUK MENERKA INFO PERANGKAT DARI BROWSER (WEB FALLBACK)
+    function guessDeviceInfoFromWeb() {
+      const ua = navigator.userAgent;
+      let info = "Generic Browser Device";
+
+      if (/iPhone|iPad|iPod/.test(ua)) {
+        info = "iPhone/iPad (iOS)";
+      } else if (/Android/.test(ua)) {
+        // Coba ekstrak model dari User Agent Android (Sering ada di sana)
+        const match = ua.match(/Android\s+([^\s;]+);\s+([^\s;)]+)/);
+        if (match && match[2]) {
+          info = "Android (" + match[2].replace(/_/g, ' ') + ")";
+        } else {
+          info = "Android Device";
+        }
+      }
+
+      // Deteksi Mesin GPU (Bisa menebak Chipset)
+      try {
+        const canvas = document.createElement('canvas');
+        const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
+        if (gl) {
+          const debugInfo = gl.getExtension('WEBGL_debug_renderer_info');
+          if (debugInfo) {
+            const renderer = gl.getParameter(debugInfo.UNMASKED_RENDERER_WEBGL);
+            if (renderer) info += " [" + renderer.split(' ')[0] + "]";
+          }
+        }
+      } catch (e) {}
+
+      return info;
+    }
+
     // VERIFIKASI SISWA & IKAT HP
     btnVerifikasi.addEventListener('click', async () => {
       const rawNis = nisInput.value.trim();
@@ -306,9 +339,11 @@
         // Ikat HP ke Firestore
         const updateData = { device_id: currentDeviceId };
 
-        // AMBIL INFO MEREK & MODEL DARI NATIVE BRIDGE
+        // AMBIL INFO MEREK & MODEL DARI NATIVE BRIDGE ATAU WEB FALLBACK
         if (window.AndroidNativeBridge && typeof window.AndroidNativeBridge.getDeviceInfo === 'function') {
           updateData.device_info = window.AndroidNativeBridge.getDeviceInfo();
+        } else {
+          updateData.device_info = guessDeviceInfoFromWeb();
         }
 
         await updateDoc(doc(db, "siswa", actualDocId), updateData);
