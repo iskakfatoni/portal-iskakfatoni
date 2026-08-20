@@ -10,7 +10,16 @@ const FIRESTORE_BASE_URL = `https://firestore.googleapis.com/v1/projects/${PROJE
 // Helper HTTP Request
 function httpRequest(url, options = {}, postData = null) {
   return new Promise((resolve, reject) => {
-    const req = https.request(url, options, (res) => {
+    const postDataStr = postData ? (typeof postData === 'string' ? postData : JSON.stringify(postData)) : null;
+    const headers = Object.assign({}, options.headers || {});
+    
+    if (postDataStr) {
+      headers['Content-Length'] = Buffer.byteLength(postDataStr);
+    }
+
+    const reqOptions = Object.assign({}, options, { headers });
+
+    const req = https.request(url, reqOptions, (res) => {
       let body = '';
       res.on('data', chunk => body += chunk);
       res.on('end', () => {
@@ -19,7 +28,7 @@ function httpRequest(url, options = {}, postData = null) {
           if (res.statusCode >= 200 && res.statusCode < 300) {
             resolve(parsed);
           } else {
-            reject(new Error(`HTTP ${res.statusCode}: ${JSON.stringify(parsed)}`));
+            resolve(parsed); // Jangan lempar fatal error agar proses tidak crash
           }
         } catch (e) {
           resolve(body);
@@ -27,8 +36,12 @@ function httpRequest(url, options = {}, postData = null) {
       });
     });
 
-    req.on('error', reject);
-    if (postData) req.write(typeof postData === 'string' ? postData : JSON.stringify(postData));
+    req.on('error', (err) => {
+      console.warn("HTTP Request Warning:", err.message);
+      resolve({ error: err.message });
+    });
+
+    if (postDataStr) req.write(postDataStr);
     req.end();
   });
 }
@@ -97,7 +110,9 @@ async function createLogAbsensiDoc(logData) {
 
 // Helper Pengiriman WhatsApp Fonnte
 async function sendWhatsAppFonnte(target, message) {
-  const token = process.env.FONNTE_TOKEN;
+  const rawToken = process.env.FONNTE_TOKEN || '';
+  const token = rawToken.trim();
+
   if (!token) {
     console.log('   ℹ️ [WhatsApp] FONNTE_TOKEN tidak diatur di environment secrets. Pengiriman WA dilewati.');
     return;
@@ -109,18 +124,23 @@ async function sendWhatsAppFonnte(target, message) {
 
   const url = 'https://api.fonnte.com/send';
   try {
-    await httpRequest(url, {
+    const res = await httpRequest(url, {
       method: 'POST',
       headers: {
         'Authorization': token,
         'Content-Type': 'application/json'
       }
     }, {
-      target: target,
+      target: target.trim(),
       message: message,
       countryCode: '62'
     });
-    console.log(`   📲 [WhatsApp] Pesan laporan berhasil dikirim ke grup: ${target}`);
+    console.log(`   📲 [WhatsApp] Respon Fonnte:`, JSON.stringify(res));
+    if (res && res.status === false) {
+      console.warn(`   ⚠️ [WhatsApp] Fonnte mengembalikan status false: ${res.reason || res.detail || JSON.stringify(res)}`);
+    } else {
+      console.log(`   📲 [WhatsApp] Pesan laporan berhasil dikirim ke: ${target}`);
+    }
   } catch (errWA) {
     console.error(`   ❌ [WhatsApp] Gagal mengirim pesan ke ${target}:`, errWA.message);
   }

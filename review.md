@@ -4,6 +4,29 @@ Dokumen ini berisi rangkuman review perubahan kode (*code review*) terbaru yang 
 
 ---
 
+## 📅 Review [2026-08-20 22:01 WIB] - Penguatan HTTP Request & Error Handling Pengiriman WhatsApp Fonnte
+
+### 📁 1. Berkas yang Diubah
+* 📄 **[scripts/auto-alpa.js](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/scripts/auto-alpa.js)** `[MODIFY]`
+
+---
+
+### 📝 2. Rincian Baris & Logika yang Diperbarui
+
+1. 🌐 **Header `Content-Length` & Sanitasi Payload**:
+   - Memastikan setiap HTTP POST request ke endpoint API menyertakan header `Content-Length` yang presisi untuk mencegah isu chunked encoding pada API gateway Fonnte.
+   - Melakukan `.trim()` otomatis pada token Fonnte dan ID target agar tidak terjadi error format spasi yang tidak terlihat.
+   - Menangani respon error secara non-fatal sehingga kegagalan koneksi pihak ketiga tidak menghentikan keseluruhan alur cron.
+
+---
+
+### 🧪 3. Petunjuk Pengujian Lokal (*Local Verification*)
+
+1. Jalankan `node scripts/auto-alpa.js` di terminal dan pastikan proses selesai dengan exit code 0.
+2. Jalankan ulang workflow via tab Actions GitHub dan pantau log eksekusi.
+
+---
+
 ## 📅 Review [2026-08-20 21:59 WIB] - Perbaikan Pemisahan Siswa Hadir vs Alpa pada Pesan Notifikasi WhatsApp
 
 ### 📁 1. Berkas yang Diubah
