@@ -1288,6 +1288,101 @@ body.theme-dashboard::-webkit-scrollbar-thumb:hover {
   background: var(--dash-scrollbar-thumb-hover);
 }
 
+/* KOMPONEN TEMA DASHBOARD: METRIC CARDS & AUDIT TRAIL */
+.metric-card {
+  background: rgba(3, 7, 18, 0.75);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 14px;
+  padding: 12px 14px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.25);
+}
+
+.metric-card:hover {
+  border-color: rgba(56, 189, 248, 0.35);
+  background: rgba(15, 23, 42, 0.85);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px -4px rgba(56, 189, 248, 0.2);
+}
+
+/* REAL-TIME FLASH ANIMATIONS */
+@keyframes flash-cyan {
+  0% { background-color: rgba(6, 182, 212, 0.35); }
+  100% { background-color: transparent; }
+}
+.animate-flash-cyan {
+  animation: flash-cyan 2s ease-out;
+}
+
+@keyframes flash-green {
+  0% { background-color: rgba(16, 185, 129, 0.35); }
+  100% { background-color: transparent; }
+}
+.animate-flash-green {
+  animation: flash-green 2s ease-out;
+}
+
+/* JSON PAYLOAD VIEWER */
+pre.json-viewer {
+  background: #020617;
+  color: #38bdf8;
+  border: 1px solid #1e293b;
+  border-radius: 0.75rem;
+  padding: 1rem;
+  font-size: 0.75rem;
+  line-height: 1.45;
+  overflow-x: auto;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* RESIZABLE TABLE COLUMNS & ROW WARNINGS */
+.resizer {
+  position: absolute;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  width: 6px;
+  background: rgba(56, 189, 248, 0.15);
+  cursor: col-resize;
+  user-select: none;
+  touch-action: none;
+  z-index: 20;
+  transition: background 0.15s ease;
+}
+.resizer:hover, .resizer.resizing {
+  background: rgba(56, 189, 248, 0.85);
+  box-shadow: 0 0 10px rgba(56, 189, 248, 0.6);
+}
+th.resizable-th {
+  position: relative;
+}
+
+.row-duplicate-warning {
+  background-color: rgba(245, 158, 11, 0.1) !important;
+  border-left: 3px solid #f59e0b !important;
+}
+
+/* TABLE CONTAINER TOUCH SCROLLING */
+.log-table-container {
+  -webkit-overflow-scrolling: touch;
+}
+
+/* CUSTOM WEBKIT DATE PICKER */
+input[type="date"]::-webkit-calendar-picker-indicator {
+  filter: invert(1) sepia(1) saturate(5) hue-rotate(140deg);
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 4px;
+}
+input[type="date"]::-webkit-calendar-picker-indicator:hover {
+  background: rgba(56, 189, 248, 0.2);
+}
+
 /* ==========================================================================
    10. HALAMAN: link/index.html — drag & drop urutan link
    ========================================================================== */
