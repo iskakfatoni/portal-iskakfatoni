@@ -583,10 +583,10 @@ const TableEngine = {
             if (confirm(`Reset pendaftaran perangkat (HP) untuk siswa "${studentName}" (${docId})? Siswa dapat melakukan registrasi di HP baru.`)) {
               try {
                 // LOG KE system_logs
-                const adminEmail = dom.userEmailDisplay.innerText || "Unknown Admin";
-                console.log("Mencoba menyimpan log reset...");
+                const adminEmail = dom.userEmailDisplay.innerText || "Admin Portal";
+                console.log("LOG: Memulai proses reset untuk", studentName);
 
-                await addDoc(collection(db, "system_logs"), {
+                const logData = {
                   action: "RESET_DEVICE",
                   target_nis: dataObj.nis || docId,
                   target_name: studentName,
@@ -594,9 +594,10 @@ const TableEngine = {
                   old_device_id: dataObj.device_id || "-",
                   old_device_info: dataObj.device_info || "-",
                   timestamp: serverTimestamp()
-                });
+                };
 
-                console.log("Log sistem berhasil dibuat.");
+                await addDoc(collection(db, "system_logs"), logData);
+                console.log("LOG: System logs berhasil ditulis.");
 
                 await updateDoc(doc(db, "siswa", docId), {
                   device_id: deleteField(),
@@ -605,9 +606,11 @@ const TableEngine = {
                   mac_address: deleteField(),
                   registered_at: deleteField()
                 });
+                console.log("LOG: Data siswa berhasil di-update.");
+
                 alert(`Perangkat siswa "${studentName}" berhasil di-reset!`);
               } catch (err) {
-                console.error("Reset Error:", err);
+                console.error("LOG ERROR:", err);
                 alert("Gagal mereset perangkat: " + err.message);
               }
             }

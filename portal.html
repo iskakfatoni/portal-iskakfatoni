@@ -132,9 +132,15 @@
 
   <!-- FIREBASE LOGIC & HARDWARE DEVICE CHECK FOR GREETING -->
   <script type="module">
-    import { db } from "./assets/js/config/firebase-config.js";
-    import { getHardwareFingerprint } from "./assets/js/utils/device-fingerprint.js";
-    import { collection, doc, onSnapshot, query, where, getDocs, orderBy } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+    import {
+      collection,
+      doc,
+      onSnapshot,
+      query,
+      where,
+      getDocs,
+      orderBy
+    } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
     const marqueeWrapper = document.getElementById('marquee-wrapper');
     const runningTextContent = document.getElementById('running-text-content');
@@ -147,50 +153,43 @@
     const greetingStudentName = document.getElementById('greeting-student-name');
     const greetingStudentClass = document.getElementById('greeting-student-class');
 
-    // MEMERIKSA STATUS IKATAN DEVICE UNTUK TAMPILKAN "Hai, [Nama]"
+    let unsubscribeProfile = null;
+
+    // MEMERIKSA STATUS IKATAN DEVICE SECARA REAL-TIME (PRIORITAS FIRESTORE)
     document.addEventListener('DOMContentLoaded', async () => {
       try {
         const currentDeviceId = await getHardwareFingerprint();
         
-        // Cek data di LocalStorage terlebih dahulu
-        const savedUserJson = localStorage.getItem('portal_siswa_user');
-        if (savedUserJson) {
-          const user = JSON.parse(savedUserJson);
-          if (user && user.nama_siswa) {
-            showStudentGreeting(user.nama_siswa, user.nama_kelas || user.id_kelas);
-            return;
-          }
-        }
+        if (unsubscribeProfile) unsubscribeProfile();
 
-        // Jika LocalStorage kosong, verifikasi langsung ke Firestore via device_id
         const qDevice = query(collection(db, "siswa"), where("device_id", "==", currentDeviceId));
-        const deviceSnap = await getDocs(qDevice);
 
-        if (!deviceSnap.empty) {
-          const studentData = deviceSnap.docs[0].data();
-          showStudentGreeting(studentData.nama_siswa, studentData.nama_kelas || studentData.id_kelas);
+        unsubscribeProfile = onSnapshot(qDevice, (snapshot) => {
+          if (!snapshot.empty) {
+            // DATA DITEMUKAN DI SERVER (HP TERIKAT)
+            const studentData = snapshot.docs[0].data();
+            showStudentGreeting(studentData.nama_siswa, studentData.nama_kelas || studentData.id_kelas);
 
-          // Sinkronkan ke LocalStorage jika belum ada
-          const syncUser = {
-            doc_id: deviceSnap.docs[0].id,
-            nis: studentData.nis,
-            nama_siswa: studentData.nama_siswa,
-            id_kelas: studentData.id_kelas,
-            nama_kelas: studentData.nama_kelas || studentData.id_kelas,
-            device_id: currentDeviceId
-          };
-          localStorage.setItem('portal_siswa_user', JSON.stringify(syncUser));
-        } else {
-          // FIX BUG: Jika sesi lokal ada tapi di server HP tidak terikat, hapus sesi lokal
-          if (savedUserJson) {
-            console.log("Portal: Sesi tidak valid di server. Membersihkan...");
+            // Update LocalStorage hanya sebagai cache visual cepat
+            const syncUser = {
+              doc_id: snapshot.docs[0].id,
+              nis: studentData.nis,
+              nama_siswa: studentData.nama_siswa,
+              id_kelas: studentData.id_kelas,
+              nama_kelas: studentData.nama_kelas || studentData.id_kelas,
+              device_id: currentDeviceId
+            };
+            localStorage.setItem('portal_siswa_user', JSON.stringify(syncUser));
+          } else {
+            // DATA TIDAK ADA DI SERVER (HP SUDAH DI-RESET)
+            console.log("Portal: HP tidak terdaftar. Membersihkan sesi...");
             localStorage.removeItem('portal_siswa_user');
             localStorage.removeItem('siswa_session');
             greetingWrapper.classList.add('hidden');
           }
-        }
+        });
       } catch (err) {
-        console.error("Gagal memuat salam siswa:", err);
+        console.error("Gagal memuat profil real-time:", err);
       }
     });
 
