@@ -181,7 +181,11 @@ async function loadData() {
         id: docSnap.id,
         nis: d.nis || "-",
         nama: d.nama_siswa || "-",
-        kelas: d.id_kelas || d.nama_kelas || "-",
+        kelas: d.nama_kelas || d.id_kelas || "-",
+        id_kelas: d.id_kelas || "-",
+        mapel: d.nama_mapel || "-",
+        id_sesi: d.id_sesi || "-",
+        nama_sekolah: d.nama_sekolah || "",
         waktu: DateUtils.formatLogTime(d),
         status: d.status || "Hadir",
         device_id: d.device_id || ""
@@ -203,20 +207,43 @@ async function loadData() {
       }
     });
 
-    // Deteksi Siswa Tidak Hadir (S.d. 17:00 WIB)
+    // Deteksi Siswa Tidak Hadir (S.d. 15:30 WIB)
     if (includeAlpa) {
       try {
         const snapSiswa = await getDocs(collection(db, "siswa"));
         const presentNisSet = new Set(currentData.map(d => String(d.nis).trim()));
 
-        // Tentukan daftar kelas yang akan disaring alpa
+        // Tentukan daftar kelas & metadata sesi yang akan disaring alpa
         const targetClassSet = new Set();
+        const classSessionMap = {};
 
+        const qTodaySesi = query(collection(db, "sesi_absensi"), where("tanggal", "==", todayISOStr));
+        const todaySesiSnap = await getDocs(qTodaySesi);
+        todaySesiSnap.forEach(s => {
+          const sd = s.data();
+          const kId = normClass(sd.id_kelas);
+          const kNama = normClass(sd.nama_kelas);
+          const meta = {
+            id_sesi: s.id,
+            mapel: sd.nama_mapel || "-",
+            sekolah: sd.nama_sekolah || ""
+          };
+          if (kId) classSessionMap[kId] = meta;
+          if (kNama) classSessionMap[kNama] = meta;
+        });
+
+        let selectedSesiMeta = null;
         if (selectedSesiId) {
           const sesiDoc = await getDoc(doc(db, "sesi_absensi", selectedSesiId));
           if (sesiDoc.exists()) {
-            const sKelas = sesiDoc.data().id_kelas || '';
+            const sd = sesiDoc.data();
+            const sKelas = sd.id_kelas || '';
             if (sKelas) targetClassSet.add(sKelas);
+            selectedSesiMeta = {
+              id_sesi: sesiDoc.id,
+              mapel: sd.nama_mapel || "-",
+              sekolah: sd.nama_sekolah || ""
+            };
           }
         } else if (inputKelasVal) {
           targetClassSet.add(inputKelasVal);
@@ -228,8 +255,6 @@ async function loadData() {
 
           // Juga masukkan kelas dari sesi hari ini jika mode hari ini aktif
           if (onlyToday) {
-            const qTodaySesi = query(collection(db, "sesi_absensi"), where("tanggal", "==", todayISOStr));
-            const todaySesiSnap = await getDocs(qTodaySesi);
             todaySesiSnap.forEach(s => {
               const k = s.data().id_kelas || '';
               if (k) targetClassSet.add(k);
@@ -253,12 +278,17 @@ async function loadData() {
             if (match) {
               const sNis = String(s.nis || siswaDoc.id).trim();
               if (!presentNisSet.has(sNis)) {
+                const sessionMeta = selectedSesiMeta || classSessionMap[normTarget] || classSessionMap[sK1] || classSessionMap[sK2] || {};
                 currentData.push({
                   id: `alpa-${sNis}`,
                   isVirtualAlpa: true,
                   nis: s.nis || siswaDoc.id || "-",
                   nama: s.nama_siswa || s.nama || "-",
                   kelas: s.nama_kelas || targetClass,
+                  id_kelas: s.id_kelas || targetClass,
+                  mapel: sessionMeta.mapel || "-",
+                  id_sesi: sessionMeta.id_sesi || "-",
+                  nama_sekolah: s.nama_sekolah || sessionMeta.sekolah || "",
                   waktu: `Tidak Absen (s.d. 15:30 WIB)`,
                   status: "Tidak Hadir"
                 });
@@ -332,13 +362,20 @@ function renderTable(data) {
       `;
     }
 
+    const mapelSubtext = item.mapel && item.mapel !== '-' 
+      ? `<span class="text-[11px] text-slate-400 block font-mono truncate max-w-[220px]" title="${item.mapel}">📖 ${item.mapel}</span>` 
+      : '';
+
     html += `
       <tr class="hover:bg-slate-700/30 transition border-b border-slate-800/60">
         <td class="px-4 py-3 font-mono text-slate-400 text-xs">${idx + 1}</td>
         <td class="px-4 py-3 text-xs font-mono text-slate-300">${item.waktu}</td>
         <td class="px-4 py-3 font-mono text-xs text-slate-200 font-bold">${item.nis}</td>
         <td class="px-4 py-3 font-semibold text-white">${item.nama}</td>
-        <td class="px-4 py-3 text-xs text-slate-300">${item.kelas}</td>
+        <td class="px-4 py-3 text-xs text-slate-300">
+          <span class="font-semibold text-slate-100">${item.kelas}</span>
+          ${mapelSubtext}
+        </td>
         <td class="px-4 py-3 text-center">
           <span class="px-2.5 py-1 border rounded-lg text-[11px] inline-flex items-center ${badgeClass}">
             ${iconHTML} ${item.status}
@@ -380,7 +417,11 @@ if (btnSaveAlpaLogs) {
         batch.set(newRef, {
           nis: item.nis,
           nama_siswa: item.nama,
-          id_kelas: item.kelas,
+          id_kelas: item.id_kelas || item.kelas,
+          nama_kelas: item.kelas,
+          nama_mapel: item.mapel || "-",
+          id_sesi: item.id_sesi || "-",
+          nama_sekolah: item.nama_sekolah || "",
           hari: hariStr,
           tanggal: todayISOStr,
           waktu: '15:30 WIB',
@@ -417,6 +458,7 @@ btnExportExcel.addEventListener('click', () => {
     "NIS": item.nis,
     "Nama Siswa": item.nama,
     "Kelas": item.kelas,
+    "Mata Pelajaran": item.mapel || "-",
     "Status Kehadiran": item.status,
     "Keterangan Perangkat": item.isSharedDevice ? `HP Berbagi (${item.sharedCount} Siswa)` : 'HP Mandiri'
   }));

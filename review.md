@@ -4,6 +4,38 @@ Dokumen ini berisi rangkuman review perubahan kode (*code review*) terbaru yang 
 
 ---
 
+## 📅 Review [2026-08-20 22:25 WIB] - Perbaikan Kelengkapan Data Mata Pelajaran pada Log Siswa Tidak Hadir
+
+### 📁 1. Berkas yang Diubah
+* 📄 **[assets/js/guru/rekap.js](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/assets/js/guru/rekap.js)** `[MODIFY]`
+* 📄 **[scripts/auto-alpa.js](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/scripts/auto-alpa.js)** `[MODIFY]`
+
+---
+
+### 📝 2. Rincian Baris & Logika yang Diperbarui
+
+1. 🗄️ **Pembaruan Dokumen Firestore**:
+   - Memperbarui 9 dokumen log absensi `Tidak Hadir` di Firestore yang sebelumnya belum memiliki `nama_mapel`, sehingga kini terisi lengkap dengan nama mata pelajaran (`Mapel Pilihan : Sistem Kendali Berbasis Arduino`), `id_sesi`, `nama_kelas`, dan `nama_sekolah`.
+
+2. 📊 **Resolusi Metadata Sesi di Rekap ([assets/js/guru/rekap.js](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/assets/js/guru/rekap.js))**:
+   - Logika deteksi siswa tidak hadir (`virtualAlpa`) kini memetakan sesi kelas hari ini secara otomatis untuk mengambil `nama_mapel` dan `id_sesi`, sehingga tidak lagi bernilai `-`.
+   - Menampilkan subteks nama mapel (`📖 Nama Mapel`) di bawah kolom kelas pada tabel rekapitulasi.
+   - Menambahkan kolom **Mata Pelajaran** pada file ekspor Excel (`.xlsx`).
+   - Menyimpan atribut `nama_mapel`, `id_sesi`, `nama_kelas`, dan `nama_sekolah` saat guru menekan tombol simpan manual ke DB.
+
+3. 🤖 **Skrip Auto-Alpa ([scripts/auto-alpa.js](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/scripts/auto-alpa.js))**:
+   - Memastikan `createLogAbsensiDoc` selalu menyertakan `nama_mapel`, `nama_kelas`, `nama_sekolah`, dan `id_sesi`.
+
+---
+
+### 🧪 3. Petunjuk Pengujian Lokal (*Local Verification*)
+
+1. Buka [guru/rekap.html](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/guru/rekap.html) $\rightarrow$ klik **Muat Data**.
+2. Verifikasi baris siswa dengan status **`Tidak Hadir`** kini menampilkan nama mata pelajaran secara lengkap di bawah nama kelas.
+3. Ekspor ke Excel dan pastikan kolom **Mata Pelajaran** terisi sesuai mata pelajaran yang diajarkan pada sesi tersebut.
+
+---
+
 ## 📅 Review [2026-08-20 22:18 WIB] - Integrasi Master Sekolah & Pembersihan Label "MUTU" dari Nama Kelas
 
 ### 📁 1. Berkas yang Diubah
