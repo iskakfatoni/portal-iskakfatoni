@@ -434,3 +434,156 @@ btnExportExcel.addEventListener('click', () => {
 
   XLSX.writeFile(workbook, filename);
 });
+
+// -----------------------------------------------------------------
+// 7. EXPORT LAPORAN MATRIKS BULANAN (.XLSX) VIA SHEETJS
+// -----------------------------------------------------------------
+const btnExportMatrixExcel = document.getElementById('btn-export-matrix-excel');
+if (btnExportMatrixExcel) {
+  btnExportMatrixExcel.addEventListener('click', async () => {
+    btnExportMatrixExcel.disabled = true;
+    const originalText = btnExportMatrixExcel.innerHTML;
+    btnExportMatrixExcel.innerHTML = '<span>Menyiapkan...</span>';
+
+    try {
+      // 1. Tentukan Bulan & Tahun target (berdasarkan tanggal hari ini / filter)
+      const now = new Date();
+      const year = now.getFullYear();
+      const month = now.getMonth() + 1; // 1-12
+      const monthStr = String(month).padStart(2, '0');
+      const yearMonthPrefix = `${year}-${monthStr}`;
+
+      const daysInMonth = new Date(year, month, 0).getDate(); // misal 31 hari
+
+      // 2. Ambil Semua Siswa
+      const snapSiswa = await getDocs(collection(db, "siswa"));
+      const selectedClassVal = filterKelas.value ? filterKelas.value.trim() : '';
+      const normSelectedClass = normClass(selectedClassVal);
+
+      let targetStudents = [];
+      snapSiswa.forEach(docSnap => {
+        const s = docSnap.data();
+        const k1 = normClass(s.id_kelas);
+        const k2 = normClass(s.nama_kelas);
+        const k3 = normClass(s.kelas);
+
+        if (!normSelectedClass || k1 === normSelectedClass || k2 === normSelectedClass || k3 === normSelectedClass) {
+          targetStudents.push({
+            nis: (s.nis || docSnap.id || '').trim(),
+            nama: (s.nama_siswa || s.nama || 'Siswa').trim(),
+            kelas: s.nama_kelas || s.id_kelas || s.kelas || '-'
+          });
+        }
+      });
+
+      // Urutkan siswa berdasarkan Nama Kelas dan Nama Siswa
+      targetStudents.sort((a, b) => {
+        if (a.kelas !== b.kelas) return a.kelas.localeCompare(b.kelas);
+        return a.nama.localeCompare(b.nama);
+      });
+
+      if (targetStudents.length === 0) {
+        alert("Tidak ada data siswa yang ditemukan untuk filter kelas ini.");
+        return;
+      }
+
+      // 3. Ambil Semua Log Presensi di Bulan Ini
+      const snapLogs = await getDocs(collection(db, "log_absensi"));
+      const monthLogs = [];
+      snapLogs.forEach(docSnap => {
+        const d = docSnap.data();
+        if (d.tanggal && d.tanggal.startsWith(yearMonthPrefix)) {
+          monthLogs.push(d);
+        }
+      });
+
+      // Pemetaan log: Map[nis, Map[dayInt, status]]
+      const studentDayMap = new Map();
+      monthLogs.forEach(log => {
+        const nis = (log.nis || '').trim();
+        if (!nis || !log.tanggal) return;
+
+        const parts = log.tanggal.split('-');
+        if (parts.length < 3) return;
+        const dayInt = parseInt(parts[2], 10);
+        if (!dayInt) return;
+
+        if (!studentDayMap.has(nis)) {
+          studentDayMap.set(nis, new Map());
+        }
+
+        const isHadir = (log.status || '').toLowerCase().includes('hadir') && !(log.status || '').toLowerCase().includes('tidak');
+        const code = isHadir ? 'H' : 'A';
+        studentDayMap.get(nis).set(dayInt, code);
+      });
+
+      // 4. Susun Baris Matriks
+      const matrixRows = [];
+      targetStudents.forEach((student, idx) => {
+        const row = {
+          "No": idx + 1,
+          "NIS": student.nis,
+          "Nama Siswa": student.nama,
+          "Kelas": student.kelas
+        };
+
+        let countH = 0;
+        let countA = 0;
+
+        const dayStatusMap = studentDayMap.get(student.nis);
+
+        for (let d = 1; d <= daysInMonth; d++) {
+          const status = dayStatusMap ? (dayStatusMap.get(d) || '') : '';
+          row[`Tgl ${d}`] = status || '-';
+          if (status === 'H') countH++;
+          if (status === 'A') countA++;
+        }
+
+        const totalRecorded = countH + countA;
+        const pct = totalRecorded > 0 ? Math.round((countH / totalRecorded) * 100) : 0;
+
+        row["Total Hadir (H)"] = countH;
+        row["Total Alpa (A)"] = countA;
+        row["% Kehadiran"] = `${pct}%`;
+
+        matrixRows.push(row);
+      });
+
+      // 5. Ekspor ke Excel via SheetJS
+      const worksheet = XLSX.utils.json_to_sheet(matrixRows);
+      const workbook = XLSX.utils.book_new();
+
+      // Setting lebar kolom
+      const colWidths = [
+        { wch: 5 },  // No
+        { wch: 14 }, // NIS
+        { wch: 28 }, // Nama Siswa
+        { wch: 16 }  // Kelas
+      ];
+      for (let d = 1; d <= daysInMonth; d++) {
+        colWidths.push({ wch: 6 }); // Tgl 1..31
+      }
+      colWidths.push({ wch: 14 }); // Total Hadir
+      colWidths.push({ wch: 14 }); // Total Alpa
+      colWidths.push({ wch: 14 }); // % Kehadiran
+
+      worksheet['!cols'] = colWidths;
+
+      const monthNames = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
+      const sheetTitle = `Matriks ${monthNames[month - 1]} ${year}`;
+      XLSX.utils.book_append_sheet(workbook, worksheet, sheetTitle.substring(0, 31));
+
+      const kelasFilePart = selectedClassVal ? `${selectedClassVal.replace(/\s+/g, '_')}_` : 'Semua_Kelas_';
+      const filename = `Matriks_Presensi_${kelasFilePart}${yearMonthPrefix}.xlsx`;
+
+      XLSX.writeFile(workbook, filename);
+
+    } catch (errMatrix) {
+      console.error("Gagal export matriks bulanan:", errMatrix);
+      alert("Gagal membuat matriks presensi: " + errMatrix.message);
+    } finally {
+      btnExportMatrixExcel.disabled = false;
+      btnExportMatrixExcel.innerHTML = originalText;
+    }
+  });
+}

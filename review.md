@@ -4,6 +4,44 @@ Dokumen ini berisi rangkuman review perubahan kode (*code review*) terbaru yang 
 
 ---
 
+## 📅 Review [2026-08-20 21:00 WIB] - Implementasi 3 Fitur Peningkatan: Audio Feedback Chime, Countdown Timer Sesi, dan Matriks Presensi Bulanan Siap Cetak
+
+### 📁 1. Berkas yang Diubah
+* 📄 **[guru/index.html](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/guru/index.html)** `[MODIFY]`
+* 📄 **[siswa/scanner.html](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/siswa/scanner.html)** `[MODIFY]`
+* 📄 **[guru/rekap.html](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/guru/rekap.html)** `[MODIFY]`
+* 📄 **[assets/js/guru/rekap.js](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/assets/js/guru/rekap.js)** `[MODIFY]`
+
+---
+
+### 📝 2. Rincian Baris & Logika yang Diperbarui
+
+1. 🔊 **Fitur 1: Efek Audio Feedback & Haptic ([guru/index.html](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/guru/index.html) & [siswa/scanner.html](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/siswa/scanner.html))**:
+   - Menambahkan Web Audio API Synthesizer (suara lonceng ganda frekuensi 587Hz $\rightarrow$ 880Hz / D5 $\rightarrow$ A5) yang berbunyi otomatis setiap kali ada siswa baru yang berhasil scan di layar monitor guru.
+   - Dilengkapi tombol toggle suara di header log: `🔊 Suara: ON` / `🔇 Suara: OFF` dengan penyimpanan preferensi ke `localStorage`.
+   - Pada scanner siswa, ditambahkan audio beep sukses dan getaran haptic saat kamera berhasil membaca QR code.
+
+2. ⏱️ **Fitur 3: Countdown Timer Sesi & Tombol Perpanjang Waktu ([guru/index.html](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/guru/index.html))**:
+   - Menambahkan widget hitung mundur visual (`#session-timer-box`, format `MM:SS`) yang menghitung mundur 60 menit sejak sesi presensi dibuka.
+   - Dilengkapi tombol interaktif **`+ 30m`** (`#btn-extend-session`) untuk menambah waktu sesi secara instan jika kegiatan belajar atau praktikum berlangsung lebih lama.
+   - Sesi otomatis ditutup di database jika waktu benar-benar habis tanpa campur tangan manual.
+
+3. 📊 **Fitur 4: Format Laporan Matriks Presensi Bulanan Siap Cetak ([guru/rekap.html](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/guru/rekap.html) & [assets/js/guru/rekap.js](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/assets/js/guru/rekap.js))**:
+   - Menambahkan tombol ekspor baru: **`Matriks (.xlsx)`** di sebelah tombol ekspor baris transaksi.
+   - Menghasilkan format buku absen bulanan sekolah (SheetJS): Baris berupa Nama Siswa & NIS, Kolom berupa Tanggal 1 s.d. 31 (berisi kode `H` Hadir, `A` Alpa, atau `-`), Total Kehadiran `H`, Total Ketidakhadiran `A`, serta persentase kehadiran `% Kehadiran`.
+
+---
+
+### 🧪 3. Petunjuk Pengujian Lokal (*Local Verification*)
+
+1. Buka [guru/index.html](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/guru/index.html) dan klik **"Mulai Sesi Absensi"**.
+2. Verifikasi timer hitung mundur sesi aktif berjalan di bawah QR code (`⏱️ Sisa Sesi: 59:59`), dan uji tombol `+30m`.
+3. Buka [siswa/scanner.html](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/siswa/scanner.html) dan scan QR tersebut.
+4. Verifikasi layar guru membunyikan nada lonceng (*chime*) dan log realtime bertambah.
+5. Buka [guru/rekap.html](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/guru/rekap.html), pilih kelas, dan klik **"Matriks (.xlsx)"**. Verifikasi file Excel yang terunduh berisi format matriks bulanan tanggal 1 s.d. 31.
+
+---
+
 ## 📅 Review [2026-08-20 20:44 WIB] - Implementasi Fitur Lanjutan Sesi (Session Resumption) untuk Kelas & Mapel yang Sama
 
 ### 📁 1. Berkas yang Diubah
