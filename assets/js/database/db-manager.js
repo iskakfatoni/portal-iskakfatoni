@@ -584,15 +584,20 @@ const TableEngine = {
               try {
                 // LOG KE system_logs
                 const adminEmail = dom.userEmailDisplay.innerText || "Admin Portal";
-                console.log("LOG: Memulai proses reset untuk", studentName);
+
+                // AMBIL DATA TERBARU DARI ROW (Pastikan ID tidak terlewat)
+                const oldId = dataObj.device_id || dataObj.device_token || dataObj.mac_address || "-";
+                const oldInfo = dataObj.device_info || dataObj.device_model || "-";
+
+                console.log("LOG: Mencatat reset untuk ID:", oldId);
 
                 const logData = {
                   action: "RESET_DEVICE",
                   target_nis: dataObj.nis || docId,
                   target_name: studentName,
                   admin_email: adminEmail,
-                  old_device_id: dataObj.device_id || "-",
-                  old_device_info: dataObj.device_info || "-",
+                  old_device_id: oldId,
+                  old_device_info: oldInfo,
                   timestamp: serverTimestamp()
                 };
 
@@ -1300,14 +1305,18 @@ if (dom.btnResetSelectedDevice) {
           const logPromises = [];
           chunk.forEach(id => {
             const student = studentMap[id];
-            // Tambahkan ke Log secara individual
+
+            // Ambil ID perangkat lama dari berbagai kemungkinan field
+            const oldId = student.device_id || student.device_token || student.mac_address || "-";
+            const oldInfo = student.device_info || student.device_model || "-";
+
             logPromises.push(addDoc(collection(db, "system_logs"), {
               action: "BATCH_RESET_DEVICE",
               target_nis: student.nis || id,
               target_name: student.nama_siswa || id,
               admin_email: adminEmail,
-              old_device_id: student.device_id || "-",
-              old_device_info: student.device_info || "-",
+              old_device_id: oldId,
+              old_device_info: oldInfo,
               timestamp: serverTimestamp()
             }));
 
