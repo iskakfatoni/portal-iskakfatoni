@@ -4,6 +4,36 @@ Dokumen ini berisi rangkuman review perubahan kode (*code review*) terbaru yang 
 
 ---
 
+## 📅 Review [2026-08-20 22:52 WIB] - Penyimpanan Dokumen Rencana Implementasi AI Attendance Insight (Dashboard Super Admin)
+
+### 📁 1. Berkas yang Dibuat
+* 📄 **[docs/ai-attendance-insight-plan.md](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/docs/ai-attendance-insight-plan.md)** `[NEW]`
+
+---
+
+### 📝 2. Rincian Rencana & Logika yang Dirancang
+
+1. 🧠 **Spesifikasi Mesin Deteksi Anomali (*Client-Side Pattern Recognition*)**:
+   - Merancang 5 algoritma deteksi pola ketidakdisiplinan:
+     - **Frequent Device Switching**: Mendeteksi siswa dengan $\ge 2$ kali reset HP dalam 7 hari atau $\ge 3$ kali dalam 30 hari.
+     - **Chronic Last-Minute Attendance**: Mendeteksi pola presensi siswa pada menit ke-55 s.d. 60 sebelum sesi presensi ditutup.
+     - **Shared Device Collision**: Mendeteksi benturan 1 ID perangkat yang digunakan presensi oleh multi-siswa.
+     - **Chronic Absenteeism**: Mendeteksi tren ketidakhadiran $\ge 3$ sesi beruntun atau tingkat kehadiran $< 75\%$.
+     - **Early Bird**: Mengidentifikasi siswa teladan yang selalu hadir tepat waktu di awal sesi.
+
+2. 🖥️ **Desain UI/UX Dashboard Super Admin**:
+   - Menyiapkan integrasi panel insight pada `database/system-logs.html` dan `database/db-manager.html`.
+   - Dilengkapi 4 kartu ringkasan metrik, filter tab kategori anomali, kartu temuan interaktif dengan narasi bahasa alami, filter log instan, salin ringkasan laporan ke WhatsApp, serta ekspor spreadsheet Excel (`.xlsx`).
+
+---
+
+### 🧪 3. Petunjuk Pengujian Lokal (*Local Verification*)
+
+1. Buka dan pelajari dokumen spesifikasi teknis di [docs/ai-attendance-insight-plan.md](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/docs/ai-attendance-insight-plan.md).
+2. Dokumen ini tersimpan secara permanen pada repositori lokal dan siap dieksekusi kapan pun diperlukan.
+
+---
+
 ## 📅 Review [2026-08-20 22:25 WIB] - Perbaikan Kelengkapan Data Mata Pelajaran pada Log Siswa Tidak Hadir
 
 ### 📁 1. Berkas yang Diubah
