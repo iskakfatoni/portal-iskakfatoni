@@ -178,7 +178,19 @@
   <script type="module">
     import { db } from "../assets/js/config/firebase-config.js";
     import { initializeAuthGuard } from "../assets/js/auth/auth-guard.js";
-    import { collection, addDoc, doc, updateDoc, query, where, orderBy, getDocs, onSnapshot, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+    import { 
+      collection, 
+      addDoc, 
+      getDoc,
+      doc, 
+      updateDoc, 
+      query, 
+      where, 
+      orderBy, 
+      getDocs, 
+      onSnapshot, 
+      serverTimestamp 
+    } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
     const userEmailDisplay = document.getElementById('user-email-display');
     const btnLogout = document.getElementById('btn-logout');
@@ -202,6 +214,8 @@
     let unsubscribeLog = null;
     let activeToken = "";
 
+    const normClass = (k) => (k || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+
     // 🔒 AUTH GUARD: Verifikasi Sesi
     initializeAuthGuard({
       onAuthenticated: async (user) => {
@@ -218,6 +232,7 @@
       window.location.href = "../admin.html";
     });
 
+    // 🛡️ ATURAN 1 (Pilar 1): Sesi belum ditutup guru -> pertahankan 1 jam meski tab/browser ditutup
     async function checkAndRestoreActiveSesi() {
       try {
         let activeDocId = localStorage.getItem('portal_guru_active_sesi_id');
@@ -352,6 +367,7 @@
       } catch (err) { console.error("Gagal load mapel:", err); }
     }
 
+    // 🔄 ATURAN 2 (Pilar 2): Buka Sesi (Cek apakah lanjutan sesi <= 1 jam untuk Kelas & Mapel yang sama)
     btnStartSesi.addEventListener('click', async () => {
       const kelas = selectKelas.value;
       const mapel = selectMapel.value;
@@ -364,37 +380,93 @@
       try {
         btnStartSesi.disabled = true;
 
-        // FIX 1.5.1: Pastikan HANYA SATU sesi yang aktif di seluruh database
+        const now = new Date();
+        const tanggalStr = now.toLocaleDateString('id-ID', { year: 'numeric', month: '2-digit', day: '2-digit' }).split('/').reverse().join('-');
+        const waktuStr = now.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', second: '2-digit' }) + ' WIB';
+        const normSelectedKelas = normClass(kelas);
+        const normSelectedMapel = mapel.trim().toLowerCase();
+
+        // 1. CEK APAKAH ADA SESI HARI INI DENGAN KELAS & MAPEL YANG SAMA (RENTANG <= 1 JAM)
+        let reusableSesiId = null;
+        let isResumed = false;
+
+        const qTodaySesi = query(
+          collection(db, "sesi_absensi"),
+          where("tanggal", "==", tanggalStr)
+        );
+        const todaySesiSnap = await getDocs(qTodaySesi);
+
+        if (!todaySesiSnap.empty) {
+          // Cari sesi yang kelas dan mapelnya sama persis
+          const matchingDocs = todaySesiSnap.docs.filter(docSnap => {
+            const d = docSnap.data();
+            const kMatch = normClass(d.id_kelas) === normSelectedKelas;
+            const mMapel = (d.nama_mapel || '').trim().toLowerCase() === normSelectedMapel;
+            return kMatch && mMapel;
+          }).sort((a, b) => {
+            const tA = (a.data().closed_at?.seconds || a.data().updated_at?.seconds || a.data().created_at?.seconds || 0);
+            const tB = (b.data().closed_at?.seconds || b.data().updated_at?.seconds || b.data().created_at?.seconds || 0);
+            return tB - tA;
+          });
+
+          if (matchingDocs.length > 0) {
+            const latestMatchDoc = matchingDocs[0];
+            const latestMatchData = latestMatchDoc.data();
+
+            // Hitung selisih waktu dari penutupan atau aktivitas terakhir sesi tersebut
+            const lastTimeSeconds = (latestMatchData.closed_at?.seconds || latestMatchData.updated_at?.seconds || latestMatchData.created_at?.seconds || 0);
+            if (lastTimeSeconds > 0) {
+              const diffMs = Date.now() - (lastTimeSeconds * 1000);
+              if (diffMs <= 60 * 60 * 1000) { // <= 1 Jam
+                reusableSesiId = latestMatchDoc.id;
+                isResumed = true;
+              }
+            }
+          }
+        }
+
+        // 2. Nonaktifkan sesi aktif lain (jika ada sesi kelas/mapel lain yang masih aktif)
         const qActive = query(collection(db, "sesi_absensi"), where("is_active", "==", true));
         const activeSnap = await getDocs(qActive);
 
         const deactivatePromises = [];
         activeSnap.forEach((activeDoc) => {
-          deactivatePromises.push(updateDoc(doc(db, "sesi_absensi", activeDoc.id), { is_active: false }));
+          if (activeDoc.id !== reusableSesiId) {
+            deactivatePromises.push(updateDoc(doc(db, "sesi_absensi", activeDoc.id), { is_active: false }));
+          }
         });
 
         if (deactivatePromises.length > 0) {
           await Promise.all(deactivatePromises);
-          console.log(`Berhasil menonaktifkan ${deactivatePromises.length} sesi lama.`);
         }
 
-        const now = new Date();
-        const tanggalStr = now.toLocaleDateString('id-ID', { year: 'numeric', month: '2-digit', day: '2-digit' }).split('/').reverse().join('-');
-        const waktuStr = now.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', second: '2-digit' }) + ' WIB';
-
         activeToken = 'QR-' + Math.random().toString(36).substring(2, 10).toUpperCase();
-        const docRef = await addDoc(collection(db, "sesi_absensi"), {
-          id_kelas: kelas,
-          nama_mapel: mapel,
-          tanggal: tanggalStr,
-          waktu: waktuStr,
-          current_qr_token: activeToken,
-          is_active: true,
-          created_at: serverTimestamp()
-        });
 
-        currentSesiId = docRef.id;
-        localStorage.setItem('portal_guru_active_sesi_id', docRef.id);
+        if (isResumed && reusableSesiId) {
+          // ✅ LANJUTKAN SESI LAMA
+          currentSesiId = reusableSesiId;
+          await updateDoc(doc(db, "sesi_absensi", currentSesiId), {
+            is_active: true,
+            current_qr_token: activeToken,
+            updated_at: serverTimestamp()
+          });
+          console.log(`[SESI DILANJUTKAN] Melanjutkan sesi ID: ${currentSesiId} untuk kelas [${kelas}] dan mapel [${mapel}]`);
+        } else {
+          // 🆕 BUAT SESI BARU (Kelas beda, Mapel beda, atau rentang waktu > 1 jam)
+          const docRef = await addDoc(collection(db, "sesi_absensi"), {
+            id_kelas: kelas,
+            nama_mapel: mapel,
+            tanggal: tanggalStr,
+            waktu: waktuStr,
+            current_qr_token: activeToken,
+            is_active: true,
+            created_at: serverTimestamp()
+          });
+          currentSesiId = docRef.id;
+          console.log(`[SESI BARU] Membuat sesi baru ID: ${currentSesiId} untuk kelas [${kelas}] dan mapel [${mapel}]`);
+        }
+
+        localStorage.setItem('portal_guru_active_sesi_id', currentSesiId);
 
         btnStopSesi.disabled = false;
         btnStopSesi.className = 'py-3 px-4 bg-red-500 hover:bg-red-400 text-white font-bold text-xs rounded-xl transition shadow-lg shadow-red-500/20 flex items-center justify-center gap-2 cursor-pointer';
@@ -402,10 +474,10 @@
         btnFullscreenQr.disabled = false;
         btnFullscreenQr.className = 'w-full py-3 px-4 bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-bold text-xs rounded-xl transition flex items-center justify-center gap-2 cursor-pointer shadow-lg shadow-cyan-500/20';
 
-        sessionStatus.innerText = `Aktif [${kelas}]`;
+        sessionStatus.innerText = isResumed ? `Dilanjutkan [${kelas}]` : `Aktif [${kelas}]`;
         sessionStatus.className = 'text-xs text-emerald-400 font-mono font-bold';
 
-        document.getElementById('modal-kelas-title').innerText = kelas;
+        document.getElementById('modal-kelas-title').innerText = `${kelas}${isResumed ? ' (Lanjutan)' : ''}`;
         document.getElementById('modal-mapel-title').innerText = mapel;
 
         updateQRDisplay(activeToken);
@@ -428,11 +500,15 @@
       }
     });
 
+    // 🛑 TUTUP SESI PRESENSI (Rekam closed_at)
     btnStopSesi.addEventListener('click', async () => {
       const activeId = currentSesiId || localStorage.getItem('portal_guru_active_sesi_id');
       if (activeId) {
         try {
-          await updateDoc(doc(db, "sesi_absensi", activeId), { is_active: false });
+          await updateDoc(doc(db, "sesi_absensi", activeId), { 
+            is_active: false,
+            closed_at: serverTimestamp()
+          });
         } catch(e) {}
       }
       resetSesiState();

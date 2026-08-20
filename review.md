@@ -4,6 +4,40 @@ Dokumen ini berisi rangkuman review perubahan kode (*code review*) terbaru yang 
 
 ---
 
+## 📅 Review [2026-08-20 20:44 WIB] - Implementasi Fitur Lanjutan Sesi (Session Resumption) untuk Kelas & Mapel yang Sama
+
+### 📁 1. Berkas yang Diubah
+* 📄 **[guru/index.html](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/guru/index.html)** `[MODIFY]`
+
+---
+
+### 📝 2. Rincian Baris & Logika yang Diperbarui
+
+1. 🛡️ **Pilar 1: Retensi Sesi Belum Ditutup (1 Jam)**:
+   - Sesi yang belum ditutup guru tetap dipertahankan aktif selama 1 jam di Firestore.
+   - Saat tab/browser dibuka kembali, fungsi `checkAndRestoreActiveSesi()` secara otomatis memulihkan sesi aktif dan melanjutkan rotasi QR code serta realtime listener log absensi.
+
+2. 🔄 **Pilar 2: Lanjutan Sesi Setelah Ditutup Manual ($\le 1$ Jam)**:
+   - Saat guru menekan **"Tutup Sesi"** (`#btn-stop-sesi`), waktu penutupan dicatat: `closed_at: serverTimestamp()`.
+   - Saat guru menekan **"Buka Sesi Presensi"** (`#btn-start-sesi`):
+     - Sistem mencari sesi pada hari yang sama (`tanggal == todayISO`) dengan **Kelas yang SAMA** DAN **Mapel yang SAMA**.
+     - Jika ditemukan dan selisih waktu dari penutupan $\le 60\text{ menit}$ (1 jam), sistem **melanjutkan sesi sebelumnya** (`is_active: true`, `updated_at: serverTimestamp()`), mempertahankan ID sesi lama, dan memuat kembali daftar siswa yang tadi sudah absen.
+     - Di UI ditampilkan status **`Dilanjutkan [Nama Kelas]`**.
+     - Jika Kelas berbeda ATAU Mapel berbeda ATAU waktu $> 1\text{ jam}$, sistem membuat sesi baru (`addDoc`).
+
+---
+
+### 🧪 3. Petunjuk Pengujian Lokal (*Local Verification*)
+
+1. Buka [guru/index.html](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/guru/index.html).
+2. Pilih Kelas **XI TEI 1** dan Mapel **Koding dan Kecerdasan Artificial**, lalu klik **"Buka Sesi Presensi"**.
+3. Klik **"Tutup Sesi Presensi"**.
+4. Dalam beberapa detik/menit, pilih kembali **XI TEI 1** dan Mapel **Koding dan Kecerdasan Artificial**, lalu klik **"Buka Sesi Presensi"**.
+5. Verifikasi konsol browser mencatat `[SESI DILANJUTKAN]` dan status header menampilkan badge **`Dilanjutkan [XI TEI 1]`** tanpa membuat dokumen sesi duplikat di Firestore.
+6. Coba ganti kelas ke **XI TEI 2** dan klik **"Buka Sesi Presensi"**, verifikasi konsol mencatat `[SESI BARU]`.
+
+---
+
 ## 📅 Review [2026-08-20 20:36 WIB] - Penguatan Proteksi Kedaluwarsa Sesi Presensi (> 1 Jam)
 
 ### 📁 1. Berkas yang Diubah
