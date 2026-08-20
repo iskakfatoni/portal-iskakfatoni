@@ -147,7 +147,14 @@ const Sanitizer = {
       'waktu': 'Waktu Presensi',
       'status': 'Status Kehadiran',
       'is_active': 'Status Sesi',
-      'current_qr_token': 'Token Sesi QR'
+      'current_qr_token': 'Token Sesi QR',
+      'action': 'Aksi System',
+      'target_nis': 'NIS Siswa',
+      'target_name': 'Nama Siswa',
+      'admin_email': 'Admin',
+      'old_device_id': 'ID Perangkat Lama',
+      'old_device_info': 'Merek HP Lama',
+      'timestamp': 'Waktu Kejadian'
     };
     return headerMap[lower] || fieldKey;
   },
@@ -576,11 +583,13 @@ const TableEngine = {
             if (confirm(`Reset pendaftaran perangkat (HP) untuk siswa "${studentName}" (${docId})? Siswa dapat melakukan registrasi di HP baru.`)) {
               try {
                 // LOG KE system_logs
+                const adminEmail = dom.userEmailDisplay.innerText || "Unknown Admin";
+
                 await addDoc(collection(db, "system_logs"), {
                   action: "RESET_DEVICE",
                   target_nis: dataObj.nis || docId,
                   target_name: studentName,
-                  admin_email: dom.userEmailDisplay.innerText,
+                  admin_email: adminEmail,
                   old_device_id: dataObj.device_id || "-",
                   old_device_info: dataObj.device_info || "-",
                   timestamp: serverTimestamp()
@@ -595,6 +604,7 @@ const TableEngine = {
                 });
                 alert(`Perangkat siswa "${studentName}" berhasil di-reset!`);
               } catch (err) {
+                console.error("Reset Error:", err);
                 alert("Gagal mereset perangkat: " + err.message);
               }
             }
@@ -1024,6 +1034,8 @@ function loadCollectionData(colName) {
       ['nis', 'nama_siswa', 'id_kelas', 'nama_mapel', 'hari', 'tanggal', 'waktu', 'status'].forEach(k => fieldSet.add(k));
     } else if (colName === 'sesi_absensi') {
       ['id_kelas', 'nama_mapel', 'hari', 'tanggal', 'waktu', 'is_active'].forEach(k => fieldSet.add(k));
+    } else if (colName === 'system_logs') {
+      ['action', 'target_nis', 'target_name', 'admin_email', 'timestamp'].forEach(k => fieldSet.add(k));
     }
 
     snapshot.docs.forEach(docSnap => {
@@ -1268,22 +1280,25 @@ if (dom.btnResetSelectedDevice) {
           }
         });
 
+        const adminEmail = dom.userEmailDisplay.innerText || "Unknown Admin";
+
         for (let i = 0; i < selectedArray.length; i += CHUNK_SIZE) {
           const chunk = selectedArray.slice(i, i + CHUNK_SIZE);
           const batch = writeBatch(db);
 
+          const logPromises = [];
           chunk.forEach(id => {
             const student = studentMap[id];
-            // Tambahkan ke Log secara individual (Firestore limitation on batch-add-log)
-            addDoc(collection(db, "system_logs"), {
+            // Tambahkan ke Log secara individual
+            logPromises.push(addDoc(collection(db, "system_logs"), {
               action: "BATCH_RESET_DEVICE",
               target_nis: student.nis || id,
               target_name: student.nama_siswa || id,
-              admin_email: dom.userEmailDisplay.innerText,
+              admin_email: adminEmail,
               old_device_id: student.device_id || "-",
               old_device_info: student.device_info || "-",
               timestamp: serverTimestamp()
-            });
+            }));
 
             batch.update(doc(db, "siswa", id), {
               device_id: deleteField(),
@@ -1293,6 +1308,8 @@ if (dom.btnResetSelectedDevice) {
               registered_at: deleteField()
             });
           });
+
+          await Promise.all(logPromises);
           await batch.commit();
         }
         alert(`Berhasil mereset pendaftaran HP untuk ${count} siswa!`);
