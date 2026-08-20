@@ -304,7 +304,14 @@
         }
 
         // Ikat HP ke Firestore
-        await updateDoc(doc(db, "siswa", actualDocId), { device_id: currentDeviceId });
+        const updateData = { device_id: currentDeviceId };
+
+        // AMBIL INFO MEREK & MODEL DARI NATIVE BRIDGE
+        if (window.AndroidNativeBridge && typeof window.AndroidNativeBridge.getDeviceInfo === 'function') {
+          updateData.device_info = window.AndroidNativeBridge.getDeviceInfo();
+        }
+
+        await updateDoc(doc(db, "siswa", actualDocId), updateData);
 
         const userData = {
           doc_id: actualDocId,
@@ -312,7 +319,8 @@
           nama_siswa: dataSiswa.nama_siswa,
           id_kelas: dataSiswa.id_kelas,
           nama_kelas: dataSiswa.nama_kelas || dataSiswa.id_kelas,
-          device_id: currentDeviceId
+          device_id: currentDeviceId,
+          device_info: updateData.device_info || null
         };
 
         localStorage.setItem('portal_siswa_user', JSON.stringify(userData));

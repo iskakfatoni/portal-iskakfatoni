@@ -141,6 +141,7 @@ const Sanitizer = {
       'nama_mapel': 'Mata Pelajaran',
       'wali_kelas': 'Guru Kelas',
       'device_id': 'ID Perangkat HP',
+      'device_info': 'Merek/Model HP',
       'hari': 'Hari',
       'tanggal': 'Tanggal',
       'waktu': 'Waktu Presensi',
@@ -314,8 +315,9 @@ const TableEngine = {
 
     // FITUR: Default sort "Terbaru" untuk Log & Sesi jika user belum memilih sorting manual
     if (!sortField) {
-      if (state.currentCollection === 'log_absensi' || state.currentCollection === 'sesi_absensi') {
-        sortField = 'created_at';
+      if (state.currentCollection === 'log_absensi' || state.currentCollection === 'sesi_absensi' || state.currentCollection === 'system_logs') {
+        sortField = 'timestamp'; // system_logs menggunakan 'timestamp'
+        if (state.currentCollection !== 'system_logs') sortField = 'created_at';
         sortOrder = 'desc';
       } else {
         sortField = '__id__';
@@ -573,8 +575,20 @@ const TableEngine = {
             const studentName = dataObj.nama_siswa || docId;
             if (confirm(`Reset pendaftaran perangkat (HP) untuk siswa "${studentName}" (${docId})? Siswa dapat melakukan registrasi di HP baru.`)) {
               try {
+                // LOG KE system_logs
+                await addDoc(collection(db, "system_logs"), {
+                  action: "RESET_DEVICE",
+                  target_nis: dataObj.nis || docId,
+                  target_name: studentName,
+                  admin_email: dom.userEmailDisplay.innerText,
+                  old_device_id: dataObj.device_id || "-",
+                  old_device_info: dataObj.device_info || "-",
+                  timestamp: serverTimestamp()
+                });
+
                 await updateDoc(doc(db, "siswa", docId), {
                   device_id: deleteField(),
+                  device_info: deleteField(),
                   device_token: deleteField(),
                   mac_address: deleteField(),
                   registered_at: deleteField()
@@ -935,7 +949,7 @@ document.addEventListener('fullscreenchange', () => {
 });
 
 function initBadgesCount() {
-  const collections = ['siswa', 'kelas', 'mapel', 'sesi_absensi', 'log_absensi', 'links'];
+  const collections = ['siswa', 'kelas', 'mapel', 'sesi_absensi', 'log_absensi', 'links', 'system_logs'];
   collections.forEach(colName => {
     onSnapshot(collection(db, colName), (snap) => {
       const badge = document.getElementById(`badge-${colName}`);
@@ -1002,7 +1016,7 @@ function loadCollectionData(colName) {
     const fieldSet = new Set();
     if (colName === 'siswa') {
       if (state.deviceFilter === 'bound') {
-        ['nis', 'nama_siswa', 'id_kelas', 'nama_kelas', 'device_id'].forEach(k => fieldSet.add(k));
+        ['nis', 'nama_siswa', 'id_kelas', 'nama_kelas', 'device_id', 'device_info'].forEach(k => fieldSet.add(k));
       } else {
         ['nis', 'nama_siswa', 'id_kelas', 'nama_kelas'].forEach(k => fieldSet.add(k));
       }
@@ -1245,12 +1259,35 @@ if (dom.btnResetSelectedDevice) {
         dom.btnResetSelectedDevice.disabled = true;
         const selectedArray = Array.from(state.selectedDocIds);
         const CHUNK_SIZE = 400;
+
+        // Buat mapping data untuk logging masal
+        const studentMap = {};
+        state.currentDocsList.forEach(d => {
+          if (state.selectedDocIds.has(d.id)) {
+            studentMap[d.id] = d.data();
+          }
+        });
+
         for (let i = 0; i < selectedArray.length; i += CHUNK_SIZE) {
           const chunk = selectedArray.slice(i, i + CHUNK_SIZE);
           const batch = writeBatch(db);
+
           chunk.forEach(id => {
+            const student = studentMap[id];
+            // Tambahkan ke Log secara individual (Firestore limitation on batch-add-log)
+            addDoc(collection(db, "system_logs"), {
+              action: "BATCH_RESET_DEVICE",
+              target_nis: student.nis || id,
+              target_name: student.nama_siswa || id,
+              admin_email: dom.userEmailDisplay.innerText,
+              old_device_id: student.device_id || "-",
+              old_device_info: student.device_info || "-",
+              timestamp: serverTimestamp()
+            });
+
             batch.update(doc(db, "siswa", id), {
               device_id: deleteField(),
+              device_info: deleteField(),
               device_token: deleteField(),
               mac_address: deleteField(),
               registered_at: deleteField()
