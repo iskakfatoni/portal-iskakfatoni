@@ -37,5 +37,13 @@ service cloud.firestore {
     match /settings/{docId} {
       allow read, create, update, delete: if true;
     }
+
+    // 6. Koleksi system_logs & trash_bin (Logs & Recycle Bin)
+    match /system_logs/{docId} {
+      allow read, create, update, delete: if true;
+    }
+    match /trash_bin/{docId} {
+      allow read, create, update, delete: if true;
+    }
   }
 }
