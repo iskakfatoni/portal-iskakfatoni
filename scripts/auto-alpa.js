@@ -1,6 +1,6 @@
 // scripts/auto-alpa.js
 // Skrip otomatisasi untuk menyimpan data siswa yang 'Tidak Hadir' ke Firestore
-// Dijalankan setiap hari Senin - Jumat pukul 17:00 WIB via GitHub Actions atau Manual Run
+// Dijalankan setiap hari Senin - Jumat pukul 15:30 WIB via GitHub Actions atau Manual Run
 
 const https = require('https');
 
@@ -99,7 +99,7 @@ async function createLogAbsensiDoc(logData) {
 async function main() {
   const { todayISO, hariStr } = getTodayWIB();
   console.log(`=======================================================`);
-  console.log(`🤖 AUTO-ALPA CRON JOB: ${hariStr}, ${todayISO} 17:00 WIB`);
+  console.log(`🤖 AUTO-ALPA CRON JOB: ${hariStr}, ${todayISO} 15:30 WIB`);
   console.log(`=======================================================`);
 
   try {
@@ -196,7 +196,7 @@ async function main() {
             nama_mapel: sMapel,
             hari: hariStr,
             tanggal: todayISO,
-            waktu: '17:00 WIB',
+            waktu: '15:30 WIB',
             status: 'Tidak Hadir'
           });
 

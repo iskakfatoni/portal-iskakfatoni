@@ -4,6 +4,42 @@ Dokumen ini berisi rangkuman review perubahan kode (*code review*) terbaru yang 
 
 ---
 
+## 📅 Review [2026-08-20 20:26 WIB] - Penyesuaian Jadwal Cron Auto-Alpa & Label Waktu ke 15:30 WIB
+
+### 📁 1. Berkas yang Diubah
+* 📄 **[.github/workflows/auto-alpa.yml](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/.github/workflows/auto-alpa.yml)** `[MODIFY]`
+* 📄 **[scripts/auto-alpa.js](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/scripts/auto-alpa.js)** `[MODIFY]`
+* 📄 **[guru/rekap.html](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/guru/rekap.html)** `[MODIFY]`
+* 📄 **[assets/js/guru/rekap.js](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/assets/js/guru/rekap.js)** `[MODIFY]`
+
+---
+
+### 📝 2. Rincian Baris & Logika yang Diperbarui
+
+1. ⏰ **Pembaruan Jadwal Cron ([.github/workflows/auto-alpa.yml](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/.github/workflows/auto-alpa.yml))**:
+   - Mengubah jadwal cron dari `0 10 * * 1-5` (17:00 WIB) menjadi `30 8 * * 1-5` (**08:30 UTC = 15:30 WIB** setiap hari kerja Senin s.d. Jumat).
+   - Memperbarui nama workflow menjadi **"Auto Simpan Presensi Tidak Hadir (Alpa 15:30 WIB)"**.
+
+2. ⚙️ **Pembaruan Skrip Otomatisasi ([scripts/auto-alpa.js](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/scripts/auto-alpa.js))**:
+   - Memperbarui waktu default penyimpanan dokumen `log_absensi` siswa alpa menjadi `15:30 WIB`.
+
+3. 🖥️ **Pembaruan UI & Rekapitulasi ([guru/rekap.html](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/guru/rekap.html) & [assets/js/guru/rekap.js](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/assets/js/guru/rekap.js))**:
+   - Memperbarui label filter: `⚠️ Sertakan Siswa Tidak Hadir (S.d. 15:30 WIB)`.
+   - Menyesuaikan dialog konfirmasi batch simpan dan teks status tabel menjadi batas waktu `15:30 WIB`.
+
+---
+
+### 🧪 3. Petunjuk Pengujian Lokal (*Local Verification*)
+
+1. Jalankan skrip auto-alpa melalui terminal:
+   ```bash
+   node scripts/auto-alpa.js
+   ```
+2. Verifikasi header terminal menampilkan `🤖 AUTO-ALPA CRON JOB: ... 15:30 WIB`.
+3. Buka [guru/rekap.html](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/guru/rekap.html) dan periksa label opsi filter serta baris data alpa telah menampilkan keterangan `s.d. 15:30 WIB`.
+
+---
+
 ## 📅 Review [2026-08-20 20:21 WIB] - Implementasi Otomatisasi GitHub Actions Scheduled Cron untuk Auto-Simpan 'Tidak Hadir' (17:00 WIB)
 
 ### 📁 1. Berkas yang Diubah / Dibuat

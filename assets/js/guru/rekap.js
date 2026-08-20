@@ -252,7 +252,7 @@ async function loadData() {
                   nis: s.nis || siswaDoc.id || "-",
                   nama: s.nama_siswa || s.nama || "-",
                   kelas: s.nama_kelas || targetClass,
-                  waktu: `Tidak Absen (s.d. 17:00 WIB)`,
+                  waktu: `Tidak Absen (s.d. 15:30 WIB)`,
                   status: "Tidak Hadir"
                 });
               }
@@ -356,7 +356,7 @@ if (btnSaveAlpaLogs) {
       return;
     }
 
-    const confirmMsg = `Konfirmasi Simpan Status 'Tidak Hadir':\n\nSimpan ${virtualAlpaItems.length} siswa kelas ini yang belum absen sampai 17:00 WIB ke database Firestore?`;
+    const confirmMsg = `Konfirmasi Simpan Status 'Tidak Hadir':\n\nSimpan ${virtualAlpaItems.length} siswa kelas ini yang belum absen sampai 15:30 WIB ke database Firestore?`;
     if (!confirm(confirmMsg)) return;
 
     btnSaveAlpaLogs.disabled = true;
@@ -376,7 +376,7 @@ if (btnSaveAlpaLogs) {
           id_kelas: item.kelas,
           hari: hariStr,
           tanggal: todayISOStr,
-          waktu: '17:00 WIB',
+          waktu: '15:30 WIB',
           status: 'Tidak Hadir',
           created_at: serverTimestamp()
         });
