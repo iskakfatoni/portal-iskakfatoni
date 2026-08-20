@@ -183,7 +183,8 @@
       query,
       where,
       limit,
-      getDocs 
+      getDocs,
+      onSnapshot
     } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
     const sectionLoading = document.getElementById('section-loading-absensi');
@@ -200,6 +201,7 @@
     const btnBukaScanner = document.getElementById('btn-buka-scanner');
 
     let currentDeviceId = '';
+    let unsubscribeProfile = null;
 
     // INISIALISASI APLIKASI
     document.addEventListener('DOMContentLoaded', async () => {
@@ -207,14 +209,15 @@
       currentDeviceId = await getHardwareFingerprint();
       localStorage.setItem('portal_device_id', currentDeviceId);
 
-      // 1. DULUAN CEK FIRESTORE BERDASARKAN DEVICE_ID PERANGKAT INI
-      try {
-        const qDevice = query(collection(db, "siswa"), where("device_id", "==", currentDeviceId));
-        const deviceSnap = await getDocs(qDevice);
+      // 1. DULUAN CEK FIRESTORE BERDASARKAN DEVICE_ID PERANGKAT INI (REALTIME)
+      if (unsubscribeProfile) unsubscribeProfile();
 
-        if (!deviceSnap.empty) {
-          // HP ini SUDAH TERIKAT di Firestore! Langsung tampilkan profilnya meski cache pernah di-clear!
-          const docSnap = deviceSnap.docs[0];
+      const qDevice = query(collection(db, "siswa"), where("device_id", "==", currentDeviceId));
+
+      unsubscribeProfile = onSnapshot(qDevice, (snapshot) => {
+        if (!snapshot.empty) {
+          // HP ini TERIKAT!
+          const docSnap = snapshot.docs[0];
           const dbData = docSnap.data();
 
           const updatedUser = {
@@ -229,22 +232,17 @@
 
           localStorage.setItem('portal_siswa_user', JSON.stringify(updatedUser));
           showProfile(updatedUser);
-          return;
         } else {
-          // FIX BUG: Jika HP ini tidak terikat di Firestore, hapus sesi lokal agar sinkron
-          console.log("HP tidak terikat di server. Membersihkan sesi lokal...");
+          // HP TIDAK TERIKAT (Atau baru saja di-reset oleh Admin)
+          console.log("Sesi tidak ditemukan atau telah di-reset oleh Admin.");
           localStorage.removeItem('portal_siswa_user');
           localStorage.removeItem('siswa_session');
           showLoginForm();
-          return;
         }
-      } catch (e) {
-        console.error("Gagal auto-restore via hardware ID:", e);
-      }
-
-      // 2. JIKA CHIP DOKUMEN BELUM TERIKAT PADA FIRESTORE, TAMPILKAN FORM LOGIN
-      localStorage.removeItem('portal_siswa_user');
-      showLoginForm();
+      }, (error) => {
+        console.error("Profile Listener Error:", error);
+        showLoginForm();
+      });
     });
 
     // FUNGSI UNTUK MENERKA INFO PERANGKAT DARI BROWSER (WEB FALLBACK)
