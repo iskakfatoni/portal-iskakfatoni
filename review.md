@@ -4,6 +4,51 @@ Dokumen ini berisi rangkuman review perubahan kode (*code review*) terbaru yang 
 
 ---
 
+## 📅 Review [2026-08-20 18:25 WIB] - Pengecekan Komprehensif `database/db-manager.html` & `database/system-logs.html`
+
+### 📁 1. Berkas yang Diperiksa & Diverifikasi
+* 📄 **[database/db-manager.html](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/database/db-manager.html)**
+* 📄 **[database/system-logs.html](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/database/system-logs.html)**
+* 📄 **[assets/js/database/db-manager.js](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/assets/js/database/db-manager.js)**
+* 📄 **[assets/js/database/system-logs.js](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/assets/js/database/system-logs.js)**
+* 📄 **[firestore.rules](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/firestore.rules)**
+
+---
+
+### 📝 2. Hasil Pemeriksaan & Validasi Teknis
+
+1. 🔍 **Validasi Sintaks & Modul JavaScript (ESM)**:
+   - File [assets/js/database/db-manager.js](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/assets/js/database/db-manager.js) dan [assets/js/database/system-logs.js](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/assets/js/database/system-logs.js) lulus uji parsing sintaks AST ES Module (`SYNTAX VALID`) tanpa galat/syntax error.
+   - Semua fungsi `import` dari CDN Firebase v10.12.0 (`collection`, `doc`, `onSnapshot`, `setDoc`, `addDoc`, `deleteDoc`, `updateDoc`, `deleteField`, `writeBatch`, `serverTimestamp`, `getDocs`) terdaftar dengan benar.
+
+2. 🔗 **Integritas Binding Elemen DOM**:
+   - Seluruh ID elemen HTML (`getElementById` & `querySelector`) yang dipanggil dalam modul JavaScript telah diverifikasi ada 100% pada masing-masing file HTML:
+     - `database/db-manager.html` &rarr; 0 ID hilang / tidak cocok.
+     - `database/system-logs.html` &rarr; 0 ID hilang / tidak cocok.
+
+3. 🖼️ **Integritas Asset & Dependensi Statis**:
+   - Semua tautan gambar/favicon (`assets/img/nisnas_logo_colorful.webp`, `assets/img/foto_asn_profile.webp`), stylesheet (`style/style.css`), script partikel (`assets/js/particle/particle-bg.js`), konfigurasi Firebase (`assets/js/config/firebase-config.js`), dan auth guard (`assets/js/auth/auth-guard.js`) terkonfirmasi ada di sistem berkas lokal.
+
+4. 🛡️ **Sinkronisasi Rules Firestore (`firestore.rules`)**:
+   - Aturan keamanan Firestore telah mencakup seluruh koleksi yang beroperasi: `siswa`, `log_absensi`, `sesi_absensi`, `kelas`, `mapel`, `links`, `admin_devices`, `settings`, `system_logs`, dan `trash_bin`.
+
+5. 🧭 **Navigasi & Interoperabilitas**:
+   - Jalur navigasi dua arah antara `admin.html` &harr; `db-manager.html` &harr; `system-logs.html` terpasang rapi dengan tombol kembali dan *external link indicators*.
+
+---
+
+### 🧪 3. Petunjuk Pengujian Lokal (*Local Verification*)
+
+1. **Uji Halaman DB Manager**:
+   - Buka [database/db-manager.html](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/database/db-manager.html) melalui local server atau browser.
+   - Verifikasi tabel data koleksi `siswa`, `kelas`, `mapel`, `sesi_absensi`, `links`, serta filter log presensi dan filter perangkat HP.
+   - Uji tombol **Audit Keamanan**, **Reset HP Terpilih**, **Ekspor (.xlsx)**, dan modal tambah/edit/impor data.
+2. **Uji Halaman System Logs**:
+   - Buka [database/system-logs.html](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/database/system-logs.html) atau klik menu `log_reset_ponsel` di sidebar `db-manager.html`.
+   - Verifikasi 4 kartu ringkasan metrik, filter aksi, filter waktu, pencarian real-time, serta tombol modal inspektor payload JSON.
+
+---
+
 ## 📅 Review [2026-08-20 17:36 WIB] - Pemisahan Halaman Mandiri Audit Trail & Log Keamanan (`system-logs.html`)
 
 ### 📁 1. Berkas yang Diubah / Dibuat
