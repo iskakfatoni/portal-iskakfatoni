@@ -4,6 +4,41 @@ Dokumen ini berisi rangkuman review perubahan kode (*code review*) terbaru yang 
 
 ---
 
+## 📅 Review [2026-08-20 20:21 WIB] - Implementasi Otomatisasi GitHub Actions Scheduled Cron untuk Auto-Simpan 'Tidak Hadir' (17:00 WIB)
+
+### 📁 1. Berkas yang Diubah / Dibuat
+* 📄 **[.github/workflows/auto-alpa.yml](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/.github/workflows/auto-alpa.yml)** `[NEW]`
+* 📄 **[scripts/auto-alpa.js](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/scripts/auto-alpa.js)** `[NEW]`
+
+---
+
+### 📝 2. Rincian Baris & Logika yang Diperbarui
+
+1. ⚙️ **Skrip Otomatisasi Server ([scripts/auto-alpa.js](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/scripts/auto-alpa.js))**:
+   - Menghitung waktu zona Jakarta (WIB) secara presisi untuk menentukan tanggal hari ini (`YYYY-MM-DD`) dan hari dalam bahasa Indonesia.
+   - Mengambil data seluruh `sesi_absensi`, `siswa`, dan `log_absensi` secara otomatis dari Firestore REST API.
+   - Mengidentifikasi seluruh rombel/kelas yang membuka sesi pembelajaran hari itu.
+   - Menyaring siswa yang belum memiliki log presensi pada hari tersebut, dan menyimpannya secara otomatis ke koleksi `log_absensi` dengan status **`Tidak Hadir`** (waktu `17:00 WIB`).
+   - Mencegah duplikasi data jika proses dieksekusi berulang kali.
+
+2. ⏰ **Workflow Terjadwal ([.github/workflows/auto-alpa.yml](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/.github/workflows/auto-alpa.yml))**:
+   - Menggunakan konfigurasi jadwal cron GitHub Actions: `cron: '0 10 * * 1-5'` (10:00 UTC = 17:00 WIB, setiap hari kerja Senin s.d. Jumat).
+   - Menambahkan event trigger `workflow_dispatch` agar dapat dijalankan secara manual kapan saja melalui tab Actions di GitHub.
+   - 100% gratis dan berjalan di cloud GitHub tanpa membebani komputer maupun kuota lokal guru.
+
+---
+
+### 🧪 3. Petunjuk Pengujian Lokal (*Local Verification*)
+
+1. Jalankan pengujian skrip melalui terminal:
+   ```bash
+   node scripts/auto-alpa.js
+   ```
+2. Verifikasi output menampilkan log pencarian sesi hari ini, pembacaan rombel kelas, dan status eksekusi berhasil (`code 0`).
+3. Pada repositori GitHub: Buka tab **Actions** &rarr; pilih **"Auto Simpan Presensi Tidak Hadir (Alpa 17:00 WIB)"** &rarr; klik **"Run workflow"** untuk menguji eksekusi cloud langsung dari GitHub.
+
+---
+
 ## 📅 Review [2026-08-20 18:40 WIB] - Perbaikan Algoritma Deteksi Siswa Tidak Hadir (Alpa) pada `guru/rekap.html`
 
 ### 📁 1. Berkas yang Diubah

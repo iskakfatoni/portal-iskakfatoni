@@ -1,0 +1,24 @@
+name: Auto Simpan Presensi Tidak Hadir (Alpa 17:00 WIB)
+
+on:
+  schedule:
+    # 10:00 UTC = 17:00 WIB (Senin s.d. Jumat)
+    - cron: '0 10 * * 1-5'
+  # Memungkinkan eksekusi manual via tombol 'Run workflow' di tab Actions GitHub
+  workflow_dispatch:
+
+jobs:
+  auto-alpa:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 📥 Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: 🟢 Setup Node.js Environment
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: 🤖 Jalankan Auto-Alpa Script (17:00 WIB)
+        run: node scripts/auto-alpa.js
