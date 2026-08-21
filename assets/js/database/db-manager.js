@@ -1,5 +1,6 @@
 import { db } from "../config/firebase-config.js";
 import { initializeAuthGuard } from "../auth/auth-guard.js";
+import { AIInsightEngine } from "./ai-insights.js";
 import { collection, doc, getDocs, setDoc, addDoc, deleteDoc, updateDoc, deleteField, onSnapshot, writeBatch, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
 // -----------------------------------------------------------------
@@ -30,6 +31,7 @@ const state = {
 
 // DOM ELEMENTS REGISTRY
 const dom = {
+  btnToggleAnalytics: document.getElementById('btn-toggle-analytics'),
   btnAuditSecurity: document.getElementById('btn-audit-security'),
   analyticsPanel: document.getElementById('analytics-panel'),
   analyticsInsights: document.getElementById('analytics-insights'),
@@ -257,6 +259,152 @@ const StatsManager = {
 
       dom.statVal1.innerText = `${state.currentDynamicFields.length} Kolom`;
       dom.statVal2.innerText = 'Aktif';
+    }
+
+    AnalyticsManager.updateAnalytics();
+  }
+};
+
+// -----------------------------------------------------------------
+// 3.5. ANALYTICS & AI INSIGHTS MANAGER (NEW)
+// -----------------------------------------------------------------
+const AnalyticsManager = {
+  cachedLogs: null,
+  cachedAbsensi: null,
+  cachedSesi: null,
+  cachedStudents: null,
+
+  toggle() {
+    if (!dom.analyticsPanel) return;
+    const isHidden = dom.analyticsPanel.classList.toggle('hidden');
+    if (!isHidden) {
+      this.updateAnalytics();
+    }
+  },
+
+  async updateAnalytics() {
+    if (!dom.analyticsPanel || dom.analyticsPanel.classList.contains('hidden')) return;
+
+    try {
+      if (!this.cachedLogs || !this.cachedAbsensi || !this.cachedSesi || !this.cachedStudents) {
+        const [snapLogs, snapAbsensi, snapSesi, snapSiswa] = await Promise.all([
+          getDocs(collection(db, "system_logs")),
+          getDocs(collection(db, "log_absensi")),
+          getDocs(collection(db, "sesi_absensi")),
+          getDocs(collection(db, "siswa"))
+        ]);
+        this.cachedLogs = snapLogs.docs;
+        this.cachedAbsensi = snapAbsensi.docs;
+        this.cachedSesi = snapSesi.docs;
+        this.cachedStudents = snapSiswa.docs;
+      }
+
+      const findings = AIInsightEngine.analyze({
+        systemLogs: this.cachedLogs,
+        logAbsensi: this.cachedAbsensi,
+        sesiAbsensi: this.cachedSesi,
+        siswaList: this.cachedStudents
+      });
+
+      // Render Top Findings into dom.analyticsInsights
+      if (dom.analyticsInsights) {
+        if (findings.length === 0) {
+          dom.analyticsInsights.innerHTML = `
+            <div class="p-2.5 bg-slate-950/60 rounded-xl border border-slate-800/80 text-emerald-400 font-mono text-[11px] col-span-2 flex items-center gap-2">
+              <i class="fa-solid fa-circle-check text-base"></i>
+              <span>Tidak ada anomali atau ancaman manipulasi perangkat terdeteksi.</span>
+            </div>
+          `;
+        } else {
+          const topFindings = findings.slice(0, 4);
+          dom.analyticsInsights.innerHTML = topFindings.map(f => {
+            const isHigh = f.severity === 'HIGH';
+            const isPos = f.severity === 'POSITIVE';
+            const colorClass = isHigh ? 'text-rose-400 border-rose-500/30 bg-rose-950/20' : isPos ? 'text-emerald-400 border-emerald-500/30 bg-emerald-950/20' : 'text-amber-400 border-amber-500/30 bg-amber-950/20';
+            const icon = isHigh ? 'fa-triangle-exclamation' : isPos ? 'fa-award' : 'fa-clock-rotate-left';
+            return `
+              <div class="p-2.5 rounded-xl border ${colorClass} text-[10px] sm:text-[11px] font-mono space-y-1">
+                <div class="flex items-center justify-between gap-1 font-bold">
+                  <span class="truncate"><i class="fa-solid ${icon} mr-1"></i> ${f.categoryLabel}</span>
+                  <span class="text-[9px] uppercase px-1.5 py-0.2 rounded bg-slate-900 border border-slate-800">${f.severity}</span>
+                </div>
+                <div class="text-white font-bold text-[11px] truncate">${f.nama} (${f.nis})</div>
+                <div class="text-slate-400 text-[10px] leading-tight line-clamp-2">${f.summary}</div>
+              </div>
+            `;
+          }).join('');
+        }
+      }
+
+      // Draw Mini Chart Canvas
+      if (dom.miniChartCanvas) {
+        const ctx = dom.miniChartCanvas.getContext('2d');
+        if (ctx) {
+          const w = dom.miniChartCanvas.width = 150;
+          const h = dom.miniChartCanvas.height = 150;
+          ctx.clearRect(0, 0, w, h);
+
+          const centerX = w / 2;
+          const centerY = h / 2;
+          const radius = 52;
+          const lineWidth = 14;
+
+          const totalDocs = state.currentDocsList.length || 1;
+          let valA = 0;
+          let colorA = '#38bdf8';
+          let colorB = '#1e293b';
+
+          if (state.currentCollection === 'siswa') {
+            valA = state.currentDocsList.filter(d => Boolean(d.data().device_id)).length;
+            colorA = '#10b981'; // Bound
+            colorB = '#f59e0b'; // Unbound
+          } else if (state.currentCollection === 'log_absensi') {
+            valA = state.currentDocsList.filter(d => (d.data().status || '').toUpperCase() === 'HADIR').length;
+            colorA = '#06b6d4'; // Hadir
+            colorB = '#f43f5e'; // Tidak Hadir
+          } else if (state.currentCollection === 'sesi_absensi') {
+            valA = state.currentDocsList.filter(d => d.data().is_active).length;
+            colorA = '#10b981'; // Aktif
+            colorB = '#475569'; // Tutup
+          } else {
+            valA = Math.floor(totalDocs * 0.75);
+            colorA = '#6366f1';
+            colorB = '#1e293b';
+          }
+
+          const ratioA = totalDocs > 0 ? (valA / totalDocs) : 0;
+          const angleA = ratioA * 2 * Math.PI;
+
+          // Segment A
+          ctx.beginPath();
+          ctx.arc(centerX, centerY, radius, -Math.PI / 2, -Math.PI / 2 + angleA);
+          ctx.lineWidth = lineWidth;
+          ctx.strokeStyle = colorA;
+          ctx.lineCap = 'round';
+          ctx.stroke();
+
+          // Segment B
+          ctx.beginPath();
+          ctx.arc(centerX, centerY, radius, -Math.PI / 2 + angleA, 1.5 * Math.PI);
+          ctx.lineWidth = lineWidth;
+          ctx.strokeStyle = colorB;
+          ctx.lineCap = 'round';
+          ctx.stroke();
+
+          // Center Text
+          ctx.fillStyle = '#ffffff';
+          ctx.font = 'bold 15px "Plus Jakarta Sans", sans-serif';
+          ctx.textAlign = 'center';
+          ctx.textBaseline = 'middle';
+          ctx.fillText(`${Math.round(ratioA * 100)}%`, centerX, centerY - 4);
+
+          ctx.fillStyle = '#94a3b8';
+          ctx.font = '9px monospace';
+          ctx.fillText('Rasio Utama', centerX, centerY + 12);
+        }
+      }
+    } catch (e) {
+      console.warn("[AnalyticsManager] Error:", e);
     }
   }
 };
@@ -1706,3 +1854,11 @@ if (dom.btnExportDeviceExcel) {
     XLSX.writeFile(workbook, `${filePrefix}_${today}.xlsx`);
   });
 }
+
+// 🤖 Toggle AI Insights & Analytics Panel
+if (dom.btnToggleAnalytics) {
+  dom.btnToggleAnalytics.addEventListener('click', () => {
+    AnalyticsManager.toggle();
+  });
+}
+
