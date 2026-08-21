@@ -59,6 +59,11 @@
 
       <!-- ACTION BUTTONS (FULLSCREEN, BACK NAV, LOGOUT) RESPONSIVE -->
       <div class="flex items-center gap-1.5 sm:gap-2.5 w-full md:w-auto justify-between md:justify-end flex-wrap">
+        <!-- TOMBOL 0: TOGGLE AI RADAR -->
+        <button id="btn-toggle-radar" class="flex-1 sm:flex-initial px-2.5 sm:px-3 py-2 bg-indigo-950/40 hover:bg-indigo-900/60 border border-indigo-500/30 text-indigo-300 font-bold text-xs rounded-xl transition flex items-center justify-center gap-1.5 cursor-pointer shadow-md" title="🤖 Buka / Tutup Panel AI Radar">
+          <i class="fa-solid fa-robot text-cyan-400"></i> <span class="hidden sm:inline">AI Radar</span>
+        </button>
+
         <!-- TOMBOL FULLSCREEN -->
         <button id="btn-toggle-fullscreen" class="flex-1 sm:flex-initial px-2.5 sm:px-3 py-2 bg-slate-900 hover:bg-slate-800 border border-slate-800 text-cyan-400 font-bold text-xs rounded-xl transition flex items-center justify-center gap-1.5 cursor-pointer shadow-md" title="🖥️ Layar Penuh (Fullscreen)">
           <i class="fa-solid fa-expand"></i> <span class="hidden sm:inline">Layar Penuh</span>
@@ -124,16 +129,18 @@
             </div>
             <i class="fa-solid fa-calendar-day text-slate-700 text-base sm:text-lg shrink-0"></i>
           </div>
+        </div>
+
         <!-- 🤖 PANEL AI ATTENDANCE & SECURITY INSIGHT RADAR -->
-        <div id="ai-radar-panel" class="bg-slate-900/60 rounded-2xl border border-slate-800 p-3.5 sm:p-4.5 space-y-3 shadow-inner">
-          <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2.5 border-b border-slate-800 pb-2.5">
+        <div id="ai-radar-panel" class="bg-slate-900/40 rounded-2xl border border-slate-800/80 p-3.5 sm:p-4 space-y-3 shadow-inner">
+          <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2.5 border-b border-slate-800/80 pb-2.5">
             <div class="flex items-center gap-2.5">
               <div class="w-8 h-8 rounded-xl bg-cyan-500/10 border border-cyan-500/30 flex items-center justify-center text-cyan-400 font-bold text-sm shrink-0">
                 <i class="fa-solid fa-robot"></i>
               </div>
               <div>
                 <h3 class="text-xs sm:text-sm font-extrabold text-white tracking-wide flex items-center gap-2 flex-wrap">
-                  <span>AI Attendance &amp; Security Insight Radar</span>
+                  <span>AI Attendance &amp; Security Radar</span>
                   <span id="ai-status-badge" class="px-2 py-0.5 text-[9px] bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 rounded-full font-mono font-bold uppercase">Active • 0 Anomali</span>
                 </h3>
                 <p class="text-[10px] sm:text-[11px] text-slate-400 font-mono">Deteksi otomatis gonta-ganti HP, presensi menit terakhir, device sharing, &amp; pola alpa</p>
@@ -143,7 +150,7 @@
             <!-- ACTION BUTTONS RADAR -->
             <div class="flex items-center gap-2 w-full sm:w-auto justify-between sm:justify-end">
               <button id="btn-export-anomalies" class="px-2.5 sm:px-3 py-1.5 bg-indigo-500/15 hover:bg-indigo-500/30 text-indigo-300 border border-indigo-500/30 font-bold text-[11px] rounded-xl transition flex items-center gap-1.5 cursor-pointer shadow-sm" title="Ekspor Temuan Anomali ke Excel">
-                <i class="fa-solid fa-file-excel"></i> <span>Ekspor Investigasi (.xlsx)</span>
+                <i class="fa-solid fa-file-excel text-emerald-400"></i> <span>Ekspor (.xlsx)</span>
               </button>
               <button id="btn-toggle-radar-collapse" class="px-2.5 py-1.5 bg-slate-900 hover:bg-slate-800 border border-slate-800 text-slate-300 font-bold text-[11px] rounded-xl transition flex items-center gap-1 cursor-pointer">
                 <i id="icon-radar-collapse" class="fa-solid fa-chevron-up"></i> <span id="text-radar-collapse">Ciutkan</span>
@@ -154,15 +161,15 @@
           <!-- RADAR BODY WRAPPER (COLLAPSIBLE) -->
           <div id="ai-radar-body" class="space-y-3">
             <!-- TAB FILTER KATEGORI ANOMALI -->
-            <div class="flex items-center gap-1.5 overflow-x-auto pb-1 text-[10px] sm:text-[11px] font-mono text-slate-400">
-              <button data-cat="ALL" class="btn-ai-filter px-3 py-1.5 rounded-xl font-bold bg-cyan-500 text-slate-950 transition cursor-pointer shrink-0">
+            <div class="flex items-center gap-1.5 overflow-x-auto pb-1 text-[10px] sm:text-[11px] font-mono text-slate-400 no-scrollbar">
+              <button data-cat="ALL" class="btn-ai-filter px-3 py-1.5 rounded-xl font-bold bg-cyan-500 text-slate-950 transition cursor-pointer shrink-0 shadow-md">
                 Semua (<span id="count-cat-all">0</span>)
               </button>
               <button data-cat="FREQUENT_RESET" class="btn-ai-filter px-3 py-1.5 rounded-xl font-bold bg-slate-900/80 hover:bg-slate-800 text-slate-300 border border-slate-800 transition cursor-pointer shrink-0">
-                📱 Reset HP Berulang (<span id="count-cat-reset">0</span>)
+                📱 Reset HP (<span id="count-cat-reset">0</span>)
               </button>
               <button data-cat="SHARED_DEVICE" class="btn-ai-filter px-3 py-1.5 rounded-xl font-bold bg-slate-900/80 hover:bg-slate-800 text-slate-300 border border-slate-800 transition cursor-pointer shrink-0">
-                👥 Device Sharing (<span id="count-cat-shared">0</span>)
+                👥 1 HP Multi-Akun (<span id="count-cat-shared">0</span>)
               </button>
               <button data-cat="LAST_MINUTE" class="btn-ai-filter px-3 py-1.5 rounded-xl font-bold bg-slate-900/80 hover:bg-slate-800 text-slate-300 border border-slate-800 transition cursor-pointer shrink-0">
                 ⏱️ Menit Terakhir (<span id="count-cat-lastmin">0</span>)
@@ -176,8 +183,8 @@
             </div>
 
             <!-- CONTAINER KARTU TEMUAN AI -->
-            <div id="ai-insights-cards-container" class="grid grid-cols-1 md:grid-cols-2 gap-3 max-h-[380px] overflow-y-auto pr-1">
-              <div class="p-6 bg-slate-950/60 rounded-xl border border-slate-800 text-center text-slate-400 font-mono text-xs col-span-2">
+            <div id="ai-insights-cards-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 max-h-[360px] overflow-y-auto pr-1">
+              <div class="p-6 bg-slate-950/60 rounded-xl border border-slate-800 text-center text-slate-400 font-mono text-xs col-span-full">
                 <i class="fa-solid fa-spinner fa-spin text-cyan-400 mr-2"></i> Menganalisis pola riwayat log dan presensi...
               </div>
             </div>

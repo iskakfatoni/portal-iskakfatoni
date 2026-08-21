@@ -50,6 +50,7 @@ const dom = {
   statLogsToday: document.getElementById('stat-logs-today'),
 
   // 🤖 AI Radar Elements
+  btnToggleRadar: document.getElementById('btn-toggle-radar'),
   aiRadarPanel: document.getElementById('ai-radar-panel'),
   aiStatusBadge: document.getElementById('ai-status-badge'),
   aiRadarBody: document.getElementById('ai-radar-body'),
@@ -559,6 +560,18 @@ const AIInsightManager = {
           dom.aiRadarBody.classList.remove('hidden');
           dom.iconRadarCollapse.className = 'fa-solid fa-chevron-up';
           dom.textRadarCollapse.innerText = 'Ciutkan';
+        }
+      });
+    }
+
+    // Toggle Buka/Tutup AI Radar dari Header
+    if (dom.btnToggleRadar) {
+      dom.btnToggleRadar.addEventListener('click', () => {
+        if (dom.aiRadarPanel) {
+          const isHidden = dom.aiRadarPanel.classList.toggle('hidden');
+          if (!isHidden) {
+            dom.aiRadarPanel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          }
         }
       });
     }

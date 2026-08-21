@@ -424,8 +424,8 @@ export const AIInsightEngine = {
 
     if (findingsList.length === 0) {
       containerEl.innerHTML = `
-        <div class="p-6 bg-slate-950/60 rounded-2xl border border-slate-800 text-center space-y-2 shadow-inner">
-          <i class="fa-solid fa-circle-check text-2xl text-emerald-400"></i>
+        <div class="p-5 bg-slate-950/60 rounded-2xl border border-slate-800 text-center space-y-1.5 shadow-inner col-span-full">
+          <i class="fa-solid fa-circle-check text-xl text-emerald-400"></i>
           <p class="text-xs font-bold text-white uppercase tracking-wider">Status Integritas Presensi: Sangat Baik</p>
           <p class="text-[11px] text-slate-400 font-mono">Belum ditemukan anomali perilaku presensi atau manipulasi perangkat yang mencurigakan.</p>
         </div>
@@ -460,11 +460,11 @@ export const AIInsightEngine = {
       let evidenceHTML = '';
       if (f.evidence && f.evidence.length > 0) {
         evidenceHTML = `
-          <div class="mt-2.5 pt-2 border-t border-slate-800/80 space-y-1">
+          <div class="pt-2 border-t border-slate-800/80 space-y-1">
             <p class="text-[10px] font-bold text-slate-400 uppercase font-mono flex items-center gap-1">
               <i class="fa-solid fa-fingerprint text-cyan-400"></i> Jejak Bukti Data (${f.evidence.length}):
             </p>
-            <div class="space-y-1 max-h-28 overflow-y-auto pr-1">
+            <div class="space-y-1 max-h-24 overflow-y-auto pr-1">
               ${f.evidence
                 .map(
                   (ev) => `
@@ -481,33 +481,35 @@ export const AIInsightEngine = {
       }
 
       cardsHTML += `
-        <div class="glass-card p-3.5 sm:p-4 rounded-xl border ${cardBorder} shadow-lg space-y-2.5 transition-all duration-200" data-finding-id="${f.id}">
-          <div class="flex items-start justify-between gap-2 flex-wrap">
-            <div class="flex items-center gap-2">
-              <div class="w-7 h-7 rounded-lg bg-slate-900 border border-slate-800 flex items-center justify-center text-xs shrink-0">
-                <i class="${iconClass}"></i>
+        <div class="glass-card p-3.5 sm:p-4 rounded-xl border ${cardBorder} shadow-lg flex flex-col justify-between gap-2.5 transition-all duration-200 h-full" data-finding-id="${f.id}">
+          <div class="space-y-2">
+            <div class="flex items-start justify-between gap-2 flex-wrap">
+              <div class="flex items-center gap-2">
+                <div class="w-7 h-7 rounded-lg bg-slate-900 border border-slate-800 flex items-center justify-center text-xs shrink-0">
+                  <i class="${iconClass}"></i>
+                </div>
+                <div>
+                  <h4 class="text-xs font-bold text-white tracking-wide">${f.title}</h4>
+                  <p class="text-[11px] text-cyan-300 font-mono">${f.nama} <span class="text-slate-400">[NIS: ${f.nis}]</span> ${f.kelas && f.kelas !== '-' ? `• ${f.kelas}` : ''}</p>
+                </div>
               </div>
-              <div>
-                <h4 class="text-xs font-bold text-white tracking-wide">${f.title}</h4>
-                <p class="text-[11px] text-cyan-300 font-mono">${f.nama} <span class="text-slate-400">[NIS: ${f.nis}]</span> ${f.kelas && f.kelas !== '-' ? `• ${f.kelas}` : ''}</p>
-              </div>
+              <span class="px-2 py-0.5 rounded-full text-[9px] font-extrabold uppercase font-mono border ${badgeBg} shrink-0">
+                ${f.categoryLabel}
+              </span>
             </div>
-            <span class="px-2 py-0.5 rounded-full text-[9px] font-extrabold uppercase font-mono border ${badgeBg} shrink-0">
-              ${f.categoryLabel}
-            </span>
+
+            <p class="text-[11px] text-slate-300 leading-relaxed font-sans">${f.summary}</p>
+
+            <div class="p-2 bg-slate-950/80 rounded-lg border border-slate-800/80 text-[10px] text-amber-300/90 font-mono flex items-start gap-1.5">
+              <i class="fa-solid fa-lightbulb text-amber-400 mt-0.5 shrink-0"></i>
+              <span><strong>Rekomendasi:</strong> ${f.recommendation}</span>
+            </div>
+
+            ${evidenceHTML}
           </div>
-
-          <p class="text-[11px] text-slate-300 leading-relaxed font-sans">${f.summary}</p>
-
-          <div class="p-2 bg-slate-950/80 rounded-lg border border-slate-800/80 text-[10px] text-amber-300/90 font-mono flex items-start gap-1.5">
-            <i class="fa-solid fa-lightbulb text-amber-400 mt-0.5 shrink-0"></i>
-            <span><strong>Rekomendasi Tindakan:</strong> ${f.recommendation}</span>
-          </div>
-
-          ${evidenceHTML}
 
           <!-- ACTION BUTTONS -->
-          <div class="flex items-center justify-between gap-2 pt-1">
+          <div class="flex items-center justify-between gap-2 pt-1 border-t border-slate-800/40">
             <button class="btn-copy-finding px-2.5 py-1.5 bg-slate-900 hover:bg-slate-800 border border-slate-800 hover:border-cyan-500/40 text-cyan-300 rounded-lg text-[10px] font-bold font-mono transition flex items-center gap-1.5 cursor-pointer" data-idx="${idx}">
               <i class="fa-solid fa-share-nodes"></i> <span>Salin Laporan WA</span>
             </button>
@@ -516,7 +518,7 @@ export const AIInsightEngine = {
               f.nis && !f.nis.includes('/')
                 ? `
             <button class="btn-filter-nis px-2.5 py-1.5 bg-cyan-500/15 hover:bg-cyan-500/30 text-cyan-300 border border-cyan-500/30 rounded-lg text-[10px] font-bold font-mono transition flex items-center gap-1 cursor-pointer" data-nis="${f.nis}">
-              <i class="fa-solid fa-filter"></i> <span>Filter Log Siswa Ini</span>
+              <i class="fa-solid fa-filter"></i> <span>Filter Log Siswa</span>
             </button>
             `
                 : ''
