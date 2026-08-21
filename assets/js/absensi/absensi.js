@@ -230,7 +230,7 @@ if (dom.btnBukaScanner) {
     if (window.AndroidNativeBridge && typeof window.AndroidNativeBridge.isNativeApp === 'function' && window.AndroidNativeBridge.isNativeApp()) {
       window.AndroidNativeBridge.startScanner();
     } else {
-      window.location.href = "siswa/scanner.html";
+      window.location.href = "pages/siswa/scanner.html";
     }
   });
 }
@@ -239,7 +239,7 @@ if (dom.btnBukaScanner) {
 window.receiveNativeScan = function(decodedText) {
   console.log("Menerima hasil scan native:", decodedText);
   localStorage.setItem('pending_native_scan', decodedText);
-  window.location.href = "siswa/scanner.html";
+  window.location.href = "pages/siswa/scanner.html";
 };
 
 function showError(msg) {

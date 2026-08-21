@@ -1,0 +1,489 @@
+<!DOCTYPE html>
+<html lang="id" class="dark">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Manajemen Absensi Siswa | Portal Iskak Fatoni</title>
+  <link rel="icon" type="image/webp" href="../../assets/img/nisnas_logo_colorful.webp">
+
+  <!-- TAILWIND CSS & FONTAWESOME -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <!-- SHEETJS (XLSX) FOR EXCEL EXPORT & IMPORT -->
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+  <!-- CHART.JS FOR ANALYTICS -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <!-- MODERN DESIGN SYSTEM STYLING TUNGGAL -->
+  <link rel="stylesheet" href="../../style/style.css">
+
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              50: '#f0fdfa',
+              500: '#14b8a6',
+              900: '#134e4a',
+            }
+          }
+        }
+      }
+    }
+  </script>
+</head>
+
+<body class="bg-slate-950 text-slate-100 font-sans antialiased min-h-screen relative overflow-x-hidden theme-dashboard">
+
+  <!-- BACKGROUND PARTICLE CANVAS -->
+  <canvas id="particle-canvas" class="fixed inset-0 pointer-events-none z-0 opacity-40"></canvas>
+
+  <main class="relative z-10 w-full max-w-[1920px] mx-auto px-3 sm:px-6 md:px-8 py-3 md:py-5 space-y-3.5 sm:space-y-4">
+
+    <!-- HEADER BRANDING & ADMIN NAV RESPONSIVE -->
+    <header class="glass-card p-3 sm:p-4 rounded-2xl flex flex-col md:flex-row items-center justify-between gap-3 border border-slate-800 shadow-xl">
+      <div class="flex items-center gap-3 w-full md:w-auto justify-between md:justify-start">
+        <div class="flex items-center gap-2.5 sm:gap-3">
+          <!-- TOMBOL TOGGLE SIDEBAR -->
+          <button id="btn-toggle-sidebar" class="px-2.5 sm:px-3 py-2 bg-slate-900 hover:bg-slate-800 border border-slate-800 text-slate-300 text-xs font-bold rounded-xl transition cursor-pointer flex items-center gap-1.5" title="Sembunyikan / Tampilkan Sidebar Koleksi">
+            <i class="fa-solid fa-bars-staggered text-cyan-400"></i>
+            <span class="hidden sm:inline">Sidebar</span>
+          </button>
+
+          <img src="../../assets/img/foto_asn_profile.webp" alt="Muchamad Iskak Fatoni" class="w-9 h-9 sm:w-10 sm:h-10 object-cover rounded-xl border border-slate-700 shadow-sm shrink-0" loading="lazy">
+          <div>
+            <h1 class="text-xs sm:text-sm md:text-base font-extrabold text-white tracking-wide flex items-center gap-1.5 sm:gap-2 flex-wrap">
+              <span>Manajemen Absensi Siswa</span>
+              <span class="px-2 py-0.5 text-[9px] sm:text-[10px] bg-cyan-500/20 text-cyan-400 border border-cyan-500/30 rounded-full uppercase font-mono">Master Control</span>
+            </h1>
+            <p class="text-[10px] sm:text-[11px] text-slate-400 font-mono hidden sm:block">Portal Iskak Fatoni &bull; Sistem Pengelola Koleksi Firestore Fullscreen</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- USER EMAIL, FULLSCREEN TOGGLE & ACTIONS RESPONSIVE -->
+      <div class="flex items-center gap-1.5 sm:gap-2.5 w-full md:w-auto justify-between md:justify-end flex-wrap">
+        <!-- TOMBOL 0: TOGGLE AI ANALYTICS -->
+        <button id="btn-toggle-analytics" class="flex-1 sm:flex-initial px-2.5 sm:px-3 py-2 bg-indigo-950/40 hover:bg-indigo-900/60 border border-indigo-500/30 text-indigo-300 font-bold text-xs rounded-xl transition flex items-center justify-center gap-1.5 cursor-pointer shadow-md" title="🤖 Buka / Tutup Panel AI Insights &amp; Analitik">
+          <i class="fa-solid fa-brain text-cyan-400"></i> <span class="hidden sm:inline">AI Insights</span>
+        </button>
+
+        <!-- TOMBOL 1: FULLSCREEN MODE -->
+        <button id="btn-toggle-fullscreen" class="flex-1 sm:flex-initial px-2.5 sm:px-3 py-2 bg-slate-900 hover:bg-slate-800 border border-slate-800 text-cyan-400 font-bold text-xs rounded-xl transition flex items-center justify-center gap-1.5 cursor-pointer shadow-md" title="🖥️ Layar Penuh (Fullscreen)">
+          <i class="fa-solid fa-expand"></i> <span class="hidden sm:inline">Layar Penuh</span>
+        </button>
+
+        <!-- TOMBOL 2: KEMBALI KE HUB ADMIN -->
+        <a href="../../admin.html" class="flex-1 sm:flex-initial px-2.5 sm:px-3.5 py-2 bg-slate-900 hover:bg-slate-800 text-slate-300 text-xs font-bold rounded-xl transition border border-slate-800 flex items-center justify-center gap-1.5" title="↩️ Kembali ke Hub Admin">
+          <i class="fa-solid fa-arrow-left"></i> <span class="hidden sm:inline">Admin Hub</span>
+        </a>
+        
+        <div class="hidden lg:flex items-center gap-2 px-3 py-1.5 bg-slate-900/80 rounded-xl border border-slate-800 text-xs font-mono text-slate-300" title="👤 Akun Admin Terautentikasi">
+          <i class="fa-solid fa-user-shield text-cyan-400"></i>
+          <span id="user-email-display">loading...</span>
+        </div>
+        
+        <!-- TOMBOL 3: KELUAR / LOGOUT -->
+        <button id="btn-logout" class="px-2.5 sm:px-3 py-2 bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/30 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 cursor-pointer" title="🚪 Keluar (Logout)">
+          <i class="fa-solid fa-right-from-bracket"></i>
+          <span class="hidden sm:inline">Keluar</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- GRID LAYOUT FULL-WIDTH: SIDEBAR NAV KOLEKSI & MATRIKS TABEL -->
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-3.5 sm:gap-4 items-start w-full">
+
+      <!-- SIDEBAR KOLEKSI FIRESTORE (KOLOM KIRI - TOGGLEABLE) -->
+      <aside id="sidebar-container" class="lg:col-span-2 space-y-3 transition-all duration-300 w-full">
+        <div class="glass-card p-3.5 rounded-2xl border border-slate-800 shadow-xl space-y-3">
+          <div class="flex items-center justify-between border-b border-slate-800 pb-2">
+            <h2 class="text-xs font-bold text-slate-400 uppercase tracking-wider font-mono flex items-center gap-1.5">
+              <i class="fa-solid fa-database text-cyan-400"></i> Koleksi Data
+            </h2>
+          </div>
+
+          <nav class="space-y-1.5" id="nav-collections">
+            <button data-collection="siswa" class="btn-col w-full text-left px-3.5 py-2.5 rounded-xl text-xs font-bold transition flex items-center justify-between cursor-pointer bg-cyan-500/20 text-cyan-300 border border-cyan-500/40">
+              <span class="flex items-center gap-2"><i class="fa-solid fa-graduation-cap"></i> siswa</span>
+              <span id="badge-siswa" class="px-2 py-0.5 rounded-full text-[10px] bg-slate-900 border border-slate-700 font-mono text-cyan-300">0</span>
+            </button>
+            <button data-collection="kelas" class="btn-col w-full text-left px-3.5 py-2.5 rounded-xl text-xs font-bold transition flex items-center justify-between cursor-pointer bg-slate-900/60 text-slate-400 hover:bg-slate-800 border border-slate-800">
+              <span class="flex items-center gap-2"><i class="fa-solid fa-door-open"></i> kelas</span>
+              <span id="badge-kelas" class="px-2 py-0.5 rounded-full text-[10px] bg-slate-900 border border-slate-700 font-mono text-slate-300">0</span>
+            </button>
+            <button data-collection="mapel" class="btn-col w-full text-left px-3.5 py-2.5 rounded-xl text-xs font-bold transition flex items-center justify-between cursor-pointer bg-slate-900/60 text-slate-400 hover:bg-slate-800 border border-slate-800">
+              <span class="flex items-center gap-2"><i class="fa-solid fa-book-open"></i> mapel</span>
+              <span id="badge-mapel" class="px-2 py-0.5 rounded-full text-[10px] bg-slate-900 border border-slate-700 font-mono text-slate-300">0</span>
+            </button>
+            <button data-collection="sesi_absensi" class="btn-col w-full text-left px-3.5 py-2.5 rounded-xl text-xs font-bold transition flex items-center justify-between cursor-pointer bg-slate-900/60 text-slate-400 hover:bg-slate-800 border border-slate-800">
+              <span class="flex items-center gap-2"><i class="fa-solid fa-calendar-check"></i> sesi_absensi</span>
+              <span id="badge-sesi_absensi" class="px-2 py-0.5 rounded-full text-[10px] bg-slate-900 border border-slate-700 font-mono text-slate-300">0</span>
+            </button>
+            <button data-collection="links" class="btn-col w-full text-left px-3.5 py-2.5 rounded-xl text-xs font-bold transition flex items-center justify-between cursor-pointer bg-slate-900/60 text-slate-400 hover:bg-slate-800 border border-slate-800">
+              <span class="flex items-center gap-2"><i class="fa-solid fa-link"></i> links</span>
+              <span id="badge-links" class="px-2 py-0.5 rounded-full text-[10px] bg-slate-900 border border-slate-700 font-mono text-slate-300">0</span>
+            </button>
+            <a href="system-logs.html" class="w-full text-left px-3.5 py-2.5 rounded-xl text-xs font-bold transition flex items-center justify-between cursor-pointer bg-slate-900/60 text-indigo-300 hover:bg-slate-800 border border-slate-800 hover:border-indigo-500/40" title="Buka Halaman Log Reset Ponsel Siswa">
+              <span class="flex items-center gap-2"><i class="fa-solid fa-mobile-screen-button text-indigo-400"></i> log_reset_ponsel</span>
+              <div class="flex items-center gap-1.5">
+                <span id="badge-system_logs" class="px-2 py-0.5 rounded-full text-[10px] bg-slate-900 border border-slate-700 font-mono text-indigo-300">0</span>
+                <i class="fa-solid fa-arrow-up-right-from-square text-[10px] text-slate-500"></i>
+              </div>
+            </a>
+          </nav>
+        </div>
+
+        <!-- 📋 CARD BARU: LOG PRESENSI SISWA (MEMILIKI FILTER MENURUT HARI) -->
+        <div class="glass-card p-3.5 rounded-2xl border border-slate-800 shadow-xl space-y-3">
+          <div class="flex items-center justify-between border-b border-slate-800 pb-2">
+            <h2 class="text-xs font-bold text-slate-400 uppercase tracking-wider font-mono flex items-center gap-1.5">
+              <i class="fa-solid fa-clipboard-user text-cyan-400"></i> Log Presensi
+            </h2>
+          </div>
+
+          <nav class="space-y-1.5" id="nav-log-filters">
+            <button data-log-filter="today" class="btn-log-filter w-full text-left px-3.5 py-2.5 rounded-xl text-xs font-bold transition flex items-center justify-between cursor-pointer bg-slate-900/60 text-slate-400 hover:bg-slate-800 border border-slate-800">
+              <span class="flex items-center gap-2"><i class="fa-solid fa-calendar-day text-emerald-400"></i> Hari Ini</span>
+              <span id="badge-log-today" class="px-2 py-0.5 rounded-full text-[10px] bg-slate-900 border border-slate-700 font-mono text-emerald-400">0</span>
+            </button>
+            <button data-log-filter="yesterday" class="btn-log-filter w-full text-left px-3.5 py-2.5 rounded-xl text-xs font-bold transition flex items-center justify-between cursor-pointer bg-slate-900/60 text-slate-400 hover:bg-slate-800 border border-slate-800">
+              <span class="flex items-center gap-2"><i class="fa-solid fa-calendar-minus text-amber-400"></i> Kemarin</span>
+              <span id="badge-log-yesterday" class="px-2 py-0.5 rounded-full text-[10px] bg-slate-900 border border-slate-700 font-mono text-amber-400">0</span>
+            </button>
+            <button data-log-filter="all" class="btn-log-filter w-full text-left px-3.5 py-2.5 rounded-xl text-xs font-bold transition flex items-center justify-between cursor-pointer bg-slate-900/60 text-slate-400 hover:bg-slate-800 border border-slate-800">
+              <span class="flex items-center gap-2"><i class="fa-solid fa-clock-rotate-left text-cyan-400"></i> Semua Riwayat</span>
+              <span id="badge-log_absensi" class="px-2 py-0.5 rounded-full text-[10px] bg-slate-900 border border-slate-700 font-mono text-cyan-300">0</span>
+            </button>
+          </nav>
+
+          <!-- FILTER TANGGAL KUSTOM DENGAN POPUP KALENDER INTERAKTIF -->
+          <div class="pt-2 border-t border-slate-800/80 space-y-1.5">
+            <label for="input-log-date-filter" class="block text-[10px] uppercase font-bold text-slate-400 font-mono flex items-center gap-1.5 cursor-pointer">
+              <i class="fa-solid fa-calendar-days text-cyan-400"></i> Pilih Tanggal Khusus:
+            </label>
+            <div class="relative flex items-center">
+              <input type="date" id="input-log-date-filter" class="w-full pl-9 pr-3 py-2 bg-slate-950 border border-slate-800 hover:border-cyan-500/50 focus:border-cyan-400 rounded-xl text-xs text-cyan-400 font-mono focus:outline-none cursor-pointer transition shadow-inner">
+              <div class="absolute left-3 pointer-events-none text-cyan-400 text-xs">
+                <i class="fa-solid fa-calendar"></i>
+              </div>
+            </div>
+            <p class="text-[10px] text-slate-500 italic font-mono">// Klik untuk membuka kalender interaktif</p>
+          </div>
+        </div>
+
+        <!-- 📱 CARD BARU: PERANGKAT HP SISWA -->
+        <div class="glass-card p-3.5 rounded-2xl border border-slate-800 shadow-xl space-y-3">
+          <div class="flex items-center justify-between border-b border-slate-800 pb-2">
+            <h2 class="text-xs font-bold text-slate-400 uppercase tracking-wider font-mono flex items-center gap-1.5">
+              <i class="fa-solid fa-mobile-screen-button text-emerald-400"></i> Perangkat HP
+            </h2>
+          </div>
+
+          <nav class="space-y-1.5" id="nav-device-filters">
+            <button data-filter="bound" class="btn-device-filter w-full text-left px-3.5 py-2.5 rounded-xl text-xs font-bold transition flex items-center justify-between cursor-pointer bg-slate-900/60 text-slate-400 hover:bg-slate-800 border border-slate-800">
+              <span class="flex items-center gap-2"><i class="fa-solid fa-mobile-check text-emerald-400"></i> HP Terikat</span>
+              <span id="badge-hp-bound" class="px-2 py-0.5 rounded-full text-[10px] bg-slate-900 border border-slate-700 font-mono text-emerald-400">0</span>
+            </button>
+            <button data-filter="unbound" class="btn-device-filter w-full text-left px-3.5 py-2.5 rounded-xl text-xs font-bold transition flex items-center justify-between cursor-pointer bg-slate-900/60 text-slate-400 hover:bg-slate-800 border border-slate-800">
+              <span class="flex items-center gap-2"><i class="fa-solid fa-mobile-retro text-amber-400"></i> Belum Terikat</span>
+              <span id="badge-hp-unbound" class="px-2 py-0.5 rounded-full text-[10px] bg-slate-900 border border-slate-700 font-mono text-amber-400">0</span>
+            </button>
+          </nav>
+        </div>
+      </aside>
+
+      <!-- KONTEN TABEL MATRIKS DINAMIS (KOLOM KANAN - EXPANDABLE TO 100%) -->
+      <section id="table-section-container" class="lg:col-span-10 space-y-3.5 sm:space-y-4 transition-all duration-300 w-full">
+        <div class="glass-card p-3.5 sm:p-5 rounded-2xl shadow-xl space-y-3.5 sm:space-y-4 w-full border border-slate-800">
+
+          <!-- 📊 KARTU RINGKASAN STATISTIK DOKUMEN (RESPONSIVE GRID) -->
+          <div id="stats-summary-card" class="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-3.5">
+            <div class="metric-card">
+              <div class="min-w-0">
+                <p class="text-[9px] sm:text-[10px] uppercase font-bold text-slate-400 truncate">Total Dokumen</p>
+                <p id="stat-total-doc" class="text-xs sm:text-sm font-extrabold text-cyan-400 font-mono mt-0.5">0</p>
+              </div>
+              <i class="fa-solid fa-file-lines text-slate-700 text-base sm:text-lg shrink-0"></i>
+            </div>
+            <div class="metric-card">
+              <div class="min-w-0">
+                <p id="stat-label-1" class="text-[9px] sm:text-[10px] uppercase font-bold text-slate-400 truncate">HP Terikat</p>
+                <p id="stat-val-1" class="text-xs sm:text-sm font-extrabold text-emerald-400 font-mono mt-0.5">0</p>
+              </div>
+              <i id="stat-icon-1" class="fa-solid fa-mobile-screen-button text-slate-700 text-base sm:text-lg shrink-0"></i>
+            </div>
+            <div class="metric-card">
+              <div class="min-w-0">
+                <p id="stat-label-2" class="text-[9px] sm:text-[10px] uppercase font-bold text-slate-400 truncate">HP Belum Terikat</p>
+                <p id="stat-val-2" class="text-xs sm:text-sm font-extrabold text-amber-400 font-mono mt-0.5">0</p>
+              </div>
+              <i id="stat-icon-2" class="fa-solid fa-mobile-retro text-slate-700 text-base sm:text-lg shrink-0"></i>
+            </div>
+            <div class="metric-card">
+              <div class="min-w-0">
+                <p id="stat-label-3" class="text-[9px] sm:text-[10px] uppercase font-bold text-slate-400 truncate">Hasil Filter</p>
+                <p id="stat-val-3" class="text-xs sm:text-sm font-extrabold text-white font-mono mt-0.5">0 Baris</p>
+              </div>
+              <i class="fa-solid fa-filter text-slate-700 text-base sm:text-lg shrink-0"></i>
+            </div>
+          </div>
+
+          <!-- 📈 PANEL ANALYTICS (NEW) -->
+          <div id="analytics-panel" class="hidden grid grid-cols-1 md:grid-cols-3 gap-3.5 sm:gap-4 bg-slate-900/40 p-3.5 sm:p-4 rounded-2xl border border-slate-800 shadow-inner">
+            <div class="md:col-span-1 flex flex-col items-center justify-center p-2 bg-slate-950/50 rounded-xl border border-slate-800/50">
+              <h4 class="text-[10px] font-bold text-slate-400 uppercase mb-2">Sebaran Data / Kehadiran</h4>
+              <div class="w-full max-w-[150px] aspect-square">
+                <canvas id="miniChartCanvas"></canvas>
+              </div>
+            </div>
+            <div class="md:col-span-2 space-y-2.5 sm:space-y-3 py-1 sm:py-2">
+              <h4 class="text-[10px] font-bold text-slate-400 uppercase border-b border-slate-800 pb-1">Insight & Anomali Sistem</h4>
+              <div id="analytics-insights" class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-[11px] font-mono">
+                <!-- Insight items injected by JS -->
+                <div class="p-2 bg-slate-950/40 rounded-lg border border-slate-800/40 text-slate-400 italic">Menganalisa data...</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- TOOLBAR TABLE (SEARCH BAR & BUTTONS) -->
+          <div class="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-2.5 sm:gap-3 border-b border-slate-800 pb-3">
+            <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5 sm:gap-3 w-full md:w-auto">
+              <div>
+                <h2 id="active-collection-title" class="text-xs sm:text-sm font-extrabold text-white flex items-center gap-2 uppercase tracking-wide">
+                  <i class="fa-solid fa-table-list text-cyan-400"></i> Koleksi: <span class="text-cyan-400 font-mono">siswa</span>
+                </h2>
+              </div>
+
+              <!-- 🔍 SEARCH BAR REAL-TIME -->
+              <div class="relative flex-1 sm:w-72">
+                <input type="text" id="input-search-db" placeholder="🔍 Cari ID, NIS, Nama..." class="w-full pl-3.5 pr-8 py-2 bg-slate-950 border border-slate-800 rounded-xl text-slate-100 text-xs focus:outline-none focus:border-cyan-500 font-mono transition">
+                <button id="btn-clear-search" class="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-300 text-xs hidden cursor-pointer">✕</button>
+              </div>
+            </div>
+
+            <!-- AKSI SELEKSI, TAMBAH, IMPORT, EXPORT, & HAPUS MASAL (RESPONSIVE WRAP) -->
+            <div class="flex flex-wrap items-center gap-1.5 sm:gap-2 justify-start sm:justify-end">
+              <button id="btn-audit-security" class="py-2 px-3 bg-indigo-500/15 hover:bg-indigo-500/30 text-indigo-400 border border-indigo-500/30 font-bold text-xs rounded-xl transition flex items-center gap-1.5 cursor-pointer" title="Cek Integritas & Duplikasi Perangkat">
+                <i class="fa-solid fa-shield-virus"></i> <span>Audit Keamanan</span>
+              </button>
+
+              <button id="btn-add-new-data" class="py-2 px-3 bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-bold text-xs rounded-xl transition flex items-center gap-1.5 cursor-pointer shadow-lg shadow-cyan-500/20">
+                <i class="fa-solid fa-plus"></i> <span>+ Data Baru</span>
+              </button>
+
+              <button id="btn-open-import-modal" class="py-2 px-3 bg-teal-500/15 hover:bg-teal-500/30 text-teal-300 border border-teal-500/30 font-bold text-xs rounded-xl transition flex items-center gap-1.5 cursor-pointer">
+                <i class="fa-solid fa-file-import"></i> <span>Import Data</span>
+              </button>
+
+              <button id="btn-export-device-excel" class="py-2 px-3 bg-emerald-500/10 hover:bg-emerald-500/25 text-emerald-400 border border-emerald-500/30 font-bold text-xs rounded-xl transition flex items-center gap-1.5 cursor-pointer">
+                <i class="fa-solid fa-file-excel"></i> <span>Ekspor HP (.xlsx)</span>
+              </button>
+
+              <button id="btn-reset-selected-device" disabled class="py-2 px-3 bg-amber-500/10 hover:bg-amber-500/25 text-amber-300 border border-amber-500/30 font-bold text-xs rounded-xl transition flex items-center gap-1.5 cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed">
+                <i class="fa-solid fa-mobile-screen-button"></i> <span>Reset HP (<span id="selected-reset-count">0</span>)</span>
+              </button>
+
+              <button id="btn-export-selected-excel" disabled class="py-2 px-3 bg-emerald-500/10 hover:bg-emerald-500/25 text-emerald-300 border border-emerald-500/30 font-bold text-xs rounded-xl transition flex items-center gap-1.5 cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed">
+                <i class="fa-solid fa-file-excel"></i> <span>Ekspor (<span id="selected-export-count">0</span>)</span>
+              </button>
+
+              <button id="btn-delete-selected" disabled class="py-2 px-3 bg-red-500/10 hover:bg-red-500/25 text-red-400 border border-red-500/30 font-bold text-xs rounded-xl transition flex items-center gap-1.5 cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed">
+                <i class="fa-solid fa-trash-can"></i> <span>Hapus (<span id="selected-count">0</span>)</span>
+              </button>
+
+              <button id="btn-clear-collection" class="py-2 px-3 bg-rose-950/40 hover:bg-rose-900/60 text-rose-300 border border-rose-800/60 font-bold text-xs rounded-xl transition flex items-center gap-1.5 cursor-pointer">
+                <i class="fa-solid fa-triangle-exclamation"></i> <span>Kosongkan</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- TABEL FIRESTORE DINAMIS WIDE RESPONSIVE -->
+          <div id="table-scroll-container" class="log-table-container overflow-x-auto max-h-[calc(100vh-270px)] min-h-[340px] sm:min-h-[480px] overflow-y-auto rounded-xl border border-slate-800 bg-slate-950/70 w-full shadow-inner">
+            <table class="w-full text-left border-collapse text-xs whitespace-nowrap">
+              <thead class="sticky top-0 bg-slate-900/95 backdrop-blur border-b border-slate-800 text-slate-300 uppercase tracking-wider font-mono text-[10px] sm:text-[11px] z-10">
+                <tr id="table-header-row">
+                  <th class="p-2.5 sm:p-3 w-10 sm:w-12 text-center border-r border-slate-800 font-bold text-slate-400">NO</th>
+                  <th class="p-2.5 sm:p-3 font-bold text-cyan-400 border-r border-slate-800 cursor-pointer hover:bg-slate-800/60 select-none" data-sort="__id__">
+                    Document ID <span class="sort-icon text-[10px] ml-1">⇅</span>
+                  </th>
+                  <th class="p-2.5 sm:p-3 w-10 text-center border-r border-slate-800">
+                    <input type="checkbox" id="select-all-checkbox" class="rounded bg-slate-900 border-slate-700 text-cyan-500 focus:ring-0 cursor-pointer" title="Pilih Semua">
+                  </th>
+                  <th class="p-2.5 sm:p-3 w-28 sm:w-32 text-center">Aksi</th>
+                </tr>
+              </thead>
+              <tbody id="table-body" class="divide-y divide-slate-800/60 text-slate-300 font-mono text-xs">
+                <tr>
+                  <td colspan="6" class="p-8 text-center text-slate-500 font-sans">// Memuat data koleksi...</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <!-- 📄 FOOTER TABLE STATUS & PAGINATION CONTROL -->
+          <div class="flex flex-col sm:flex-row items-center justify-between gap-2.5 sm:gap-3 text-[10px] sm:text-[11px] text-slate-400 font-mono pt-1.5 border-t border-slate-800/60">
+            <div class="flex items-center justify-between sm:justify-start gap-2.5 w-full sm:w-auto">
+              <div class="flex items-center gap-1.5">
+                <span>Baris:</span>
+                <select id="select-page-size" class="px-2 py-1 bg-slate-950 border border-slate-800 rounded-lg text-slate-200 text-xs focus:outline-none focus:border-cyan-500 cursor-pointer">
+                  <option value="10">10</option>
+                  <option value="25" selected>25</option>
+                  <option value="50">50</option>
+                  <option value="100">100</option>
+                  <option value="0">Semua</option>
+                </select>
+              </div>
+              <span id="page-info">Halaman 1 dari 1</span>
+            </div>
+
+            <div class="flex items-center justify-between sm:justify-end gap-2 w-full sm:w-auto">
+              <div class="flex items-center gap-1.5">
+                <button id="btn-prev-page" disabled class="px-2.5 sm:px-3 py-1 bg-slate-900 hover:bg-slate-800 border border-slate-800 rounded-lg text-slate-300 disabled:opacity-40 disabled:cursor-not-allowed transition cursor-pointer text-xs">
+                  ◀ Prev
+                </button>
+                <button id="btn-next-page" disabled class="px-2.5 sm:px-3 py-1 bg-slate-900 hover:bg-slate-800 border border-slate-800 rounded-lg text-slate-300 disabled:opacity-40 disabled:cursor-not-allowed transition cursor-pointer text-xs">
+                  Next ▶
+                </button>
+              </div>
+              <span id="sync-status" class="text-emerald-400 ml-1">✔ Connected</span>
+            </div>
+          </div>
+
+        </div>
+      </section>
+
+    </div>
+
+    <!-- FOOTER COPYRIGHT -->
+    <div class="text-center pt-1">
+      <p class="text-[11px] sm:text-xs text-slate-500 font-mono">Developed by Iskak Fatoni, S.Pd., Gr.</p>
+    </div>
+
+  </main>
+
+  <!-- MODAL 1: TAMBAH DATA BARU MANUAL -->
+  <div id="modal-add-data" class="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-50 hidden flex items-center justify-center p-3 sm:p-4">
+    <div class="glass-card max-w-lg w-full p-4 sm:p-6 rounded-2xl shadow-2xl space-y-3.5 sm:space-y-4 border border-slate-700 max-h-[90vh] overflow-y-auto">
+      <div class="flex items-center justify-between border-b border-slate-800 pb-2.5 sm:pb-3">
+        <h3 class="text-xs sm:text-sm font-bold text-cyan-400 flex items-center gap-2 uppercase tracking-wider">
+          <i class="fa-solid fa-plus-circle"></i> Tambah Data Baru (<span id="modal-col-name" class="font-mono text-emerald-400">siswa</span>)
+        </h3>
+        <button id="btn-close-add-modal" class="text-slate-400 hover:text-white transition cursor-pointer p-1">
+          <i class="fa-solid fa-xmark text-lg"></i>
+        </button>
+      </div>
+
+      <form id="form-add-manual" class="space-y-3">
+        <div class="space-y-1">
+          <label class="block text-xs font-semibold text-slate-300">Document ID (Opsional, kosongkan jika acak)</label>
+          <input type="text" id="input-doc-id" placeholder="Misal: 9177-413 (Ganti '/' dengan '-')" class="w-full px-3.5 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-slate-100 text-xs focus:outline-none focus:border-cyan-500 font-mono">
+        </div>
+
+        <div id="dynamic-input-fields" class="space-y-3 max-h-60 overflow-y-auto pr-1">
+          <!-- Input fields dinamis disuntikkan oleh JS -->
+        </div>
+
+        <button type="button" id="btn-add-custom-field-add" class="w-full py-2 bg-slate-900 hover:bg-slate-800 border border-slate-800 text-cyan-400 font-semibold text-xs rounded-xl transition flex items-center justify-center gap-1.5 cursor-pointer">
+          <i class="fa-solid fa-plus text-xs"></i> Tambah Field Kustom Baru
+        </button>
+
+        <div class="flex gap-2 pt-2 border-t border-slate-800">
+          <button type="button" id="btn-cancel-add-modal" class="flex-1 py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold text-xs rounded-xl transition cursor-pointer">
+            Batal
+          </button>
+          <button type="submit" class="flex-1 py-2.5 bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-bold text-xs rounded-xl transition shadow-lg shadow-cyan-500/20 cursor-pointer">
+            Simpan ke Firestore
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL 2: IMPORT DATA FILE (.XLSX / .CSV / .JSON) -->
+  <div id="modal-import-file" class="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-50 hidden flex items-center justify-center p-3 sm:p-4">
+    <div class="glass-card max-w-lg w-full p-4 sm:p-6 rounded-2xl shadow-2xl space-y-3.5 sm:space-y-4 border border-slate-700 max-h-[90vh] overflow-y-auto">
+      <div class="flex items-center justify-between border-b border-slate-800 pb-2.5 sm:pb-3">
+        <h3 class="text-xs sm:text-sm font-bold text-teal-400 flex items-center gap-2 uppercase tracking-wider">
+          <i class="fa-solid fa-file-import"></i> Import Data Koleksi: <span id="import-col-name" class="font-mono text-cyan-400">siswa</span>
+        </h3>
+        <button id="btn-close-import-modal" class="text-slate-400 hover:text-white transition cursor-pointer p-1">
+          <i class="fa-solid fa-xmark text-lg"></i>
+        </button>
+      </div>
+
+      <div class="space-y-3">
+        <p class="text-xs text-slate-300">Pilih berkas <b>.xlsx</b>, <b>.csv</b>, atau <b>.json</b>. Pastikan nama header/kolom di file cocok dengan field di Firestore.</p>
+
+        <div class="flex items-center justify-between bg-slate-900 p-3 rounded-xl border border-slate-800">
+          <span class="text-xs text-slate-400">Unduh Format Template:</span>
+          <button id="btn-download-template" type="button" class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-cyan-400 font-semibold text-xs rounded-lg transition border border-slate-700 cursor-pointer">
+            <i class="fa-solid fa-download"></i> Template Excel (.xlsx)
+          </button>
+        </div>
+
+        <input type="file" id="import-file-input" accept=".xlsx, .xls, .csv, .json" class="block w-full text-xs text-slate-400 file:mr-3 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-slate-800 file:text-teal-400 hover:file:bg-slate-700 cursor-pointer border border-slate-800 rounded-xl p-1 bg-slate-950">
+
+        <!-- LOG BOX IMPOR -->
+        <div id="import-log-box" class="bg-slate-950 rounded-xl p-3 border border-slate-800 font-mono text-[11px] text-slate-300 h-36 overflow-y-auto space-y-1">
+          <p class="text-slate-500">// Log proses impor akan tampil di sini...</p>
+        </div>
+      </div>
+
+      <div class="flex gap-2 pt-2 border-t border-slate-800">
+        <button type="button" id="btn-cancel-import-modal" class="flex-1 py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold text-xs rounded-xl transition cursor-pointer">
+          Batal
+        </button>
+        <button type="button" id="btn-process-import" disabled class="flex-1 py-2.5 bg-gradient-to-r from-teal-400 to-cyan-400 text-slate-950 font-bold text-xs rounded-xl hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed transition shadow-lg shadow-cyan-500/10 cursor-pointer">
+          🚀 Proses &amp; Simpan
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ✏️ MODAL 3: EDIT DOKUMEN PENUH & FIELD KUSTOM -->
+  <div id="modal-edit-data" class="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-50 hidden flex items-center justify-center p-3 sm:p-4">
+    <div class="glass-card max-w-lg w-full p-4 sm:p-6 rounded-2xl shadow-2xl space-y-3.5 sm:space-y-4 border border-slate-700 max-h-[90vh] overflow-y-auto">
+      <div class="flex items-center justify-between border-b border-slate-800 pb-2.5 sm:pb-3">
+        <h3 class="text-xs sm:text-sm font-bold text-cyan-400 flex items-center gap-2 uppercase tracking-wider">
+          <i class="fa-solid fa-pen-to-square"></i> Edit Dokumen: <span id="edit-modal-doc-id" class="font-mono text-emerald-400">ID</span>
+        </h3>
+        <button id="btn-close-edit-modal" class="text-slate-400 hover:text-white transition cursor-pointer p-1">
+          <i class="fa-solid fa-xmark text-lg"></i>
+        </button>
+      </div>
+
+      <form id="form-edit-manual" class="space-y-3">
+        <input type="hidden" id="input-edit-doc-id">
+
+        <div id="edit-dynamic-input-fields" class="space-y-3 max-h-72 overflow-y-auto pr-1">
+          <!-- Input fields dinamis disuntikkan oleh JS -->
+        </div>
+
+        <button type="button" id="btn-add-custom-field-edit" class="w-full py-2 bg-slate-900 hover:bg-slate-800 border border-slate-800 text-cyan-400 font-semibold text-xs rounded-xl transition flex items-center justify-center gap-1.5 cursor-pointer">
+          <i class="fa-solid fa-plus text-xs"></i> Tambah Field Kustom Baru
+        </button>
+
+        <div class="flex gap-2 pt-2 border-t border-slate-800">
+          <button type="button" id="btn-cancel-edit-modal" class="flex-1 py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold text-xs rounded-xl transition cursor-pointer">
+            Batal
+          </button>
+          <button type="submit" class="flex-1 py-2.5 bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-bold text-xs rounded-xl transition shadow-lg shadow-cyan-500/20 cursor-pointer">
+            Simpan Perubahan
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- PARTICLE CANVAS ANIMATION -->
+  <script src="../../assets/js/particle/particle-bg.js"></script>
+
+  <!-- FIREBASE AUTH & FIRESTORE SCRIPT (EXTERNAL MODULAR ENGINE) -->
+  <script type="module" src="../../assets/js/database/db-manager.js?v=1.7.0"></script>
+</body>
+
+</html>

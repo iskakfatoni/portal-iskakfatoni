@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="id" class="auth-guard">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PORTAL :: Dashboard Admin Absensi Siswa</title>
+  
+  <link rel="preload" href="../../style/style.css" as="style">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="../../style/style.css">
+  <script defer src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <script defer src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+  <script defer src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body class="theme-dashboard min-h-screen flex flex-col justify-start items-center p-3 md:p-6 relative">
+
+  <!-- BACKGROUND PARTICLE CANVAS -->
+  <canvas id="particle-canvas"></canvas>
+
+  <!-- CONTAINER DASHBOARD UTAMA FULL SCREEN -->
+  <div id="dashboard-section" class="w-full space-y-4 relative z-10 my-auto">
+    
+    <!-- TOP BAR HEADER FULL WIDTH -->
+    <header class="flex items-center justify-between glass-card p-4 rounded-2xl shadow-xl w-full">
+      <div class="flex items-center gap-3.5">
+        <div class="w-11 h-11 rounded-xl bg-cyan-500/10 border border-cyan-500/30 flex items-center justify-center text-cyan-400 font-bold">
+          <i class="fa-solid fa-qrcode text-xl"></i>
+        </div>
+        <div>
+          <h2 class="text-base font-bold text-white tracking-wide">Dashboard Admin Absensi Siswa</h2>
+          <p id="user-email-display" class="text-xs text-slate-400 font-mono">Memuat akun...</p>
+        </div>
+      </div>
+
+      <!-- TAB SWITCHER NAVIGASI (DESKTOP) -->
+      <div class="hidden sm:flex items-center gap-2 p-1.5 bg-slate-950/80 rounded-xl border border-slate-800">
+        <button id="tab-sesi-qr-desktop" class="py-2 px-4 rounded-lg font-bold text-xs bg-cyan-500 text-slate-950 transition flex items-center gap-2 cursor-pointer">
+          <i class="fa-solid fa-qrcode"></i> Sesi QR Aktif
+        </button>
+        <!-- Tautan Navigasi Langsung ke rekap.html -->
+        <a href="rekap.html" class="py-2 px-4 rounded-lg font-bold text-xs text-slate-400 hover:text-white transition flex items-center gap-2 cursor-pointer">
+          <i class="fa-solid fa-database"></i> Database Rekap
+        </a>
+      </div>
+
+      <!-- TOMBOL KEMBALI KE ADMIN PUSAT -->
+      <button id="btn-logout" title="Kembali ke Master Admin" class="py-2.5 px-4 bg-red-500/15 hover:bg-red-500/30 text-red-400 border border-red-500/40 font-bold text-xs rounded-xl transition flex items-center gap-2 cursor-pointer">
+        <i class="fa-solid fa-arrow-left"></i> <span class="inline">Kembali ke Admin</span>
+      </button>
+    </header>
+
+    <!-- TAB SWITCHER MOBILE -->
+    <div class="grid grid-cols-2 gap-2 p-1.5 bg-slate-900/90 rounded-xl border border-slate-800 sm:hidden w-full">
+      <button id="tab-sesi-qr-mobile" class="py-2 px-3 rounded-lg font-bold text-xs bg-cyan-500 text-slate-950 transition flex items-center justify-center gap-2">
+        <i class="fa-solid fa-qrcode"></i> Sesi QR Aktif
+      </button>
+      <!-- Tautan Navigasi Langsung ke rekap.html -->
+      <a href="rekap.html" class="py-2 px-3 rounded-lg font-bold text-xs text-slate-400 hover:text-white transition flex items-center justify-center gap-2">
+        <i class="fa-solid fa-database"></i> Database Rekap
+      </a>
+    </div>
+
+    <!-- MODUL A: KONTROL SESI ABSENSI REALTIME FULL WIDTH -->
+    <div id="modul-sesi-qr" class="space-y-4 w-full">
+      
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-4 w-full">
+        
+        <!-- KOLOM KIRI (KONFIGURASI & QR - 4 KOLOM GRID WIDE) -->
+        <div class="lg:col-span-4 space-y-4">
+          <div class="glass-card p-5 rounded-2xl border border-slate-800 space-y-4 shadow-xl">
+            <h3 class="text-xs font-bold text-cyan-400 border-b border-slate-800 pb-2 flex items-center gap-2 uppercase tracking-wider">
+              <i class="fa-solid fa-sliders"></i> Konfigurasi Sesi
+            </h3>
+
+            <div class="space-y-1">
+              <label for="select-kelas" class="block text-xs font-semibold text-slate-300">Pilih Kelas TEI</label>
+              <select id="select-kelas" class="w-full px-3.5 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-slate-100 text-xs focus:outline-none focus:border-cyan-500 cursor-pointer">
+                <option value="">-- Memuat Daftar Kelas... --</option>
+              </select>
+            </div>
+
+            <div class="space-y-1">
+              <label for="select-mapel" class="block text-xs font-semibold text-slate-300">Pilih Mata Pelajaran</label>
+              <select id="select-mapel" class="w-full px-3.5 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-slate-100 text-xs focus:outline-none focus:border-cyan-500 cursor-pointer">
+                <option value="">-- Memuat Mata Pelajaran... --</option>
+              </select>
+            </div>
+
+            <div class="flex gap-2 pt-2">
+              <button id="btn-start-sesi" class="flex-1 py-3 px-4 bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-xs rounded-xl transition shadow-lg shadow-emerald-500/20 flex items-center justify-center gap-2 cursor-pointer">
+                <i class="fa-solid fa-play"></i> Mulai Sesi Absensi
+              </button>
+              
+              <button id="btn-stop-sesi" disabled class="py-3 px-4 bg-slate-800 hover:bg-red-500/20 text-slate-500 border border-slate-700 font-bold text-xs rounded-xl transition flex items-center justify-center gap-2 cursor-not-allowed">
+                <i class="fa-solid fa-stop"></i> Tutup Sesi
+              </button>
+            </div>
+          </div>
+
+          <div class="glass-card p-5 rounded-2xl border border-slate-800 flex flex-col items-center justify-center text-center space-y-4 shadow-xl">
+            <div class="flex items-center justify-between w-full border-b border-slate-800 pb-2">
+              <span class="text-xs font-bold text-cyan-400 uppercase tracking-wider">Tampilan QR Ponsel</span>
+              <span id="session-status" class="text-xs text-slate-400 font-mono">Off</span>
+            </div>
+
+            <!-- WIDGET HITUNG MUNDUR BATAS SESI (COUNTDOWN TIMER) -->
+            <div id="session-timer-box" class="hidden w-full p-2.5 bg-slate-950/80 rounded-xl border border-slate-800 flex items-center justify-between font-mono text-xs shadow-inner">
+              <span class="text-slate-400 flex items-center gap-1.5"><i class="fa-solid fa-stopwatch text-cyan-400"></i> Sisa Sesi:</span>
+              <div class="flex items-center gap-2">
+                <span id="session-countdown-display" class="font-bold text-cyan-400">60:00</span>
+                <button id="btn-extend-session" class="px-2 py-0.5 bg-cyan-500/20 hover:bg-cyan-500/30 text-cyan-300 border border-cyan-500/40 rounded-lg text-[10px] font-bold transition cursor-pointer flex items-center gap-1" title="Tambah Waktu Sesi +30 Menit">
+                  <i class="fa-solid fa-plus text-[9px]"></i> 30m
+                </button>
+              </div>
+            </div>
+            
+            <div id="qrcode-container" class="p-4 bg-white rounded-2xl shadow-xl min-w-[200px] min-h-[200px] flex items-center justify-center">
+              <p class="text-xs text-slate-500 font-sans">Sesi Belum Aktif</p>
+            </div>
+
+            <button id="btn-fullscreen-qr" disabled class="w-full py-3 px-4 bg-slate-800 text-slate-500 border border-slate-700 font-bold text-xs rounded-xl transition flex items-center justify-center gap-2 cursor-not-allowed">
+              <i class="fa-solid fa-expand"></i> Perbesar QR (Layar Penuh HP)
+            </button>
+          </div>
+        </div>
+
+        <!-- KOLOM KANAN (LOG REALTIME - 8 KOLOM GRID WIDE) -->
+        <div class="lg:col-span-8">
+          <div class="glass-card p-5 rounded-2xl border border-slate-800 space-y-4 shadow-xl h-full flex flex-col justify-between w-full">
+            <div>
+              <div class="flex items-center justify-between border-b border-slate-800 pb-3 flex-wrap gap-2">
+                <div class="flex items-center gap-2 sm:gap-3">
+                  <h3 class="text-xs font-bold text-cyan-400 flex items-center gap-2 uppercase tracking-wider">
+                    <i class="fa-solid fa-list-check"></i> Realtime Attendance Log
+                  </h3>
+                  <!-- TOMBOL TOGGLE SUARA NOTIFIKASI -->
+                  <button id="btn-toggle-sound" class="px-2.5 py-1 rounded-lg text-[11px] font-mono font-bold bg-slate-900 hover:bg-slate-800 text-cyan-400 border border-slate-800 flex items-center gap-1.5 transition cursor-pointer" title="Nyalakan / Matikan Suara Notifikasi Scan">
+                    <i id="icon-sound" class="fa-solid fa-volume-high text-cyan-400"></i>
+                    <span id="text-sound" class="hidden sm:inline text-slate-300">Suara: ON</span>
+                  </button>
+                </div>
+                <span id="log-count" class="text-xs text-slate-400 font-mono font-bold bg-slate-950 px-3 py-1 rounded-full border border-slate-800">0 Siswa</span>
+              </div>
+
+              <div id="log-siswa-container" class="space-y-2.5 mt-4 max-h-[520px] overflow-y-auto pr-2">
+                <p class="text-xs text-slate-500 text-center py-10">// Siswa yang melakukan scan akan tampil otomatis di sini secara realtime...</p>
+              </div>
+            </div>
+
+            <div class="pt-4 border-t border-slate-800/80 text-right">
+              <span class="text-[11px] text-slate-500 font-mono">Status Sistem: <span class="text-emerald-400">Monitoring Aktif</span></span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+
+    <!-- FOOTER -->
+    <div class="text-center pt-1">
+      <p class="text-xs text-slate-500 font-mono">Developed by Iskak Fatoni, S.Pd., Gr.</p>
+    </div>
+
+  </div>
+
+  <!-- MODAL FULLSCREEN QR CODE -->
+  <div id="qr-fullscreen-modal" class="fixed inset-0 bg-slate-950/95 backdrop-blur-2xl z-50 hidden flex flex-col items-center justify-between p-6 md:p-10 text-center">
+    <div class="w-full max-w-lg flex items-center justify-between border-b border-slate-800 pb-4">
+      <div>
+        <h3 id="modal-kelas-title" class="text-lg font-bold text-white text-left">-</h3>
+        <p id="modal-mapel-title" class="text-xs text-cyan-400 text-left">-</p>
+      </div>
+      <button id="btn-close-modal" class="w-10 h-10 bg-slate-800 hover:bg-slate-700 text-white rounded-full flex items-center justify-center font-bold text-sm cursor-pointer border border-slate-700">✕</button>
+    </div>
+
+    <div class="my-auto p-6 bg-white rounded-3xl shadow-2xl flex items-center justify-center">
+      <div id="qrcode-modal-container"></div>
+    </div>
+
+    <div class="w-full max-w-lg space-y-1">
+      <p class="text-sm text-slate-300 font-semibold">Tunjukkan Layar Ini ke Siswa untuk Di-Scan</p>
+      <p class="text-xs text-slate-500 font-mono">QR Code Diperbarui Otomatis Setiap 10 Detik</p>
+    </div>
+  </div>
+
+  <!-- PARTICLE CANVAS ANIMATION -->
+  <script src="../../assets/js/particle/particle-bg.js"></script>
+
+  <!-- FIREBASE AUTH & GURU DASHBOARD LOGIC -->
+  <script type="module" src="../../assets/js/guru/guru-dashboard.js?v=1.0.0"></script>
+</body>
+</html>

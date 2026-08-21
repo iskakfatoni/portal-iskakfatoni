@@ -4,7 +4,11 @@ import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/f
 import { doc, getDoc, serverTimestamp, updateDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 import { getHardwareFingerprint } from "../utils/device-fingerprint.js";
 
-const DEFAULT_REDIRECT_PATH = "../admin.html";
+function getDefaultRedirectPath() {
+  return window.location.pathname.includes('/pages/') ? '../../admin.html' : '../admin.html';
+}
+
+const DEFAULT_REDIRECT_PATH = getDefaultRedirectPath();
 
 function revealPage() {
   document.documentElement.style.display = "block";

@@ -2,7 +2,7 @@
 // 🎯 SISWA ATTENDANCE RESULT DISPLAY & CONFETTI CELEBRATION
 
 export function goBack() {
-  window.location.href = "../absensi.html";
+  window.location.href = window.location.pathname.includes('/pages/') ? "../../absensi.html" : "../absensi.html";
 }
 window.goBack = goBack;
 

@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>PORTAL :: Hasil Absensi Siswa</title>
+  <link rel="preload" href="../../style/style.css" as="style">
+  <link rel="stylesheet" href="../../style/style.css">
+  <script defer src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <!-- Confetti.js untuk efek perayaan -->
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+</head>
+<body class="theme-dashboard min-h-screen flex flex-col justify-center items-center p-4 relative overflow-hidden">
+
+  <canvas id="particle-canvas"></canvas>
+
+  <main class="max-w-md w-full space-y-6 relative z-10 text-center">
+    
+    <!-- CARD HASIL -->
+    <div id="result-card" class="glass-card p-8 rounded-3xl shadow-2xl space-y-6 border border-white/20 backdrop-blur-xl">
+      
+      <!-- ICON STATUS -->
+      <div id="status-icon-container" class="w-24 h-24 mx-auto rounded-full flex items-center justify-center text-4xl shadow-lg">
+        <i id="status-icon" class="fa-solid fa-check"></i>
+      </div>
+
+      <div class="space-y-2">
+        <h1 id="status-title" class="text-2xl font-extrabold tracking-tight text-white uppercase">Status Absensi</h1>
+        <p id="status-message" class="text-slate-300 font-medium leading-relaxed">Memproses data...</p>
+      </div>
+
+      <!-- DETAIL INFO -->
+      <div id="detail-info" class="bg-slate-900/50 rounded-2xl p-4 border border-white/5 space-y-3 text-left hidden">
+        <div class="flex justify-between border-b border-white/5 pb-2">
+          <span class="text-xs text-slate-400">Siswa</span>
+          <span id="res-nama" class="text-xs font-bold text-white">-</span>
+        </div>
+        <div class="flex justify-between border-b border-white/5 pb-2">
+          <span class="text-xs text-slate-400">Pelajaran</span>
+          <span id="res-mapel" class="text-xs font-bold text-cyan-400">-</span>
+        </div>
+        <div class="flex justify-between">
+          <span class="text-xs text-slate-400">Waktu</span>
+          <span id="res-waktu" class="text-xs font-bold text-slate-200">-</span>
+        </div>
+      </div>
+
+      <!-- BUTTON KEMBALI -->
+      <button onclick="goBack()" class="w-full py-4 bg-gradient-to-r from-cyan-500 to-blue-600 text-white font-bold text-sm rounded-2xl hover:scale-[1.02] active:scale-[0.98] transition-all shadow-xl shadow-cyan-500/20 cursor-pointer">
+        Kembali ke Dashboard
+      </button>
+
+    </div>
+
+    <p class="text-[11px] text-slate-500 font-mono">PORTAL::IskakFatoni System</p>
+
+  </main>
+
+  <script src="../../assets/js/particle/particle-bg.js"></script>
+
+  <script type="module" src="../../assets/js/siswa/siswa-result.js?v=1.0.0"></script>
+</body>
+</html>

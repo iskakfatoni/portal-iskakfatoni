@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="id" class="dark">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Audit Trail &amp; Log Keamanan | Portal Iskak Fatoni</title>
+  <link rel="icon" type="image/webp" href="../../assets/img/nisnas_logo_colorful.webp">
+
+  <!-- TAILWIND CSS & FONTAWESOME -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <!-- SHEETJS (XLSX) FOR EXCEL EXPORT -->
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+
+  <!-- MODERN DESIGN SYSTEM STYLING TUNGGAL -->
+  <link rel="stylesheet" href="../../style/style.css">
+
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              50: '#f0fdfa',
+              500: '#14b8a6',
+              900: '#134e4a',
+            }
+          }
+        }
+      }
+    }
+  </script>
+</head>
+
+<body class="bg-slate-950 text-slate-100 font-sans antialiased min-h-screen relative overflow-x-hidden theme-dashboard">
+
+  <!-- BACKGROUND PARTICLE CANVAS -->
+  <canvas id="particle-canvas" class="fixed inset-0 pointer-events-none z-0 opacity-40"></canvas>
+
+  <main class="relative z-10 w-full max-w-[1920px] mx-auto px-3 sm:px-6 md:px-8 py-3 md:py-5 space-y-3.5 sm:space-y-4">
+
+    <!-- HEADER BRANDING & NAVIGASI ADMIN RESPONSIVE -->
+    <header class="glass-card p-3 sm:p-4 rounded-2xl flex flex-col md:flex-row items-center justify-between gap-3 border border-slate-800 shadow-xl">
+      <div class="flex items-center gap-3 w-full md:w-auto justify-between md:justify-start">
+        <div class="flex items-center gap-2.5 sm:gap-3">
+          <img src="../../assets/img/foto_asn_profile.webp" alt="Muchamad Iskak Fatoni" class="w-9 h-9 sm:w-10 sm:h-10 object-cover rounded-xl border border-slate-700 shadow-sm shrink-0" loading="lazy">
+          <div>
+            <h1 class="text-xs sm:text-sm md:text-base font-extrabold text-white tracking-wide flex items-center gap-1.5 sm:gap-2 flex-wrap">
+              <i class="fa-solid fa-shield-halved text-cyan-400"></i>
+              <span>Audit Trail &amp; Log Keamanan</span>
+              <span class="px-2 py-0.5 text-[9px] sm:text-[10px] bg-indigo-500/20 text-indigo-400 border border-indigo-500/30 rounded-full uppercase font-mono">System Logs</span>
+            </h1>
+            <p class="text-[10px] sm:text-[11px] text-slate-400 font-mono hidden sm:block">Portal Iskak Fatoni &bull; Perekaman Jejak Aktivitas &amp; Audit Reset Perangkat</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- ACTION BUTTONS (FULLSCREEN, BACK NAV, LOGOUT) RESPONSIVE -->
+      <div class="flex items-center gap-1.5 sm:gap-2.5 w-full md:w-auto justify-between md:justify-end flex-wrap">
+        <!-- TOMBOL 0: TOGGLE AI RADAR -->
+        <button id="btn-toggle-radar" class="flex-1 sm:flex-initial px-2.5 sm:px-3 py-2 bg-indigo-950/40 hover:bg-indigo-900/60 border border-indigo-500/30 text-indigo-300 font-bold text-xs rounded-xl transition flex items-center justify-center gap-1.5 cursor-pointer shadow-md" title="🤖 Buka / Tutup Panel AI Radar">
+          <i class="fa-solid fa-robot text-cyan-400"></i> <span class="hidden sm:inline">AI Radar</span>
+        </button>
+
+        <!-- TOMBOL FULLSCREEN -->
+        <button id="btn-toggle-fullscreen" class="flex-1 sm:flex-initial px-2.5 sm:px-3 py-2 bg-slate-900 hover:bg-slate-800 border border-slate-800 text-cyan-400 font-bold text-xs rounded-xl transition flex items-center justify-center gap-1.5 cursor-pointer shadow-md" title="🖥️ Layar Penuh (Fullscreen)">
+          <i class="fa-solid fa-expand"></i> <span class="hidden sm:inline">Layar Penuh</span>
+        </button>
+
+        <!-- TOMBOL KEMBALI KE DB MANAGER -->
+        <a href="db-manager.html" class="flex-1 sm:flex-initial px-2.5 sm:px-3.5 py-2 bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-300 text-xs font-bold rounded-xl transition border border-cyan-500/30 flex items-center justify-center gap-1.5" title="↩️ Kembali ke Database Manager">
+          <i class="fa-solid fa-database"></i> <span class="hidden sm:inline">DB Manager</span>
+        </a>
+
+        <!-- TOMBOL KEMBALI KE HUB ADMIN -->
+        <a href="../../admin.html" class="flex-1 sm:flex-initial px-2.5 sm:px-3.5 py-2 bg-slate-900 hover:bg-slate-800 text-slate-300 text-xs font-bold rounded-xl transition border border-slate-800 flex items-center justify-center gap-1.5" title="↩️ Kembali ke Hub Admin">
+          <i class="fa-solid fa-arrow-left"></i> <span class="hidden sm:inline">Admin Hub</span>
+        </a>
+        
+        <div class="hidden lg:flex items-center gap-2 px-3 py-1.5 bg-slate-900/80 rounded-xl border border-slate-800 text-xs font-mono text-slate-300" title="👤 Akun Admin Terautentikasi">
+          <i class="fa-solid fa-user-shield text-cyan-400"></i>
+          <span id="user-email-display">loading...</span>
+        </div>
+        
+        <!-- TOMBOL KELUAR / LOGOUT -->
+        <button id="btn-logout" class="px-2.5 sm:px-3 py-2 bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/30 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 cursor-pointer" title="🚪 Keluar (Logout)">
+          <i class="fa-solid fa-right-from-bracket"></i>
+          <span class="hidden sm:inline">Keluar</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- SECTION KONTEN AUDIT TRAIL -->
+    <section class="space-y-3.5 sm:space-y-4 w-full">
+      <div class="glass-card p-3.5 sm:p-5 rounded-2xl shadow-xl space-y-3.5 sm:space-y-4 w-full border border-slate-800">
+
+        <!-- 📊 KARTU RINGKASAN METRIK AUDIT KEAMANAN (RESPONSIVE GRID) -->
+        <div class="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-3.5">
+          <div class="metric-card">
+            <div class="min-w-0">
+              <p class="text-[9px] sm:text-[10px] uppercase font-bold text-slate-400 truncate">Total Log</p>
+              <p id="stat-total-logs" class="text-xs sm:text-sm font-extrabold text-cyan-400 font-mono mt-0.5">0</p>
+            </div>
+            <i class="fa-solid fa-clock-rotate-left text-slate-700 text-base sm:text-lg shrink-0"></i>
+          </div>
+
+          <div class="metric-card">
+            <div class="min-w-0">
+              <p class="text-[9px] sm:text-[10px] uppercase font-bold text-slate-400 truncate">Reset HP</p>
+              <p id="stat-total-resets" class="text-xs sm:text-sm font-extrabold text-amber-400 font-mono mt-0.5">0</p>
+            </div>
+            <i class="fa-solid fa-mobile-screen-button text-slate-700 text-base sm:text-lg shrink-0"></i>
+          </div>
+
+          <div class="metric-card">
+            <div class="min-w-0">
+              <p class="text-[9px] sm:text-[10px] uppercase font-bold text-slate-400 truncate">Admin</p>
+              <p id="stat-total-admins" class="text-xs sm:text-sm font-extrabold text-emerald-400 font-mono mt-0.5">0 Akun</p>
+            </div>
+            <i class="fa-solid fa-user-shield text-slate-700 text-base sm:text-lg shrink-0"></i>
+          </div>
+
+          <div class="metric-card">
+            <div class="min-w-0">
+              <p class="text-[9px] sm:text-[10px] uppercase font-bold text-slate-400 truncate">Hari Ini</p>
+              <p id="stat-logs-today" class="text-xs sm:text-sm font-extrabold text-indigo-400 font-mono mt-0.5">0 Log</p>
+            </div>
+            <i class="fa-solid fa-calendar-day text-slate-700 text-base sm:text-lg shrink-0"></i>
+          </div>
+        </div>
+
+        <!-- 🤖 PANEL AI ATTENDANCE & SECURITY INSIGHT RADAR -->
+        <div id="ai-radar-panel" class="bg-slate-900/40 rounded-2xl border border-slate-800/80 p-3.5 sm:p-4 space-y-3 shadow-inner">
+          <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2.5 border-b border-slate-800/80 pb-2.5">
+            <div class="flex items-center gap-2.5">
+              <div class="w-8 h-8 rounded-xl bg-cyan-500/10 border border-cyan-500/30 flex items-center justify-center text-cyan-400 font-bold text-sm shrink-0">
+                <i class="fa-solid fa-robot"></i>
+              </div>
+              <div>
+                <h3 class="text-xs sm:text-sm font-extrabold text-white tracking-wide flex items-center gap-2 flex-wrap">
+                  <span>AI Attendance &amp; Security Radar</span>
+                  <span id="ai-status-badge" class="px-2 py-0.5 text-[9px] bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 rounded-full font-mono font-bold uppercase">Active • 0 Anomali</span>
+                </h3>
+                <p class="text-[10px] sm:text-[11px] text-slate-400 font-mono">Deteksi otomatis gonta-ganti HP, presensi menit terakhir, device sharing, &amp; pola alpa</p>
+              </div>
+            </div>
+
+            <!-- ACTION BUTTONS RADAR -->
+            <div class="flex items-center gap-2 w-full sm:w-auto justify-between sm:justify-end">
+              <button id="btn-export-anomalies" class="px-2.5 sm:px-3 py-1.5 bg-indigo-500/15 hover:bg-indigo-500/30 text-indigo-300 border border-indigo-500/30 font-bold text-[11px] rounded-xl transition flex items-center gap-1.5 cursor-pointer shadow-sm" title="Ekspor Temuan Anomali ke Excel">
+                <i class="fa-solid fa-file-excel text-emerald-400"></i> <span>Ekspor (.xlsx)</span>
+              </button>
+              <button id="btn-toggle-radar-collapse" class="px-2.5 py-1.5 bg-slate-900 hover:bg-slate-800 border border-slate-800 text-slate-300 font-bold text-[11px] rounded-xl transition flex items-center gap-1 cursor-pointer">
+                <i id="icon-radar-collapse" class="fa-solid fa-chevron-up"></i> <span id="text-radar-collapse">Ciutkan</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- RADAR BODY WRAPPER (COLLAPSIBLE) -->
+          <div id="ai-radar-body" class="space-y-3">
+            <!-- TAB FILTER KATEGORI ANOMALI -->
+            <div class="flex items-center gap-1.5 overflow-x-auto pb-1 text-[10px] sm:text-[11px] font-mono text-slate-400 no-scrollbar">
+              <button data-cat="ALL" class="btn-ai-filter px-3 py-1.5 rounded-xl font-bold bg-cyan-500 text-slate-950 transition cursor-pointer shrink-0 shadow-md">
+                Semua (<span id="count-cat-all">0</span>)
+              </button>
+              <button data-cat="FREQUENT_RESET" class="btn-ai-filter px-3 py-1.5 rounded-xl font-bold bg-slate-900/80 hover:bg-slate-800 text-slate-300 border border-slate-800 transition cursor-pointer shrink-0">
+                📱 Reset HP (<span id="count-cat-reset">0</span>)
+              </button>
+              <button data-cat="SHARED_DEVICE" class="btn-ai-filter px-3 py-1.5 rounded-xl font-bold bg-slate-900/80 hover:bg-slate-800 text-slate-300 border border-slate-800 transition cursor-pointer shrink-0">
+                👥 1 HP Multi-Akun (<span id="count-cat-shared">0</span>)
+              </button>
+              <button data-cat="LAST_MINUTE" class="btn-ai-filter px-3 py-1.5 rounded-xl font-bold bg-slate-900/80 hover:bg-slate-800 text-slate-300 border border-slate-800 transition cursor-pointer shrink-0">
+                ⏱️ Menit Terakhir (<span id="count-cat-lastmin">0</span>)
+              </button>
+              <button data-cat="CHRONIC_ABSENCE" class="btn-ai-filter px-3 py-1.5 rounded-xl font-bold bg-slate-900/80 hover:bg-slate-800 text-slate-300 border border-slate-800 transition cursor-pointer shrink-0">
+                📉 Alpa Kronis (<span id="count-cat-alpa">0</span>)
+              </button>
+              <button data-cat="EARLY_BIRD" class="btn-ai-filter px-3 py-1.5 rounded-xl font-bold bg-slate-900/80 hover:bg-slate-800 text-slate-300 border border-slate-800 transition cursor-pointer shrink-0">
+                🟢 Siswa Teladan (<span id="count-cat-early">0</span>)
+              </button>
+            </div>
+
+            <!-- CONTAINER KARTU TEMUAN AI -->
+            <div id="ai-insights-cards-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 max-h-[360px] overflow-y-auto pr-1">
+              <div class="p-6 bg-slate-950/60 rounded-xl border border-slate-800 text-center text-slate-400 font-mono text-xs col-span-full">
+                <i class="fa-solid fa-spinner fa-spin text-cyan-400 mr-2"></i> Menganalisis pola riwayat log dan presensi...
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- TOOLBAR AUDIT (SEARCH, FILTER AKSI, FILTER WAKTU, EKSPOR & KOSONGKAN) -->
+        <div class="flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-2.5 sm:gap-3 border-b border-slate-800 pb-3">
+          
+          <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-2.5 flex-1 flex-wrap">
+            <!-- 🔍 SEARCH BAR REAL-TIME -->
+            <div class="relative flex-1 min-w-full sm:min-w-[220px]">
+              <input type="text" id="input-search-logs" placeholder="🔍 Cari NIS, Nama, Admin, ID HP..." class="w-full pl-3.5 pr-8 py-2 bg-slate-950 border border-slate-800 rounded-xl text-slate-100 text-xs focus:outline-none focus:border-cyan-500 font-mono transition">
+              <button id="btn-clear-search" class="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-300 text-xs hidden cursor-pointer">✕</button>
+            </div>
+
+            <!-- FILTER TIPE AKSI & WAKTU (GRID 2 KOLOM PADA MOBILE) -->
+            <div class="grid grid-cols-2 sm:flex sm:items-center gap-2">
+              <div class="flex items-center gap-1.5">
+                <span class="text-[10px] sm:text-[11px] text-slate-400 font-mono hidden sm:inline">Aksi:</span>
+                <select id="select-action-filter" class="w-full sm:w-auto px-2.5 py-2 bg-slate-950 border border-slate-800 rounded-xl text-slate-200 text-xs focus:outline-none focus:border-cyan-500 cursor-pointer font-mono">
+                  <option value="ALL">Semua Aksi</option>
+                  <option value="RESET_DEVICE">RESET_DEVICE</option>
+                  <option value="BATCH_RESET_DEVICE">BATCH_RESET_DEVICE</option>
+                  <option value="DELETE_DATA">DELETE_DATA</option>
+                  <option value="OTHER">Lainnya</option>
+                </select>
+              </div>
+
+              <div class="flex items-center gap-1.5">
+                <span class="text-[10px] sm:text-[11px] text-slate-400 font-mono hidden sm:inline">Waktu:</span>
+                <select id="select-time-filter" class="w-full sm:w-auto px-2.5 py-2 bg-slate-950 border border-slate-800 rounded-xl text-slate-200 text-xs focus:outline-none focus:border-cyan-500 cursor-pointer font-mono">
+                  <option value="ALL" selected>Semua Waktu</option>
+                  <option value="TODAY">Hari Ini</option>
+                  <option value="7DAYS">7 Hari Terakhir</option>
+                  <option value="30DAYS">30 Hari Terakhir</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <!-- AKSI: EKSPOR EXCEL & KOSONGKAN LOG -->
+          <div class="flex items-center gap-2 justify-end">
+            <button id="btn-export-excel" class="flex-1 sm:flex-initial justify-center py-2 px-3.5 bg-emerald-500/10 hover:bg-emerald-500/25 text-emerald-400 border border-emerald-500/30 font-bold text-xs rounded-xl transition flex items-center gap-1.5 cursor-pointer">
+              <i class="fa-solid fa-file-excel"></i> <span>Ekspor (.xlsx)</span>
+            </button>
+
+            <button id="btn-clear-logs" class="flex-1 sm:flex-initial justify-center py-2 px-3.5 bg-rose-950/40 hover:bg-rose-900/60 text-rose-300 border border-rose-800/60 font-bold text-xs rounded-xl transition flex items-center gap-1.5 cursor-pointer">
+              <i class="fa-solid fa-trash-can"></i> <span>Kosongkan Log</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- TABEL AUDIT TRAIL LOG RESPONSIVE -->
+        <div id="table-scroll-container" class="log-table-container overflow-x-auto max-h-[calc(100vh-280px)] min-h-[340px] sm:min-h-[460px] overflow-y-auto rounded-xl border border-slate-800 bg-slate-950/70 w-full shadow-inner">
+          <table class="w-full text-left border-collapse text-xs whitespace-nowrap">
+            <thead class="sticky top-0 bg-slate-900/95 backdrop-blur border-b border-slate-800 text-slate-300 uppercase tracking-wider font-mono text-[10px] sm:text-[11px] z-10">
+              <tr>
+                <th class="p-2.5 sm:p-3 w-10 sm:w-12 text-center border-r border-slate-800 font-bold text-slate-400">NO</th>
+                <th class="p-2.5 sm:p-3 border-r border-slate-800 font-bold text-cyan-400 min-w-[130px]">WAKTU &amp; TANGGAL</th>
+                <th class="p-2.5 sm:p-3 border-r border-slate-800 font-bold text-slate-300 min-w-[130px]">TIPE AKSI</th>
+                <th class="p-2.5 sm:p-3 border-r border-slate-800 font-bold text-slate-300 min-w-[150px]">TARGET SISWA</th>
+                <th class="p-2.5 sm:p-3 border-r border-slate-800 font-bold text-slate-300 min-w-[140px]">ADMIN EKSEKUTOR</th>
+                <th class="p-2.5 sm:p-3 border-r border-slate-800 font-bold text-slate-300 min-w-[180px]">PERANGKAT TERKAIT</th>
+                <th class="p-2.5 sm:p-3 text-center w-28 min-w-[110px]">DETAIL &amp; AKSI</th>
+              </tr>
+            </thead>
+            <tbody id="table-body-logs" class="divide-y divide-slate-800/60 text-slate-300 font-mono text-xs">
+              <tr>
+                <td colspan="7" class="p-8 text-center text-slate-500 font-sans">// Memuat data riwayat audit sistem...</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- 📄 FOOTER TABLE STATUS & PAGINATION CONTROL -->
+        <div class="flex flex-col sm:flex-row items-center justify-between gap-2.5 sm:gap-3 text-[10px] sm:text-[11px] text-slate-400 font-mono pt-1.5 border-t border-slate-800/60">
+          <div class="flex items-center justify-between sm:justify-start gap-2.5 w-full sm:w-auto">
+            <div class="flex items-center gap-1.5">
+              <span>Baris:</span>
+              <select id="select-page-size" class="px-2 py-1 bg-slate-950 border border-slate-800 rounded-lg text-slate-200 text-xs focus:outline-none focus:border-cyan-500 cursor-pointer">
+                <option value="10">10</option>
+                <option value="25" selected>25</option>
+                <option value="50">50</option>
+                <option value="100">100</option>
+                <option value="0">Semua</option>
+              </select>
+            </div>
+            <span id="page-info">Halaman 1 dari 1</span>
+          </div>
+
+          <div class="flex items-center justify-between sm:justify-end gap-2 w-full sm:w-auto">
+            <div class="flex items-center gap-1.5">
+              <button id="btn-prev-page" disabled class="px-2.5 sm:px-3 py-1 bg-slate-900 hover:bg-slate-800 border border-slate-800 rounded-lg text-slate-300 disabled:opacity-40 disabled:cursor-not-allowed transition cursor-pointer text-xs">
+                ◀ Prev
+              </button>
+              <button id="btn-next-page" disabled class="px-2.5 sm:px-3 py-1 bg-slate-900 hover:bg-slate-800 border border-slate-800 rounded-lg text-slate-300 disabled:opacity-40 disabled:cursor-not-allowed transition cursor-pointer text-xs">
+                Next ▶
+              </button>
+            </div>
+            <span id="sync-status" class="text-emerald-400 ml-1">✔ Connected</span>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- FOOTER COPYRIGHT -->
+    <div class="text-center pt-1">
+      <p class="text-[11px] sm:text-xs text-slate-500 font-mono">Audit Trail Engine &bull; Developed by Iskak Fatoni, S.Pd., Gr.</p>
+    </div>
+
+  </main>
+
+  <!-- 🔍 MODAL INSPEKTOR LOG DETAIL (JSON PAYLOAD VIEWER) -->
+  <div id="modal-log-inspector" class="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-50 hidden flex items-center justify-center p-3 sm:p-4">
+    <div class="glass-card max-w-2xl w-full p-4 sm:p-6 rounded-2xl shadow-2xl space-y-3.5 sm:space-y-4 border border-slate-700 max-h-[90vh] flex flex-col justify-between">
+      <div class="flex items-center justify-between border-b border-slate-800 pb-2.5 sm:pb-3">
+        <h3 class="text-xs sm:text-sm font-bold text-cyan-400 flex items-center gap-2 uppercase tracking-wider truncate">
+          <i class="fa-solid fa-code"></i> Detail Audit Payload: <span id="inspector-doc-id" class="font-mono text-emerald-400 truncate">ID</span>
+        </h3>
+        <button id="btn-close-inspector" class="text-slate-400 hover:text-white transition cursor-pointer p-1">
+          <i class="fa-solid fa-xmark text-lg"></i>
+        </button>
+      </div>
+
+      <div class="space-y-2.5 sm:space-y-3 overflow-hidden flex-1 flex flex-col">
+        <div class="flex items-center justify-between">
+          <span class="text-[11px] sm:text-xs text-slate-400 font-mono">Raw Metadata JSON:</span>
+          <button id="btn-copy-json" class="px-2.5 py-1 bg-slate-900 hover:bg-slate-800 border border-slate-700 text-cyan-300 rounded-lg text-xs font-mono transition flex items-center gap-1 cursor-pointer">
+            <i class="fa-solid fa-copy"></i> Salin JSON
+          </button>
+        </div>
+        <pre id="json-viewer-content" class="json-viewer max-h-[50vh] sm:max-h-80 select-all overflow-y-auto"></pre>
+      </div>
+
+      <div class="pt-2 sm:pt-3 border-t border-slate-800 flex justify-end">
+        <button type="button" id="btn-close-inspector-footer" class="py-2 px-5 bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold text-xs rounded-xl transition cursor-pointer">
+          Tutup
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- PARTICLE CANVAS ANIMATION -->
+  <script src="../../assets/js/particle/particle-bg.js"></script>
+
+  <!-- FIREBASE AUTH & SYSTEM LOGS MODULAR ENGINE -->
+  <script type="module" src="../../assets/js/database/system-logs.js?v=1.2.0"></script>
+</body>
+
+</html>

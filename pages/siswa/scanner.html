@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>PORTAL :: Scanner QR Absensi Siswa</title>
+  <link rel="preload" href="../../style/style.css" as="style">
+  <link rel="stylesheet" href="../../style/style.css">
+  <script defer src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <script defer src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body class="theme-dashboard min-h-screen flex flex-col justify-center items-center p-4 relative">
+
+  <canvas id="particle-canvas"></canvas>
+
+  <main class="max-w-md w-full my-auto space-y-4 relative z-10">
+
+    <!-- UI LOADING / PROCESSING -->
+    <div id="processing-ui" class="glass-card p-10 rounded-3xl shadow-2xl text-center space-y-4">
+      <div class="w-20 h-20 mx-auto rounded-2xl bg-cyan-500/10 flex items-center justify-center">
+        <i class="fa-solid fa-circle-notch fa-spin text-4xl text-cyan-400"></i>
+      </div>
+      <h2 class="text-xl font-bold text-white">Memproses...</h2>
+      <p class="text-xs text-slate-400 font-mono">Mohon tunggu sebentar.</p>
+    </div>
+
+    <!-- UI WEB SCANNER (FALLBACK) -->
+    <div id="web-scanner-ui" class="hidden glass-card p-5 rounded-2xl shadow-xl space-y-4 text-center">
+      <div class="flex items-center justify-between border-b border-slate-800 pb-2.5">
+        <span class="text-xs font-bold text-cyan-400 flex items-center gap-2 uppercase tracking-wider">
+          <i class="fa-solid fa-camera"></i> Web Scanner
+        </span>
+      </div>
+      <div class="relative w-full aspect-square bg-slate-950 rounded-2xl overflow-hidden border-2 border-dashed border-cyan-500/40 flex items-center justify-center">
+        <div id="reader"></div>
+        <div id="camera-loading" class="absolute inset-0 bg-slate-950/70 backdrop-blur-sm flex flex-col items-center justify-center gap-2 z-20">
+          <i class="fa-solid fa-circle-notch fa-spin text-2xl text-cyan-400"></i>
+          <p class="text-xs text-slate-200 font-mono">Membuka Kamera...</p>
+        </div>
+      </div>
+      <div class="grid grid-cols-2 gap-2">
+        <button id="btn-switch-camera" class="py-2.5 bg-slate-800 text-slate-300 font-bold text-xs rounded-xl">Putar Kamera</button>
+        <button id="btn-restart-cam" class="py-2.5 bg-slate-800 text-cyan-400 font-bold text-xs rounded-xl">Reset</button>
+      </div>
+      <button onclick="window.location.href='../../absensi.html'" class="w-full py-2.5 bg-slate-900 text-slate-400 text-xs rounded-xl">Kembali</button>
+    </div>
+
+  </main>
+
+  <script src="../../assets/js/particle/particle-bg.js"></script>
+
+  <!-- SCANNER & FIREBASE SUBMISSION SCRIPT -->
+  <script type="module" src="../../assets/js/siswa/siswa-scanner.js?v=1.0.0"></script>
+</body>
+</html>

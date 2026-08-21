@@ -4,6 +4,75 @@ Dokumen ini berisi rangkuman review perubahan kode (*code review*) terbaru yang 
 
 ---
 
+## 📅 Review [2026-08-21 13:04 WIB] - Penataan Arsitektur Sub-Modul ke Folder `pages/` (Opsi 1) & Pemeliharaan Backwards-Compatibility
+
+### 📁 1. Berkas yang Dibuat & Diperbarui
+* 📄 **[pages/guru/index.html](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/pages/guru/index.html)** `[NEW]`
+* 📄 **[pages/guru/rekap.html](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/pages/guru/rekap.html)** `[NEW]`
+* 📄 **[pages/database/db-manager.html](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/pages/database/db-manager.html)** `[NEW]`
+* 📄 **[pages/database/system-logs.html](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/pages/database/system-logs.html)** `[NEW]`
+* 📄 **[pages/link/index.html](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/pages/link/index.html)** `[NEW]`
+* 📄 **[pages/siswa/index.html](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/pages/siswa/index.html)** `[NEW]`
+* 📄 **[pages/siswa/login.html](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/pages/siswa/login.html)** `[NEW]`
+* 📄 **[pages/siswa/scanner.html](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/pages/siswa/scanner.html)** `[NEW]`
+* 📄 **[pages/siswa/result.html](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/pages/siswa/result.html)** `[NEW]`
+* 📄 **[admin.html](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/admin.html)** `[MODIFY]`
+* 📄 **[assets/js/absensi/absensi.js](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/assets/js/absensi/absensi.js)** `[MODIFY]`
+* 📄 **[assets/js/auth/auth-guard.js](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/assets/js/auth/auth-guard.js)** `[MODIFY]`
+* 📄 **[assets/js/guru/guru-dashboard.js](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/assets/js/guru/guru-dashboard.js)** `[MODIFY]`
+* 📄 **[assets/js/link/link-manager.js](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/assets/js/link/link-manager.js)** `[MODIFY]`
+* 📄 **[assets/js/database/db-manager.js](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/assets/js/database/db-manager.js)** `[MODIFY]`
+* 📄 **[assets/js/database/system-logs.js](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/assets/js/database/system-logs.js)** `[MODIFY]`
+* 📄 **[assets/js/siswa/siswa-result.js](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/assets/js/siswa/siswa-result.js)** `[MODIFY]`
+* 📄 **[guru/index.html](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/guru/index.html)** `[MODIFY]`
+* 📄 **[guru/rekap.html](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/guru/rekap.html)** `[MODIFY]`
+* 📄 **[database/db-manager.html](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/database/db-manager.html)** `[MODIFY]`
+* 📄 **[database/system-logs.html](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/database/system-logs.html)** `[MODIFY]`
+* 📄 **[link/index.html](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/link/index.html)** `[MODIFY]`
+* 📄 **[siswa/login.html](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/siswa/login.html)** `[MODIFY]`
+* 📄 **[siswa/scanner.html](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/siswa/scanner.html)** `[MODIFY]`
+* 📄 **[siswa/result.html](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/siswa/result.html)** `[MODIFY]`
+* 📄 **[sw.js](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/sw.js)** `[MODIFY]`
+
+---
+
+### 📝 2. Rincian Perubahan & Logika
+
+1. 📂 **Pusat Modul Halaman Internal ([pages/](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/pages))**:
+   - Seluruh sub-halaman aplikasi internal (`guru`, `siswa`, `database`, `link`) telah disatukan secara rapi ke dalam direktori `pages/`:
+     - `pages/guru/` (dashboard presensi QR & database rekap)
+     - `pages/siswa/` (login, scanner kamera QR, hasil presensi)
+     - `pages/database/` (Firestore DB manager & audit logs)
+     - `pages/link/` (link portal & running text)
+   - Seluruh path CSS (`../../style/style.css`), script JS (`../../assets/js/...`), dan aset gambar (`../../assets/img/...`) diatur secara presisi.
+
+2. 🔗 **Pembaruan Tautan & Navigasi Admin ([admin.html](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/admin.html))**:
+   - Semua 4 menu card di admin dashboard kini langsung membuka tautan kanonikal di folder `pages/link/index.html`, `pages/guru/index.html`, `pages/guru/rekap.html`, dan `pages/database/db-manager.html`.
+
+3. 🛡️ **Penanganan Backwards Compatibility (Jaminan Akses Tanpa Rusak / 404)**:
+   - File di lokasi folder lama (`guru/`, `database/`, `link/`, `siswa/`) diubah menjadi *instant canonical redirector*. Jika pengguna mengakses bookmark lama atau aplikasi Android APK membuka URL lama, browser akan dialihkan secara instan ke `pages/...`.
+
+4. 🤖 **Isolasi Folder `scripts/` untuk Node.js CI/CD**:
+   - Skrip [scripts/auto-alpa.js](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/scripts/auto-alpa.js) tetap berada di direktori `scripts/` terisolasi dari browser assets, menjaga pemisahan yang bersih antara *frontend client* dan *GitHub Actions backend*.
+
+5. ⚡ **Service Worker `sw.js` v10**:
+   - Versi cache dinaikkan ke `portal-iskakfatoni-v10` dengan mendaftarkan seluruh rute `pages/...` dan file redirector ke dalam `LOCAL_ASSETS`.
+
+---
+
+### 🧪 3. Petunjuk Pengujian Lokal (*Local Verification*)
+
+1. Jalankan audit komprehensif:
+   ```bash
+   node --experimental-vm-modules .gemini/antigravity-ide/brain/.../test_full_audit.js
+   ```
+   Hasil: **25 berkas HTML dan 17 berkas ES Modules valid 100% tanpa error**.
+2. Uji alur halaman:
+   - Buka `admin.html` $\rightarrow$ klik menu "Dashboard Absensi Guru", "Rekapitulasi Presensi", "Database Firestore Manager", "Kelola Link": semua halaman di `pages/` terbuka mulus.
+   - Buka URL lama seperti `guru/index.html` atau `siswa/scanner.html`: langsung diarahkan otomatis (*instant redirect*) ke `pages/guru/index.html` dan `pages/siswa/scanner.html`.
+
+---
+
 ## 📅 Review [2026-08-21 12:53 WIB] - Restrukturisasi Menyeluruh Repositori: Modularisasi JS Inline, Deduplikasi File, Global Toast Dialog, & Service Worker v9
 
 ### 📁 1. Berkas yang Diubah / Dibuat

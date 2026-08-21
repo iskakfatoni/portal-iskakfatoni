@@ -72,7 +72,7 @@ initializeAuthGuard({
 // ↩️ KEMBALI KE HUB ADMIN
 if (dom.btnLogout) {
   dom.btnLogout.addEventListener('click', () => {
-    window.location.href = "../admin.html";
+    window.location.href = window.location.pathname.includes('/pages/') ? "../../admin.html" : "../admin.html";
   });
 }
 
