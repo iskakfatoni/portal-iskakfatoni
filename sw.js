@@ -1,5 +1,5 @@
 // sw.js - Service Worker Optimized for Performance & Offline PWA
-const CACHE_NAME = 'portal-iskakfatoni-v10';
+const CACHE_NAME = 'portal-iskakfatoni-v11';
 
 const LOCAL_ASSETS = [
   './',
@@ -18,14 +18,6 @@ const LOCAL_ASSETS = [
   'pages/link/index.html',
   'pages/database/db-manager.html',
   'pages/database/system-logs.html',
-  'guru/index.html',
-  'guru/rekap.html',
-  'siswa/login.html',
-  'siswa/scanner.html',
-  'siswa/result.html',
-  'link/index.html',
-  'database/db-manager.html',
-  'database/system-logs.html',
   'style/style.css',
   'assets/manifest.json',
   'assets/img/foto_asn_profile.webp',

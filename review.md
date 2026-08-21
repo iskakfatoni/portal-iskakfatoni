@@ -4,6 +4,49 @@ Dokumen ini berisi rangkuman review perubahan kode (*code review*) terbaru yang 
 
 ---
 
+## 📅 Review [2026-08-21 13:21 WIB] - Pembersihan Total Folder Legacy (`guru/`, `siswa/`, `database/`, `link/`) & Service Worker v11
+
+### 📁 1. Berkas yang Dihapus & Diperbarui
+* 🗑️ `guru/index.html` `[DELETED]`
+* 🗑️ `guru/rekap.html` `[DELETED]`
+* 🗑️ `database/db-manager.html` `[DELETED]`
+* 🗑️ `database/system-logs.html` `[DELETED]`
+* 🗑️ `link/index.html` `[DELETED]`
+* 🗑️ `siswa/index.html` `[DELETED]`
+* 🗑️ `siswa/login.html` `[DELETED]`
+* 🗑️ `siswa/scanner.html` `[DELETED]`
+* 🗑️ `siswa/result.html` `[DELETED]`
+* 📄 **[sw.js](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/sw.js)** `[MODIFY]`
+
+---
+
+### 📝 2. Rincian Baris & Logika yang Diperbarui
+
+1. 🧹 **Penghapusan Folder Legacy**:
+   - Seluruh folder lama di root (`guru/`, `siswa/`, `database/`, `link/`) telah dihapus secara permanen dari repositori.
+   - Semua modul fungsional sekarang secara tunggal dan rapi bermukim di dalam folder [pages/](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/pages):
+     - `pages/guru/` (Dashboard Sesi & Rekap)
+     - `pages/siswa/` (Login, Scanner QR, & Result)
+     - `pages/database/` (Firestore Manager & System Logs)
+     - `pages/link/` (Link & Announcement Manager)
+
+2. ⚡ **Pembaruan Service Worker v11 (`sw.js`)**:
+   - Entri path folder lama dihapus dari daftar `LOCAL_ASSETS`.
+   - Versi cache dinaikkan menjadi `portal-iskakfatoni-v11` untuk memastikan seluruh klien memperbarui cache PWA secara otomatis dan membuang cache lama.
+
+---
+
+### 🧪 3. Petunjuk Pengujian Lokal (*Local Verification*)
+
+1. Jalankan audit:
+   ```bash
+   node --experimental-vm-modules .gemini/antigravity-ide/brain/.../test_full_audit.js
+   ```
+   Hasil: **16 berkas HTML dan 17 berkas ES Modules valid 100% tanpa error**.
+2. Root repositori kini sangat bersih hanya menyisakan landing page, folder `pages/`, `assets/`, `scripts/`, dan `style/`.
+
+---
+
 ## 📅 Review [2026-08-21 13:04 WIB] - Penataan Arsitektur Sub-Modul ke Folder `pages/` (Opsi 1) & Pemeliharaan Backwards-Compatibility
 
 ### 📁 1. Berkas yang Dibuat & Diperbarui
