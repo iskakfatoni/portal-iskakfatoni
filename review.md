@@ -4,6 +4,71 @@ Dokumen ini berisi rangkuman review perubahan kode (*code review*) terbaru yang 
 
 ---
 
+## 📅 Review [2026-08-21 12:53 WIB] - Restrukturisasi Menyeluruh Repositori: Modularisasi JS Inline, Deduplikasi File, Global Toast Dialog, & Service Worker v9
+
+### 📁 1. Berkas yang Diubah / Dibuat
+* 📄 **[assets/js/utils/toast.js](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/assets/js/utils/toast.js)** `[NEW]`
+* 📄 **[assets/js/portal/portal-links.js](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/assets/js/portal/portal-links.js)** `[NEW]`
+* 📄 **[assets/js/admin/admin-auth.js](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/assets/js/admin/admin-auth.js)** `[NEW]`
+* 📄 **[assets/js/link/link-manager.js](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/assets/js/link/link-manager.js)** `[NEW]`
+* 📄 **[assets/js/guru/guru-dashboard.js](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/assets/js/guru/guru-dashboard.js)** `[NEW]`
+* 📄 **[assets/js/absensi/absensi.js](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/assets/js/absensi/absensi.js)** `[NEW]`
+* 📄 **[assets/js/siswa/siswa-login.js](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/assets/js/siswa/siswa-login.js)** `[NEW]`
+* 📄 **[assets/js/siswa/siswa-scanner.js](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/assets/js/siswa/siswa-scanner.js)** `[NEW]`
+* 📄 **[assets/js/siswa/siswa-result.js](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/assets/js/siswa/siswa-result.js)** `[NEW]`
+* 📄 **[portal.html](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/portal.html)** `[MODIFY]`
+* 📄 **[admin.html](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/admin.html)** `[MODIFY]`
+* 📄 **[link/index.html](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/link/index.html)** `[MODIFY]`
+* 📄 **[guru/index.html](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/guru/index.html)** `[MODIFY]`
+* 📄 **[absensi.html](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/absensi.html)** `[MODIFY]`
+* 📄 **[siswa/login.html](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/siswa/login.html)** `[MODIFY]`
+* 📄 **[siswa/scanner.html](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/siswa/scanner.html)** `[MODIFY]`
+* 📄 **[siswa/result.html](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/siswa/result.html)** `[MODIFY]`
+* 📄 **[download.html](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/download.html)** `[MODIFY]`
+* 📄 **[iphone.html](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/iphone.html)** `[MODIFY]`
+* 📄 **[sw.js](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/sw.js)** `[MODIFY]`
+* 📄 **[style/style.css](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/style/style.css)** `[MODIFY]`
+
+---
+
+### 📝 2. Rincian Baris & Logika yang Diperbarui
+
+1. 📂 **Pemisahan Modular JavaScript (*Script Modularization*)**:
+   - Memindahkan seluruh kode JavaScript inline dari seluruh berkas HTML ke modul terisolasi di dalam `assets/js/`:
+     - `guru/index.html` $\rightarrow$ `assets/js/guru/guru-dashboard.js`
+     - `link/index.html` $\rightarrow$ `assets/js/link/link-manager.js`
+     - `admin.html` $\rightarrow$ `assets/js/admin/admin-auth.js`
+     - `portal.html` $\rightarrow$ `assets/js/portal/portal-links.js`
+     - `absensi.html` $\rightarrow$ `assets/js/absensi/absensi.js`
+     - `siswa/login.html` $\rightarrow$ `assets/js/siswa/siswa-login.js`
+     - `siswa/scanner.html` $\rightarrow$ `assets/js/siswa/siswa-scanner.js`
+     - `siswa/result.html` $\rightarrow$ `assets/js/siswa/siswa-result.js`
+   - Semua halaman HTML kini bebas dari script inline panjang, meningkatkan maintainability dan efisiensi browser caching.
+
+2. 🗂️ **Konsolidasi & Eliminasi Berkas Redundan (*File Deduplication*)**:
+   - Menyederhanakan `download.html` dan `iphone.html` menjadi halaman pengalihan kanonikal instan (*instant canonical redirect*) ke `perangkat.html`.
+
+3. 🔔 **Sistem Notifikasi & Dialog Konfirmasi Global ([assets/js/utils/toast.js](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/assets/js/utils/toast.js))**:
+   - Membangun `ToastManager` (`showToast`, `showConfirm`) bertema glassmorphism untuk menggantikan dialog `alert()` dan `confirm()` bawaan browser yang kaku.
+
+4. ⚡ **Sinkronisasi Service Worker PWA ([sw.js](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/sw.js))**:
+   - Memperbarui nama cache ke `portal-iskakfatoni-v9`.
+   - Mendaftarkan seluruh 36 aset utama (HTML, CSS, gambar, dan seluruh modul JS baru) ke `LOCAL_ASSETS`.
+   - Mengimplementasikan strategi *Network-First* untuk dokumen HTML dan *Stale-While-Revalidate* untuk aset statis.
+
+5. 🎨 **Table of Contents pada Master Stylesheet ([style/style.css](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/style/style.css))**:
+   - Menambahkan peta navigasi bab (*Table of Contents*) di awal file CSS agar struktur style mudah ditelusuri.
+
+---
+
+### 🧪 3. Petunjuk Pengujian Lokal (*Local Verification*)
+
+1. Jalankan audit skrip lokal: pastikan seluruh 16 file HTML dan 17 file JS terverifikasi tanpa *syntax error* (`node --experimental-vm-modules`).
+2. Buka `portal.html`, `admin.html`, `guru/index.html`, `link/index.html`, dan `absensi.html`: pastikan seluruh fitur (QR real-time, drag & drop link, device binding, auth guard) berjalan mulus.
+3. Buka `download.html` dan `iphone.html`: pastikan langsung dialihkan secara otomatis ke `perangkat.html`.
+
+---
+
 ## 📅 Review [2026-08-21 10:22 WIB] - Perbaikan Layout Grid Metrik & Penyempurnaan Tata Letak AI Radar pada system-logs.html
 
 ### 📁 1. Berkas yang Diperbarui

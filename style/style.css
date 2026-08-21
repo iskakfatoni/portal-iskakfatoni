@@ -1,25 +1,19 @@
 /* ==========================================================================
-   PORTAL::IskakFatoni — STYLE.CSS TUNGGAL
+   PORTAL::IskakFatoni — STYLE.CSS MASTER DESIGN SYSTEM
    ==========================================================================
-   File CSS gabungan untuk SELURUH halaman (index, portal, admin, absensi,
-   guru/index, guru/rekap, link/index, database/db-manager, siswa/index,
-   siswa/login).
-
-   Cara kerja:
-   - Semua warna & nilai tema disimpan sebagai CSS Variable di :root, supaya
-     kalau mau ganti tema/warna cukup ubah bagian ":root" di file ini saja.
-   - Ada 2 "keluarga tampilan" (theme) dalam 1 file ini:
-       1) THEME "GLASS"      -> body.theme-glass
-          Kartu kaca (glassmorphism) sempit di tengah layar.
-          Dipakai oleh: index.html, portal.html, admin.html, absensi.html
-       2) THEME "DASHBOARD"  -> body.theme-dashboard
-          Dashboard gelap lebar penuh (dipakai bersama Tailwind CDN).
-          Dipakai oleh: guru/index.html, link/index.html,
-                        database/db-manager.html, siswa/index.html
-   - guru/rekap.html & siswa/login.html memakai Tailwind + tailwind.config
-     bawaan halaman itu sendiri (warna sudah selaras dengan variabel di
-     bawah), sehingga tidak butuh class theme di atas — cukup menyertakan
-     file ini untuk reset dasar & konsistensi.
+   DAFTAR ISI (TABLE OF CONTENTS):
+   --------------------------------------------------------------------------
+   1.  CSS VARIABLES (Tema Glass, Dashboard, Palette, Tokens)
+   2.  RESET GLOBAL & UTILITY (Box-sizing, Scroll, Auth Guard)
+   3.  THEME "GLASS" (Kartu Kaca Mobile, Profil, Avatar, Bio, Tombol)
+   4.  PENGUMUMAN DINAMIS & MARQUEE
+   5.  AUDIO PLAYER WIDGET
+   6.  PEMANTAU JAM WAKTU REAL-TIME (Digital Clock)
+   7.  HALAMAN: absensi.html & admin.html (Login & Form Card)
+   8.  HALAMAN: perangkat.html / download.html (Deteksi iOS & Android)
+   9.  THEME "DASHBOARD" (Metric Cards, Audit Trail, Payloads, Resizers)
+   10. HALAMAN: link/index.html (Drag & Drop Sorting)
+   11. SISTEM NOTIFIKASI GLOBAL (Toast & Glassmorphic Modal Dialog)
    ========================================================================== */
 
 /* ==========================================================================
