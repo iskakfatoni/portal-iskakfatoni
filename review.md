@@ -4,6 +4,40 @@ Dokumen ini berisi rangkuman review perubahan kode (*code review*) terbaru yang 
 
 ---
 
+## 📅 Review [2026-08-21 14:16 WIB] - Peningkatan Akurasi Algoritma AI Radar: Deteksi Presisi Multi-Account on Single Device Berbasis `system_logs`
+
+### 📁 1. Berkas yang Diperbarui
+* 📄 **[assets/js/database/ai-insights.js](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/assets/js/database/ai-insights.js)** `[MODIFY]`
+
+---
+
+### 📝 2. Rincian Baris & Logika yang Diperbarui
+
+1. 🤖 **Korelasi 3-Vektor Multi-Akun ([assets/js/database/ai-insights.js](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/assets/js/database/ai-insights.js))**:
+   - Memperluas fungsi `detectSharedDevices(logAbsensi, siswaList, systemLogs)` dengan menganalisis silang (*cross-correlation*) 3 sumber data:
+     1. **Vektor A (`system_logs`)**: Melacak jejak historis perangkat (`old_device_id`, `device_id`, `new_device_id`) yang pernah di-reset/diikat pada akun siswa lain.
+     2. **Vektor B (`log_absensi`)**: Mendeteksi tabrakan presensi pada hari yang sama (*same-day collision*) maupun hari yang berbeda.
+     3. **Vektor C (`siswa` database)**: Mendeteksi duplikasi aktif ID perangkat yang terikat secara bersamaan pada lebih dari 1 akun siswa.
+   - **Kalkulasi Tingkat Risiko (Severity)**:
+     - `HIGH`: Jika terdeteksi *same-day collision* (2+ siswa absen dengan 1 HP di tanggal yang sama), 2+ akun siswa aktif terikat ke ID yang sama, atau perangkat terhubung $\ge 3$ akun.
+     - `MEDIUM`: Jika terdeteksi riwayat perpindahan perangkat antar-akun siswa via `system_logs`.
+   - **Forensik Bukti Jejak Digital**:
+     - Setiap kartu temuan menyajikan daftar bukti kronologis terperinci lengkap dengan label asal sumber data (`[system_logs]`, `[log_absensi]`, `[siswa]`).
+
+---
+
+### 🧪 3. Petunjuk Pengujian Lokal (*Local Verification*)
+
+1. Jalankan unit test korelasi AI Radar:
+   ```bash
+   node scratch/test_ai_radar.js
+   ```
+   Hasil: **✅ TEST PASSED: Successfully correlated system_logs and log_absensi to detect multi-account device sharing!**
+2. Buka halaman Audit Logs / DB Manager:
+   - Panel AI Radar akan otomatis mengidentifikasi jika ada 1 ID HP yang pernah di-reset untuk Siswa A lalu kemudian digunakan presensi oleh Siswa B.
+
+---
+
 ## 📅 Review [2026-08-21 13:21 WIB] - Pembersihan Total Folder Legacy (`guru/`, `siswa/`, `database/`, `link/`) & Service Worker v11
 
 ### 📁 1. Berkas yang Dihapus & Diperbarui

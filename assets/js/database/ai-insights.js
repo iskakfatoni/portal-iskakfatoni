@@ -17,7 +17,7 @@ export const AIInsightEngine = {
     findings.push(...resetFindings);
 
     // 1.2 Anomali 2: Shared Device Collision (1 HP Banyak Siswa)
-    const sharedFindings = this.detectSharedDevices(logAbsensi, siswaList);
+    const sharedFindings = this.detectSharedDevices(logAbsensi, siswaList, systemLogs);
     findings.push(...sharedFindings);
 
     // 1.3 Anomali 3: Chronic Last-Minute Attendance (Absen Menit Terakhir)
@@ -55,11 +55,11 @@ export const AIInsightEngine = {
     const studentResetMap = new Map();
 
     systemLogs.forEach((docSnap) => {
-      const d = docSnap.data();
+      const d = typeof docSnap.data === 'function' ? docSnap.data() : docSnap;
       const action = (d.action || '').toUpperCase();
       if (!action.includes('RESET')) return;
 
-      const nis = (d.target_nis || '').trim();
+      const nis = (d.target_nis || d.nis || '').trim();
       if (!nis || nis === '-') return;
 
       let tsMs = 0;
@@ -72,17 +72,17 @@ export const AIInsightEngine = {
         if (!studentResetMap.has(nis)) {
           studentResetMap.set(nis, {
             nis,
-            nama: d.target_name || 'Siswa',
+            nama: d.target_name || d.nama_siswa || 'Siswa',
             resets: []
           });
         }
         studentResetMap.get(nis).resets.push({
-          docId: docSnap.id,
+          docId: docSnap.id || '-',
           tsMs,
           timeStr: new Date(tsMs).toLocaleString('id-ID', { dateStyle: 'medium', timeStyle: 'short' }),
           admin: d.admin_email || 'Admin',
-          oldDeviceId: d.old_device_id || '-',
-          oldDeviceInfo: d.old_device_info || '-'
+          oldDeviceId: d.old_device_id || d.device_id || '-',
+          oldDeviceInfo: d.old_device_info || d.device_info || '-'
         });
       }
     });
@@ -122,68 +122,254 @@ export const AIInsightEngine = {
   },
 
   // -----------------------------------------------------------------
-  // 3. DETEKTOR 2: SHARED DEVICE COLLISION (1 HP BANYAK SISWA)
+  // 3. DETEKTOR 2: SHARED DEVICE & MULTI-ACCOUNT COLLISION (1 HP BANYAK SISWA)
+  // Analisis komprehensif 3-Vektor:
+  // - Vektor A (system_logs): Riwayat reset & binding perangkat pada banyak siswa
+  // - Vektor B (log_absensi): Jejak presensi siswa dengan hardware ID yang sama
+  // - Vektor C (siswaList): Status aktif ganda pada koleksi siswa saat ini
   // -----------------------------------------------------------------
-  detectSharedDevices(logAbsensi, siswaList) {
+  detectSharedDevices(logAbsensi = [], siswaList = [], systemLogs = []) {
     const findings = [];
-    const deviceDailyMap = new Map(); // Key: `${tanggal}__${device_id}`
+    const deviceMasterMap = new Map(); // Key: normalized device_id
 
-    logAbsensi.forEach((docSnap) => {
-      const d = docSnap.data();
-      const devId = (d.device_id || '').trim();
-      const tanggal = (d.tanggal || '').trim();
-      const nis = (d.nis || '').trim();
-      const nama = d.nama_siswa || d.nama || 'Siswa';
-      const kelas = d.nama_kelas || d.id_kelas || '-';
+    // Helper normalisasi ID Perangkat
+    const cleanDeviceId = (id) => {
+      if (!id) return '';
+      const str = String(id).trim();
+      if (str === '' || str === '-' || str.toLowerCase() === 'null' || str.toLowerCase() === 'undefined') return '';
+      return str;
+    };
 
-      if (!devId || devId === '-' || !tanggal || !nis || !d.status || d.status.toLowerCase().includes('tidak')) return;
-
-      const groupKey = `${tanggal}__${devId}`;
-      if (!deviceDailyMap.has(groupKey)) {
-        deviceDailyMap.set(groupKey, {
-          tanggal,
-          deviceId: devId,
-          students: new Map()
+    const getDeviceEntry = (devId, devInfo = '') => {
+      const cleanId = cleanDeviceId(devId);
+      if (!cleanId) return null;
+      if (!deviceMasterMap.has(cleanId)) {
+        deviceMasterMap.set(cleanId, {
+          deviceId: cleanId,
+          deviceInfo: devInfo && devInfo !== '-' ? devInfo : 'Perangkat Mobile',
+          students: new Map(), // nis -> { nis, nama, kelas, sources: Set(), events: [] }
+          sameDayCollisions: new Map(), // tanggal -> Set of nis
+          allEvents: [] // chronological trace
         });
       }
+      const entry = deviceMasterMap.get(cleanId);
+      if (devInfo && devInfo !== '-' && entry.deviceInfo === 'Perangkat Mobile') {
+        entry.deviceInfo = devInfo;
+      }
+      return entry;
+    };
 
-      const group = deviceDailyMap.get(groupKey);
-      if (!group.students.has(nis)) {
-        group.students.set(nis, {
+    // ---------------------------------------------------------------
+    // 3.1 VEKTOR A: ANALISIS AUDIT TRAIL SYSTEM_LOGS
+    // ---------------------------------------------------------------
+    systemLogs.forEach((docSnap) => {
+      const d = typeof docSnap.data === 'function' ? docSnap.data() : docSnap;
+      const nis = (d.target_nis || d.nis || '').trim();
+      const nama = d.target_name || d.nama_siswa || d.nama || 'Siswa';
+      const kelas = d.target_kelas || d.kelas || '-';
+      const action = (d.action || '').toUpperCase();
+      
+      // Ambil device ID dari berbagai kemungkinan field system_logs
+      const devId = cleanDeviceId(d.old_device_id || d.device_id || d.new_device_id || d.hw_fingerprint);
+      const devInfo = d.old_device_info || d.device_info || '-';
+
+      if (!devId || !nis || nis === '-') return;
+
+      let tsMs = 0;
+      if (d.timestamp && d.timestamp.seconds) tsMs = d.timestamp.seconds * 1000;
+      else if (d.created_at && d.created_at.seconds) tsMs = d.created_at.seconds * 1000;
+      else if (d.timestamp) tsMs = new Date(d.timestamp).getTime();
+
+      const timeStr = tsMs ? new Date(tsMs).toLocaleString('id-ID', { dateStyle: 'medium', timeStyle: 'short' }) : 'Riwayat Log';
+
+      const entry = getDeviceEntry(devId, devInfo);
+      if (!entry) return;
+
+      if (!entry.students.has(nis)) {
+        entry.students.set(nis, {
           nis,
           nama,
           kelas,
-          waktu: d.waktu || '-',
-          mapel: d.nama_mapel || '-'
+          sources: new Set(),
+          events: []
         });
+      }
+      const st = entry.students.get(nis);
+      st.sources.add('system_logs');
+      if (st.nama === 'Siswa' && nama !== 'Siswa') st.nama = nama;
+      if (st.kelas === '-' && kelas !== '-') st.kelas = kelas;
+
+      const eventDesc = `[system_logs] ${action} oleh ${d.admin_email || 'Admin'} (Info: ${devInfo})`;
+      st.events.push({ timeStr, tsMs, desc: eventDesc });
+      entry.allEvents.push({ timeStr, tsMs, nis, nama, desc: eventDesc });
+    });
+
+    // ---------------------------------------------------------------
+    // 3.2 VEKTOR B: ANALISIS LOG_ABSENSI & SAME-DAY COLLISION
+    // ---------------------------------------------------------------
+    logAbsensi.forEach((docSnap) => {
+      const d = typeof docSnap.data === 'function' ? docSnap.data() : docSnap;
+      const devId = cleanDeviceId(d.device_id);
+      const devInfo = d.device_info || '-';
+      const nis = (d.nis || '').trim();
+      const nama = d.nama_siswa || d.nama || 'Siswa';
+      const kelas = d.nama_kelas || d.id_kelas || '-';
+      const tanggal = (d.tanggal || '').trim();
+      const waktu = d.waktu || '-';
+      const mapel = d.nama_mapel || '-';
+
+      if (!devId || !nis || !d.status || d.status.toLowerCase().includes('tidak')) return;
+
+      let tsMs = 0;
+      if (d.created_at && d.created_at.seconds) tsMs = d.created_at.seconds * 1000;
+      else if (d.tanggal) tsMs = new Date(d.tanggal).getTime();
+
+      const entry = getDeviceEntry(devId, devInfo);
+      if (!entry) return;
+
+      if (!entry.students.has(nis)) {
+        entry.students.set(nis, {
+          nis,
+          nama,
+          kelas,
+          sources: new Set(),
+          events: []
+        });
+      }
+      const st = entry.students.get(nis);
+      st.sources.add('log_absensi');
+      if (st.nama === 'Siswa' && nama !== 'Siswa') st.nama = nama;
+      if (st.kelas === '-' && kelas !== '-') st.kelas = kelas;
+
+      const timeStr = `${tanggal} (${waktu})`;
+      const eventDesc = `[log_absensi] Presensi Mapel: ${mapel} (${kelas})`;
+      st.events.push({ timeStr, tsMs, desc: eventDesc });
+      entry.allEvents.push({ timeStr, tsMs, nis, nama, desc: eventDesc });
+
+      // Catat tabrakan tanggal yang sama
+      if (tanggal) {
+        if (!entry.sameDayCollisions.has(tanggal)) {
+          entry.sameDayCollisions.set(tanggal, new Set());
+        }
+        entry.sameDayCollisions.get(tanggal).add(nis);
       }
     });
 
-    // Cari tabrakan device ID yang dipakai oleh >= 2 siswa pada hari yang sama
-    deviceDailyMap.forEach((entry, key) => {
-      if (entry.students.size >= 2) {
-        const studentList = Array.from(entry.students.values());
-        const studentNames = studentList.map((s) => `${s.nama} (${s.nis})`).join(', ');
+    // ---------------------------------------------------------------
+    // 3.3 VEKTOR C: ANALISIS KOLEKSI SISWA AKTIF (ACTIVE CONFLICT)
+    // ---------------------------------------------------------------
+    siswaList.forEach((docSnap) => {
+      const d = typeof docSnap.data === 'function' ? docSnap.data() : docSnap;
+      const devId = cleanDeviceId(d.device_id || d.device_token || d.mac_address);
+      const devInfo = d.device_info || d.device_model || '-';
+      const nis = (d.nis || (docSnap.id && !docSnap.id.includes('-') ? docSnap.id : '')).trim();
+      const nama = d.nama_siswa || d.nama || 'Siswa';
+      const kelas = d.nama_kelas || d.id_kelas || '-';
 
-        findings.push({
-          id: `anomaly-shared-${entry.tanggal}-${entry.deviceId.substring(0, 8)}`,
-          type: 'SHARED_DEVICE',
-          categoryLabel: 'Device Sharing (Tabrakan HP)',
-          severity: 'HIGH',
-          nis: studentList.map((s) => s.nis).join(' / '),
-          nama: studentList.map((s) => s.nama).join(', '),
-          kelas: studentList.map((s) => s.kelas).join(', '),
-          title: `Penggunaan 1 HP Bersama (${entry.students.size} Siswa pada ${entry.tanggal})`,
-          summary: `Perangkat hardware ID [${entry.deviceId}] terdeteksi digunakan untuk melakukan presensi oleh ${entry.students.size} siswa berbeda pada hari yang sama: ${studentNames}.`,
-          recommendation: `Panggil siswa terkait untuk klarifikasi. Satu perangkat smartphone hanya diizinkan untuk 1 akun siswa. Lakukan reset perangkat jika diperlukan.`,
-          evidence: studentList.map((s) => ({
-            label: `${entry.tanggal} (${s.waktu})`,
-            desc: `Siswa: ${s.nama} [NIS: ${s.nis}] - ${s.kelas} (Mapel: ${s.mapel})`
-          })),
-          rawEvidenceCount: entry.students.size,
-          latestTimestamp: new Date(entry.tanggal).getTime() || Date.now()
+      if (!devId || !nis) return;
+
+      const entry = getDeviceEntry(devId, devInfo);
+      if (!entry) return;
+
+      if (!entry.students.has(nis)) {
+        entry.students.set(nis, {
+          nis,
+          nama,
+          kelas,
+          sources: new Set(),
+          events: []
         });
       }
+      const st = entry.students.get(nis);
+      st.sources.add('siswa_active');
+      if (st.nama === 'Siswa' && nama !== 'Siswa') st.nama = nama;
+      if (st.kelas === '-' && kelas !== '-') st.kelas = kelas;
+
+      const eventDesc = `[siswa] Status Terikat Aktif di Database (Info: ${devInfo})`;
+      st.events.push({ timeStr: 'Status Saat Ini', tsMs: Date.now(), desc: eventDesc });
+      entry.allEvents.push({ timeStr: 'Status Aktif', tsMs: Date.now(), nis, nama, desc: eventDesc });
+    });
+
+    // ---------------------------------------------------------------
+    // 3.4 SINTESIS TEMUAN & KALKULASI TINGKAT RISIKO
+    // ---------------------------------------------------------------
+    deviceMasterMap.forEach((entry, devId) => {
+      const distinctStudentsCount = entry.students.size;
+      if (distinctStudentsCount < 2) return; // Tidak ada anomali multi-akun jika hanya 1 siswa
+
+      const studentList = Array.from(entry.students.values());
+      const studentSummaryStr = studentList.map((s) => `${s.nama} (${s.nis})`).join(', ');
+
+      // Cari apakah ada tabrakan pada hari yang sama (Same-day collision)
+      let sameDayCount = 0;
+      const sameDayDates = [];
+      entry.sameDayCollisions.forEach((nisSet, tanggal) => {
+        if (nisSet.size >= 2) {
+          sameDayCount += nisSet.size;
+          sameDayDates.push(tanggal);
+        }
+      });
+
+      // Hitung keterlibatan system_logs & status aktif
+      const systemLogsInvolvedCount = studentList.filter((s) => s.sources.has('system_logs')).length;
+      const activeConflictCount = studentList.filter((s) => s.sources.has('siswa_active')).length;
+
+      // Evaluasi Tingkat Risiko:
+      // HIGH jika:
+      // 1. Terjadi same-day attendance collision (2 siswa absen dengan 1 HP di hari yang sama)
+      // 2. Ada 2+ akun siswa aktif yang terikat ke 1 device ID yang sama
+      // 3. Jumlah siswa >= 3 akun
+      const isHighRisk = sameDayDates.length > 0 || activeConflictCount >= 2 || distinctStudentsCount >= 3;
+      const severity = isHighRisk ? 'HIGH' : 'MEDIUM';
+
+      // Susun ringkasan bukti kronologis
+      entry.allEvents.sort((a, b) => (b.tsMs || 0) - (a.tsMs || 0));
+      const latestTs = entry.allEvents.length > 0 ? entry.allEvents[0].tsMs : Date.now();
+
+      let title = '';
+      let summary = '';
+      let recommendation = '';
+
+      if (sameDayDates.length > 0) {
+        title = `1 HP Dipakai Bersama (${distinctStudentsCount} Siswa • Tabrakan Presensi Tanggal ${sameDayDates.slice(0, 2).join(', ')})`;
+        summary = `Hardware ID [${devId}] (${entry.deviceInfo}) terdeteksi digunakan untuk presensi oleh ${distinctStudentsCount} siswa berbeda pada tanggal yang sama (${sameDayDates.join(', ')}): ${studentSummaryStr}. Terkonfirmasi melalui log presensi dan audit trail sistem.`;
+        recommendation = `Segera panggil siswa-siswa terkait untuk investigasi titip presensi. Lakukan reset perangkat pada siswa yang meminjamkan/meminjam HP.`;
+      } else if (systemLogsInvolvedCount >= 1 && distinctStudentsCount >= 2) {
+        title = `Jejak Perangkat Multi-Akun (${distinctStudentsCount} Siswa Terhubung ke 1 HP)`;
+        summary = `Hardware ID [${devId}] (${entry.deviceInfo}) tercatat berpindah tangan atau digunakan bergantian oleh ${distinctStudentsCount} akun siswa (${studentSummaryStr}) berdasarkan riwayat reset di system_logs dan jejak presensi.`;
+        recommendation = `Konfirmasi kepemilikan riil smartphone kepada wali kelas/orang tua untuk memastikan ponsel tidak disalahgunakan untuk presensi akun lain.`;
+      } else {
+        title = `Duplikasi ID Perangkat (${distinctStudentsCount} Akun Siswa)`;
+        summary = `Perangkat dengan ID [${devId}] terikat pada ${distinctStudentsCount} akun siswa: ${studentSummaryStr}.`;
+        recommendation = `Lakukan verifikasi identitas perangkat di Database Manager dan reset perangkat pada akun yang tidak sah.`;
+      }
+
+      // Susun list bukti (maksimal 6 bukti terbaik)
+      const evidenceItems = [];
+      studentList.forEach((s) => {
+        const srcLabels = Array.from(s.sources).join(', ');
+        const latestEvent = s.events[s.events.length - 1];
+        evidenceItems.push({
+          label: `${s.nama} [NIS: ${s.nis}]`,
+          desc: `Terdeteksi via [${srcLabels}] • ${latestEvent ? latestEvent.desc : 'Tercatat di sistem'}`
+        });
+      });
+
+      findings.push({
+        id: `anomaly-shared-${devId.substring(0, 10)}`,
+        type: 'SHARED_DEVICE',
+        categoryLabel: 'Device Sharing (Multi-Akun 1 HP)',
+        severity,
+        nis: studentList.map((s) => s.nis).join(' / '),
+        nama: studentList.map((s) => s.nama).join(', '),
+        kelas: studentList.map((s) => s.kelas).filter((k) => k !== '-').join(', ') || '-',
+        title,
+        summary,
+        recommendation,
+        evidence: evidenceItems,
+        rawEvidenceCount: distinctStudentsCount,
+        latestTimestamp: latestTs
+      });
     });
 
     return findings;
