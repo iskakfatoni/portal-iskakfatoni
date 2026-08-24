@@ -2896,6 +2896,37 @@ Dokumen ini berisi rangkuman review perubahan kode (*code review*) terbaru yang 
    - Buka **Database Manager** (`pages/database/db-manager.html`) pada koleksi `log_absensi`.
    - Kolom `orientasi_layar` akan menampilkan misal: `Portrait 📱↕️ (393x873)` atau `Landscape 📱↔️ (873x393)`.
 
+---
+
+## 📅 Review [2026-08-25 06:32 WIB] - Optimasi Layout Responsif Total pada Halaman Rekapitulasi Presensi Guru (pages/guru/rekap.html)
+
+### 📁 1. Berkas yang Diubah
+* 📄 **[pages/guru/rekap.html](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/pages/guru/rekap.html)**
+
+---
+
+### 📝 2. Rincian Baris & Logika yang Diperbarui
+
+1. **Header & Navbar Responsif**:
+   - Menyesuaikan pembungkus header (`flex-col sm:flex-row`) dan ukuran judul agar tidak terpotong di layar HP kecil.
+   - Tombol "Dashboard Sesi" disesuaikan menjadi *full-width* pada seluler untuk pengalaman sentuh yang mudah.
+
+2. **Panel Filter & Tombol Aksi**:
+   - Mengurutkan kotak centang (*checkbox*) filter "Absensi Hari Ini" dan "Auto Tidak Hadir" ke posisi vertikal rapi di layar HP dan horizontal di layar tablet/desktop.
+   - Mengubah grid filter dropdown (`select-sesi` & `filter-kelas`) serta tombol ekspor Excel (`.xlsx` Baris & Matriks) menjadi `grid-cols-1 sm:grid-cols-2 lg:grid-cols-4` agar tersusun presisi di semua ukuran layar.
+
+3. **Container Tabel & Scroll Touch**:
+   - Mengintegrasikan `.log-table-container` dengan pembatas tinggi responsif `max-h-[calc(100vh-280px)]` dan *smooth touch scroll* untuk kenyamanan navigasi tabel presensi pada HP/Tablet.
+
+---
+
+### 🧪 3. Petunjuk Pengujian Lokal (*Local Verification*)
+
+1. Buka peramban di [http://localhost:8080/pages/guru/rekap.html](http://localhost:8080/pages/guru/rekap.html).
+2. Aktifkan *Toggle Device Toolbar* (Mobile View misal iPhone SE / Galaxy S20).
+3. Verifikasi seluruh elemen (Header, Filter Checkbox, Select Sesi/Kelas, Tombol Ekspor Excel, dan Tabel Rekapitulasi) tersusun rapi, responsif, dan tidak ada elemen yang melimpah (*overflow*) keluar dari layar.
+
+
 
 
 
