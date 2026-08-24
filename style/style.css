@@ -1859,29 +1859,255 @@ input[type="date"]::-webkit-calendar-picker-indicator:hover {
 /* ==========================================================================
    11. SISTEM NOTIFIKASI GLOBAL (Toast & Glassmorphic Modal Dialog)
    ========================================================================== */
-#portal-toast-container {
-  pointer-events: none;
-  z-index: 10000;
+#portal-toast-container,
+.portal-toast-container-root {
+  position: fixed !important;
+  bottom: 1.5rem !important;
+  right: 1.5rem !important;
+  z-index: 20000 !important;
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 0.75rem !important;
+  max-width: calc(100vw - 2rem) !important;
+  width: 380px !important;
+  pointer-events: none !important;
 }
 
 .portal-toast {
-  pointer-events: auto;
-  min-width: 280px;
-  animation: toastSlideIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+  pointer-events: auto !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 0.875rem !important;
+  padding: 0.875rem 1.125rem !important;
+  border-radius: 1rem !important;
+  border: 1.5px solid rgba(255, 255, 255, 0.12) !important;
+  background: rgba(15, 23, 42, 0.92) !important;
+  backdrop-filter: blur(20px) !important;
+  -webkit-backdrop-filter: blur(20px) !important;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.4), 0 0 15px rgba(255, 255, 255, 0.05) !important;
+  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1) !important;
+  font-size: 0.85rem !important;
+  font-weight: 600 !important;
+  line-height: 1.4 !important;
+  color: #f8fafc !important;
+  opacity: 0;
+  transform: translateX(30px);
 }
 
-@keyframes toastSlideIn {
-  from { opacity: 0; transform: translateX(30px); }
-  to { opacity: 1; transform: translateX(0); }
+.portal-toast.show {
+  opacity: 1 !important;
+  transform: translateX(0) !important;
 }
 
-#portal-confirm-modal {
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
+.portal-toast.hide {
+  opacity: 0 !important;
+  transform: translateY(12px) !important;
 }
 
-#portal-confirm-card {
-  background: rgba(15, 23, 42, 0.9);
-  border: 1.5px solid rgba(255, 255, 255, 0.15);
-  box-shadow: 0 25px 70px -10px rgba(0, 0, 0, 0.6);
+/* Variant Toast */
+.portal-toast-info {
+  border-color: rgba(6, 182, 212, 0.35) !important;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.4), 0 0 20px rgba(6, 182, 212, 0.15) !important;
 }
+
+.portal-toast-success {
+  border-color: rgba(16, 185, 129, 0.35) !important;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.4), 0 0 20px rgba(16, 185, 129, 0.15) !important;
+}
+
+.portal-toast-error {
+  border-color: rgba(244, 63, 94, 0.35) !important;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.4), 0 0 20px rgba(244, 63, 94, 0.15) !important;
+}
+
+.portal-toast-warning {
+  border-color: rgba(245, 158, 11, 0.35) !important;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.4), 0 0 20px rgba(245, 158, 11, 0.15) !important;
+}
+
+.portal-toast-icon-wrap {
+  width: 2.25rem;
+  height: 2.25rem;
+  border-radius: 0.6rem;
+  background: rgba(255, 255, 255, 0.07);
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  flex-shrink: 0 !important;
+  font-size: 1.1rem;
+}
+
+.portal-toast-info .portal-toast-icon-wrap i { color: #22d3ee !important; }
+.portal-toast-success .portal-toast-icon-wrap i { color: #34d399 !important; }
+.portal-toast-error .portal-toast-icon-wrap i { color: #fb7185 !important; }
+.portal-toast-warning .portal-toast-icon-wrap i { color: #fbbf24 !important; }
+
+.portal-toast-content {
+  flex: 1 !important;
+  word-break: break-word !important;
+}
+
+.portal-toast-close {
+  background: transparent !important;
+  border: none !important;
+  color: #64748b !important;
+  padding: 0.25rem !important;
+  cursor: pointer !important;
+  border-radius: 0.375rem !important;
+  transition: color 0.2s !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  flex-shrink: 0 !important;
+}
+.portal-toast-close:hover {
+  color: #f8fafc !important;
+}
+
+/* Modal Confirm Dialog */
+#portal-confirm-modal,
+.portal-confirm-modal-root {
+  position: fixed !important;
+  inset: 0 !important;
+  z-index: 20001 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  padding: 1rem !important;
+  background: rgba(2, 6, 23, 0.75) !important;
+  backdrop-filter: blur(12px) !important;
+  -webkit-backdrop-filter: blur(12px) !important;
+  transition: all 0.3s ease !important;
+}
+
+#portal-confirm-modal.hidden,
+.portal-confirm-modal-hidden {
+  display: none !important;
+}
+
+#portal-confirm-card,
+.portal-confirm-card {
+  width: 100% !important;
+  max-width: 400px !important;
+  padding: 2rem !important;
+  border-radius: 2rem !important;
+  background: rgba(15, 23, 42, 0.95) !important;
+  border: 1.5px solid rgba(255, 255, 255, 0.15) !important;
+  box-shadow: 0 25px 70px -10px rgba(0, 0, 0, 0.8), 0 0 40px rgba(6, 182, 212, 0.15) !important;
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 1.5rem !important;
+  transform: scale(0.92);
+  opacity: 0;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1) !important;
+}
+
+#portal-confirm-card.active,
+.portal-confirm-card.active {
+  transform: scale(1) !important;
+  opacity: 1 !important;
+}
+
+.portal-confirm-body {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  text-align: center !important;
+  gap: 1.25rem !important;
+}
+
+.portal-confirm-icon {
+  width: 4.5rem !important;
+  height: 4.5rem !important;
+  border-radius: 1.5rem !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  font-size: 2rem !important;
+}
+
+.portal-confirm-icon-cyan {
+  background: rgba(6, 182, 212, 0.1) !important;
+  color: #22d3ee !important;
+  border: 1.5px solid rgba(6, 182, 212, 0.25) !important;
+  box-shadow: 0 0 20px rgba(6, 182, 212, 0.15) !important;
+}
+
+.portal-confirm-icon-danger {
+  background: rgba(244, 63, 94, 0.1) !important;
+  color: #fb7185 !important;
+  border: 1.5px solid rgba(244, 63, 94, 0.25) !important;
+  box-shadow: 0 0 20px rgba(244, 63, 94, 0.15) !important;
+}
+
+.portal-confirm-text {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 0.5rem !important;
+}
+
+.portal-confirm-title {
+  font-size: 1.25rem !important;
+  font-weight: 900 !important;
+  color: #ffffff !important;
+  letter-spacing: -0.02em !important;
+  margin: 0 !important;
+}
+
+.portal-confirm-msg {
+  font-size: 0.875rem !important;
+  color: #94a3b8 !important;
+  line-height: 1.5 !important;
+  font-weight: 500 !important;
+  margin: 0 !important;
+}
+
+.portal-confirm-actions {
+  display: flex !important;
+  gap: 0.75rem !important;
+  padding-top: 0.5rem !important;
+}
+
+.portal-confirm-btn {
+  flex: 1 !important;
+  padding: 0.875rem 1.25rem !important;
+  border-radius: 1rem !important;
+  font-size: 0.8rem !important;
+  font-weight: 800 !important;
+  letter-spacing: 0.03em !important;
+  cursor: pointer !important;
+  transition: all 0.2s ease !important;
+  border: none !important;
+  text-align: center !important;
+}
+
+.portal-confirm-btn-cancel {
+  background: rgba(30, 41, 59, 0.9) !important;
+  border: 1.5px solid rgba(51, 65, 85, 0.6) !important;
+  color: #cbd5e1 !important;
+}
+.portal-confirm-btn-cancel:hover {
+  background: rgba(51, 65, 85, 0.9) !important;
+  color: #ffffff !important;
+}
+
+.portal-confirm-btn-ok {
+  background: #06b6d4 !important;
+  color: #020617 !important;
+  box-shadow: 0 4px 20px rgba(6, 182, 212, 0.35) !important;
+}
+.portal-confirm-btn-ok:hover {
+  background: #22d3ee !important;
+  transform: translateY(-1px) !important;
+}
+
+.portal-confirm-btn-danger {
+  background: #f43f5e !important;
+  color: #ffffff !important;
+  box-shadow: 0 4px 20px rgba(244, 63, 94, 0.35) !important;
+}
+.portal-confirm-btn-danger:hover {
+  background: #fb7185 !important;
+  transform: translateY(-1px) !important;
+}
+

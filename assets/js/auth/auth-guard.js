@@ -3,6 +3,7 @@ import { auth, db } from "../config/firebase-config.js";
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 import { doc, getDoc, serverTimestamp, updateDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 import { getHardwareFingerprint } from "../utils/device-fingerprint.js";
+import { showToast } from "../utils/toast.js";
 
 function getDefaultRedirectPath() {
   return window.location.pathname.includes('/pages/') ? '../../admin.html' : '../admin.html';
@@ -16,8 +17,10 @@ function revealPage() {
 }
 
 function redirectToLogin(redirectPath = DEFAULT_REDIRECT_PATH) {
-  alert("Akses ditolak! Anda harus login atau mengikat perangkat terlebih dahulu.");
-  window.location.href = redirectPath;
+  showToast("Akses ditolak! Anda harus login atau mengikat perangkat terlebih dahulu.", "error");
+  setTimeout(() => {
+    window.location.href = redirectPath;
+  }, 1200);
 }
 
 export function initializeAuthGuard({

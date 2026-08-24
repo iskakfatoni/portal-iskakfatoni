@@ -4,6 +4,47 @@ Dokumen ini berisi rangkuman review perubahan kode (*code review*) terbaru yang 
 
 ---
 
+## 📅 Review [2026-08-24 20:05 WIB] - Refaktorisasi & Perbaikan Total Sistem Notifikasi Global (Toast & Glassmorphic Confirm Modal) di `admin.html`
+
+### 📁 1. Berkas yang Diperbarui
+* 📄 **[style/style.css](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/style/style.css)** `[MODIFY]`
+* 📄 **[assets/js/utils/toast.js](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/assets/js/utils/toast.js)** `[MODIFY]`
+* 📄 **[assets/js/auth/auth-guard.js](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/assets/js/auth/auth-guard.js)** `[MODIFY]`
+
+---
+
+### 📝 2. Rincian Baris & Logika yang Diperbarui
+
+1. 🔍 **Analisis Penyebab Notifikasi "Jelek/Rusak" di `admin.html`**:
+   - Berkas [`toast.js`](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/assets/js/utils/toast.js) sebelumnya menggantungkan posisi dan tampilan toast pada kelas utilitas Tailwind CSS (`fixed`, `bottom-6`, `right-6`, `z-[20000]`, `bg-slate-900/90`, `border-cyan-500/30`, dll.).
+   - Halaman [`admin.html`](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/admin.html) menggunakan CSS Vanilla dan tidak memuat skrip CDN Tailwind CSS.
+   - Tanpa CSS yang sesuai, notifikasi dirender sebagai elemen teks *block* biasa di bagian bawah dokumen (di bawah footer), tidak mengambang (*fixed*), tanpa latar *glassmorphic*, dan tanpa penataan tombol/ikon.
+
+2. 🎨 **Penguatan CSS Standalone di Bagian 11 ([style/style.css](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/style/style.css))**:
+   - Menambahkan aturan CSS komprehensif untuk `#portal-toast-container` dan `.portal-toast` dengan posisi `fixed`, `bottom: 1.5rem`, `right: 1.5rem`, dan `z-index: 20000`.
+   - Menambahkan desain *glassmorphism* tingkat tinggi: `background: rgba(15, 23, 42, 0.92)`, `backdrop-filter: blur(20px)`, border neon cyan/emerald/rose/amber, bayangan (*box-shadow*) berpendar, serta tombol penutup (*close button*).
+   - Menyediakan tampilan modal konfirmasi dialog `#portal-confirm-modal` dan `#portal-confirm-card` bertema *glassmorphic* lengkap dengan animasi *scale* & pendaran warna bahaya/akses.
+
+3. 🛠️ **Refaktorisasi Engine Toast ([assets/js/utils/toast.js](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/assets/js/utils/toast.js))**:
+   - Memastikan elemen DOM yang dibuat oleh `ToastManager` menyertakan class-class CSS murni (`portal-toast-container-root`, `portal-toast`, `portal-toast-info`, `portal-toast-success`, `portal-toast-error`, `portal-toast-warning`, `portal-confirm-modal-root`, `portal-confirm-card`) sehingga notifikasi dan modal bekerja 100% sempurna di semua halaman portal dengan atau tanpa Tailwind CSS.
+   - Menambahkan transisi masuk (`.show`) dan keluar (`.hide`) berbasis `requestAnimationFrame` untuk respon animasi yang mulus.
+
+4. 🛡️ **Modernisasi Auth Guard ([assets/js/auth/auth-guard.js](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/assets/js/auth/auth-guard.js))**:
+   - Mengganti dialog `alert(...)` kaku bawaan peramban saat pengalihan akses ditolak menjadi notifikasi modern `showToast(..., "error")`.
+
+---
+
+### 🧪 3. Petunjuk Pengujian Lokal (*Local Verification*)
+
+1. Buka halaman [`admin.html`](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/admin.html) di browser.
+2. Uji aksi yang memicu notifikasi toast:
+   - Coba lakukan login dengan password salah / acak -> Toast Notifikasi Merah (Error) muncul dengan mulus di kanan bawah layar lengkap dengan efek glassmorphic & glow neon.
+   - Lakukan klik **Ikat Perangkat Ini** -> Toast Notifikasi Hijau (Sukses) muncul di kanan bawah layar.
+   - Lakukan klik **Lepas Ikat Perangkat Ini** atau **Logout** -> Modal Dialog Konfirmasi Glassmorphic mengambang di tengah layar dengan latar belakang blur & tombol aksi berpendar.
+
+---
+
+
 ## 📅 Review [2026-08-21 14:16 WIB] - Peningkatan Akurasi Algoritma AI Radar: Deteksi Presisi Multi-Account on Single Device Berbasis `system_logs`
 
 ### 📁 1. Berkas yang Diperbarui
