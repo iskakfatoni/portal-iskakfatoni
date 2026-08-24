@@ -68,24 +68,20 @@ function getCanvas2dHash() {
 }
 
 export async function getHardwareFingerprint() {
-  // 1. Ambil sinyal Audio & WebGL Hardware DSP
-  const audioSig = await getAudioFingerprint();
+  // 1. Ambil sinyal WebGL Hardware (Sangat Stabil untuk 1 model HP)
   const webglSig = getWebGLFingerprint();
   const canvasSig = getCanvas2dHash();
 
-  // 2. Gabungkan parameter fisik perangkat (Bebas dari storage/localStorage)
+  // 2. Gunakan hanya parameter fisik yang STATIS (Tahan update & setting)
+  // Menghapus Audio, Language, dan Timezone karena sering berubah & bikin HW-ID loncat
   const rawString = [
-    navigator.userAgent,
-    screen.width + 'x' + screen.height + 'x' + (screen.colorDepth || 24),
+    screen.width + 'x' + screen.height,
     window.devicePixelRatio || 1,
     navigator.hardwareConcurrency || 2,
     navigator.deviceMemory || 'unknown',
     navigator.maxTouchPoints || 0,
-    navigator.language || '',
     webglSig,
-    canvasSig,
-    audioSig,
-    Intl.DateTimeFormat().resolvedOptions().timeZone
+    canvasSig
   ].join('||');
 
   // 3. Enkripsi String ke Hash SHA-256 Hex 16 Karakter (Persisten Hardware Murni)
