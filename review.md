@@ -4,6 +4,44 @@ Dokumen ini berisi rangkuman review perubahan kode (*code review*) terbaru yang 
 
 ---
 
+## 📅 Review [2026-08-24 20:08 WIB] - Integrasi Notifikasi Toast & Confirm Modal untuk Aksi "Ikat Perangkat", "Lepas Ikatan", & "Logout" di `admin.html`
+
+### 📁 1. Berkas yang Diperbarui
+* 📄 **[assets/js/admin/admin-auth.js](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/assets/js/admin/admin-auth.js)** `[MODIFY]`
+
+---
+
+### 📝 2. Rincian Baris & Logika yang Diperbarui
+
+1. 📱 **Konfirmasi & Toast "Ikat Perangkat Ini"**:
+   - Menambahkan dialog konfirmasi modal glassmorphic `showConfirm` sebelum pengikatan perangkat dilakukan: `"Ikat Perangkat Ini?"`.
+   - Mengubah penanganan respons pengikatan agar langsung memunculkan notifikasi Toast Sukses `showToast("📱 Perangkat berhasil diikat! Selanjutnya auto-login tanpa password di HP ini.", "success")`.
+
+2. 🔓 **Notifikasi Toast "Lepas Ikatan Perangkat"**:
+   - Memperbarui feedback visual pelepasan ikatan perangkat dengan Toast Info bertema ikon gembok `showToast("🔓 Ikat perangkat berhasil dilepas. Anda perlu login manual selanjutnya.", "info")`.
+
+3. 🚪 **Notifikasi Toast & Delay pada Sesi "Logout"**:
+   - Mengubah aksi tombol Logout (`#btn-logout`) agar setelah pengguna menyetujui konfirmasi keluar, sistem memunculkan terlebih dahulu notifikasi Toast Info `showToast("🚪 Berhasil keluar dari Master Admin Hub.", "info")`.
+   - Menambahkan penundaan transisi 800ms sebelum `signOut(auth)` dan `window.location.reload()` agar efek notifikasi Toast sempat terlihat jelas oleh pengguna.
+
+---
+
+### 🧪 3. Petunjuk Pengujian Lokal (*Local Verification*)
+
+1. Buka halaman [`admin.html`](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/admin.html) di browser.
+2. Klik tombol **Ikat Perangkat Ini**:
+   - Modal Konfirmasi Glassmorphic mengambang di tengah layar. Klik **Ya, Ikat Perangkat**.
+   - Notifikasi Toast Hijau mengambang di kanan bawah layar: *"📱 Perangkat berhasil diikat!..."*.
+3. Klik tombol **Lepas Ikat Perangkat Ini**:
+   - Modal Konfirmasi mengambang di tengah layar. Klik **Ya, Lepas Ikat**.
+   - Notifikasi Toast Biru/Cyan mengambang di kanan bawah layar: *"🔓 Ikat perangkat berhasil dilepas..."*.
+4. Lakukan login lalu klik tombol **Logout**:
+   - Modal Konfirmasi Keluar mengambang di tengah layar. Klik **YA, KELUAR**.
+   - Notifikasi Toast mengambang *"🚪 Berhasil keluar dari Master Admin Hub."* muncul selama 800ms sebelum halaman memuat ulang secara otomatis.
+
+---
+
+
 ## 📅 Review [2026-08-24 20:05 WIB] - Refaktorisasi & Perbaikan Total Sistem Notifikasi Global (Toast & Glassmorphic Confirm Modal) di `admin.html`
 
 ### 📁 1. Berkas yang Diperbarui

@@ -178,23 +178,33 @@ if (dom.btnBindDevice) {
           await deleteDoc(deviceRef);
           isCurrentDeviceBound = false;
           renderDeviceBindStatus(false);
-          showToast("Ikat perangkat berhasil dilepas.", "info");
+          showToast("🔓 Ikat perangkat berhasil dilepas. Anda perlu login manual selanjutnya.", "info");
         }
       } else {
-        const emailToBind = activeAdminEmail || (auth.currentUser ? auth.currentUser.email : "admin@portal");
-        await setDoc(deviceRef, {
-          device_id: currentHwFingerprint,
-          device_name: deviceType.name,
-          is_mobile: deviceType.isMobile,
-          admin_email: emailToBind,
-          is_active: true,
-          user_agent: navigator.userAgent,
-          bound_at: serverTimestamp(),
-          last_login: serverTimestamp()
+        const confirmed = await showConfirm({
+          title: 'Ikat Perangkat Ini',
+          message: 'Ikat perangkat ini ke akun Admin? Perangkat ini akan diizinkan untuk auto-login ke Master Admin Hub tanpa memasukkan password.',
+          icon: 'fa-shield-cat',
+          confirmText: 'Ya, Ikat Perangkat',
+          type: 'info'
         });
-        isCurrentDeviceBound = true;
-        renderDeviceBindStatus(true);
-        showToast("📱 Perangkat berhasil diikat! Selanjutnya auto-login tanpa password di HP ini.", "success");
+
+        if (confirmed) {
+          const emailToBind = activeAdminEmail || (auth.currentUser ? auth.currentUser.email : "admin@portal");
+          await setDoc(deviceRef, {
+            device_id: currentHwFingerprint,
+            device_name: deviceType.name,
+            is_mobile: deviceType.isMobile,
+            admin_email: emailToBind,
+            is_active: true,
+            user_agent: navigator.userAgent,
+            bound_at: serverTimestamp(),
+            last_login: serverTimestamp()
+          });
+          isCurrentDeviceBound = true;
+          renderDeviceBindStatus(true);
+          showToast("📱 Perangkat berhasil diikat! Selanjutnya auto-login tanpa password di HP ini.", "success");
+        }
       }
     } catch (err) {
       console.error("Gagal mengubah status binding:", err);
@@ -259,7 +269,7 @@ function listenAdminDevices() {
               isCurrentDeviceBound = false;
               renderDeviceBindStatus(false);
             }
-            showToast("Akses perangkat berhasil dicabut.", "info");
+            showToast("🗑️ Akses perangkat berhasil dicabut.", "info");
           } catch (err) {
             showToast("Gagal mencabut akses perangkat: " + err.message, "error");
           }
@@ -308,8 +318,11 @@ if (dom.btnLogout) {
     });
 
     if (confirmed) {
+      showToast("🚪 Berhasil keluar dari Master Admin Hub.", "info");
       await signOut(auth);
-      window.location.reload();
+      setTimeout(() => {
+        window.location.reload();
+      }, 800);
     }
   });
 }
