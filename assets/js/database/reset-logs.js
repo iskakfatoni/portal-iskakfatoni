@@ -35,7 +35,7 @@ const dom = {
   tableBodyLogs: document.getElementById('table-body-logs'),
   btnPrevPage: document.getElementById('btn-prev-page'),
   btnNextPage: document.getElementById('btn-next-page'),
-  pageInfoLogs: document.getElementById('page-info-logs'),
+  pageInfoLogs: document.getElementById('page-info-logs') || document.getElementById('page-info'),
   btnExportExcel: document.getElementById('btn-export-excel'),
   btnClearLogs: document.getElementById('btn-clear-logs')
 };
@@ -59,6 +59,7 @@ const TableEngine = {
   },
 
   renderTable() {
+    if (!dom.tableBodyLogs) return;
     dom.tableBodyLogs.innerHTML = '';
     const filtered = this.getFilteredLogs();
 
@@ -66,9 +67,9 @@ const TableEngine = {
     if (state.currentPage > totalPages) state.currentPage = totalPages;
     if (state.currentPage < 1) state.currentPage = 1;
 
-    dom.pageInfoLogs.innerText = `Halaman ${state.currentPage} dari ${totalPages}`;
-    dom.btnPrevPage.disabled = state.currentPage === 1;
-    dom.btnNextPage.disabled = state.currentPage === totalPages;
+    if (dom.pageInfoLogs) dom.pageInfoLogs.innerText = `Halaman ${state.currentPage} dari ${totalPages}`;
+    if (dom.btnPrevPage) dom.btnPrevPage.disabled = state.currentPage === 1;
+    if (dom.btnNextPage) dom.btnNextPage.disabled = state.currentPage === totalPages;
 
     const start = (state.currentPage - 1) * state.pageSize;
     const pageDocs = filtered.slice(start, start + state.pageSize);
@@ -126,12 +127,12 @@ const TableEngine = {
     }
 
     // Update Metrics
-    dom.statTotalResets.innerText = state.logsList.length;
+    if (dom.statTotalResets) dom.statTotalResets.innerText = state.logsList.length;
     const admins = new Set(state.logsList.map(d => d.data().admin_email));
-    dom.statTotalAdmins.innerText = `${admins.size} Akun`;
+    if (dom.statTotalAdmins) dom.statTotalAdmins.innerText = `${admins.size} Akun`;
     const today = new Date().setHours(0,0,0,0);
     const todayLogs = state.logsList.filter(d => (d.data().timestamp?.seconds * 1000) >= today).length;
-    dom.statLogsToday.innerText = todayLogs;
+    if (dom.statLogsToday) dom.statLogsToday.innerText = todayLogs;
   }
 };
 
@@ -140,7 +141,7 @@ const TableEngine = {
 // -----------------------------------------------------------------
 initializeAuthGuard({
   onAuthenticated: (user) => {
-    dom.userEmailDisplay.innerText = user.email;
+    if (dom.userEmailDisplay) dom.userEmailDisplay.innerText = user.email;
 
     const q = query(collection(db, "system_logs"), orderBy("timestamp", "desc"));
     state.unsubscribeLogs = onSnapshot(q, (snapshot) => {
@@ -148,58 +149,64 @@ initializeAuthGuard({
       TableEngine.renderTable();
     });
 
-    dom.inputSearchLogs.addEventListener('input', (e) => {
-      state.searchQuery = e.target.value.trim();
-      state.currentPage = 1;
-      TableEngine.renderTable();
-    });
-
-    dom.btnNextPage.onclick = () => { state.currentPage++; TableEngine.renderTable(); };
-    dom.btnPrevPage.onclick = () => { state.currentPage--; TableEngine.renderTable(); };
-    dom.btnLogout.onclick = () => window.location.href = "../../admin.html";
-
-    dom.btnExportExcel.onclick = () => {
-      if (state.logsList.length === 0) {
-        showToast("Tidak ada riwayat log untuk diekspor.", "warning");
-        return;
-      }
-      const rows = state.logsList.map(d => ({
-        Waktu: d.data().timestamp ? new Date(d.data().timestamp.seconds * 1000).toLocaleString() : '-',
-        Siswa: d.data().target_name,
-        NIS: d.data().target_nis,
-        Admin: d.data().admin_email,
-        DeviceID: d.data().old_device_id
-      }));
-      const ws = XLSX.utils.json_to_sheet(rows);
-      const wb = XLSX.utils.book_new();
-      XLSX.utils.book_append_sheet(wb, ws, "Resets");
-      XLSX.writeFile(wb, "Riwayat_Reset_HP.xlsx");
-      showToast("Berhasil mengunduh riwayat reset HP!", "success");
-    };
-
-    dom.btnClearLogs.onclick = async () => {
-      if (state.logsList.length === 0) {
-        showToast("Koleksi log sudah kosong.", "info");
-        return;
-      }
-      const input = await showPrompt({
-        title: "KOSONGKAN SELURUH LOG",
-        message: "Anda akan menghapus seluruh riwayat log reset.<br/>Ketik <b>HAPUS</b> untuk mengonfirmasi:",
-        placeholder: "HAPUS"
+    if (dom.inputSearchLogs) {
+      dom.inputSearchLogs.addEventListener('input', (e) => {
+        state.searchQuery = e.target.value.trim();
+        state.currentPage = 1;
+        TableEngine.renderTable();
       });
+    }
 
-      if (input === 'HAPUS') {
-        try {
-          const batch = writeBatch(db);
-          state.logsList.forEach(d => batch.delete(d.ref));
-          await batch.commit();
-          showToast("Seluruh riwayat log reset berhasil dikosongkan!", "success");
-        } catch (e) {
-          showToast("Gagal mengosongkan log: " + e.message, "error");
+    if (dom.btnNextPage) dom.btnNextPage.onclick = () => { state.currentPage++; TableEngine.renderTable(); };
+    if (dom.btnPrevPage) dom.btnPrevPage.onclick = () => { state.currentPage--; TableEngine.renderTable(); };
+    if (dom.btnLogout) dom.btnLogout.onclick = () => window.location.href = "../../admin.html";
+
+    if (dom.btnExportExcel) {
+      dom.btnExportExcel.onclick = () => {
+        if (state.logsList.length === 0) {
+          showToast("Tidak ada riwayat log untuk diekspor.", "warning");
+          return;
         }
-      } else if (input !== null) {
-        showToast("Konfirmasi batal: Kata kunci tidak cocok.", "warning");
-      }
-    };
+        const rows = state.logsList.map(d => ({
+          Waktu: d.data().timestamp ? new Date(d.data().timestamp.seconds * 1000).toLocaleString() : '-',
+          Siswa: d.data().target_name,
+          NIS: d.data().target_nis,
+          Admin: d.data().admin_email,
+          DeviceID: d.data().old_device_id
+        }));
+        const ws = XLSX.utils.json_to_sheet(rows);
+        const wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, ws, "Resets");
+        XLSX.writeFile(wb, "Riwayat_Reset_HP.xlsx");
+        showToast("Berhasil mengunduh riwayat reset HP!", "success");
+      };
+    }
+
+    if (dom.btnClearLogs) {
+      dom.btnClearLogs.onclick = async () => {
+        if (state.logsList.length === 0) {
+          showToast("Koleksi log sudah kosong.", "info");
+          return;
+        }
+        const input = await showPrompt({
+          title: "KOSONGKAN SELURUH LOG",
+          message: "Anda akan menghapus seluruh riwayat log reset.<br/>Ketik <b>HAPUS</b> untuk mengonfirmasi:",
+          placeholder: "HAPUS"
+        });
+
+        if (input === 'HAPUS') {
+          try {
+            const batch = writeBatch(db);
+            state.logsList.forEach(d => batch.delete(d.ref));
+            await batch.commit();
+            showToast("Seluruh riwayat log reset berhasil dikosongkan!", "success");
+          } catch (e) {
+            showToast("Gagal mengosongkan log: " + e.message, "error");
+          }
+        } else if (input !== null) {
+          showToast("Konfirmasi batal: Kata kunci tidak cocok.", "warning");
+        }
+      };
+    }
   }
 });

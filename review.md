@@ -2772,4 +2772,30 @@ Dokumen ini berisi rangkuman review perubahan kode (*code review*) terbaru yang 
    - Buka halaman **Riwayat Reset HP** (`database/reset-logs.html`) atau tekan **Kosongkan Koleksi** di Database Manager.
    - Modal input glassmorphic akan meminta mengetikkan kata kunci (`HAPUS` / Nama Koleksi).
 
+---
+
+## 📅 Review [2026-08-25 06:16 WIB] - Perbaikan DOM Binding pageInfo & Render Tabel di reset-logs.js
+
+### 📁 1. Berkas yang Diubah
+* 📄 **[assets/js/database/reset-logs.js](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/assets/js/database/reset-logs.js)**
+
+---
+
+### 📝 2. Rincian Baris & Logika yang Diperbarui
+
+1. **Perbaikan Elemen ID Paginasi (`page-info`)**:
+   - Menyesuaikan referensi `dom.pageInfoLogs` agar menggunakan pencarian gabungan `document.getElementById('page-info-logs') || document.getElementById('page-info')`.
+   - Mengatasi potensi `TypeError` yang sebelumnya terjadi saat `dom.pageInfoLogs.innerText` dijalankan akibat ketidakcocokan ID elemen HTML, sehingga rendering tabel log terhenti sebelum menambahkan baris.
+2. **Penguatan Proteksi Null-Safety**:
+   - Menambahkan pengkondisian aman (*null-check*) untuk seluruh elemen DOM (`tableBodyLogs`, `statTotalResets`, `statTotalAdmins`, `statLogsToday`, dll) agar aman dari *runtime error*.
+
+---
+
+### 🧪 3. Petunjuk Pengujian Lokal (*Local Verification*)
+
+1. Buka halaman **Riwayat Reset HP** ([`pages/database/reset-logs.html`](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/pages/database/reset-logs.html)).
+2. Verifikasi bahwa tabel sekarang memuat riwayat log reset dengan sempurna (atau menampilkan *"Tidak ada riwayat log reset yang ditemukan"* tanpa error jika database `system_logs` sedang kosong).
+3. Lakukan reset HP pada salah satu akun siswa dari Database Manager $\rightarrow$ Buka kembali `reset-logs.html` &rarr; Baris log reset langsung muncul di tabel.
+
+
 
