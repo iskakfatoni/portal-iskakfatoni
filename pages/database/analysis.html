@@ -39,128 +39,117 @@
   <!-- BACKGROUND PARTICLE CANVAS -->
   <canvas id="particle-canvas" class="fixed inset-0 pointer-events-none z-0 opacity-40"></canvas>
 
-  <main class="relative z-10 w-full max-w-[1600px] mx-auto px-4 sm:px-6 md:px-8 lg:px-12 py-5 md:py-8 space-y-6">
+  <main class="relative z-10 w-full max-w-[1800px] mx-auto px-4 sm:px-6 md:px-10 lg:px-16 py-8 md:py-12 space-y-8">
 
     <!-- HEADER BRANDING & NAVIGASI ADMIN RESPONSIVE -->
-    <header class="glass-card p-4 sm:p-5 rounded-3xl flex flex-col xl:flex-row items-center justify-between gap-4 border border-slate-800 shadow-2xl backdrop-blur-md">
-      <div class="flex items-center gap-4 w-full xl:w-auto justify-between xl:justify-start">
-        <div class="flex items-center gap-3.5">
-          <img src="../../assets/img/foto_asn_profile.webp" alt="Muchamad Iskak Fatoni" class="w-10 h-10 sm:w-12 sm:h-12 object-cover rounded-2xl border-2 border-slate-700 shadow-lg shrink-0" loading="lazy">
+    <header class="glass-card p-6 sm:p-8 rounded-[2.5rem] flex flex-col xl:flex-row items-center justify-between gap-6 border-2 border-slate-800 shadow-2xl backdrop-blur-xl">
+      <div class="flex items-center gap-6 w-full xl:w-auto justify-between xl:justify-start">
+        <div class="flex items-center gap-5">
+          <img src="../../assets/img/foto_asn_profile.webp" alt="Muchamad Iskak Fatoni" class="w-14 h-14 sm:w-20 sm:h-20 object-cover rounded-3xl border-2 border-cyan-500/50 shadow-2xl shrink-0" loading="lazy">
           <div>
-            <h1 class="text-sm sm:text-base md:text-lg font-extrabold text-white tracking-tight flex items-center gap-2 flex-wrap">
+            <h1 class="text-lg sm:text-2xl md:text-3xl font-black text-white tracking-tighter flex items-center gap-3 flex-wrap">
               <i class="fa-solid fa-robot text-cyan-400"></i>
-              <span>AI Attendance &amp; Security Analysis</span>
-              <span class="px-2.5 py-1 text-[10px] bg-indigo-500/20 text-indigo-400 border border-indigo-500/30 rounded-lg uppercase font-mono tracking-tighter">Radar v2.0</span>
+              <span>AI Attendance Analysis</span>
+              <span class="px-3 py-1 text-xs bg-indigo-500/20 text-indigo-400 border-2 border-indigo-500/30 rounded-xl uppercase font-mono tracking-widest">Radar v2.0</span>
             </h1>
-            <p class="text-[11px] sm:text-xs text-slate-400 font-mono hidden sm:block opacity-80">Portal Iskak Fatoni &bull; Intelegensi Deteksi Anomali &amp; Pola Kedisiplinan</p>
+            <p class="text-xs sm:text-sm text-slate-400 font-mono hidden sm:block opacity-70 tracking-wide mt-1">Portal Iskak Fatoni &bull; Advanced Security Monitoring &amp; Student Behavioral Analytics</p>
           </div>
         </div>
       </div>
 
       <!-- ACTION BUTTONS -->
-      <div class="flex items-center gap-2 sm:gap-3 w-full xl:w-auto justify-center sm:justify-end flex-wrap">
-        <!-- TOMBOL KEMBALI KE DB MANAGER -->
-        <a href="db-manager.html" class="flex-1 sm:flex-initial px-4 py-2.5 bg-slate-900 hover:bg-slate-800 text-cyan-300 text-xs font-bold rounded-2xl transition border border-slate-800 flex items-center justify-center gap-2 shadow-sm">
-          <i class="fa-solid fa-database"></i> <span>DB Manager</span>
+      <div class="flex items-center gap-3 sm:gap-4 w-full xl:w-auto justify-center sm:justify-end flex-wrap">
+        <a href="db-manager.html" class="flex-1 sm:flex-initial px-6 py-3.5 bg-slate-900 hover:bg-slate-800 text-cyan-300 text-sm font-black rounded-2xl transition border-2 border-slate-800 flex items-center justify-center gap-3 shadow-lg">
+          <i class="fa-solid fa-database"></i> <span>DATABASE</span>
         </a>
-
-        <!-- TOMBOL KEMBALI KE HUB ADMIN -->
-        <a href="../../admin.html" class="flex-1 sm:flex-initial px-4 py-2.5 bg-slate-900 hover:bg-slate-800 text-slate-300 text-xs font-bold rounded-2xl transition border border-slate-800 flex items-center justify-center gap-2 shadow-sm">
-          <i class="fa-solid fa-arrow-left"></i> <span>Admin Hub</span>
+        <a href="../../admin.html" class="flex-1 sm:flex-initial px-6 py-3.5 bg-slate-900 hover:bg-slate-800 text-slate-300 text-sm font-black rounded-2xl transition border-2 border-slate-800 flex items-center justify-center gap-3 shadow-lg">
+          <i class="fa-solid fa-arrow-left"></i> <span>ADMIN HUB</span>
         </a>
-        
-        <div class="hidden lg:flex items-center gap-2.5 px-4 py-2 bg-slate-900/60 rounded-2xl border border-slate-800 text-xs font-mono text-slate-300">
-          <i class="fa-solid fa-user-shield text-cyan-400"></i>
-          <span id="user-email-display">loading...</span>
-        </div>
-        
-        <button id="btn-logout" class="px-4 py-2.5 bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/30 rounded-2xl text-xs font-bold transition flex items-center gap-2 cursor-pointer shadow-sm">
-          <i class="fa-solid fa-right-from-bracket"></i>
-          <span class="hidden sm:inline">Keluar</span>
+        <button id="btn-logout" class="px-6 py-3.5 bg-red-500/10 hover:bg-red-500/20 text-red-400 border-2 border-red-500/30 rounded-2xl text-sm font-black transition flex items-center gap-3 cursor-pointer shadow-lg">
+          <i class="fa-solid fa-power-off"></i>
         </button>
       </div>
     </header>
 
     <!-- SECTION KONTEN AI RADAR -->
-    <section class="space-y-6 w-full">
+    <section class="space-y-8 w-full">
 
-      <!-- 📊 RINGKASAN ANOMALI (OPTIMIZED GRID) -->
-      <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5">
-        <div class="metric-card bg-slate-900/40 p-4 sm:p-5 rounded-3xl border border-slate-800 shadow-xl transition-all hover:border-cyan-500/30">
+      <!-- 📊 RINGKASAN ANOMALI (SUPER GRID) -->
+      <div class="grid grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8">
+        <div class="metric-card bg-slate-900/60 p-6 sm:p-8 rounded-[2rem] border-2 border-slate-800 shadow-2xl transition-all hover:border-cyan-500/50 group">
           <div class="min-w-0">
-            <p class="text-[10px] sm:text-xs uppercase font-bold text-slate-400 tracking-widest">Total Anomali</p>
-            <p id="stat-total-findings" class="text-lg sm:text-2xl font-black text-cyan-400 font-mono mt-1">0</p>
+            <p class="text-[10px] sm:text-xs uppercase font-black text-slate-500 tracking-[0.2em]">Total Temuan</p>
+            <p id="stat-total-findings" class="text-3xl sm:text-5xl font-black text-cyan-400 font-mono mt-2 group-hover:scale-110 transition-transform origin-left">0</p>
           </div>
-          <div class="w-10 h-10 sm:w-12 sm:h-12 bg-cyan-500/10 rounded-2xl flex items-center justify-center">
-            <i class="fa-solid fa-magnifying-glass-chart text-cyan-500 text-xl"></i>
+          <div class="w-14 h-14 sm:w-16 sm:h-14 bg-cyan-500/10 rounded-2xl flex items-center justify-center border border-cyan-500/20">
+            <i class="fa-solid fa-magnifying-glass-chart text-cyan-500 text-2xl sm:text-3xl"></i>
           </div>
         </div>
-        <div class="metric-card bg-slate-900/40 p-4 sm:p-5 rounded-3xl border border-slate-800 shadow-xl transition-all hover:border-rose-500/30">
+        <div class="metric-card bg-slate-900/60 p-6 sm:p-8 rounded-[2rem] border-2 border-slate-800 shadow-2xl transition-all hover:border-rose-500/50 group">
           <div class="min-w-0">
-            <p class="text-[10px] sm:text-xs uppercase font-bold text-slate-400 tracking-widest">Kasus Kritis</p>
-            <p id="stat-high-risk" class="text-lg sm:text-2xl font-black text-rose-400 font-mono mt-1">0</p>
+            <p class="text-[10px] sm:text-xs uppercase font-black text-slate-500 tracking-[0.2em]">Kasus Kritis</p>
+            <p id="stat-high-risk" class="text-3xl sm:text-5xl font-black text-rose-400 font-mono mt-2 group-hover:scale-110 transition-transform origin-left">0</p>
           </div>
-          <div class="w-10 h-10 sm:w-12 sm:h-12 bg-rose-500/10 rounded-2xl flex items-center justify-center">
-            <i class="fa-solid fa-radiation text-rose-500 text-xl"></i>
+          <div class="w-14 h-14 sm:w-16 sm:h-14 bg-rose-500/10 rounded-2xl flex items-center justify-center border border-rose-500/20">
+            <i class="fa-solid fa-radiation text-rose-500 text-2xl sm:text-3xl"></i>
           </div>
         </div>
-        <div class="metric-card bg-slate-900/40 p-4 sm:p-5 rounded-3xl border border-slate-800 shadow-xl transition-all hover:border-amber-500/30">
+        <div class="metric-card bg-slate-900/60 p-6 sm:p-8 rounded-[2rem] border-2 border-slate-800 shadow-2xl transition-all hover:border-amber-500/50 group">
           <div class="min-w-0">
-            <p class="text-[10px] sm:text-xs uppercase font-bold text-slate-400 tracking-widest">Reset Berulang</p>
-            <p id="stat-reset-anomalies" class="text-lg sm:text-2xl font-black text-amber-400 font-mono mt-1">0</p>
+            <p class="text-[10px] sm:text-xs uppercase font-black text-slate-500 tracking-[0.2em]">Reset Ganda</p>
+            <p id="stat-reset-anomalies" class="text-3xl sm:text-5xl font-black text-amber-400 font-mono mt-2 group-hover:scale-110 transition-transform origin-left">0</p>
           </div>
-          <div class="w-10 h-10 sm:w-12 sm:h-12 bg-amber-500/10 rounded-2xl flex items-center justify-center">
-            <i class="fa-solid fa-mobile-screen-button text-amber-500 text-xl"></i>
+          <div class="w-14 h-14 sm:w-16 sm:h-14 bg-amber-500/10 rounded-2xl flex items-center justify-center border border-amber-500/20">
+            <i class="fa-solid fa-mobile-screen-button text-amber-500 text-2xl sm:text-3xl"></i>
           </div>
         </div>
-        <div class="metric-card bg-slate-900/40 p-4 sm:p-5 rounded-3xl border border-slate-800 shadow-xl transition-all hover:border-emerald-500/30">
+        <div class="metric-card bg-slate-900/60 p-6 sm:p-8 rounded-[2rem] border-2 border-slate-800 shadow-2xl transition-all hover:border-emerald-500/50 group">
           <div class="min-w-0">
-            <p class="text-[10px] sm:text-xs uppercase font-bold text-slate-400 tracking-widest">Early Birds</p>
-            <p id="stat-early-birds" class="text-lg sm:text-2xl font-black text-emerald-400 font-mono mt-1">0</p>
+            <p class="text-[10px] sm:text-xs uppercase font-black text-slate-500 tracking-[0.2em]">Siswa Teladan</p>
+            <p id="stat-early-birds" class="text-3xl sm:text-5xl font-black text-emerald-400 font-mono mt-2 group-hover:scale-110 transition-transform origin-left">0</p>
           </div>
-          <div class="w-10 h-10 sm:w-12 sm:h-12 bg-emerald-500/10 rounded-2xl flex items-center justify-center">
-            <i class="fa-solid fa-award text-emerald-500 text-xl"></i>
+          <div class="w-14 h-14 sm:w-16 sm:h-14 bg-emerald-500/10 rounded-2xl flex items-center justify-center border border-emerald-500/20">
+            <i class="fa-solid fa-award text-emerald-500 text-2xl sm:text-3xl"></i>
           </div>
         </div>
       </div>
 
       <!-- MAIN RADAR PANEL -->
-      <div class="glass-card p-5 sm:p-6 rounded-[2rem] border border-slate-800 shadow-2xl space-y-6">
-        <div class="flex flex-col md:flex-row items-center justify-between gap-4 border-b border-slate-800/80 pb-5">
-          <div class="flex items-center gap-3.5 w-full md:w-auto">
-            <div class="w-10 h-10 rounded-2xl bg-cyan-500/10 border border-cyan-500/30 flex items-center justify-center text-cyan-400 shadow-inner">
+      <div class="glass-card p-6 sm:p-10 rounded-[3rem] border-2 border-slate-800 shadow-2xl space-y-8">
+        <div class="flex flex-col md:flex-row items-center justify-between gap-6 border-b-2 border-slate-800/80 pb-8">
+          <div class="flex items-center gap-5 w-full md:w-auto text-center md:text-left justify-center md:justify-start">
+            <div class="w-14 h-14 rounded-3xl bg-cyan-500/10 border-2 border-cyan-500/30 flex items-center justify-center text-cyan-400 text-2xl shadow-inner">
               <i class="fa-solid fa-bolt-lightning"></i>
             </div>
             <div>
-              <h3 class="text-base sm:text-lg font-black text-white tracking-tight uppercase">Radar Temuan Analisis AI</h3>
-              <p class="text-[11px] sm:text-xs text-slate-500 font-mono italic">Diproses berdasarkan riwayat log & pola perangkat secara berkala</p>
+              <h3 class="text-xl sm:text-2xl font-black text-white tracking-tight uppercase">Radar Temuan Analisis AI</h3>
+              <p class="text-xs sm:text-sm text-slate-500 font-mono italic opacity-60">Sistem melakukan pemindaian otomatis terhadap 8,400+ parameter data harian</p>
             </div>
           </div>
-          <div class="flex items-center gap-2.5 w-full md:w-auto justify-between">
-            <span id="ai-status-badge" class="px-3.5 py-1.5 text-[10px] bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 rounded-xl font-black uppercase tracking-widest">Engine Active</span>
-            <button id="btn-export-anomalies" class="px-4 py-2 bg-indigo-500 hover:bg-indigo-400 text-white font-bold text-xs rounded-2xl transition flex items-center gap-2 shadow-lg shadow-indigo-500/20 cursor-pointer">
-              <i class="fa-solid fa-file-excel"></i> <span>Ekspor Laporan</span>
+          <div class="flex items-center gap-4 w-full md:w-auto justify-between">
+            <span id="ai-status-badge" class="px-5 py-2 text-xs bg-emerald-500/10 text-emerald-400 border-2 border-emerald-500/20 rounded-2xl font-black uppercase tracking-[0.2em]">AI Active</span>
+            <button id="btn-export-anomalies" class="px-6 py-3 bg-indigo-500 hover:bg-indigo-400 text-white font-black text-sm rounded-2xl transition-all flex items-center gap-3 shadow-2xl shadow-indigo-500/40 active:scale-95">
+              <i class="fa-solid fa-file-excel"></i> <span>DOWNLOAD LAPORAN</span>
             </button>
           </div>
         </div>
 
-        <!-- TAB FILTER KATEGORI (MODERN PILLS) -->
-        <div class="flex items-center gap-2 overflow-x-auto pb-4 text-[11px] font-bold no-scrollbar">
-          <button data-cat="ALL" class="btn-ai-filter px-5 py-2.5 rounded-2xl bg-cyan-500 text-slate-950 transition-all shadow-lg shadow-cyan-500/20 shrink-0">Semua Kasus</button>
-          <button data-cat="FREQUENT_RESET" class="btn-ai-filter px-5 py-2.5 rounded-2xl bg-slate-900 border border-slate-800 text-slate-400 hover:text-white transition-all shrink-0">📱 Reset Berulang</button>
-          <button data-cat="SHARED_DEVICE" class="btn-ai-filter px-5 py-2.5 rounded-2xl bg-slate-900 border border-slate-800 text-slate-400 hover:text-white transition-all shrink-0">👥 Device Sharing</button>
-          <button data-cat="LAST_MINUTE" class="btn-ai-filter px-5 py-2.5 rounded-2xl bg-slate-900 border border-slate-800 text-slate-400 hover:text-white transition-all shrink-0">⏱️ Menit Akhir</button>
-          <button data-cat="CHRONIC_ABSENCE" class="btn-ai-filter px-5 py-2.5 rounded-2xl bg-slate-900 border border-slate-800 text-slate-400 hover:text-white transition-all shrink-0">📉 Alpa Kronis</button>
-          <button data-cat="EARLY_BIRD" class="btn-ai-filter px-5 py-2.5 rounded-2xl bg-slate-900 border border-slate-800 text-slate-400 hover:text-white transition-all shrink-0">🟢 Teladan</button>
+        <!-- TAB FILTER KATEGORI (PRO SCALE) -->
+        <div class="flex items-center gap-3 overflow-x-auto pb-4 text-xs font-black no-scrollbar">
+          <button data-cat="ALL" class="btn-ai-filter px-8 py-4 rounded-2xl bg-cyan-500 text-slate-950 transition-all shadow-2xl shadow-cyan-500/40 shrink-0">SEMUA KASUS</button>
+          <button data-cat="FREQUENT_RESET" class="btn-ai-filter px-8 py-4 rounded-2xl bg-slate-900 border-2 border-slate-800 text-slate-400 hover:text-white hover:border-slate-700 transition-all shrink-0">📱 RESET BERULANG</button>
+          <button data-cat="SHARED_DEVICE" class="btn-ai-filter px-8 py-4 rounded-2xl bg-slate-900 border-2 border-slate-800 text-slate-400 hover:text-white hover:border-slate-700 transition-all shrink-0">👥 DEVICE SHARING</button>
+          <button data-cat="LAST_MINUTE" class="btn-ai-filter px-8 py-4 rounded-2xl bg-slate-900 border-2 border-slate-800 text-slate-400 hover:text-white hover:border-slate-700 transition-all shrink-0">⏱️ MENIT AKHIR</button>
+          <button data-cat="CHRONIC_ABSENCE" class="btn-ai-filter px-8 py-4 rounded-2xl bg-slate-900 border-2 border-slate-800 text-slate-400 hover:text-white hover:border-slate-700 transition-all shrink-0">📉 ALPA KRONIS</button>
+          <button data-cat="EARLY_BIRD" class="btn-ai-filter px-8 py-4 rounded-2xl bg-slate-900 border-2 border-slate-800 text-slate-400 hover:text-white hover:border-slate-700 transition-all shrink-0">🟢 TELADAN</button>
         </div>
 
-        <!-- FINDINGS GRID (ENHANCED DESKTOP SCALE) -->
-        <div id="ai-insights-cards-container" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-5 sm:gap-6 min-h-[400px]">
-          <!-- Findings injected by JS -->
-          <div class="p-12 text-center text-slate-500 font-mono text-xs col-span-full opacity-60">
-            <div class="animate-pulse space-y-4">
-              <i class="fa-solid fa-spinner fa-spin text-3xl text-cyan-400"></i>
-              <p>Menginisialisasi Radar Kecerdasan Buatan...</p>
+        <!-- FINDINGS GRID (CINEMATIC SCALE) -->
+        <div id="ai-insights-cards-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 min-h-[500px]">
+          <div class="p-20 text-center text-slate-500 font-mono text-sm col-span-full opacity-40">
+            <div class="animate-pulse space-y-6">
+              <i class="fa-solid fa-robot fa-spin text-6xl text-cyan-400"></i>
+              <p class="tracking-widest">MEMUAT KECERDASAN BUATAN...</p>
             </div>
           </div>
         </div>
