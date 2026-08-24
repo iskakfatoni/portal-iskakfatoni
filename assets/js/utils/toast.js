@@ -19,53 +19,56 @@ class ToastManager {
   }
 
   ensureContainers() {
-    // 1. Toast Container (Pojok Kanan Bawah / Atas Mobile)
-    if (!document.getElementById('portal-toast-container')) {
-      const container = document.createElement('div');
+    if (typeof document === 'undefined') return;
+    console.log("[ToastManager] Ensuring containers...");
+
+    // 1. Toast Container
+    let container = document.getElementById('portal-toast-container');
+    if (!container) {
+      container = document.createElement('div');
       container.id = 'portal-toast-container';
-      container.className = 'fixed bottom-4 right-4 z-[9999] flex flex-col gap-2.5 max-w-[92vw] sm:max-w-sm pointer-events-none';
+      container.className = 'fixed bottom-6 right-6 z-[20000] flex flex-col gap-3 max-w-[92vw] sm:max-w-sm pointer-events-none';
       document.body.appendChild(container);
-      this.container = container;
-    } else {
-      this.container = document.getElementById('portal-toast-container');
+      console.log("[ToastManager] Toast container created.");
     }
+    this.container = container;
 
     // 2. Modal Confirm Container
-    if (!document.getElementById('portal-confirm-modal')) {
-      const modal = document.createElement('div');
+    let modal = document.getElementById('portal-confirm-modal');
+    if (!modal) {
+      modal = document.createElement('div');
       modal.id = 'portal-confirm-modal';
-      modal.className = 'fixed inset-0 z-[10000] hidden flex items-center justify-center p-4 bg-slate-950/60 backdrop-blur-md transition-all duration-300';
+      modal.className = 'fixed inset-0 z-[20001] hidden flex items-center justify-center p-4 bg-slate-950/70 backdrop-blur-md transition-all duration-300';
       modal.innerHTML = `
-        <div id="portal-confirm-card" class="glass-card w-full max-w-sm p-6 sm:p-8 rounded-[2rem] border-2 border-slate-700/50 shadow-[0_0_50px_rgba(0,0,0,0.5)] space-y-6 transform scale-90 opacity-0 transition-all duration-300">
-          <div class="flex flex-col items-center text-center gap-4">
-            <div id="portal-confirm-icon" class="w-16 h-16 rounded-2xl bg-cyan-500/10 text-cyan-400 border-2 border-cyan-500/20 flex items-center justify-center text-2xl shadow-inner">
+        <div id="portal-confirm-card" class="glass-card w-full max-w-sm p-8 rounded-[2.5rem] border-2 border-slate-700/50 shadow-[0_0_80px_rgba(0,0,0,0.6)] space-y-6 transform scale-90 opacity-0 transition-all duration-300">
+          <div class="flex flex-col items-center text-center gap-5">
+            <div id="portal-confirm-icon" class="w-20 h-20 rounded-3xl bg-cyan-500/10 text-cyan-400 border-2 border-cyan-500/20 flex items-center justify-center text-3xl shadow-inner">
               <i class="fa-solid fa-circle-question"></i>
             </div>
             <div class="space-y-2">
-              <h3 id="portal-confirm-title" class="text-lg sm:text-xl font-black text-white tracking-tight">Konfirmasi</h3>
-              <p id="portal-confirm-msg" class="text-xs sm:text-sm text-slate-400 leading-relaxed font-medium"></p>
+              <h3 id="portal-confirm-title" class="text-xl font-black text-white tracking-tight">KONFIRMASI</h3>
+              <p id="portal-confirm-msg" class="text-sm text-slate-400 leading-relaxed font-medium"></p>
             </div>
           </div>
-          <div class="flex flex-col sm:flex-row items-center gap-3 pt-2">
-            <button id="btn-portal-confirm-cancel" class="w-full sm:flex-1 px-6 py-3 bg-slate-900 hover:bg-slate-800 border-2 border-slate-800 text-slate-300 rounded-2xl text-xs font-black transition-all active:scale-95">
+          <div class="flex flex-col sm:flex-row items-center gap-4 pt-2">
+            <button id="btn-portal-confirm-cancel" class="w-full sm:flex-1 px-6 py-4 bg-slate-900 hover:bg-slate-800 border-2 border-slate-800 text-slate-300 rounded-2xl text-xs font-black transition-all active:scale-95 cursor-pointer">
               BATAL
             </button>
-            <button id="btn-portal-confirm-ok" class="w-full sm:flex-1 px-6 py-3 bg-cyan-500 hover:bg-cyan-400 text-slate-950 rounded-2xl text-xs font-black transition-all shadow-xl shadow-cyan-500/20 active:scale-95">
+            <button id="btn-portal-confirm-ok" class="w-full sm:flex-1 px-6 py-4 bg-cyan-500 hover:bg-cyan-400 text-slate-950 rounded-2xl text-xs font-black transition-all shadow-xl shadow-cyan-500/30 active:scale-95 cursor-pointer">
               SETUJU
-            </button>
-          </div>
-        </div>
-      `;
+                </button>
+              </div>
+            </div>
+          `;
       document.body.appendChild(modal);
-      this.modalContainer = modal;
-    } else {
-      this.modalContainer = document.getElementById('portal-confirm-modal');
+      console.log("[ToastManager] Modal container created.");
     }
+    this.modalContainer = modal;
   }
 
-  show(message, type = 'info', duration = 3500) {
+  show(message, type = 'info', duration = 4000) {
     this.ensureContainers();
-    if (!this.container) return;
+    console.log(`[ToastManager] Showing toast: ${message} (${type})`);
 
     const toast = document.createElement('div');
     toast.className = 'portal-toast pointer-events-auto flex items-center gap-4 p-4 rounded-2xl border-2 backdrop-blur-2xl shadow-[0_10px_40px_rgba(0,0,0,0.3)] transition-all duration-500 translate-x-10 opacity-0 text-[13px] font-bold tracking-tight';
