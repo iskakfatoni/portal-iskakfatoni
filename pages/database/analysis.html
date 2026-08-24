@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="id" class="dark">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Analisa Kecurangan &amp; Anomali | Portal Iskak Fatoni</title>
+  <link rel="icon" type="image/webp" href="../../assets/img/nisnas_logo_colorful.webp">
+
+  <!-- TAILWIND CSS & FONTAWESOME -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <!-- SHEETJS (XLSX) FOR EXCEL EXPORT -->
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+
+  <!-- MODERN DESIGN SYSTEM STYLING TUNGGAL -->
+  <link rel="stylesheet" href="../../style/style.css">
+
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              50: '#f0fdfa',
+              500: '#14b8a6',
+              900: '#134e4a',
+            }
+          }
+        }
+      }
+    }
+  </script>
+</head>
+
+<body class="bg-slate-950 text-slate-100 font-sans antialiased min-h-screen relative overflow-x-hidden theme-dashboard">
+
+  <!-- BACKGROUND PARTICLE CANVAS -->
+  <canvas id="particle-canvas" class="fixed inset-0 pointer-events-none z-0 opacity-40"></canvas>
+
+  <main class="relative z-10 w-full max-w-[1920px] mx-auto px-3 sm:px-6 md:px-8 py-3 md:py-5 space-y-4">
+
+    <!-- HEADER BRANDING & NAVIGASI ADMIN RESPONSIVE -->
+    <header class="glass-card p-3 sm:p-4 rounded-2xl flex flex-col md:flex-row items-center justify-between gap-3 border border-slate-800 shadow-xl">
+      <div class="flex items-center gap-3 w-full md:w-auto justify-between md:justify-start">
+        <div class="flex items-center gap-2.5 sm:gap-3">
+          <img src="../../assets/img/foto_asn_profile.webp" alt="Muchamad Iskak Fatoni" class="w-9 h-9 sm:w-10 sm:h-10 object-cover rounded-xl border border-slate-700 shadow-sm shrink-0" loading="lazy">
+          <div>
+            <h1 class="text-xs sm:text-sm md:text-base font-extrabold text-white tracking-wide flex items-center gap-1.5 sm:gap-2 flex-wrap">
+              <i class="fa-solid fa-robot text-cyan-400"></i>
+              <span>AI Attendance &amp; Security Analysis</span>
+              <span class="px-2 py-0.5 text-[9px] sm:text-[10px] bg-indigo-500/20 text-indigo-400 border border-indigo-500/30 rounded-full uppercase font-mono">Radar Engine</span>
+            </h1>
+            <p class="text-[10px] sm:text-[11px] text-slate-400 font-mono hidden sm:block">Portal Iskak Fatoni &bull; Analisis Pola Kecurangan &amp; Deteksi Anomali Presensi</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- ACTION BUTTONS -->
+      <div class="flex items-center gap-1.5 sm:gap-2.5 w-full md:w-auto justify-between md:justify-end flex-wrap">
+        <!-- TOMBOL KEMBALI KE DB MANAGER -->
+        <a href="db-manager.html" class="flex-1 sm:flex-initial px-2.5 sm:px-3.5 py-2 bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-300 text-xs font-bold rounded-xl transition border border-cyan-500/30 flex items-center justify-center gap-1.5" title="↩️ Kembali ke Database Manager">
+          <i class="fa-solid fa-database"></i> <span class="hidden sm:inline">DB Manager</span>
+        </a>
+
+        <!-- TOMBOL KEMBALI KE HUB ADMIN -->
+        <a href="../../admin.html" class="flex-1 sm:flex-initial px-2.5 sm:px-3.5 py-2 bg-slate-900 hover:bg-slate-800 text-slate-300 text-xs font-bold rounded-xl transition border border-slate-800 flex items-center justify-center gap-1.5" title="↩️ Kembali ke Hub Admin">
+          <i class="fa-solid fa-arrow-left"></i> <span class="hidden sm:inline">Admin Hub</span>
+        </a>
+        
+        <div class="hidden lg:flex items-center gap-2 px-3 py-1.5 bg-slate-900/80 rounded-xl border border-slate-800 text-xs font-mono text-slate-300">
+          <i class="fa-solid fa-user-shield text-cyan-400"></i>
+          <span id="user-email-display">loading...</span>
+        </div>
+        
+        <button id="btn-logout" class="px-2.5 sm:px-3 py-2 bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/30 rounded-xl text-xs font-bold transition flex items-center gap-1.5 cursor-pointer">
+          <i class="fa-solid fa-right-from-bracket"></i>
+          <span class="hidden sm:inline">Keluar</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- SECTION KONTEN AI RADAR -->
+    <section class="space-y-4 w-full">
+
+      <!-- 📊 RINGKASAN ANOMALI -->
+      <div class="grid grid-cols-2 lg:grid-cols-4 gap-3">
+        <div class="metric-card bg-slate-900/40">
+          <div class="min-w-0">
+            <p class="text-[10px] uppercase font-bold text-slate-400">Total Anomali</p>
+            <p id="stat-total-findings" class="text-sm font-extrabold text-cyan-400 font-mono mt-0.5">0</p>
+          </div>
+          <i class="fa-solid fa-magnifying-glass-chart text-slate-700 text-lg shrink-0"></i>
+        </div>
+        <div class="metric-card bg-slate-900/40">
+          <div class="min-w-0">
+            <p class="text-[10px] uppercase font-bold text-slate-400">Kasus Kritis</p>
+            <p id="stat-high-risk" class="text-sm font-extrabold text-rose-400 font-mono mt-0.5">0</p>
+          </div>
+          <i class="fa-solid fa-radiation text-slate-700 text-lg shrink-0"></i>
+        </div>
+        <div class="metric-card bg-slate-900/40">
+          <div class="min-w-0">
+            <p class="text-[10px] uppercase font-bold text-slate-400">Reset Berulang</p>
+            <p id="stat-reset-anomalies" class="text-sm font-extrabold text-amber-400 font-mono mt-0.5">0</p>
+          </div>
+          <i class="fa-solid fa-mobile-screen-button text-slate-700 text-lg shrink-0"></i>
+        </div>
+        <div class="metric-card bg-slate-900/40">
+          <div class="min-w-0">
+            <p class="text-[10px] uppercase font-bold text-slate-400">Early Birds</p>
+            <p id="stat-early-birds" class="text-sm font-extrabold text-emerald-400 font-mono mt-0.5">0</p>
+          </div>
+          <i class="fa-solid fa-award text-slate-700 text-lg shrink-0"></i>
+        </div>
+      </div>
+
+      <!-- MAIN RADAR PANEL -->
+      <div class="glass-card p-5 rounded-2xl border border-slate-800 shadow-xl space-y-4">
+        <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+          <div class="flex items-center gap-2.5">
+            <h3 class="text-sm font-extrabold text-white tracking-wide uppercase">Daftar Temuan Analisis AI</h3>
+            <span id="ai-status-badge" class="px-2.5 py-0.5 text-[10px] bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 rounded-full font-mono font-bold uppercase">Engine Active</span>
+          </div>
+          <button id="btn-export-anomalies" class="px-3 py-1.5 bg-indigo-500/15 hover:bg-indigo-500/30 text-indigo-300 border border-indigo-500/30 font-bold text-xs rounded-xl transition flex items-center gap-1.5 cursor-pointer">
+            <i class="fa-solid fa-file-excel text-emerald-400"></i> <span>Ekspor Temuan (.xlsx)</span>
+          </button>
+        </div>
+
+        <!-- TAB FILTER KATEGORI -->
+        <div class="flex items-center gap-1.5 overflow-x-auto pb-2 text-[11px] font-mono text-slate-400 no-scrollbar">
+          <button data-cat="ALL" class="btn-ai-filter px-4 py-2 rounded-xl font-bold bg-cyan-500 text-slate-950 transition cursor-pointer shrink-0">Semua</button>
+          <button data-cat="FREQUENT_RESET" class="btn-ai-filter px-4 py-2 rounded-xl font-bold bg-slate-900 hover:bg-slate-800 text-slate-300 border border-slate-800 transition cursor-pointer shrink-0">📱 Reset HP</button>
+          <button data-cat="SHARED_DEVICE" class="btn-ai-filter px-4 py-2 rounded-xl font-bold bg-slate-900 hover:bg-slate-800 text-slate-300 border border-slate-800 transition cursor-pointer shrink-0">👥 Device Sharing</button>
+          <button data-cat="LAST_MINUTE" class="btn-ai-filter px-4 py-2 rounded-xl font-bold bg-slate-900 hover:bg-slate-800 text-slate-300 border border-slate-800 transition cursor-pointer shrink-0">⏱️ Menit Terakhir</button>
+          <button data-cat="CHRONIC_ABSENCE" class="btn-ai-filter px-4 py-2 rounded-xl font-bold bg-slate-900 hover:bg-slate-800 text-slate-300 border border-slate-800 transition cursor-pointer shrink-0">📉 Alpa Kronis</button>
+          <button data-cat="EARLY_BIRD" class="btn-ai-filter px-4 py-2 rounded-xl font-bold bg-slate-900 hover:bg-slate-800 text-slate-300 border border-slate-800 transition cursor-pointer shrink-0">🟢 Teladan</button>
+        </div>
+
+        <div id="ai-insights-cards-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <!-- Findings injected by JS -->
+          <div class="p-8 text-center text-slate-500 font-mono text-xs col-span-full">
+            <i class="fa-solid fa-spinner fa-spin text-cyan-400 mr-2"></i> Melakukan analisis mendalam terhadap pola data...
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- FOOTER COPYRIGHT -->
+    <div class="text-center pt-1">
+      <p class="text-[11px] text-slate-500 font-mono">AI Analysis Engine &bull; Developed by Iskak Fatoni, S.Pd., Gr.</p>
+    </div>
+
+  </main>
+
+  <!-- PARTICLE CANVAS ANIMATION -->
+  <script src="../../assets/js/particle/particle-bg.js"></script>
+
+  <!-- FIREBASE AUTH & ANALYSIS MODULAR ENGINE -->
+  <script type="module" src="../../assets/js/database/analysis.js?v=1.0.0"></script>
+</body>
+
+</html>
