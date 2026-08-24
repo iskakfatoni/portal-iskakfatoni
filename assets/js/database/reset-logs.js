@@ -17,7 +17,7 @@ const state = {
   logsList: [],
   searchQuery: '',
   currentPage: 1,
-  pageSize: 25,
+  pageSize: 100, // Tingkatkan batas ke 100
   unsubscribeLogs: null
 };
 
@@ -59,19 +59,22 @@ const TableEngine = {
 
     if (filtered.length === 0) {
       dom.tableBodyLogs.innerHTML = `<tr><td colspan="6" class="p-8 text-center text-slate-500">// Tidak ada data.</td></tr>`;
+      dom.pageInfo.innerText = "Tidak ada data.";
       return;
     }
 
-    // Basic Pagination
+    // User Requirement: Tampilkan semua jika < 100, batasi 100 jika > 100
     const totalItems = filtered.length;
-    const totalPages = Math.ceil(totalItems / state.pageSize);
-    const start = (state.currentPage - 1) * state.pageSize;
-    const end = start + state.pageSize;
-    const pageDocs = filtered.slice(start, end);
+    const showLimit = 100;
+    const displayCount = Math.min(totalItems, showLimit);
+    const pageDocs = filtered.slice(0, displayCount);
 
-    dom.pageInfo.innerText = `Halaman ${state.currentPage} dari ${totalPages}`;
-    dom.btnPrevPage.disabled = state.currentPage <= 1;
-    dom.btnNextPage.disabled = state.currentPage >= totalPages;
+    dom.pageInfo.innerText = totalItems > showLimit
+      ? `Menampilkan ${displayCount} log terbaru (Dibatasi maks ${showLimit})`
+      : `Menampilkan seluruh ${totalItems} log audit`;
+
+    // Sembunyikan navigasi halaman karena mode "Top 100"
+    if (dom.btnPrevPage) dom.btnPrevPage.parentElement.classList.add('hidden');
 
     dom.tableBodyLogs.innerHTML = '';
     pageDocs.forEach((docSnap, index) => {
