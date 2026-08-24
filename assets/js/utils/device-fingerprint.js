@@ -95,3 +95,13 @@ export async function getHardwareFingerprint() {
   
   return 'HW-' + hashHex.substring(0, 16).toUpperCase();
 }
+
+// FUNGSI DETEKSI ORIENTASI & RESOLUSI LAYAR REAL-TIME SAAT ABSENSI
+export function getScreenOrientationInfo() {
+  const width = window.innerWidth || screen.width || 0;
+  const height = window.innerHeight || screen.height || 0;
+  const isLandscape = width > height || (screen.orientation && screen.orientation.type.includes('landscape'));
+  const mode = isLandscape ? 'Landscape 📱↔️' : 'Portrait 📱↕️';
+  return `${mode} (${width}x${height})`;
+}
+

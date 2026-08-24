@@ -13,6 +13,8 @@ import {
   serverTimestamp 
 } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
+import { getScreenOrientationInfo } from "../utils/device-fingerprint.js";
+
 let isProcessing = false;
 let html5QrCode = null;
 
@@ -125,6 +127,8 @@ async function onScanSuccess(decodedText) {
     const waktuStr = now.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', second: '2-digit' }) + ' WIB';
     const currentDeviceId = currentSiswaUser.device_id || localStorage.getItem('portal_device_id') || '';
 
+    const screenOrientation = getScreenOrientationInfo();
+
     await addDoc(collection(db, "log_absensi"), {
       id_sesi: sesiDoc.id,
       nis: currentSiswaUser.nis,
@@ -137,6 +141,7 @@ async function onScanSuccess(decodedText) {
       tanggal: tanggalStr,
       waktu: waktuStr,
       device_id: currentDeviceId,
+      orientasi_layar: screenOrientation,
       status: "Hadir",
       created_at: serverTimestamp()
     });

@@ -2861,6 +2861,42 @@ Dokumen ini berisi rangkuman review perubahan kode (*code review*) terbaru yang 
 3. Buka halaman **Analisa Anomali AI** ([`pages/database/analysis.html`](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/pages/database/analysis.html)).
 4. Klik filter **⚡ Reset Sesi Sama** &rarr; Kartu temuan bermutu **🔴 HIGH RISK** akan muncul dengan detail waktu presensi, nama-nama siswa yang terlibat, dan rekomendasi tindakan inspeksi kelas.
 
+---
+
+## 📅 Review [2026-08-25 06:29 WIB] - Fitur Recording Orientasi & Resolusi Fisik Layar pada Log Absensi (Portrait vs Landscape)
+
+### 📁 1. Berkas yang Diubah
+* 📄 **[assets/js/utils/device-fingerprint.js](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/assets/js/utils/device-fingerprint.js)**
+* 📄 **[assets/js/siswa/siswa-scanner.js](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/assets/js/siswa/siswa-scanner.js)**
+* 📄 **[assets/js/database/db-manager.js](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/assets/js/database/db-manager.js)**
+
+---
+
+### 📝 2. Rincian Baris & Logika yang Diperbarui
+
+1. **Fungsi Deteksi Orientasi & Resolusi Real-time (`getScreenOrientationInfo`)**:
+   - Menambahkan fungsi pembantu di `device-fingerprint.js` untuk mengukur dimensi lebar & tinggi layar aktif saat presensi (`window.innerWidth` & `window.innerHeight`), lalu menentukan posisi orientasi perangkat saat men-scan QR code:
+     - `Portrait 📱↕️ (393x873)`
+     - `Landscape 📱↔️ (873x393)`
+
+2. **Perekaman Otomatis ke Firestore (`siswa-scanner.js`)**:
+   - Menambahkan field `orientasi_layar` ke dokumen `log_absensi` saat siswa menyelesaikan scan QR presensi.
+
+3. **Visibilitas Tabel Database (`db-manager.js`)**:
+   - Memasukkan kolom `orientasi_layar` ke dalam daftar kolom default koleksi `log_absensi` di Database Manager.
+
+---
+
+### 🧪 3. Petunjuk Pengujian Lokal (*Local Verification*)
+
+1. **Uji Presensi Siswa**:
+   - Buka scanner QR siswa ([`pages/siswa/scanner.html`](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/pages/siswa/scanner.html)) dengan layar HP posisi tegak (Portrait).
+   - Lakukan scan QR $\rightarrow$ Presensi berhasil disimpan.
+2. **Cek Log Absensi**:
+   - Buka **Database Manager** (`pages/database/db-manager.html`) pada koleksi `log_absensi`.
+   - Kolom `orientasi_layar` akan menampilkan misal: `Portrait 📱↕️ (393x873)` atau `Landscape 📱↔️ (873x393)`.
+
+
 
 
 
