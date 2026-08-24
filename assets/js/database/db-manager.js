@@ -1,6 +1,7 @@
 import { db } from "../config/firebase-config.js";
 import { initializeAuthGuard } from "../auth/auth-guard.js";
 import { AIInsightEngine } from "./ai-insights.js";
+import { showToast, showConfirm, showPrompt } from "../utils/toast.js";
 import { collection, doc, getDocs, setDoc, addDoc, deleteDoc, updateDoc, deleteField, onSnapshot, writeBatch, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
 // -----------------------------------------------------------------
@@ -707,8 +708,9 @@ const TableEngine = {
           const newValue = e.target.checked;
           try {
             await updateDoc(doc(db, state.currentCollection, targetDocId), { [targetField]: newValue });
+            showToast(`Status ${targetField} berhasil diperbarui.`, 'success');
           } catch (err) {
-            alert(`Gagal merubah status ${targetField}: ` + err.message);
+            showToast(`Gagal merubah status ${targetField}: ` + err.message, 'error');
             e.target.checked = !newValue;
           }
         };
@@ -728,16 +730,19 @@ const TableEngine = {
         if (btnReset) {
           btnReset.onclick = async () => {
             const studentName = dataObj.nama_siswa || docId;
-            if (confirm(`Reset pendaftaran perangkat (HP) untuk siswa "${studentName}" (${docId})? Siswa dapat melakukan registrasi di HP baru.`)) {
-              try {
-                // LOG KE system_logs
-                const adminEmail = dom.userEmailDisplay.innerText || "Admin Portal";
+            const confirmed = await showConfirm({
+              title: "Reset Perangkat HP",
+              message: `Reset pendaftaran perangkat (HP) untuk siswa <b>"${studentName}"</b> (${docId})?<br/>Siswa dapat melakukan registrasi di HP baru.`,
+              icon: "fa-mobile-screen-button",
+              confirmText: "Reset Perangkat",
+              type: "danger"
+            });
 
-                // AMBIL DATA TERBARU DARI ROW (Pastikan ID tidak terlewat)
+            if (confirmed) {
+              try {
+                const adminEmail = dom.userEmailDisplay.innerText || "Admin Portal";
                 const oldId = dataObj.device_id || dataObj.device_token || dataObj.mac_address || "-";
                 const oldInfo = dataObj.device_info || dataObj.device_model || "-";
-
-                console.log("LOG: Mencatat reset untuk ID:", oldId);
 
                 const logData = {
                   action: "RESET_DEVICE",
@@ -750,7 +755,6 @@ const TableEngine = {
                 };
 
                 await addDoc(collection(db, "system_logs"), logData);
-                console.log("LOG: System logs berhasil ditulis.");
 
                 await updateDoc(doc(db, "siswa", docId), {
                   device_id: deleteField(),
@@ -759,12 +763,11 @@ const TableEngine = {
                   mac_address: deleteField(),
                   registered_at: deleteField()
                 });
-                console.log("LOG: Data siswa berhasil di-update.");
 
-                alert(`Perangkat siswa "${studentName}" berhasil di-reset!`);
+                showToast(`Perangkat siswa "${studentName}" berhasil di-reset!`, 'success');
               } catch (err) {
                 console.error("LOG ERROR:", err);
-                alert("Gagal mereset perangkat: " + err.message);
+                showToast("Gagal mereset perangkat: " + err.message, 'error');
               }
             }
           };
@@ -781,14 +784,22 @@ const TableEngine = {
         if (state.currentCollection === 'links') window.open(dataObj.url, '_blank');
         else if (state.currentCollection === 'sesi_absensi') {
           const token = dataObj.current_qr_token;
-          alert(`TOKEN QR: ${token}\n(Gunakan Dashboard Guru untuk visual QR Code)`);
+          showToast(`TOKEN QR: ${token} (Gunakan Dashboard Guru untuk visual QR Code)`, 'info', 6000);
         }
       };
     }
 
     // 🛡️ Fitur 3: Soft Delete (Move to trash_bin)
     tr.querySelector('.btn-del-single').onclick = async () => {
-      if (confirm(`Pindahkan dokumen "${docId}" ke Keranjang Sampah (Recycle Bin)?`)) {
+      const confirmed = await showConfirm({
+        title: "Pindahkan ke Sampah",
+        message: `Pindahkan dokumen <b>"${docId}"</b> ke Keranjang Sampah (Recycle Bin)?`,
+        icon: "fa-trash-can",
+        confirmText: "Pindahkan",
+        type: "danger"
+      });
+
+      if (confirmed) {
         try {
           // Salin ke trash_bin
           const trashData = { ...dataObj, original_collection: state.currentCollection, deleted_at: serverTimestamp() };
@@ -797,8 +808,9 @@ const TableEngine = {
           await deleteDoc(doc(db, state.currentCollection, docId));
           state.selectedDocIds.delete(docId);
           TableEngine.updateSelectedUI();
+          showToast(`Dokumen "${docId}" dipindahkan ke Sampah.`, 'info');
         } catch (err) {
-          alert("Gagal menghapus: " + err.message);
+          showToast("Gagal menghapus: " + err.message, 'error');
         }
       }
     };
@@ -1049,7 +1061,7 @@ const ChartEngine = {
 // 🔒 Fitur 1: Audit Security Toggle
 dom.btnAuditSecurity.addEventListener('click', () => {
   if (state.currentCollection !== 'siswa') {
-    alert("Fitur Audit Keamanan saat ini dikhususkan untuk koleksi 'siswa'.");
+    showToast("Fitur Audit Keamanan saat ini dikhususkan untuk koleksi 'siswa'.", "warning");
     return;
   }
 
@@ -1062,7 +1074,7 @@ dom.btnAuditSecurity.addEventListener('click', () => {
     dom.btnAuditSecurity.className = "py-2 px-3.5 bg-rose-500 text-white font-bold text-xs rounded-xl transition flex items-center gap-1.5 cursor-pointer shadow-lg shadow-rose-500/30";
     dom.btnAuditSecurity.innerHTML = '<i class="fa-solid fa-shield-halved"></i> <span>Matikan Audit</span>';
     if (state.duplicateDeviceIds.size > 0) {
-      alert(`Peringatan Keamanan!\n\nTerdeteksi ${state.duplicateDeviceIds.size} ID perangkat yang digunakan oleh lebih dari satu siswa. Baris yang bermasalah telah disorot warna kuning.`);
+      showToast(`⚠️ Terdeteksi ${state.duplicateDeviceIds.size} ID perangkat yang digunakan oleh lebih dari satu siswa. Baris bermasalah disorot kuning.`, "warning", 6000);
     }
   } else {
     dom.btnAuditSecurity.className = "py-2 px-3.5 bg-indigo-500/15 hover:bg-indigo-500/30 text-indigo-400 border border-indigo-500/30 font-bold text-xs rounded-xl transition flex items-center gap-1.5 cursor-pointer";
@@ -1425,18 +1437,26 @@ dom.btnNextPage.addEventListener('click', () => {
 });
 
 // 🗑️ Delete Selected & Batch Actions
+// 🗑️ Delete Selected & Batch Actions
 if (dom.btnResetSelectedDevice) {
   dom.btnResetSelectedDevice.addEventListener('click', async () => {
     const count = state.selectedDocIds.size;
     if (count === 0 || state.currentCollection !== 'siswa') return;
 
-    if (confirm(`Reset pendaftaran perangkat (HP) untuk ${count} siswa terpilih? Siswa terpilih dapat melakukan registrasi ulang di HP baru.`)) {
+    const confirmed = await showConfirm({
+      title: "Reset HP Massal",
+      message: `Reset pendaftaran perangkat (HP) untuk <b>${count} siswa terpilih</b>?<br/>Siswa terpilih dapat melakukan registrasi ulang di HP baru.`,
+      icon: "fa-mobile-screen-button",
+      confirmText: "Reset All",
+      type: "danger"
+    });
+
+    if (confirmed) {
       try {
         dom.btnResetSelectedDevice.disabled = true;
         const selectedArray = Array.from(state.selectedDocIds);
         const CHUNK_SIZE = 400;
 
-        // Buat mapping data untuk logging masal
         const studentMap = {};
         state.currentDocsList.forEach(d => {
           if (state.selectedDocIds.has(d.id)) {
@@ -1454,7 +1474,6 @@ if (dom.btnResetSelectedDevice) {
           chunk.forEach(id => {
             const student = studentMap[id];
 
-            // Ambil ID perangkat lama dari berbagai kemungkinan field
             const oldId = student.device_id || student.device_token || student.mac_address || "-";
             const oldInfo = student.device_info || student.device_model || "-";
 
@@ -1480,11 +1499,11 @@ if (dom.btnResetSelectedDevice) {
           await Promise.all(logPromises);
           await batch.commit();
         }
-        alert(`Berhasil mereset pendaftaran HP untuk ${count} siswa!`);
+        showToast(`Berhasil mereset pendaftaran HP untuk ${count} siswa!`, 'success');
         state.selectedDocIds.clear();
         TableEngine.updateSelectedUI();
       } catch (err) {
-        alert("Gagal mereset perangkat masal: " + err.message);
+        showToast("Gagal mereset perangkat masal: " + err.message, 'error');
       } finally {
         dom.btnResetSelectedDevice.disabled = false;
       }
@@ -1501,7 +1520,7 @@ if (dom.btnExportSelectedExcel) {
     const selectedDocs = allFiltered.filter(docSnap => state.selectedDocIds.has(docSnap.id));
 
     if (selectedDocs.length === 0) {
-      alert("Tidak ada dokumen terceklist yang ditemukan.");
+      showToast("Tidak ada dokumen terceklist yang ditemukan.", "warning");
       return;
     }
 
@@ -1529,6 +1548,7 @@ if (dom.btnExportSelectedExcel) {
 
     const today = new Date().toISOString().split('T')[0];
     XLSX.writeFile(workbook, `Ekspor_Terpilih_${state.currentCollection}_${today}.xlsx`);
+    showToast(`Berhasil mengunduh ${exportRows.length} data terpilih!`, "success");
   });
 }
 
@@ -1536,25 +1556,37 @@ dom.btnDeleteSelected.addEventListener('click', async () => {
   const count = state.selectedDocIds.size;
   if (count === 0) return;
 
-  if (confirm(`Apakah Anda yakin ingin menghapus ${count} dokumen terpilih dari koleksi "${state.currentCollection}"?`)) {
+  const confirmed = await showConfirm({
+    title: "Hapus Terpilih",
+    message: `Hapus <b>${count} dokumen terpilih</b> dari koleksi "${state.currentCollection}"?`,
+    icon: "fa-trash-can",
+    confirmText: "Hapus Dokumen",
+    type: "danger"
+  });
+
+  if (confirmed) {
     try {
       await BatchUtils.chunkedDelete(Array.from(state.selectedDocIds), state.currentCollection);
       state.selectedDocIds.clear();
       TableEngine.updateSelectedUI();
-      alert(`Berhasil menghapus ${count} dokumen!`);
+      showToast(`Berhasil menghapus ${count} dokumen!`, 'success');
     } catch (err) {
-      alert("Gagal menghapus dokumen terpilih: " + err.message);
+      showToast("Gagal menghapus dokumen terpilih: " + err.message, 'error');
     }
   }
 });
 
 dom.btnClearCollection.addEventListener('click', async () => {
   if (state.currentDocsList.length === 0) {
-    alert(`Koleksi "${state.currentCollection}" sudah kosong.`);
+    showToast(`Koleksi "${state.currentCollection}" sudah kosong.`, "info");
     return;
   }
 
-  const promptInput = prompt(`⚠️ PERINGATAN BAHAYA!\n\nAnda akan menghapus SELURUH data (${state.currentDocsList.length} dokumen) dalam koleksi "${state.currentCollection}".\n\nKetik nama koleksi "${state.currentCollection}" di bawah ini untuk mengonfirmasi:`);
+  const promptInput = await showPrompt({
+    title: "⚠️ PERINGATAN BAHAYA",
+    message: `Anda akan menghapus SELURUH data (<b>${state.currentDocsList.length} dokumen</b>) dalam koleksi "<b>${state.currentCollection}</b>".<br/><br/>Ketik nama koleksi <b>${state.currentCollection}</b> di bawah untuk konfirmasi:`,
+    placeholder: state.currentCollection
+  });
 
   if (promptInput === state.currentCollection) {
     try {
@@ -1562,12 +1594,12 @@ dom.btnClearCollection.addEventListener('click', async () => {
       await BatchUtils.chunkedDelete(docIds, state.currentCollection);
       state.selectedDocIds.clear();
       TableEngine.updateSelectedUI();
-      alert(`Koleksi "${state.currentCollection}" berhasil dikosongkan!`);
+      showToast(`Koleksi "${state.currentCollection}" berhasil dikosongkan!`, 'success');
     } catch (err) {
-      alert("Gagal mengosongkan koleksi: " + err.message);
+      showToast("Gagal mengosongkan koleksi: " + err.message, 'error');
     }
   } else if (promptInput !== null) {
-    alert("Konfirmasi dibatalkan: Nama koleksi tidak cocok.");
+    showToast("Konfirmasi dibatalkan: Nama koleksi tidak cocok.", "warning");
   }
 });
 
@@ -1599,9 +1631,9 @@ dom.formAddManual.addEventListener('submit', async (e) => {
     }
 
     dom.modalAddData.classList.add('hidden');
-    alert(`Berhasil menambahkan data baru ke koleksi "${state.currentCollection}"!`);
+    showToast(`Berhasil menambahkan data baru ke koleksi "${state.currentCollection}"!`, 'success');
   } catch (err) {
-    alert("Gagal menyimpan data baru: " + err.message);
+    showToast("Gagal menyimpan data baru: " + err.message, 'error');
   }
 });
 
@@ -1625,9 +1657,9 @@ dom.formEditManual.addEventListener('submit', async (e) => {
   try {
     await setDoc(doc(db, state.currentCollection, targetDocId), updatedObj);
     dom.modalEditData.classList.add('hidden');
-    alert(`Dokumen ID: "${targetDocId}" berhasil diperbarui!`);
+    showToast(`Dokumen ID: "${targetDocId}" berhasil diperbarui!`, 'success');
   } catch (err) {
-    alert("Gagal memperbarui dokumen: " + err.message);
+    showToast("Gagal memperbarui dokumen: " + err.message, 'error');
   }
 });
 
@@ -1798,13 +1830,13 @@ dom.btnDownloadTemplate.addEventListener('click', () => {
 if (dom.btnExportDeviceExcel) {
   dom.btnExportDeviceExcel.addEventListener('click', () => {
     if (state.currentCollection !== 'siswa') {
-      alert('Fitur ekspor perangkat HP hanya tersedia untuk koleksi "siswa".');
+      showToast('Fitur ekspor perangkat HP hanya tersedia untuk koleksi "siswa".', 'warning');
       return;
     }
 
     const filteredDocs = TableEngine.getFilteredAndSortedDocs();
     if (!filteredDocs || filteredDocs.length === 0) {
-      alert('Tidak ada data siswa yang cocok dengan filter saat ini untuk diekspor.');
+      showToast('Tidak ada data siswa yang cocok dengan filter saat ini untuk diekspor.', 'warning');
       return;
     }
 
@@ -1852,6 +1884,7 @@ if (dom.btnExportDeviceExcel) {
 
     const today = new Date().toISOString().split('T')[0];
     XLSX.writeFile(workbook, `${filePrefix}_${today}.xlsx`);
+    showToast("Berhasil mengunduh rekap perangkat HP siswa!", "success");
   });
 }
 

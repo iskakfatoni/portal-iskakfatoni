@@ -61,6 +61,38 @@ class ToastManager {
       document.body.appendChild(modal);
     }
     this.modalContainer = modal;
+
+    // 3. Modal Prompt Container
+    let promptModal = document.getElementById('portal-prompt-modal');
+    if (!promptModal) {
+      promptModal = document.createElement('div');
+      promptModal.id = 'portal-prompt-modal';
+      promptModal.className = 'portal-prompt-modal-root hidden fixed inset-0 z-[20002] flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md transition-all duration-300';
+      promptModal.innerHTML = `
+        <div id="portal-prompt-card" class="portal-prompt-card glass-card w-full max-w-sm p-8 rounded-[2.5rem] border-2 border-rose-500/30 shadow-[0_0_80px_rgba(244,63,94,0.3)] space-y-6 transform scale-90 opacity-0 transition-all duration-300">
+          <div class="portal-prompt-body flex flex-col items-center text-center gap-4">
+            <div id="portal-prompt-icon" class="portal-prompt-icon w-16 h-16 rounded-2xl bg-rose-500/10 text-rose-400 border-2 border-rose-500/20 flex items-center justify-center text-2xl shadow-inner">
+              <i class="fa-solid fa-triangle-exclamation"></i>
+            </div>
+            <div class="portal-prompt-text space-y-2 w-full">
+              <h3 id="portal-prompt-title" class="portal-prompt-title text-xl font-black text-white tracking-tight">KONFIRMASI KEAMANAN</h3>
+              <p id="portal-prompt-msg" class="portal-prompt-msg text-xs text-slate-400 leading-relaxed font-medium"></p>
+            </div>
+            <input id="portal-prompt-input" type="text" class="w-full px-4 py-3 bg-slate-900/90 border-2 border-slate-700/60 rounded-xl text-sm font-mono text-center text-rose-300 placeholder-slate-500 focus:outline-none focus:border-rose-500 transition-all" />
+          </div>
+          <div class="portal-prompt-actions flex items-center gap-3 pt-2">
+            <button id="btn-portal-prompt-cancel" class="w-1/2 px-5 py-3 bg-slate-900 hover:bg-slate-800 border-2 border-slate-800 text-slate-300 rounded-2xl text-xs font-black transition-all cursor-pointer">
+              BATAL
+            </button>
+            <button id="btn-portal-prompt-ok" class="w-1/2 px-5 py-3 bg-rose-600 hover:bg-rose-500 text-white rounded-2xl text-xs font-black transition-all shadow-lg shadow-rose-600/30 cursor-pointer">
+              PROSES
+            </button>
+          </div>
+        </div>
+      `;
+      document.body.appendChild(promptModal);
+    }
+    this.promptModalContainer = promptModal;
   }
 
   show(message, type = 'info', duration = 4000) {
@@ -165,9 +197,58 @@ class ToastManager {
       };
     });
   }
+
+  prompt({ title = 'Konfirmasi Teks', message = 'Masukkan kata kunci konfirmasi:', placeholder = '', defaultValue = '', confirmText = 'PROSES', cancelText = 'BATAL' } = {}) {
+    this.ensureContainers();
+    if (!this.promptModalContainer) return Promise.resolve(null);
+
+    const card = document.getElementById('portal-prompt-card');
+    const titleEl = document.getElementById('portal-prompt-title');
+    const msgEl = document.getElementById('portal-prompt-msg');
+    const inputEl = document.getElementById('portal-prompt-input');
+    const btnCancel = document.getElementById('btn-portal-prompt-cancel');
+    const btnOk = document.getElementById('btn-portal-prompt-ok');
+
+    titleEl.innerText = title;
+    msgEl.innerHTML = message;
+    inputEl.placeholder = placeholder;
+    inputEl.value = defaultValue;
+    btnCancel.innerText = cancelText;
+    btnOk.innerText = confirmText;
+
+    this.promptModalContainer.classList.remove('hidden');
+    requestAnimationFrame(() => {
+      card.classList.remove('scale-90', 'opacity-0');
+      card.classList.add('scale-100', 'opacity-100');
+      inputEl.focus();
+    });
+
+    return new Promise((resolve) => {
+      const cleanup = (result) => {
+        card.classList.remove('scale-100', 'opacity-100');
+        card.classList.add('scale-90', 'opacity-0');
+        setTimeout(() => {
+          this.promptModalContainer.classList.add('hidden');
+          resolve(result);
+        }, 300);
+      };
+
+      btnOk.onclick = () => cleanup(inputEl.value);
+      btnCancel.onclick = () => cleanup(null);
+      inputEl.onkeydown = (e) => {
+        if (e.key === 'Enter') cleanup(inputEl.value);
+        if (e.key === 'Escape') cleanup(null);
+      };
+      this.promptModalContainer.onclick = (e) => {
+        if (e.target === this.promptModalContainer) cleanup(null);
+      };
+    });
+  }
 }
 
 export const toast = new ToastManager();
 export const showToast = (msg, type, duration) => toast.show(msg, type, duration);
 export const showConfirm = (options) => toast.confirm(options);
+export const showPrompt = (options) => toast.prompt(options);
+
 

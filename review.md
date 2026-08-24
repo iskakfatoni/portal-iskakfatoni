@@ -2737,3 +2737,39 @@ Dokumen ini berisi rangkuman review perubahan kode (*code review*) terbaru yang 
 3. **Uji dari iPhone PWA (Ikon Layar Utama)**:
    - Buka ikon dari Layar Utama iPhone &rarr; [iphone.html](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/iphone.html) menyembunyikan petunjuk PWA dan menampilkan menu tombol pintasan `portal.html` & `absensi.html`.
 
+---
+
+## 📅 Review [2026-08-25 06:10 WIB] - Standarisasi Sistem Notifikasi Glassmorphic Toast & Modal Dialog
+
+### 📁 1. Berkas yang Diubah
+* 📄 **[assets/js/utils/toast.js](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/assets/js/utils/toast.js)**
+* 📄 **[assets/js/database/db-manager.js](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/assets/js/database/db-manager.js)**
+* 📄 **[assets/js/guru/rekap.js](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/assets/js/guru/rekap.js)**
+* 📄 **[assets/js/database/ai-insights.js](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/assets/js/database/ai-insights.js)**
+* 📄 **[assets/js/database/reset-logs.js](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/assets/js/database/reset-logs.js)**
+
+---
+
+### 📝 2. Rincian Baris & Logika yang Diperbarui
+
+1. **Pengembangan Modul Notifikasi (`assets/js/utils/toast.js`)**:
+   - Menambahkan komponen modal prompt glassmorphic `showPrompt({ title, message, placeholder })` untuk menggantikan dialog input bawaan peramban (`prompt()`).
+   - Menyediakan antarmuka terpadu `showToast`, `showConfirm`, dan `showPrompt` dengan animasi glassmorphic modern.
+
+2. **Penggantian Native Alert & Confirm di Seluruh Kode**:
+   - Menghapus seluruh panggilan `alert()`, `confirm()`, dan `prompt()` dari `db-manager.js`, `rekap.js`, `ai-insights.js`, dan `reset-logs.js`.
+   - Menggantikan notifikasi aksi (seperti reset HP massal, hapus data, simpan log alpa, ekspor Excel, dan audit keamanan) menjadi pesan Toast non-blocking serta dialog konfirmasi modal bertema *dark glassmorphism*.
+
+---
+
+### 🧪 3. Petunjuk Pengujian Lokal (*Local Verification*)
+
+1. **Uji Notifikasi Toast & Confirm**:
+   - Buka halaman **Database Manager** (`admin.html` / `perangkat.html`).
+   - Coba tekan tombol **Reset HP** pada salah satu baris siswa $\rightarrow$ Dialog konfirmasi glassmorphic modern akan muncul menggantikan confirm browser.
+   - Pilih **Setuju** $\rightarrow$ Notifikasi toast sukses muncul di pojok kanan bawah.
+2. **Uji Konfirmasi Prompt Kunci**:
+   - Buka halaman **Riwayat Reset HP** (`database/reset-logs.html`) atau tekan **Kosongkan Koleksi** di Database Manager.
+   - Modal input glassmorphic akan meminta mengetikkan kata kunci (`HAPUS` / Nama Koleksi).
+
+

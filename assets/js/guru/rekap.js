@@ -1,5 +1,6 @@
 import { db } from "../config/firebase-config.js";
 import { initializeAuthGuard } from "../auth/auth-guard.js";
+import { showToast, showConfirm } from "../utils/toast.js";
 import { 
   collection, 
   getDocs, 
@@ -396,12 +397,19 @@ if (btnSaveAlpaLogs) {
   btnSaveAlpaLogs.addEventListener('click', async () => {
     const virtualAlpaItems = currentData.filter(d => d.isVirtualAlpa);
     if (virtualAlpaItems.length === 0) {
-      alert("Tidak ada data siswa 'Tidak Hadir' yang perlu disimpan untuk kelas ini.\n\nTips: Pilih Sesi atau pilih Nama Kelas pada filter untuk mendeteksi siswa yang belum absen.");
+      showToast("Tidak ada data siswa 'Tidak Hadir' yang perlu disimpan untuk kelas ini.\n\nTips: Pilih Sesi atau pilih Nama Kelas pada filter untuk mendeteksi siswa yang belum absen.", "warning");
       return;
     }
 
-    const confirmMsg = `Konfirmasi Simpan Status 'Tidak Hadir':\n\nSimpan ${virtualAlpaItems.length} siswa kelas ini yang belum absen sampai 15:30 WIB ke database Firestore?`;
-    if (!confirm(confirmMsg)) return;
+    const confirmMsg = `Simpan ${virtualAlpaItems.length} siswa kelas ini yang belum absen sampai 15:30 WIB ke database Firestore?`;
+    const confirmed = await showConfirm({
+      title: "Konfirmasi Auto 'Tidak Hadir'",
+      message: confirmMsg,
+      icon: "fa-floppy-disk",
+      confirmText: "Ya, Simpan ke DB",
+      type: "info"
+    });
+    if (!confirmed) return;
 
     btnSaveAlpaLogs.disabled = true;
     btnSaveAlpaLogs.innerText = "Menyimpan...";
@@ -431,11 +439,11 @@ if (btnSaveAlpaLogs) {
       });
 
       await batch.commit();
-      alert(`Berhasil menyimpan ${virtualAlpaItems.length} log 'Tidak Hadir' ke database!`);
+      showToast(`Berhasil menyimpan ${virtualAlpaItems.length} log 'Tidak Hadir' ke database!`, "success");
       loadData();
     } catch (err) {
       console.error("Gagal menyimpan batch alpa:", err);
-      alert("Gagal menyimpan data: " + err.message);
+      showToast("Gagal menyimpan data: " + err.message, "error");
     } finally {
       btnSaveAlpaLogs.disabled = false;
       btnSaveAlpaLogs.innerText = "⚡ Simpan Auto 'Tidak Hadir' ke DB";
@@ -448,7 +456,7 @@ if (btnSaveAlpaLogs) {
 // -----------------------------------------------------------------
 btnExportExcel.addEventListener('click', () => {
   if (currentData.length === 0) {
-    alert("Tidak ada data untuk di-export. Silakan muat data terlebih dahulu.");
+    showToast("Tidak ada data untuk di-export. Silakan muat data terlebih dahulu.", "warning");
     return;
   }
 
@@ -532,7 +540,7 @@ if (btnExportMatrixExcel) {
       });
 
       if (targetStudents.length === 0) {
-        alert("Tidak ada data siswa yang ditemukan untuk filter kelas ini.");
+        showToast("Tidak ada data siswa yang ditemukan untuk filter kelas ini.", "warning");
         return;
       }
 
@@ -629,7 +637,7 @@ if (btnExportMatrixExcel) {
 
     } catch (errMatrix) {
       console.error("Gagal export matriks bulanan:", errMatrix);
-      alert("Gagal membuat matriks presensi: " + errMatrix.message);
+      showToast("Gagal membuat matriks presensi: " + errMatrix.message, "error");
     } finally {
       btnExportMatrixExcel.disabled = false;
       btnExportMatrixExcel.innerHTML = originalText;

@@ -2,6 +2,8 @@
 // 🤖 AI ATTENDANCE & SECURITY INSIGHT ENGINE
 // Engine deteksi anomali presensi, manipulasi perangkat, dan analisis pola kedisiplinan siswa berbasis client-side pattern recognition.
 
+import { showToast } from "../utils/toast.js";
+
 export const AIInsightEngine = {
   // -----------------------------------------------------------------
   // 1. ANALYZER ENGINE: DETEKSI SELURUH ANOMALI
@@ -759,12 +761,12 @@ export const AIInsightEngine = {
   // -----------------------------------------------------------------
   exportToExcel(findingsList = [], filenamePrefix = 'Laporan_Anomali_Presensi') {
     if (typeof XLSX === 'undefined') {
-      alert('Library XLSX tidak ditemukan.');
+      showToast('Library XLSX tidak ditemukan.', 'error');
       return;
     }
 
     if (findingsList.length === 0) {
-      alert('Tidak ada temuan anomali untuk diekspor.');
+      showToast('Tidak ada temuan anomali untuk diekspor.', 'warning');
       return;
     }
 
