@@ -19,7 +19,7 @@ const state = {
   currentSortOrder: 'asc',
   searchQuery: '',
   currentPage: 1,
-  pageSize: 25,
+  pageSize: 100,
   parsedImportData: [],
   sidebarCollapsed: false,
   prevDocIds: new Set(), // Untuk melacak dokumen baru (animation)
@@ -929,7 +929,7 @@ const ModalManager = {
       else if (state.currentCollection === 'kelas') fieldsToRender = ['id_kelas', 'nama_kelas', 'nama_sekolah', 'wali_kelas', 'wa_group_id'];
       else if (state.currentCollection === 'mapel') fieldsToRender = ['id_mapel', 'nama_mapel'];
       else if (state.currentCollection === 'sesi_absensi') fieldsToRender = ['id_kelas', 'nama_mapel', 'tanggal', 'waktu', 'is_active'];
-      else if (state.currentCollection === 'log_absensi') fieldsToRender = ['nis', 'nama_siswa', 'id_kelas', 'nama_mapel', 'hari', 'tanggal', 'waktu', 'status', 'orientasi_layar'];
+      else if (state.currentCollection === 'log_absensi') fieldsToRender = ['nis', 'status', 'nama_siswa', 'id_kelas', 'nama_mapel', 'hari', 'tanggal', 'waktu', 'orientasi_layar'];
       else if (state.currentCollection === 'links') fieldsToRender = ['title', 'url', 'is_active', 'order'];
       else fieldsToRender = ['nama', 'keterangan'];
     }

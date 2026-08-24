@@ -3009,6 +3009,41 @@ Dokumen ini berisi rangkuman review perubahan kode (*code review*) terbaru yang 
 2. Periksa sidebar navigasi koleksi di sebelah kiri $\rightarrow$ Tombol `log_reset_ponsel` sudah tidak ada (bersih).
 3. Akses log reset HP tetap dapat diakses dengan menekan tombol **Riwayat Reset HP** pada panel Analytics.
 
+---
+
+## 📅 Review [2026-08-25 06:51 WIB] - Reorientasi Kolom Status Kehadiran (Sebelah Kiri Nama) & Default Limit View 100 Baris
+
+### 📁 1. Berkas yang Diubah
+* 📄 **[assets/js/database/db-manager.js](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/assets/js/database/db-manager.js)**
+* 📄 **[pages/database/db-manager.html](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/pages/database/db-manager.html)**
+* 📄 **[pages/guru/rekap.html](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/pages/guru/rekap.html)**
+* 📄 **[assets/js/guru/rekap.js](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/assets/js/guru/rekap.js)**
+
+---
+
+### 📝 2. Rincian Baris & Logika yang Diperbarui
+
+1. **Pemindahan Posisi Kolom Status Kehadiran**:
+   - Memindahkan posisi kolom `status` (Hadir / Tidak Hadir) agar ditampilkan di **sebelah kiri Nama Siswa** pada tabel `log_absensi` di Database Manager dan Rekapitulasi Presensi Guru.
+   - Urutan kolom baru: `[NIS, Status, Nama Siswa, Kelas, Mapel, Hari, Tanggal, Waktu, Orientasi Layar]`.
+
+2. **Perubahan Default View Limit dari 25 menjadi 100 Baris**:
+   - Memperbarui nilai `state.pageSize` di `db-manager.js` dari `25` menjadi `100`.
+   - Mengatur atribut `selected` pada opsi `<option value="100">` di elemen pembatas baris tabel `db-manager.html`.
+
+---
+
+### 🧪 3. Petunjuk Pengujian Lokal (*Local Verification*)
+
+1. **Uji Posisi Kolom Status**:
+   - Buka **Database Manager** ([`pages/database/db-manager.html`](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/pages/database/db-manager.html)) dan pilih koleksi `log_absensi`.
+   - Verifikasi bahwa kolom **status** (Kehadiran) kini berada di sebelah kiri kolom **nama_siswa**.
+2. **Uji Default Limit 100 Baris**:
+   - Periksa dropdown **Baris:** di pojok kiri bawah tabel $\rightarrow$ Opsi default kini adalah **100** (bukan 25).
+3. **Uji Rekap Guru**:
+   - Buka [`pages/guru/rekap.html`](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/pages/guru/rekap.html) &rarr; Kolom **Status** berada persis di sebelah kiri **Nama Siswa**.
+
+
 
 
 
