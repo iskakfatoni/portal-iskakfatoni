@@ -2926,6 +2926,33 @@ Dokumen ini berisi rangkuman review perubahan kode (*code review*) terbaru yang 
 2. Aktifkan *Toggle Device Toolbar* (Mobile View misal iPhone SE / Galaxy S20).
 3. Verifikasi seluruh elemen (Header, Filter Checkbox, Select Sesi/Kelas, Tombol Ekspor Excel, dan Tabel Rekapitulasi) tersusun rapi, responsif, dan tidak ada elemen yang melimpah (*overflow*) keluar dari layar.
 
+---
+
+## 📅 Review [2026-08-25 06:43 WIB] - Perbaikan Skrip Tailwind CDN Loading Order pada pages/guru/rekap.html
+
+### 📁 1. Berkas yang Diubah
+* 📄 **[pages/guru/rekap.html](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/pages/guru/rekap.html)**
+
+---
+
+### 📝 2. Rincian Baris & Logika yang Diperbarui
+
+1. **Penyebab Error (`Uncaught ReferenceError: tailwind is not defined`)**:
+   - Atribut `defer` pada elemen `<script defer src="https://cdn.tailwindcss.com"></script>` menyebabkan peramban menunda eksekusi library Tailwind CDN hingga setelah parsing HTML selesai.
+   - Namun, blok skrip inline `<script> tailwind.config = ... </script>` dieksekusi secara instan saat parsing HTML berjalan, sehingga objek `window.tailwind` belum terdefinisi saat diakses.
+
+2. **Solusi Perbaikan**:
+   - Menghapus atribut `defer` dari skrip Tailwind CDN (`<script src="https://cdn.tailwindcss.com"></script>`) agar library dimuat dan dieksekusi secara sinkron sebelum skrip konfigurasi inline dijalankan.
+
+---
+
+### 🧪 3. Petunjuk Pengujian Lokal (*Local Verification*)
+
+1. Buka peramban dan navigasikan ke [`pages/guru/rekap.html`](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/pages/guru/rekap.html).
+2. Buka **Developer Tools (F12) -> Console**.
+3. Verifikasi bahwa halaman dimuat dengan sempurna tanpa ada error `Uncaught ReferenceError: tailwind is not defined`.
+
+
 
 
 
