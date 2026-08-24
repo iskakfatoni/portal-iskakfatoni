@@ -332,6 +332,20 @@ function renderTable(data) {
   if (statHadirCount) statHadirCount.innerText = countHadir;
   if (statAlpaCount) statAlpaCount.innerText = countAlpa;
 
+  // Sync Desktop Metrics
+  const mBaris = document.getElementById('metric-total-baris');
+  const mHadir = document.getElementById('metric-hadir');
+  const mAlpa = document.getElementById('metric-alpa');
+  const mPersen = document.getElementById('metric-persen');
+  if (mBaris) mBaris.innerText = data.length;
+  if (mHadir) mHadir.innerText = countHadir;
+  if (mAlpa) mAlpa.innerText = countAlpa;
+  if (mPersen) {
+    const total = data.length;
+    const pct = total > 0 ? Math.round((countHadir / total) * 100) : 0;
+    mPersen.innerText = `${pct}%`;
+  }
+
   if (data.length === 0) {
     tableBody.innerHTML = `
       <tr>

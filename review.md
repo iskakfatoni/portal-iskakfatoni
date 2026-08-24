@@ -2952,6 +2952,41 @@ Dokumen ini berisi rangkuman review perubahan kode (*code review*) terbaru yang 
 2. Buka **Developer Tools (F12) -> Console**.
 3. Verifikasi bahwa halaman dimuat dengan sempurna tanpa ada error `Uncaught ReferenceError: tailwind is not defined`.
 
+---
+
+## 📅 Review [2026-08-25 06:45 WIB] - Optimasi Layout Widescreen & Kartu Metrik Desktop pada pages/guru/rekap.html
+
+### 📁 1. Berkas yang Diubah
+* 📄 **[pages/guru/rekap.html](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/pages/guru/rekap.html)**
+* 📄 **[assets/js/guru/rekap.js](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/assets/js/guru/rekap.js)**
+
+---
+
+### 📝 2. Rincian Baris & Logika yang Diperbarui
+
+1. **Pengembangan Widescreen Layout Desktop (`max-w-[1600px]`)**:
+   - Memperluas container utama dari `max-w-6xl` (1152px) menjadi `max-w-[1600px]` agar memanfaatkan seluruh ruang layar monitor Full HD / 1440p desktop & laptop secara optimal.
+
+2. **Ringkasan Kartu Metrik Kehadiran Desktop**:
+   - Menambahkan 4 kartu statistik visual modern di bagian atas:
+     - **Total Baris** (Cyan)
+     - **Siswa Hadir** (Emerald)
+     - **Siswa Tidak Hadir** (Rose)
+     - **Tingkat Kehadiran %** (Indigo) dengan perhitungan otomatis real-time di `rekap.js`.
+
+3. **Grid Filter 12-Kolom & Pembatas Tabel Desktop**:
+   - Menyesuaikan form filter dan tombol ekspor Excel menggunakan `grid-cols-12` pada layar desktop.
+   - Meningkatkan kapasitas pandang vertikal tabel (`min-h-[500px]`) agar guru dapat melihat 20-30 baris data presensi sekaligus tanpa scrolling halaman yang berlebihan.
+
+---
+
+### 🧪 3. Petunjuk Pengujian Lokal (*Local Verification*)
+
+1. Buka peramban di komputer/laptop pada resolusi Full HD ([`pages/guru/rekap.html`](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/pages/guru/rekap.html)).
+2. Verifikasi bahwa 4 kartu metrik statistik muncul di bagian atas dan persentase kehadiran terhitung otomatis saat menekan **Muat Data**.
+3. Pastikan area tabel presensi melebar secara proporsional mengisi ruang layar monitor tanpa terlihat sempit di tengah.
+
+
 
 
 

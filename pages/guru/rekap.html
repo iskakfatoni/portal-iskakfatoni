@@ -25,30 +25,30 @@
     }
   </script>
 </head>
-<body class="bg-gradient-to-b from-darkSlate to-deepIndigo text-slate-100 min-h-screen p-3 sm:p-5 md:p-6">
+<body class="bg-gradient-to-b from-darkSlate to-deepIndigo text-slate-100 min-h-screen p-3 sm:p-5 lg:p-8">
 
-  <div class="max-w-6xl mx-auto space-y-4 sm:space-y-6">
+  <div class="max-w-[1600px] w-full mx-auto space-y-4 sm:space-y-6">
     
     <!-- HEADER NAVBAR -->
-    <header class="bg-slate-800/80 backdrop-blur-md rounded-2xl p-3.5 sm:p-5 border border-slate-700/50 flex flex-col sm:flex-row sm:items-center justify-between gap-3.5 shadow-xl">
-      <div class="flex items-center space-x-3">
-        <div class="p-2.5 sm:p-3 bg-cyan-500/10 border border-accentCyan/30 rounded-xl text-accentCyan shrink-0">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 sm:h-6 sm:w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+    <header class="bg-slate-800/80 backdrop-blur-md rounded-2xl p-4 lg:p-6 border border-slate-700/50 flex flex-col md:flex-row md:items-center justify-between gap-4 shadow-2xl">
+      <div class="flex items-center space-x-3.5">
+        <div class="p-3 lg:p-4 bg-cyan-500/10 border border-accentCyan/30 rounded-2xl text-accentCyan shrink-0 shadow-inner">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 lg:h-7 lg:w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
           </svg>
         </div>
         <div class="min-w-0">
-          <h1 class="text-base sm:text-lg font-bold text-white tracking-wide flex flex-wrap items-center gap-2">
-            <span>REKAPITULASI ABSENSI</span>
-            <span class="px-2 py-0.5 text-[9px] sm:text-[10px] bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 rounded-full uppercase font-mono font-bold">Hari Ini</span>
+          <h1 class="text-base sm:text-xl lg:text-2xl font-extrabold text-white tracking-wide flex flex-wrap items-center gap-2.5">
+            <span>REKAPITULASI ABSENSI SISWA</span>
+            <span class="px-3 py-1 text-[10px] lg:text-xs bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 rounded-full uppercase font-mono font-bold">Hari Ini</span>
           </h1>
-          <p class="text-[11px] sm:text-xs text-slate-400 truncate">Menampilkan kehadiran siswa & unduh format Excel (.xlsx)</p>
+          <p class="text-xs lg:text-sm text-slate-400 truncate mt-0.5">Pantau kehadiran siswa, filter per kelas/sesi, dan ekspor laporan Excel siap cetak (.xlsx)</p>
         </div>
       </div>
 
-      <div class="flex items-center space-x-3 w-full sm:w-auto">
-        <a href="index.html" class="w-full sm:w-auto px-3.5 py-2 bg-slate-700 hover:bg-slate-600 border border-slate-600 text-slate-200 rounded-xl text-xs font-semibold transition flex items-center justify-center gap-1.5">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+      <div class="flex items-center space-x-3 w-full md:w-auto">
+        <a href="index.html" class="w-full md:w-auto px-4 py-2.5 bg-slate-700 hover:bg-slate-600 border border-slate-600 text-slate-100 rounded-xl text-xs lg:text-sm font-semibold transition shadow-md flex items-center justify-center gap-2">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 lg:h-5 lg:w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
           </svg>
           <span>Dashboard Sesi</span>
@@ -56,63 +56,115 @@
       </div>
     </header>
 
+    <!-- METRICS CARDS ROW FOR DESKTOP & MOBILE -->
+    <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+      <div class="bg-slate-800/80 backdrop-blur-md p-4 rounded-2xl border border-slate-700/50 shadow-lg flex items-center justify-between">
+        <div>
+          <p class="text-[10px] sm:text-xs uppercase font-bold text-slate-400">Total Baris</p>
+          <p id="metric-total-baris" class="text-base sm:text-2xl font-extrabold text-cyan-400 font-mono mt-1">0</p>
+        </div>
+        <div class="p-3 bg-cyan-500/10 border border-cyan-500/20 rounded-xl text-cyan-400">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16" />
+          </svg>
+        </div>
+      </div>
+
+      <div class="bg-slate-800/80 backdrop-blur-md p-4 rounded-2xl border border-slate-700/50 shadow-lg flex items-center justify-between">
+        <div>
+          <p class="text-[10px] sm:text-xs uppercase font-bold text-slate-400">Hadir</p>
+          <p id="metric-hadir" class="text-base sm:text-2xl font-extrabold text-emerald-400 font-mono mt-1">0</p>
+        </div>
+        <div class="p-3 bg-emerald-500/10 border border-emerald-500/20 rounded-xl text-emerald-400">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+        </div>
+      </div>
+
+      <div class="bg-slate-800/80 backdrop-blur-md p-4 rounded-2xl border border-slate-700/50 shadow-lg flex items-center justify-between">
+        <div>
+          <p class="text-[10px] sm:text-xs uppercase font-bold text-slate-400">Tidak Hadir (Alpa)</p>
+          <p id="metric-alpa" class="text-base sm:text-2xl font-extrabold text-rose-400 font-mono mt-1">0</p>
+        </div>
+        <div class="p-3 bg-rose-500/10 border border-rose-500/20 rounded-xl text-rose-400">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+          </svg>
+        </div>
+      </div>
+
+      <div class="bg-slate-800/80 backdrop-blur-md p-4 rounded-2xl border border-slate-700/50 shadow-lg flex items-center justify-between">
+        <div>
+          <p class="text-[10px] sm:text-xs uppercase font-bold text-slate-400">Tingkat Kehadiran</p>
+          <p id="metric-persen" class="text-base sm:text-2xl font-extrabold text-indigo-400 font-mono mt-1">0%</p>
+        </div>
+        <div class="p-3 bg-indigo-500/10 border border-indigo-500/20 rounded-xl text-indigo-400">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z" />
+          </svg>
+        </div>
+      </div>
+    </div>
+
     <!-- PANEL FILTER & ACTION BUTTONS -->
-    <div class="bg-slate-800/80 backdrop-blur-md rounded-2xl p-3.5 sm:p-5 border border-slate-700/50 shadow-xl space-y-3.5 sm:space-y-4">
+    <div class="bg-slate-800/80 backdrop-blur-md rounded-2xl p-4 lg:p-6 border border-slate-700/50 shadow-xl space-y-4">
       <!-- OPSI ABSENSI HARI INI & AUTO TIDAK HADIR -->
-      <div class="flex flex-col lg:flex-row lg:items-center justify-between bg-slate-900/80 p-3 sm:px-4 sm:py-3 rounded-xl border border-slate-700/60 gap-3">
-        <div class="flex flex-col sm:flex-row sm:items-center gap-2.5 sm:gap-4">
+      <div class="flex flex-col lg:flex-row lg:items-center justify-between bg-slate-900/80 p-3.5 sm:px-4 sm:py-3.5 rounded-xl border border-slate-700/60 gap-3.5">
+        <div class="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-6">
           <div class="flex items-center gap-2">
             <input type="checkbox" id="chk-only-today" checked class="rounded bg-slate-950 border-slate-700 text-emerald-400 focus:ring-0 cursor-pointer w-4 h-4 shrink-0">
-            <label for="chk-only-today" class="text-xs font-bold text-emerald-400 cursor-pointer select-none flex items-center gap-1.5">
+            <label for="chk-only-today" class="text-xs sm:text-sm font-bold text-emerald-400 cursor-pointer select-none flex items-center gap-1.5">
               📅 Absensi Hari Ini (<span id="today-date-str" class="font-mono underline">--</span>)
             </label>
           </div>
 
-          <div class="flex items-center gap-2 border-t sm:border-t-0 sm:border-l border-slate-700/80 pt-2 sm:pt-0 sm:pl-4">
+          <div class="flex items-center gap-2 border-t sm:border-t-0 sm:border-l border-slate-700/80 pt-2.5 sm:pt-0 sm:pl-5">
             <input type="checkbox" id="chk-include-alpa" checked class="rounded bg-slate-950 border-slate-700 text-rose-400 focus:ring-0 cursor-pointer w-4 h-4 shrink-0">
-            <label for="chk-include-alpa" class="text-xs font-bold text-rose-400 cursor-pointer select-none flex items-center gap-1">
+            <label for="chk-include-alpa" class="text-xs sm:text-sm font-bold text-rose-400 cursor-pointer select-none flex items-center gap-1">
               ⚠️ Sertakan Siswa Tidak Hadir (S.d. 15:30 WIB)
             </label>
           </div>
         </div>
 
-        <button id="btn-save-alpa-logs" class="w-full lg:w-auto py-2 px-3 bg-rose-500/20 hover:bg-rose-500/35 text-rose-300 border border-rose-500/40 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 cursor-pointer shadow-lg">
+        <button id="btn-save-alpa-logs" class="w-full lg:w-auto py-2.5 px-4 bg-rose-500/20 hover:bg-rose-500/35 text-rose-300 border border-rose-500/40 rounded-xl text-xs lg:text-sm font-bold transition flex items-center justify-center gap-2 cursor-pointer shadow-lg">
           ⚡ Simpan Auto 'Tidak Hadir' ke DB
         </button>
       </div>
 
-      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+      <!-- FILTER DROPDOWNS & ACTIONS (12-COLUMNS ON DESKTOP) -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-12 gap-3.5">
         
-        <div>
+        <div class="lg:col-span-4">
           <label class="block text-xs font-semibold text-slate-300 mb-1">Pilih Sesi Absensi</label>
-          <select id="select-sesi" class="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-xl text-white text-xs focus:outline-none focus:border-accentCyan">
+          <select id="select-sesi" class="w-full px-3.5 py-2.5 bg-slate-900 border border-slate-700 rounded-xl text-white text-xs lg:text-sm focus:outline-none focus:border-accentCyan">
             <option value="">-- Tampilkan Semua / Filter Sesi --</option>
           </select>
         </div>
 
-        <div>
+        <div class="lg:col-span-3">
           <label class="block text-xs font-semibold text-slate-300 mb-1">Filter Kelas</label>
-          <select id="filter-kelas" class="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-xl text-white text-xs focus:outline-none focus:border-accentCyan cursor-pointer">
+          <select id="filter-kelas" class="w-full px-3.5 py-2.5 bg-slate-900 border border-slate-700 rounded-xl text-white text-xs lg:text-sm focus:outline-none focus:border-accentCyan cursor-pointer">
             <option value="">-- Semua Kelas --</option>
           </select>
         </div>
 
-        <div class="flex items-end">
-          <button id="btn-tampilkan" class="w-full py-2 px-3 bg-slate-700 hover:bg-slate-600 text-white font-semibold text-xs rounded-xl transition border border-slate-600 cursor-pointer flex items-center justify-center gap-1.5 shadow">
+        <div class="flex items-end lg:col-span-2">
+          <button id="btn-tampilkan" class="w-full py-2.5 px-4 bg-slate-700 hover:bg-slate-600 text-white font-bold text-xs lg:text-sm rounded-xl transition border border-slate-600 cursor-pointer flex items-center justify-center gap-2 shadow-md">
             🔍 Muat Data
           </button>
         </div>
 
-        <div class="flex items-end gap-2">
-          <button id="btn-export-excel" class="flex-1 py-2 px-2 bg-gradient-to-r from-emerald-500 to-teal-400 text-slate-950 font-bold text-xs rounded-xl hover:opacity-90 active:scale-[0.99] transition shadow-lg shadow-emerald-500/20 flex items-center justify-center gap-1 cursor-pointer" title="Export Rekap Baris Detail (.xlsx)">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <div class="flex items-end gap-2 lg:col-span-3">
+          <button id="btn-export-excel" class="flex-1 py-2.5 px-3 bg-gradient-to-r from-emerald-500 to-teal-400 text-slate-950 font-bold text-xs lg:text-sm rounded-xl hover:opacity-90 active:scale-[0.99] transition shadow-lg shadow-emerald-500/20 flex items-center justify-center gap-1.5 cursor-pointer" title="Export Rekap Baris Detail (.xlsx)">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
             </svg>
             <span>Baris (.xlsx)</span>
           </button>
           
-          <button id="btn-export-matrix-excel" class="flex-1 py-2 px-2 bg-gradient-to-r from-indigo-500 to-blue-500 text-white font-bold text-xs rounded-xl hover:opacity-90 active:scale-[0.99] transition shadow-lg shadow-indigo-500/20 flex items-center justify-center gap-1 cursor-pointer" title="Export Matriks Rekap Bulanan Siap Cetak (.xlsx)">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <button id="btn-export-matrix-excel" class="flex-1 py-2.5 px-3 bg-gradient-to-r from-indigo-500 to-blue-500 text-white font-bold text-xs lg:text-sm rounded-xl hover:opacity-90 active:scale-[0.99] transition shadow-lg shadow-indigo-500/20 flex items-center justify-center gap-1.5 cursor-pointer" title="Export Matriks Rekap Bulanan Siap Cetak (.xlsx)">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M3 14h18m-9-4v8m-7 0h14a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
             </svg>
             <span>Matriks (.xlsx)</span>
@@ -123,44 +175,44 @@
     </div>
 
     <!-- TABEL REKAP ABSENSI -->
-    <div class="bg-slate-800/80 backdrop-blur-md rounded-2xl border border-slate-700/50 shadow-xl overflow-hidden space-y-4 p-3.5 sm:p-5">
-      <div class="flex flex-col sm:flex-row sm:items-center justify-between border-b border-slate-700/50 pb-3 gap-2.5">
-        <h2 class="text-xs sm:text-sm font-bold text-white uppercase tracking-wider flex items-center gap-2">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-accentCyan shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+    <div class="bg-slate-800/80 backdrop-blur-md rounded-2xl border border-slate-700/50 shadow-xl overflow-hidden space-y-4 p-4 sm:p-6">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between border-b border-slate-700/50 pb-3.5 gap-3">
+        <h2 class="text-sm sm:text-base font-extrabold text-white uppercase tracking-wider flex items-center gap-2">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-accentCyan shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
           </svg>
           Preview Laporan Kehadiran
         </h2>
         
         <!-- COUNTER STATS BADGES -->
-        <div class="flex flex-wrap items-center gap-2 font-mono text-[11px] sm:text-xs">
-          <span class="px-2.5 py-1 bg-emerald-500/15 border border-emerald-500/30 text-emerald-400 rounded-lg">
+        <div class="flex flex-wrap items-center gap-2.5 font-mono text-xs lg:text-sm">
+          <span class="px-3 py-1.5 bg-emerald-500/15 border border-emerald-500/30 text-emerald-400 rounded-xl font-bold">
             Hadir: <strong id="stat-hadir-count">0</strong>
           </span>
-          <span class="px-2.5 py-1 bg-rose-500/15 border border-rose-500/30 text-rose-400 rounded-lg">
+          <span class="px-3 py-1.5 bg-rose-500/15 border border-rose-500/30 text-rose-400 rounded-lg font-bold">
             Tidak Hadir: <strong id="stat-alpa-count">0</strong>
           </span>
-          <span id="total-record" class="bg-slate-900 px-3 py-1 rounded-lg text-accentCyan border border-slate-700">
+          <span id="total-record" class="bg-slate-900 px-3.5 py-1.5 rounded-xl text-accentCyan border border-slate-700 font-bold">
             Total: 0 Baris
           </span>
         </div>
       </div>
 
-      <div class="log-table-container max-h-[calc(100vh-280px)] min-h-[300px]">
+      <div class="log-table-container max-h-[calc(100vh-290px)] min-h-[360px] lg:min-h-[500px]">
         <table class="w-full text-left text-xs sm:text-sm text-slate-300 whitespace-nowrap">
-          <thead class="bg-slate-900/90 text-xs font-semibold uppercase text-cyan-400 border-b border-slate-700">
+          <thead class="bg-slate-900/95 backdrop-blur text-xs font-bold uppercase text-cyan-400 border-b border-slate-700 sticky top-0 z-10">
             <tr>
-              <th class="px-3 sm:px-4 py-3 w-10 text-center">No</th>
-              <th class="px-3 sm:px-4 py-3 col-truncate-sm">Tanggal / Waktu</th>
-              <th class="px-3 sm:px-4 py-3 col-truncate-sm">NIS</th>
-              <th class="px-3 sm:px-4 py-3 col-truncate-md">Nama Siswa</th>
-              <th class="px-3 sm:px-4 py-3 col-truncate-sm">Kelas</th>
-              <th class="px-3 sm:px-4 py-3 text-center">Status</th>
+              <th class="px-4 py-3.5 w-12 text-center border-r border-slate-800">No</th>
+              <th class="px-4 py-3.5 border-r border-slate-800 col-truncate-sm">Tanggal / Waktu</th>
+              <th class="px-4 py-3.5 border-r border-slate-800 col-truncate-sm">NIS</th>
+              <th class="px-4 py-3.5 border-r border-slate-800 col-truncate-md">Nama Siswa</th>
+              <th class="px-4 py-3.5 border-r border-slate-800 col-truncate-sm">Kelas &amp; Mapel</th>
+              <th class="px-4 py-3.5 text-center">Status</th>
             </tr>
           </thead>
           <tbody id="table-body" class="divide-y divide-slate-700/50">
             <tr>
-              <td colspan="6" class="px-4 py-8 text-center text-xs text-slate-500">
+              <td colspan="6" class="px-4 py-12 text-center text-xs sm:text-sm text-slate-500 font-mono">
                 Klik tombol "Muat Data" untuk menampilkan rekapitulasi absensi.
               </td>
             </tr>
@@ -169,7 +221,7 @@
       </div>
 
       <div class="pt-2 text-right">
-        <p class="text-[11px] text-slate-500 font-mono">Developed by Iskak Fatoni</p>
+        <p class="text-xs text-slate-500 font-mono">Developed by Iskak Fatoni, S.Pd., Gr.</p>
       </div>
     </div>
 
