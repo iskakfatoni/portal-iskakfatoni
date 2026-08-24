@@ -72,16 +72,19 @@ export async function getHardwareFingerprint() {
   const webglSig = getWebGLFingerprint();
   const canvasSig = getCanvas2dHash();
 
-  // 2. Gunakan hanya parameter fisik yang STATIS (Tahan update & setting)
-  // Menghapus Audio, Language, dan Timezone karena sering berubah & bikin HW-ID loncat
+  // 2. Gunakan parameter fisik yang 100% STATIS & Tahan Rotasi
+  // Menggunakan sort agar ID tidak berubah saat HP dimiringkan (Landscape/Portrait)
+  const screenRes = [screen.width, screen.height].sort((a, b) => a - b).join('x');
+
   const rawString = [
-    screen.width + 'x' + screen.height,
-    window.devicePixelRatio || 1,
-    navigator.hardwareConcurrency || 2,
-    navigator.deviceMemory || 'unknown',
-    navigator.maxTouchPoints || 0,
-    webglSig,
-    canvasSig
+    screenRes,                               // Resolusi Layar (Tahan Rotasi)
+    screen.colorDepth || 24,                 // Kedalaman Warna
+    window.devicePixelRatio || 1,            // Kerapatan Pixel
+    navigator.hardwareConcurrency || 2,      // Jumlah Core CPU
+    navigator.deviceMemory || 'unknown',     // Estimasi RAM
+    navigator.maxTouchPoints || 0,           // Jumlah Titik Sentuh
+    webglSig,                                // Spesifikasi GPU (Sangat Unik)
+    canvasSig                                // Font Rendering Engine (DNA Browser/OS)
   ].join('||');
 
   // 3. Enkripsi String ke Hash SHA-256 Hex 16 Karakter (Persisten Hardware Murni)
