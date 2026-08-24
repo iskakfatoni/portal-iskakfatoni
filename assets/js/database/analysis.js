@@ -116,6 +116,7 @@ const AIInsightManager = {
 
     const counts = {
       ALL: state.allFindings.length,
+      SAME_SESSION_RESET: state.allFindings.filter(f => f.type === 'SAME_SESSION_RESET').length,
       FREQUENT_RESET: state.allFindings.filter(f => f.type === 'FREQUENT_RESET').length,
       SHARED_DEVICE: state.allFindings.filter(f => f.type === 'SHARED_DEVICE').length,
       LAST_MINUTE: state.allFindings.filter(f => f.type === 'LAST_MINUTE').length,
@@ -134,7 +135,7 @@ const AIInsightManager = {
     // Update Metrics Cards
     if (dom.statTotalFindings) dom.statTotalFindings.innerText = counts.ALL;
     if (dom.statHighRisk) dom.statHighRisk.innerText = state.allFindings.filter(f => f.severity === 'HIGH').length;
-    if (dom.statResetAnomalies) dom.statResetAnomalies.innerText = counts.FREQUENT_RESET;
+    if (dom.statResetAnomalies) dom.statResetAnomalies.innerText = counts.FREQUENT_RESET + counts.SAME_SESSION_RESET;
     if (dom.statEarlyBirds) dom.statEarlyBirds.innerText = counts.EARLY_BIRD;
 
     if (dom.aiStatusBadge) {

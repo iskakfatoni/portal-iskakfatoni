@@ -2829,7 +2829,38 @@ Dokumen ini berisi rangkuman review perubahan kode (*code review*) terbaru yang 
    - Buka peramban di [http://localhost:8080/pages/database/db-manager.html](http://localhost:8080/pages/database/db-manager.html) atau [http://localhost:8080/pages/database/reset-logs.html](http://localhost:8080/pages/database/reset-logs.html) lalu aktifkan *Responsive Mode / Mobile Device Toolbar* (misal iPhone / Android view).
    - Verifikasi bahwa lebar tabel tidak lagi melimpah keluar container, teks panjang terpotong rapi dengan ellipsis `...`, dan dapat di-scroll horizontal secara mulus (*smooth touch scroll*).
 2. **Uji Hover / Tooltip Data**:
-   - Arahkan kursor atau sentuh sel data yang terpotong $\rightarrow$ Tooltip berisi teks lengkap akan muncul secara instan.
+   - Arahkan kursor atau sentuh sel data melebih kapasitas &rarr; Tooltip berisi teks lengkap akan muncul secara instan.
+
+---
+
+## 📅 Review [2026-08-25 06:22 WIB] - Fitur Deteksi Anomali Reset HP dalam 1 Sesi Presensi yang Sama (SAME_SESSION_RESET)
+
+### 📁 1. Berkas yang Diubah
+* 📄 **[assets/js/database/ai-insights.js](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/assets/js/database/ai-insights.js)**
+* 📄 **[assets/js/database/analysis.js](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/assets/js/database/analysis.js)**
+* 📄 **[pages/database/analysis.html](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/pages/database/analysis.html)**
+
+---
+
+### 📝 2. Rincian Baris & Logika yang Diperbarui
+
+1. **Penambahan Detektor AI `detectSameSessionResets()` (`ai-insights.js`)**:
+   - Menganalisis log `system_logs` secara real-time untuk mendeteksi apabila terdapat perangkat HP (`old_device_id` / `device_id`) atau akun NIS siswa yang di-reset $>1$ kali dalam kurun waktu 1 sesi presensi aktif ($\le 3$ jam / 180 menit pada hari yang sama).
+   - Menghasilkan temuan bermutu **🔴 HIGH RISK (KRITIS)** yang mendeteksi indikasi kuat penyalahgunaan ponsel (1 HP dipakai gonta-ganti/titip presensi kilat di kelas saat jam pelajaran berlangsung).
+
+2. **Integrasi Radar AI & Filter Kategori (`analysis.html` & `analysis.js`)**:
+   - Menambahkan tombol filter kategori `⚡ Reset Sesi Sama` di Radar Temuan AI.
+   - Memperbarui perhitungan metrik dan akumulasi risiko tinggi pada dashboard analisa keamanan.
+
+---
+
+### 🧪 3. Petunjuk Pengujian Lokal (*Local Verification*)
+
+1. Buka **Database Manager** (`pages/database/db-manager.html`).
+2. Lakukan reset HP untuk 2 akun siswa berbeda yang menggunakan perangkat yang sama (atau lakukan 2x reset pada akun dalam rentang waktu dekat).
+3. Buka halaman **Analisa Anomali AI** ([`pages/database/analysis.html`](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/pages/database/analysis.html)).
+4. Klik filter **⚡ Reset Sesi Sama** &rarr; Kartu temuan bermutu **🔴 HIGH RISK** akan muncul dengan detail waktu presensi, nama-nama siswa yang terlibat, dan rekomendasi tindakan inspeksi kelas.
+
 
 
 

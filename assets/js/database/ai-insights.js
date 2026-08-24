@@ -18,6 +18,10 @@ export const AIInsightEngine = {
     const resetFindings = this.detectFrequentResets(systemLogs);
     findings.push(...resetFindings);
 
+    // 1.1b Anomali 1b: Same Session Reset (Reset HP Sama dalam 1 Sesi Absensi)
+    const sameSessionResetFindings = this.detectSameSessionResets(systemLogs, sesiAbsensi);
+    findings.push(...sameSessionResetFindings);
+
     // 1.2 Anomali 2: Shared Device Collision (1 HP Banyak Siswa)
     const sharedFindings = this.detectSharedDevices(logAbsensi, siswaList, systemLogs);
     findings.push(...sharedFindings);
@@ -116,6 +120,137 @@ export const AIInsightEngine = {
           })),
           rawEvidenceCount: resetCount,
           latestTimestamp: latestTs
+        });
+      }
+    });
+
+    return findings;
+  },
+
+  // -----------------------------------------------------------------
+  // 2B. DETEKTOR 1B: SAME SESSION RESET (RESET HP SAMA DALAM 1 SESI ABSENSI)
+  // Memeriksa kejadian reset perangkat pada perangkat atau siswa yang sama
+  // yang terjadi dalam kurun waktu 1 sesi presensi (<= 3 jam / 180 menit pada hari yang sama).
+  // -----------------------------------------------------------------
+  detectSameSessionResets(systemLogs = [], sesiAbsensi = []) {
+    const findings = [];
+    const MAX_SESSION_GAP_MS = 3 * 60 * 60 * 1000; // 3 Jam (Rentang Waktu Sesi Presensi Aktif)
+
+    const deviceResetGroupMap = new Map();
+    const studentSessionResetMap = new Map();
+
+    systemLogs.forEach((docSnap) => {
+      const d = typeof docSnap.data === 'function' ? docSnap.data() : docSnap;
+      const action = (d.action || '').toUpperCase();
+      if (!action.includes('RESET')) return;
+
+      let tsMs = 0;
+      if (d.timestamp && d.timestamp.seconds) tsMs = d.timestamp.seconds * 1000;
+      else if (d.created_at && d.created_at.seconds) tsMs = d.created_at.seconds * 1000;
+      else if (d.timestamp) tsMs = new Date(d.timestamp).getTime();
+
+      if (!tsMs) return;
+
+      const dateStr = new Date(tsMs).toISOString().split('T')[0];
+      const devId = (d.old_device_id || d.device_id || '').trim();
+      const nis = (d.target_nis || d.nis || '').trim();
+      const nama = d.target_name || d.nama_siswa || 'Siswa';
+      const admin = d.admin_email || 'Admin';
+      const devInfo = d.old_device_info || d.device_info || 'Perangkat HP';
+
+      const resetItem = {
+        docId: docSnap.id || '-',
+        tsMs,
+        dateStr,
+        timeStr: new Date(tsMs).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }) + ' WIB',
+        nis,
+        nama,
+        admin,
+        devId,
+        devInfo
+      };
+
+      // Grouping 1: Device ID + Tanggal
+      if (devId && devId !== '-' && !devId.toLowerCase().includes('unknown')) {
+        const keyDev = `${dateStr}_DEV_${devId}`;
+        if (!deviceResetGroupMap.has(keyDev)) {
+          deviceResetGroupMap.set(keyDev, { devId, devInfo, dateStr, items: [] });
+        }
+        deviceResetGroupMap.get(keyDev).items.push(resetItem);
+      }
+
+      // Grouping 2: NIS Siswa + Tanggal
+      if (nis && nis !== '-') {
+        const keyNis = `${dateStr}_NIS_${nis}`;
+        if (!studentSessionResetMap.has(keyNis)) {
+          studentSessionResetMap.set(keyNis, { nis, nama, dateStr, items: [] });
+        }
+        studentSessionResetMap.get(keyNis).items.push(resetItem);
+      }
+    });
+
+    // Evaluasi Vektor 1: Perangkat HP yang sama di-reset >1 kali dalam 1 Sesi Presensi (<= 3 Jam)
+    deviceResetGroupMap.forEach((group) => {
+      if (group.items.length < 2) return;
+      group.items.sort((a, b) => a.tsMs - b.tsMs);
+
+      const firstTs = group.items[0].tsMs;
+      const lastTs = group.items[group.items.length - 1].tsMs;
+
+      if ((lastTs - firstTs) <= MAX_SESSION_GAP_MS) {
+        const affectedStudents = Array.from(new Set(group.items.map(i => `${i.nama} (${i.nis})`))).join(', ');
+        const count = group.items.length;
+
+        findings.push({
+          id: `anomaly-same-session-device-${group.devId}-${group.dateStr}`,
+          type: 'SAME_SESSION_RESET',
+          categoryLabel: 'Reset Sesi Sama (Perangkat)',
+          severity: 'HIGH',
+          nis: group.items[0].nis,
+          nama: group.items[0].nama,
+          kelas: '-',
+          title: `Deteksi Kritis: HP [${group.devInfo}] di-Reset ${count}x dalam 1 Sesi Presensi`,
+          summary: `Perangkat HP dengan ID [${group.devId}] terdeteksi mengalami ${count} kali reset pendaftaran berturut-turut pada sesi presensi tanggal ${group.dateStr} (${group.items[0].timeStr} s.d. ${group.items[count - 1].timeStr}). Melibatkan akun siswa: ${affectedStudents}. Mengindikasikan kuat 1 HP digunakan bergantian untuk titip presensi kilat di kelas.`,
+          recommendation: `Segera lakukan inspeksi fisik di kelas! Panggil siswa terkait (${affectedStudents}) untuk memverifikasi siapa pemilik sah ponsel tersebut.`,
+          evidence: group.items.map(i => ({
+            label: i.timeStr,
+            desc: `Reset NIS: ${i.nis} (${i.nama}) oleh ${i.admin}`
+          })),
+          rawEvidenceCount: count,
+          latestTimestamp: lastTs
+        });
+      }
+    });
+
+    // Evaluasi Vektor 2: Akun Siswa yang sama di-reset >1 kali dalam 1 Sesi Presensi (<= 3 Jam)
+    studentSessionResetMap.forEach((group) => {
+      if (group.items.length < 2) return;
+      group.items.sort((a, b) => a.tsMs - b.tsMs);
+
+      const firstTs = group.items[0].tsMs;
+      const lastTs = group.items[group.items.length - 1].tsMs;
+
+      const isAlreadyAdded = findings.some(f => f.nis === group.nis && Math.abs(lastTs - f.latestTimestamp) < 1000);
+
+      if (!isAlreadyAdded && (lastTs - firstTs) <= MAX_SESSION_GAP_MS) {
+        const count = group.items.length;
+        findings.push({
+          id: `anomaly-same-session-student-${group.nis}-${group.dateStr}`,
+          type: 'SAME_SESSION_RESET',
+          categoryLabel: 'Reset Sesi Sama (Siswa)',
+          severity: 'HIGH',
+          nis: group.nis,
+          nama: group.nama,
+          kelas: '-',
+          title: `Deteksi Kritis: Akun ${group.nama} di-Reset ${count}x dalam 1 Sesi Presensi`,
+          summary: `Akun NIS ${group.nis} (${group.nama}) di-reset oleh Admin sebanyak ${count} kali dalam kurun waktu 1 sesi presensi pada ${group.dateStr} (${group.items[0].timeStr} - ${group.items[count - 1].timeStr}).`,
+          recommendation: `Konfirmasikan ke Admin / Wali Kelas mengenai alasan mengapa akun siswa ini harus di-reset berkali-kali pada jam pelajaran yang sama.`,
+          evidence: group.items.map(i => ({
+            label: i.timeStr,
+            desc: `Reset Perangkat: ${i.devInfo} (${i.devId}) oleh ${i.admin}`
+          })),
+          rawEvidenceCount: count,
+          latestTimestamp: lastTs
         });
       }
     });
