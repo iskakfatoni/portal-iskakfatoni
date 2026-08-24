@@ -89,15 +89,15 @@ const TableEngine = {
         const tr = document.createElement('tr');
         tr.className = "hover:bg-slate-900/80 transition border-b border-slate-800/40";
         tr.innerHTML = `
-          <td class="p-3 text-center border-r border-slate-800/60 font-mono text-slate-400">${start + index + 1}</td>
-          <td class="p-3 border-r border-slate-800/60 font-mono text-cyan-400">${ts}</td>
-          <td class="p-3 border-r border-slate-800/60">
-            <div class="font-bold text-white">${data.target_name || '-'}</div>
-            <div class="text-[10px] text-slate-400">NIS: ${data.target_nis || '-'}</div>
+          <td class="p-2.5 sm:p-3 text-center border-r border-slate-800/60 font-mono text-slate-400 font-bold">${start + index + 1}</td>
+          <td class="p-2.5 sm:p-3 border-r border-slate-800/60 font-mono text-cyan-400 col-truncate-sm" title="${ts}">${ts}</td>
+          <td class="p-2.5 sm:p-3 border-r border-slate-800/60 col-truncate-md" title="${data.target_name || '-'} (NIS: ${data.target_nis || '-'})">
+            <div class="font-bold text-white truncate">${data.target_name || '-'}</div>
+            <div class="text-[10px] text-slate-400 font-mono">NIS: ${data.target_nis || '-'}</div>
           </td>
-          <td class="p-3 border-r border-slate-800/60 text-slate-300">${data.admin_email || '-'}</td>
-          <td class="p-3 border-r border-slate-800/60 font-mono text-[10px] text-slate-500">${data.old_device_id || '-'}</td>
-          <td class="p-3 text-center">
+          <td class="p-2.5 sm:p-3 border-r border-slate-800/60 text-slate-300 col-truncate-sm" title="${data.admin_email || '-'}">${data.admin_email || '-'}</td>
+          <td class="p-2.5 sm:p-3 border-r border-slate-800/60 font-mono text-[10px] text-slate-400 col-truncate-md" title="${data.old_device_id || '-'}">${data.old_device_id || '-'}</td>
+          <td class="p-2.5 sm:p-3 text-center">
             <button class="btn-del p-1.5 bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/30 rounded-lg transition cursor-pointer" title="Hapus Log">
               <i class="fa-solid fa-trash-can"></i>
             </button>

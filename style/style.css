@@ -2111,3 +2111,95 @@ input[type="date"]::-webkit-calendar-picker-indicator:hover {
   transform: translateY(-1px) !important;
 }
 
+/* ==========================================================================
+   12. SISTEM TABEL RESPONSIF MASTER (OPTIMASI KOLOM & LAYAR HP/LAPTOP)
+   ========================================================================== */
+.log-table-container,
+.table-responsive-wrapper {
+  width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  border-radius: 1rem;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(56, 189, 248, 0.3) rgba(15, 23, 42, 0.6);
+}
+
+.log-table-container::-webkit-scrollbar,
+.table-responsive-wrapper::-webkit-scrollbar {
+  height: 6px;
+  width: 6px;
+}
+
+.log-table-container::-webkit-scrollbar-track,
+.table-responsive-wrapper::-webkit-scrollbar-track {
+  background: rgba(15, 23, 42, 0.6);
+  border-radius: 4px;
+}
+
+.log-table-container::-webkit-scrollbar-thumb,
+.table-responsive-wrapper::-webkit-scrollbar-thumb {
+  background: rgba(56, 189, 248, 0.3);
+  border-radius: 4px;
+}
+
+.log-table-container::-webkit-scrollbar-thumb:hover,
+.table-responsive-wrapper::-webkit-scrollbar-thumb:hover {
+  background: rgba(56, 189, 248, 0.6);
+}
+
+/* Penyesuaian Kolom Tabel di Layar Kecil (Mobile Phone) */
+@media (max-width: 640px) {
+  .log-table-container table,
+  .table-responsive-wrapper table {
+    font-size: 0.725rem !important; /* 11.6px */
+  }
+
+  .log-table-container th,
+  .log-table-container td,
+  .table-responsive-wrapper th,
+  .table-responsive-wrapper td {
+    padding: 0.45rem 0.5rem !important;
+  }
+}
+
+/* Truncation & Max Width Utility per Kolom */
+.col-truncate-sm {
+  max-width: 110px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.col-truncate-md {
+  max-width: 160px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.col-truncate-lg {
+  max-width: 240px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+@media (min-width: 768px) {
+  .col-truncate-sm { max-width: 180px; }
+  .col-truncate-md { max-width: 260px; }
+  .col-truncate-lg { max-width: 360px; }
+}
+
+/* Header Tabel Sticky Glass Effect */
+.log-table-container table thead th,
+.table-responsive-wrapper table thead th {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background-color: rgba(15, 23, 42, 0.95);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border-bottom: 2px solid rgba(56, 189, 248, 0.2);
+}
+
+

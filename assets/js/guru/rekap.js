@@ -369,16 +369,16 @@ function renderTable(data) {
 
     html += `
       <tr class="hover:bg-slate-700/30 transition border-b border-slate-800/60">
-        <td class="px-4 py-3 font-mono text-slate-400 text-xs">${idx + 1}</td>
-        <td class="px-4 py-3 text-xs font-mono text-slate-300">${item.waktu}</td>
-        <td class="px-4 py-3 font-mono text-xs text-slate-200 font-bold">${item.nis}</td>
-        <td class="px-4 py-3 font-semibold text-white">${item.nama}</td>
-        <td class="px-4 py-3 text-xs text-slate-300">
+        <td class="px-3 sm:px-4 py-2.5 sm:py-3 font-mono text-slate-400 text-xs text-center">${idx + 1}</td>
+        <td class="px-3 sm:px-4 py-2.5 sm:py-3 text-xs font-mono text-slate-300 col-truncate-sm" title="${item.waktu}">${item.waktu}</td>
+        <td class="px-3 sm:px-4 py-2.5 sm:py-3 font-mono text-xs text-slate-200 font-bold col-truncate-sm" title="${item.nis}">${item.nis}</td>
+        <td class="px-3 sm:px-4 py-2.5 sm:py-3 font-semibold text-white col-truncate-md" title="${item.nama}">${item.nama}</td>
+        <td class="px-3 sm:px-4 py-2.5 sm:py-3 text-xs text-slate-300 col-truncate-sm" title="${item.kelas}">
           <span class="font-semibold text-slate-100">${item.kelas}</span>
           ${mapelSubtext}
         </td>
-        <td class="px-4 py-3 text-center">
-          <span class="px-2.5 py-1 border rounded-lg text-[11px] inline-flex items-center ${badgeClass}">
+        <td class="px-3 sm:px-4 py-2.5 sm:py-3 text-center">
+          <span class="px-2.5 py-1 text-xs rounded-lg border inline-flex items-center gap-1 ${badgeClass}">
             ${iconHTML} ${item.status}
           </span>
           ${sharedBadgeHTML}

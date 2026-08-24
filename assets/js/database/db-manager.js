@@ -663,7 +663,9 @@ const TableEngine = {
           }
         }
 
-        return `<td class="p-3 border-r border-slate-800/60 whitespace-nowrap overflow-hidden text-ellipsis">${Sanitizer.formatCellContent(val, fieldKey, docId)}</td>`;
+        const rawVal = Sanitizer.formatCellContent(val, fieldKey, docId);
+        const cleanTitle = (typeof val === 'string' || typeof val === 'number') ? String(val).replace(/"/g, '&quot;') : '';
+        return `<td class="p-2.5 sm:p-3 border-r border-slate-800/60 whitespace-nowrap overflow-hidden text-ellipsis col-truncate-md text-xs" title="${cleanTitle}">${rawVal}</td>`;
       }).join('');
 
     const isSiswaCollection = state.currentCollection === 'siswa';

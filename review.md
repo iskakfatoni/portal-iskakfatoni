@@ -2797,5 +2797,40 @@ Dokumen ini berisi rangkuman review perubahan kode (*code review*) terbaru yang 
 2. Verifikasi bahwa tabel sekarang memuat riwayat log reset dengan sempurna (atau menampilkan *"Tidak ada riwayat log reset yang ditemukan"* tanpa error jika database `system_logs` sedang kosong).
 3. Lakukan reset HP pada salah satu akun siswa dari Database Manager $\rightarrow$ Buka kembali `reset-logs.html` &rarr; Baris log reset langsung muncul di tabel.
 
+---
+
+## 📅 Review [2026-08-25 06:19 WIB] - Penerapan Master Sistem Tabel Responsif & Optimasi Lebar Kolom (Mobile & Laptop)
+
+### 📁 1. Berkas yang Diubah
+* 📄 **[style/style.css](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/style/style.css)**
+* 📄 **[assets/js/database/db-manager.js](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/assets/js/database/db-manager.js)**
+* 📄 **[assets/js/database/reset-logs.js](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/assets/js/database/reset-logs.js)**
+* 📄 **[pages/guru/rekap.html](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/pages/guru/rekap.html)**
+* 📄 **[assets/js/guru/rekap.js](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/assets/js/guru/rekap.js)**
+
+---
+
+### 📝 2. Rincian Baris & Logika yang Diperbarui
+
+1. **Pengembangan Master Responsive Table System (`style/style.css`)**:
+   - Menambahkan aturan `.log-table-container` dan `.table-responsive-wrapper` dengan scrollbar kustom halus bertema cyan/dark, dukungan *touch scrolling* (`-webkit-overflow-scrolling: touch`), serta header melayang (*sticky header glass effect*).
+   - Menambahkan utilitas pemotongan teks fleksibel per kolom (`col-truncate-sm`, `col-truncate-md`, `col-truncate-lg`) berbasis *media query* breakpoint layar HP & Laptop.
+   - Menyesuaikan ukuran font tabel (`font-size: 0.725rem`) dan padding sel (`padding: 0.45rem 0.5rem`) secara responsif khusus pada tampilan layar smartphone ($\le 640\text{px}$).
+
+2. **Optimasi Kolom & Tooltip Sel (`db-manager.js`, `reset-logs.js`, `rekap.js`)**:
+   - Menambahkan penanganan pemotongan teks (*truncation*) dan atribut `title="..."` pada sel tabel sehingga teks panjang (seperti *Hardware ID*, *Device Token*, NIS, Nama, Mapel) tidak melebarkan tabel secara abnormal di layar HP kecil.
+   - Mengintegrasikan class responsif ke dalam tabel rekapitulasi presensi guru dan riwayat reset HP.
+
+---
+
+### 🧪 3. Petunjuk Pengujian Lokal (*Local Verification*)
+
+1. **Uji Tampilan Smartphone / Layar Kecil**:
+   - Buka peramban di [http://localhost:8080/pages/database/db-manager.html](http://localhost:8080/pages/database/db-manager.html) atau [http://localhost:8080/pages/database/reset-logs.html](http://localhost:8080/pages/database/reset-logs.html) lalu aktifkan *Responsive Mode / Mobile Device Toolbar* (misal iPhone / Android view).
+   - Verifikasi bahwa lebar tabel tidak lagi melimpah keluar container, teks panjang terpotong rapi dengan ellipsis `...`, dan dapat di-scroll horizontal secara mulus (*smooth touch scroll*).
+2. **Uji Hover / Tooltip Data**:
+   - Arahkan kursor atau sentuh sel data yang terpotong $\rightarrow$ Tooltip berisi teks lengkap akan muncul secara instan.
+
+
 
 
