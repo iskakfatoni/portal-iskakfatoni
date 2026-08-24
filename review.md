@@ -2986,6 +2986,30 @@ Dokumen ini berisi rangkuman review perubahan kode (*code review*) terbaru yang 
 2. Verifikasi bahwa 4 kartu metrik statistik muncul di bagian atas dan persentase kehadiran terhitung otomatis saat menekan **Muat Data**.
 3. Pastikan area tabel presensi melebar secara proporsional mengisi ruang layar monitor tanpa terlihat sempit di tengah.
 
+---
+
+## 📅 Review [2026-08-25 06:48 WIB] - Pembersihan Tombol Redundan log_reset_ponsel pada pages/database/db-manager.html
+
+### 📁 1. Berkas yang Diubah
+* 📄 **[pages/database/db-manager.html](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/pages/database/db-manager.html)**
+
+---
+
+### 📝 2. Rincian Baris & Logika yang Diperbarui
+
+1. **Menghapus Tombol Redundan `log_reset_ponsel` di Sidebar**:
+   - Menghapus tautan redundan `<a href="reset-logs.html"...>log_reset_ponsel</a>` dari menu navigasi koleksi sidebar Database Manager.
+   - Navigasi menuju riwayat log reset ponsel kini dipusatkan secara eksklusif dan rapi pada tombol **Riwayat Reset HP** (`<a href="reset-logs.html">`) di panel *Insight & Analytics*.
+
+---
+
+### 🧪 3. Petunjuk Pengujian Lokal (*Local Verification*)
+
+1. Buka halaman **Database Manager** ([`pages/database/db-manager.html`](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/pages/database/db-manager.html)).
+2. Periksa sidebar navigasi koleksi di sebelah kiri $\rightarrow$ Tombol `log_reset_ponsel` sudah tidak ada (bersih).
+3. Akses log reset HP tetap dapat diakses dengan menekan tombol **Riwayat Reset HP** pada panel Analytics.
+
+
 
 
 
