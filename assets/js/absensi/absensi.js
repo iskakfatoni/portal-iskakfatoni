@@ -112,10 +112,9 @@ function guessDeviceInfoFromWeb() {
 if (dom.btnVerifikasi) {
   dom.btnVerifikasi.addEventListener('click', async () => {
     const rawNis = dom.nisInput ? dom.nisInput.value.trim() : '';
-    hideError();
 
     if (!rawNis) {
-      showError("Silakan masukkan NIS Anda terlebih dahulu.");
+      showToast("Silakan masukkan NIS Anda terlebih dahulu.", "warning");
       return;
     }
 
@@ -142,14 +141,14 @@ if (dom.btnVerifikasi) {
       }
 
       if (!dataSiswa) {
-        showError(`NIS "${rawNis}" tidak ditemukan! Pastikan terdaftar.`);
+        showToast(`NIS "${rawNis}" tidak ditemukan! Pastikan terdaftar.`, "error");
         setLoading(false);
         return;
       }
 
       // VALIDASI 1: Akun NIS ini sudah terikat di HP lain?
       if (dataSiswa.device_id && dataSiswa.device_id !== currentDeviceId) {
-        showError("❌ Akun NIS ini sudah terikat di HP lain! Minta Guru/Admin untuk mereset perangkat.");
+        showToast("❌ Akun NIS ini sudah terikat di HP lain! Minta Guru/Admin untuk mereset perangkat.", "error");
         setLoading(false);
         return;
       }
@@ -167,7 +166,7 @@ if (dom.btnVerifikasi) {
         });
 
         if (activeOwner) {
-          showError(`❌ HP ini sudah terikat dengan siswa: ${activeOwner.nama_siswa} (${activeOwner.nis}). 1 HP hanya untuk 1 siswa!`);
+          showToast(`❌ HP ini sudah terikat dengan siswa: ${activeOwner.nama_siswa} (${activeOwner.nis}). 1 HP hanya untuk 1 siswa!`, "error");
           setLoading(false);
           return;
         }
@@ -200,7 +199,7 @@ if (dom.btnVerifikasi) {
 
     } catch (err) {
       console.error(err);
-      showError("Terjadi kesalahan: " + err.message);
+      showToast("Terjadi kesalahan: " + err.message, "error");
     } finally {
       setLoading(false);
     }
@@ -241,18 +240,6 @@ window.receiveNativeScan = function(decodedText) {
   localStorage.setItem('pending_native_scan', decodedText);
   window.location.href = "pages/siswa/scanner.html";
 };
-
-function showError(msg) {
-  if (!dom.errorMsg) return;
-  dom.errorMsg.innerText = msg;
-  dom.errorMsg.classList.remove('hidden');
-}
-
-function hideError() {
-  if (!dom.errorMsg) return;
-  dom.errorMsg.innerText = '';
-  dom.errorMsg.classList.add('hidden');
-}
 
 async function loadStudentAttendanceHistory(nis) {
   if (!nis || !dom.riwayatLogContainer) return;

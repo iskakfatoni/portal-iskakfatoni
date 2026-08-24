@@ -1855,3 +1855,33 @@ input[type="date"]::-webkit-calendar-picker-indicator:hover {
   margin-top: 2px;
 }
 
+
+/* ==========================================================================
+   11. SISTEM NOTIFIKASI GLOBAL (Toast & Glassmorphic Modal Dialog)
+   ========================================================================== */
+#portal-toast-container {
+  pointer-events: none;
+  z-index: 10000;
+}
+
+.portal-toast {
+  pointer-events: auto;
+  min-width: 280px;
+  animation: toastSlideIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+}
+
+@keyframes toastSlideIn {
+  from { opacity: 0; transform: translateX(30px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+#portal-confirm-modal {
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+#portal-confirm-card {
+  background: rgba(15, 23, 42, 0.9);
+  border: 1.5px solid rgba(255, 255, 255, 0.15);
+  box-shadow: 0 25px 70px -10px rgba(0, 0, 0, 0.6);
+}

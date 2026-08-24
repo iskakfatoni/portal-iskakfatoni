@@ -282,7 +282,6 @@ if (dom.loginForm) {
     e.preventDefault();
     const email = dom.loginEmail.value.trim();
     const pass = dom.loginPassword.value.trim();
-    hideError();
     setLoading(true);
 
     try {
@@ -291,8 +290,7 @@ if (dom.loginForm) {
       showToast("Berhasil login sebagai Super Admin!", "success");
     } catch (err) {
       console.error("Login Error:", err);
-      showError("Login gagal: Email atau password salah!");
-      showToast("Email atau password tidak sesuai.", "error");
+      showToast("Gagal Login: Email atau password salah!", "error");
     } finally {
       setLoading(false);
     }
@@ -303,9 +301,10 @@ if (dom.btnLogout) {
   dom.btnLogout.addEventListener('click', async () => {
     const confirmed = await showConfirm({
       title: 'Konfirmasi Keluar',
-      message: 'Apakah Anda yakin ingin keluar dari Master Admin?',
+      message: 'Apakah Anda yakin ingin keluar dari Master Admin Hub?',
       icon: 'fa-right-from-bracket',
-      confirmText: 'Ya, Keluar'
+      confirmText: 'YA, KELUAR',
+      type: 'danger'
     });
 
     if (confirmed) {
@@ -313,18 +312,6 @@ if (dom.btnLogout) {
       window.location.reload();
     }
   });
-}
-
-function showError(msg) { 
-  if (!dom.errorMsg) return;
-  dom.errorMsg.innerText = msg; 
-  dom.errorMsg.classList.remove('hidden'); 
-}
-
-function hideError() { 
-  if (!dom.errorMsg) return;
-  dom.errorMsg.innerText = ''; 
-  dom.errorMsg.classList.add('hidden'); 
 }
 
 function setLoading(isLoading) {
