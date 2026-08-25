@@ -6,9 +6,10 @@
   <title>PORTAL::IskakFatoni - Absensi Siswa</title>
   <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
   <link rel="preload" href="style/style.css" as="style">
-  <link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" as="style" crossorigin="anonymous" referrerpolicy="no-referrer">
   <link rel="stylesheet" href="style/style.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer">
+  <!-- Chart.js untuk Visualisasi Rasio Presensi Siswa -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
   <link rel="manifest" href="assets/manifest.json">
   <link rel="apple-touch-icon" href="assets/img/nisnas_logo_colorful.webp">
@@ -136,6 +137,18 @@
             <div style="padding: 10px; border-radius: 12px; background: rgba(239, 68, 68, 0.12); border: 1px solid rgba(239, 68, 68, 0.3); text-align: center;">
               <span style="display: block; font-size: 0.65rem; color: #f87171; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em;">Tidak Hadir</span>
               <span id="count-tidak-hadir" style="font-size: 1.1rem; font-weight: 800; color: #fca5a5; font-family: monospace;">0</span>
+            </div>
+          </div>
+
+          <!-- MINI CHART CONTAINER RASIO KEHADIRAN SISWA -->
+          <div id="student-chart-wrapper" style="margin-bottom: 14px; padding: 12px; border-radius: 12px; background: rgba(15, 23, 42, 0.6); border: 1px solid rgba(255, 255, 255, 0.08); display: flex; align-items: center; justify-content: space-around;">
+            <div style="width: 76px; height: 76px; position: relative;">
+              <canvas id="student-attendance-chart"></canvas>
+            </div>
+            <div style="text-align: left;">
+              <span style="font-size: 0.65rem; color: #94a3b8; font-family: monospace; display: block;">Tingkat Kehadiran</span>
+              <span id="student-attendance-rate" style="font-size: 1.25rem; font-weight: 800; color: #38bdf8; font-family: monospace;">0%</span>
+              <span id="student-attendance-label" style="font-size: 0.65rem; color: #34d399; font-weight: 700; display: block;">--</span>
             </div>
           </div>
 

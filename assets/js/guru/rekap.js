@@ -321,8 +321,147 @@ async function loadData() {
 }
 
 // -----------------------------------------------------------------
-// 4. RENDER DATA TABEL REKAPITULASI
+// 4. RENDER DATA TABEL & VISUALISASI CHART.JS
 // -----------------------------------------------------------------
+let doughnutChartInstance = null;
+let barChartInstance = null;
+
+function updateAttendanceCharts(data) {
+  if (typeof window.Chart === 'undefined') return;
+
+  const countHadir = data.filter(d => d.status.toLowerCase().includes('hadir') && !d.status.toLowerCase().includes('tidak')).length;
+  const countAlpa = data.filter(d => d.status.toLowerCase().includes('tidak') || d.status.toLowerCase().includes('alpa')).length;
+
+  const chartHadirText = document.getElementById('chart-hadir-text');
+  const chartAlpaText = document.getElementById('chart-alpa-text');
+  if (chartHadirText) chartHadirText.innerText = countHadir;
+  if (chartAlpaText) chartAlpaText.innerText = countAlpa;
+
+  // 1. Doughnut Chart: Rasio Kehadiran
+  const doughnutCanvas = document.getElementById('chart-attendance-doughnut');
+  if (doughnutCanvas) {
+    if (doughnutChartInstance) {
+      doughnutChartInstance.destroy();
+    }
+
+    const total = countHadir + countAlpa;
+    const chartData = total > 0 ? [countHadir, countAlpa] : [0, 0];
+
+    doughnutChartInstance = new window.Chart(doughnutCanvas, {
+      type: 'doughnut',
+      data: {
+        labels: ['Hadir', 'Tidak Hadir'],
+        datasets: [{
+          data: chartData,
+          backgroundColor: ['#10b981', '#f43f5e'],
+          borderColor: ['#047857', '#be123c'],
+          borderWidth: 2,
+          hoverOffset: 6
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        cutout: '72%',
+        plugins: {
+          legend: {
+            display: false
+          },
+          tooltip: {
+            callbacks: {
+              label: function(context) {
+                const val = context.raw || 0;
+                const pct = total > 0 ? Math.round((val / total) * 100) : 0;
+                return ` ${context.label}: ${val} Siswa (${pct}%)`;
+              }
+            }
+          }
+        }
+      }
+    });
+  }
+
+  // 2. Bar Chart: Distribusi Kehadiran per Kelas
+  const barCanvas = document.getElementById('chart-class-breakdown');
+  if (barCanvas) {
+    if (barChartInstance) {
+      barChartInstance.destroy();
+    }
+
+    // Agregasi per kelas
+    const classMap = {};
+    data.forEach(item => {
+      const k = item.kelas || 'Lainnya';
+      if (!classMap[k]) {
+        classMap[k] = { hadir: 0, alpa: 0 };
+      }
+      if (item.status.toLowerCase().includes('hadir') && !item.status.toLowerCase().includes('tidak')) {
+        classMap[k].hadir++;
+      } else {
+        classMap[k].alpa++;
+      }
+    });
+
+    const labels = Object.keys(classMap);
+    const hadirData = labels.map(k => classMap[k].hadir);
+    const alpaData = labels.map(k => classMap[k].alpa);
+
+    barChartInstance = new window.Chart(barCanvas, {
+      type: 'bar',
+      data: {
+        labels: labels.length > 0 ? labels : ['Belum Ada Data'],
+        datasets: [
+          {
+            label: 'Hadir',
+            data: labels.length > 0 ? hadirData : [0],
+            backgroundColor: '#10b981',
+            borderRadius: 6,
+            barPercentage: 0.6
+          },
+          {
+            label: 'Tidak Hadir',
+            data: labels.length > 0 ? alpaData : [0],
+            backgroundColor: '#f43f5e',
+            borderRadius: 6,
+            barPercentage: 0.6
+          }
+        ]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: {
+            labels: {
+              color: '#cbd5e1',
+              font: { size: 11, family: 'monospace' }
+            }
+          },
+          tooltip: {
+            mode: 'index',
+            intersect: false
+          }
+        },
+        scales: {
+          x: {
+            grid: { color: 'rgba(255, 255, 255, 0.05)' },
+            ticks: { color: '#94a3b8', font: { size: 10, family: 'monospace' } }
+          },
+          y: {
+            beginAtZero: true,
+            grid: { color: 'rgba(255, 255, 255, 0.05)' },
+            ticks: {
+              color: '#94a3b8',
+              stepSize: 1,
+              font: { size: 10, family: 'monospace' }
+            }
+          }
+        }
+      }
+    });
+  }
+}
+
 function renderTable(data) {
   totalRecord.innerText = `Total: ${data.length} Baris`;
 
@@ -345,6 +484,9 @@ function renderTable(data) {
     const pct = total > 0 ? Math.round((countHadir / total) * 100) : 0;
     mPersen.innerText = `${pct}%`;
   }
+
+  // Update Visual Analytics Charts
+  updateAttendanceCharts(data);
 
   if (data.length === 0) {
     tableBody.innerHTML = `

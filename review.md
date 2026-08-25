@@ -4,6 +4,56 @@ Dokumen ini berisi rangkuman review perubahan kode (*code review*) terbaru yang 
 
 ---
 
+## 📅 Review [2026-08-25 19:05 WIB] - Integrasi Teknologi Chart.js (Visualisasi Analitik Realtime) & SheetJS (Smart Excel Template Generator 10 Baris Dummy)
+
+### 📁 1. Berkas yang Diperbarui
+* 📄 **[pages/guru/rekap.html](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/pages/guru/rekap.html)** `[MODIFY]`
+* 📄 **[assets/js/guru/rekap.js](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/assets/js/guru/rekap.js)** `[MODIFY]`
+* 📄 **[assets/js/database/db-manager.js](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/assets/js/database/db-manager.js)** `[MODIFY]`
+* 📄 **[absensi.html](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/absensi.html)** `[MODIFY]`
+* 📄 **[assets/js/absensi/absensi.js](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/assets/js/absensi/absensi.js)** `[MODIFY]`
+
+---
+
+### 📝 2. Rincian Baris & Logika yang Diperbarui
+
+1. 📊 **Chart.js Visual Analytics pada Modul Guru ([pages/guru/rekap.html](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/pages/guru/rekap.html) & [assets/js/guru/rekap.js](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/assets/js/guru/rekap.js))**:
+   - Memuat library Chart.js via CDN resmi.
+   - Menambahkan section **Interactive Visual Analytics**:
+     - *Doughnut Chart*: Visualisasi Rasio Kehadiran (Hadir vs Alpa/Tidak Hadir) dengan counter badge realtime.
+     - *Bar Chart*: Distribusi kehadiran siswa per rombel kelas / mata pelajaran.
+   - Mengintegrasikan fungsi controller `updateAttendanceCharts(data)` ke dalam siklus `renderTable(data)` sehingga kedua grafik otomatis ter-update dan bertransisi mulus setiap kali filter kelas/sesi/tanggal diubah tanpa reload halaman.
+
+2. 📑 **Smart Template Excel Generator 10 Baris Dummy ([assets/js/database/db-manager.js](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/assets/js/database/db-manager.js))**:
+   - Mengadopsi arsitektur template generator dari project Manajemen Sekolah Azizah ke dalam Firestore Database Manager.
+   - Tombol **Template Excel (.xlsx)** kini menghasilkan berkas `.xlsx` dengan **10 baris dummy data realistis** sesuai konteks koleksi aktif:
+     - Koleksi `siswa`: 10 nama siswa SMK/TEI dengan NIS dan ID Kelas.
+     - Koleksi `kelas`: 10 rombel kelas kejuruan lengkap dengan nama Wali Kelas.
+     - Koleksi `mapel`: 10 mata pelajaran produktif & adaptif SMK.
+     - Koleksi `sesi_absensi`: Jadwal sesi presensi.
+   - Menerapkan konfigurasi `worksheet['!cols']` (*auto-fit column widths*) agar berkas Excel terbuka dengan lebar kolom rapi dan tidak terpotong.
+
+3. 🍩 **Mini Attendance Rate Ring pada Portal Siswa ([absensi.html](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/absensi.html) & [assets/js/absensi/absensi.js](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/assets/js/absensi/absensi.js))**:
+   - Memuat Chart.js pada halaman presensi siswa.
+   - Menambahkan visualisasi mini doughnut progress ring persentase kehadiran personal siswa serta indikator label status (*"Sangat Baik 🌟"*, *"Baik 👍"*, atau *"Perlu Ditingkatkan ⚠️"*).
+
+---
+
+### 🧪 3. Petunjuk Pengujian Lokal (*Local Verification*)
+
+1. **Pengujian Chart.js Rekap Guru**:
+   - Buka [`pages/guru/rekap.html`](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/pages/guru/rekap.html) di browser.
+   - Klik **Muat Data** atau ubah pilihan kelas pada dropdown filter -> Amati grafik Doughnut & Bar Chart yang merespons seketika dengan data riil Firestore.
+2. **Pengujian Smart Excel Generator**:
+   - Buka [`pages/database/db-manager.html`](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/pages/database/db-manager.html) -> Klik **Import Data** -> Klik **Template Excel (.xlsx)**.
+   - Buka file yang terunduh di Excel -> Pastikan memiliki 10 baris dummy data dengan kolom yang tertata rapi.
+3. **Pengujian Mini Chart Siswa**:
+   - Buka [`absensi.html`](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/absensi.html) -> Masukkan NIS siswa terdaftar -> Amati grafik mini donut tingkat kehadiran yang muncul di atas riwayat presensi.
+
+---
+
+
+
 ## 📅 Review [2026-08-24 20:08 WIB] - Integrasi Notifikasi Toast & Confirm Modal untuk Aksi "Ikat Perangkat", "Lepas Ikatan", & "Logout" di `admin.html`
 
 ### 📁 1. Berkas yang Diperbarui

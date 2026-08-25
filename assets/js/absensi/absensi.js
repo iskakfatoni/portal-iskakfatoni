@@ -305,9 +305,71 @@ async function loadStudentAttendanceHistory(nis) {
     if (dom.countTidakHadir) dom.countTidakHadir.innerText = tidakHadirCount;
     if (dom.riwayatStatusTag) dom.riwayatStatusTag.innerText = `${docs.length} Log`;
 
+    renderStudentChart(hadirCount, tidakHadirCount);
+
   } catch (err) {
     console.error("Gagal memuat riwayat presensi:", err);
     if (dom.riwayatLogContainer) dom.riwayatLogContainer.innerHTML = '<p style="font-size:0.75rem; color:#ef4444; text-align:center; padding:16px 0; font-family:monospace;">Gagal memuat data riwayat.</p>';
+  }
+}
+
+let studentChartInstance = null;
+
+function renderStudentChart(hadirCount, tidakHadirCount) {
+  const rateSpan = document.getElementById('student-attendance-rate');
+  const labelSpan = document.getElementById('student-attendance-label');
+  const canvas = document.getElementById('student-attendance-chart');
+
+  const total = hadirCount + tidakHadirCount;
+  const pct = total > 0 ? Math.round((hadirCount / total) * 100) : 0;
+
+  if (rateSpan) rateSpan.innerText = `${pct}%`;
+  if (labelSpan) {
+    if (pct >= 85) {
+      labelSpan.innerText = "Sangat Baik 🌟";
+      labelSpan.style.color = "#34d399";
+    } else if (pct >= 75) {
+      labelSpan.innerText = "Baik 👍";
+      labelSpan.style.color = "#38bdf8";
+    } else {
+      labelSpan.innerText = "Perlu Ditingkatkan ⚠️";
+      labelSpan.style.color = "#f87171";
+    }
+  }
+
+  if (canvas && typeof window.Chart !== 'undefined') {
+    if (studentChartInstance) {
+      studentChartInstance.destroy();
+    }
+
+    studentChartInstance = new window.Chart(canvas, {
+      type: 'doughnut',
+      data: {
+        labels: ['Hadir', 'Tidak Hadir'],
+        datasets: [{
+          data: total > 0 ? [hadirCount, tidakHadirCount] : [0, 1],
+          backgroundColor: total > 0 ? ['#10b981', '#f43f5e'] : ['#334155', '#1e293b'],
+          borderColor: ['#047857', '#be123c'],
+          borderWidth: 1.5,
+          hoverOffset: 2
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        cutout: '76%',
+        plugins: {
+          legend: { display: false },
+          tooltip: {
+            callbacks: {
+              label: function(ctx) {
+                return ` ${ctx.label}: ${ctx.raw} Sesi`;
+              }
+            }
+          }
+        }
+      }
+    });
   }
 }
 

@@ -1810,22 +1810,70 @@ dom.btnProcessImport.addEventListener('click', async () => {
 
 dom.btnDownloadTemplate.addEventListener('click', () => {
   let sampleData = [];
+  let colWidths = [];
+
   if (state.currentCollection === 'siswa') {
-    sampleData = [{ "NIS": "9177/413", "Nama Siswa": "ACHMAD HAMDHANI", "ID Kelas": "XI-TEI-1", "Nama Kelas": "XI TEI 1" }];
+    sampleData = [
+      { "NIS": "9177/413", "Nama Siswa": "ACHMAD HAMDHANI", "ID Kelas": "XI-TEI-1", "Nama Kelas": "XI TEI 1" },
+      { "NIS": "9178/414", "Nama Siswa": "ADINDA PUTRI LESTARI", "ID Kelas": "XI-TEI-1", "Nama Kelas": "XI TEI 1" },
+      { "NIS": "9179/415", "Nama Siswa": "AHMAD FAUZI PRATAMA", "ID Kelas": "XI-TEI-1", "Nama Kelas": "XI TEI 1" },
+      { "NIS": "9180/416", "Nama Siswa": "BAGAS ADITYA NUGRAHA", "ID Kelas": "XI-TEI-1", "Nama Kelas": "XI TEI 1" },
+      { "NIS": "9181/417", "Nama Siswa": "CANTIKA DEWI ANGGRAENI", "ID Kelas": "XI-TEI-1", "Nama Kelas": "XI TEI 1" },
+      { "NIS": "9182/418", "Nama Siswa": "DWI RIZKY FEBRIAN", "ID Kelas": "XI-TEI-2", "Nama Kelas": "XI TEI 2" },
+      { "NIS": "9183/419", "Nama Siswa": "FARHAN AL GHOZALI", "ID Kelas": "XI-TEI-2", "Nama Kelas": "XI TEI 2" },
+      { "NIS": "9184/420", "Nama Siswa": "GILANG RAMADHAN", "ID Kelas": "XI-TEI-2", "Nama Kelas": "XI TEI 2" },
+      { "NIS": "9185/421", "Nama Siswa": "HILMY MAULANA AZZAM", "ID Kelas": "XI-TEI-2", "Nama Kelas": "XI TEI 2" },
+      { "NIS": "9186/422", "Nama Siswa": "ILHAM KURNIAWAN", "ID Kelas": "XI-TEI-2", "Nama Kelas": "XI TEI 2" }
+    ];
+    colWidths = [{ wch: 15 }, { wch: 32 }, { wch: 15 }, { wch: 18 }];
   } else if (state.currentCollection === 'kelas') {
-    sampleData = [{ "id_kelas": "XI-TEI-1", "nama_kelas": "XI TEI 1", "wali_kelas": "Nama Guru" }];
+    sampleData = [
+      { "id_kelas": "X-TEI-1", "nama_kelas": "X TEI 1", "wali_kelas": "Muchamad Iskak Fatoni, S.Pd., Gr." },
+      { "id_kelas": "X-TEI-2", "nama_kelas": "X TEI 2", "wali_kelas": "Drs. Bambang Wijaya" },
+      { "id_kelas": "XI-TEI-1", "nama_kelas": "XI TEI 1", "wali_kelas": "Siti Nurhaliza, M.Pd." },
+      { "id_kelas": "XI-TEI-2", "nama_kelas": "XI TEI 2", "wali_kelas": "Agus Setiawan, S.T." },
+      { "id_kelas": "XII-TEI-1", "nama_kelas": "XII TEI 1", "wali_kelas": "Eko Prasetyo, S.Kom." },
+      { "id_kelas": "X-TKJ-1", "nama_kelas": "X TKJ 1", "wali_kelas": "Rina Marlina, S.Kom." },
+      { "id_kelas": "XI-TKJ-1", "nama_kelas": "XI TKJ 1", "wali_kelas": "Hendro Prabowo, S.Kom." },
+      { "id_kelas": "XII-TKJ-1", "nama_kelas": "XII TKJ 1", "wali_kelas": "Nurul Hidayati, S.Pd." },
+      { "id_kelas": "X-RPL-1", "nama_kelas": "X RPL 1", "wali_kelas": "Fajar Pratama, S.Kom." },
+      { "id_kelas": "XI-RPL-1", "nama_kelas": "XI RPL 1", "wali_kelas": "Anita Kusuma, M.Kom." }
+    ];
+    colWidths = [{ wch: 16 }, { wch: 18 }, { wch: 38 }];
   } else if (state.currentCollection === 'mapel') {
-    sampleData = [{ "id_mapel": "TEI-01", "nama_mapel": "Pemrograman Terstruktur" }];
+    sampleData = [
+      { "id_mapel": "TEI-01", "nama_mapel": "Penerapan Rangkaian Elektronika (PRE)" },
+      { "id_mapel": "TEI-02", "nama_mapel": "Sistem Pengendali Elektronik (SPE)" },
+      { "id_mapel": "TEI-03", "nama_mapel": "Pemrograman Mikroprosesor & Mikrokontroler" },
+      { "id_mapel": "TEI-04", "nama_mapel": "Perencanaan & Instalasi Sistem Audio Video" },
+      { "id_mapel": "TEI-05", "nama_mapel": "Dasar-Dasar Teknik Elektronika" },
+      { "id_mapel": "TKJ-01", "nama_mapel": "Administrasi Infrastruktur Jaringan (AIJ)" },
+      { "id_mapel": "TKJ-02", "nama_mapel": "Administrasi Sistem Jaringan (ASJ)" },
+      { "id_mapel": "TKJ-03", "nama_mapel": "Teknologi Layanan Jaringan (TLJ)" },
+      { "id_mapel": "RPL-01", "nama_mapel": "Pemrograman Web & Perangkat Bergerak" },
+      { "id_mapel": "RPL-02", "nama_mapel": "Basis Data & Cloud Architecture" }
+    ];
+    colWidths = [{ wch: 16 }, { wch: 45 }];
   } else if (state.currentCollection === 'sesi_absensi') {
-    sampleData = [{ "id_kelas": "XI-TEI-1", "nama_mapel": "Pemrograman Terstruktur", "tanggal": "2026-08-10", "waktu": "08:53:00 WIB", "is_active": true }];
+    sampleData = [
+      { "id_kelas": "XI-TEI-1", "nama_mapel": "Sistem Pengendali Elektronik", "tanggal": "2026-08-25", "waktu": "07:30:00 WIB", "is_active": true },
+      { "id_kelas": "XI-TEI-2", "nama_mapel": "Penerapan Rangkaian Elektronika", "tanggal": "2026-08-25", "waktu": "09:30:00 WIB", "is_active": true },
+      { "id_kelas": "XII-TEI-1", "nama_mapel": "Pemrograman Mikrokontroler", "tanggal": "2026-08-25", "waktu": "12:30:00 WIB", "is_active": true }
+    ];
+    colWidths = [{ wch: 15 }, { wch: 35 }, { wch: 15 }, { wch: 18 }, { wch: 12 }];
   } else {
-    sampleData = [{ "id": "DOC-01", "title": "Contoh Data", "keterangan": "Deskripsi" }];
+    sampleData = [{ "id": "DOC-01", "title": "Contoh Judul Data", "keterangan": "Deskripsi Lengkap" }];
+    colWidths = [{ wch: 15 }, { wch: 30 }, { wch: 35 }];
   }
 
   const ws = XLSX.utils.json_to_sheet(sampleData);
+  if (colWidths.length > 0) {
+    ws['!cols'] = colWidths;
+  }
   const wb = XLSX.utils.book_new();
   XLSX.utils.book_append_sheet(wb, ws, `Template_${state.currentCollection}`);
   XLSX.writeFile(wb, `Template_Import_${state.currentCollection}.xlsx`);
+  showToast(`Template Excel resmi (${sampleData.length} baris dummy) untuk "${state.currentCollection}" berhasil diunduh!`, "success");
 });
 
 // 📤 Export Perangkat Siswa Excel (Smart Contextual Filtered Export)
