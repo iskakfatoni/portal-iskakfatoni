@@ -228,7 +228,7 @@
           <!-- 📈 PANEL ANALYTICS (NEW) -->
           <div id="analytics-panel" class="hidden grid grid-cols-1 md:grid-cols-3 gap-3.5 sm:gap-4 bg-slate-900/40 p-3.5 sm:p-4 rounded-2xl border border-slate-800 shadow-inner">
             <div class="md:col-span-1 flex flex-col items-center justify-center p-3 bg-slate-950/50 rounded-xl border border-slate-800/50">
-              <h4 class="text-[10px] font-bold text-slate-400 uppercase mb-2">Sebaran Data / Kehadiran</h4>
+              <h4 id="mini-chart-title" class="text-[10px] font-bold text-slate-400 uppercase mb-2 text-center truncate max-w-full">Sebaran Data / Kehadiran</h4>
               <div class="w-full max-w-[130px] aspect-square">
                 <canvas id="miniChartCanvas"></canvas>
               </div>
@@ -485,7 +485,7 @@
   <script src="../../assets/js/particle/particle-bg.js"></script>
 
   <!-- FIREBASE AUTH & FIRESTORE SCRIPT (EXTERNAL MODULAR ENGINE) -->
-  <script type="module" src="../../assets/js/database/db-manager.js?v=1.7.0"></script>
+  <script type="module" src="../../assets/js/database/db-manager.js?v=1.8.0"></script>
 </body>
 
 </html>

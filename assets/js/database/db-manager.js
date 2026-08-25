@@ -337,7 +337,7 @@ const AnalyticsManager = {
         }
       }
 
-      // Draw Mini Chart Canvas
+      // Draw Mini Chart Canvas with Active Filtered & Searched Data
       if (dom.miniChartCanvas) {
         const ctx = dom.miniChartCanvas.getContext('2d');
         if (ctx) {
@@ -350,58 +350,151 @@ const AnalyticsManager = {
           const radius = 52;
           const lineWidth = 14;
 
-          const totalDocs = state.currentDocsList.length || 1;
+          const currentFilteredDocs = TableEngine.getFilteredAndSortedDocs();
+          const totalDocs = currentFilteredDocs.length;
           let valA = 0;
           let colorA = '#38bdf8';
           let colorB = '#1e293b';
+          let subLabel = 'Rasio Data';
+          let titleText = 'Sebaran Data / Kehadiran';
 
-          if (state.currentCollection === 'siswa') {
-            valA = state.currentDocsList.filter(d => Boolean(d.data().device_id)).length;
+          if (state.currentCollection === 'log_absensi') {
+            valA = currentFilteredDocs.filter(d => {
+              const st = (d.data().status || '').toUpperCase();
+              return st.includes('HADIR') && !st.includes('TIDAK');
+            }).length;
+            colorA = '#10b981'; // Emerald (Hadir)
+            colorB = '#f43f5e'; // Rose (Tidak Hadir / Alpa)
+            subLabel = `${valA}/${totalDocs} Hadir`;
+
+            if (state.searchQuery) {
+              titleText = `🔍 Cari: "${state.searchQuery}" (${totalDocs})`;
+            } else if (state.logDateFilter !== 'all') {
+              titleText = `Log: ${state.logDateFilter} (${totalDocs})`;
+            } else {
+              titleText = `Presensi Siswa (${totalDocs} Log)`;
+            }
+          } else if (state.currentCollection === 'siswa') {
+            valA = currentFilteredDocs.filter(d => Boolean(d.data().device_id || d.data().device_token || d.data().mac_address)).length;
             colorA = '#10b981'; // Bound
             colorB = '#f59e0b'; // Unbound
-          } else if (state.currentCollection === 'log_absensi') {
-            valA = state.currentDocsList.filter(d => (d.data().status || '').toUpperCase() === 'HADIR').length;
-            colorA = '#06b6d4'; // Hadir
-            colorB = '#f43f5e'; // Tidak Hadir
+            subLabel = `${valA}/${totalDocs} Terikat`;
+
+            if (state.searchQuery) {
+              titleText = `🔍 Cari: "${state.searchQuery}" (${totalDocs})`;
+            } else {
+              titleText = `Status HP Siswa (${totalDocs})`;
+            }
           } else if (state.currentCollection === 'sesi_absensi') {
-            valA = state.currentDocsList.filter(d => d.data().is_active).length;
+            valA = currentFilteredDocs.filter(d => d.data().is_active).length;
             colorA = '#10b981'; // Aktif
             colorB = '#475569'; // Tutup
+            subLabel = `${valA}/${totalDocs} Aktif`;
+            titleText = `Sesi Absensi (${totalDocs})`;
+          } else if (state.currentCollection === 'links') {
+            valA = currentFilteredDocs.filter(d => d.data().is_active !== false).length;
+            colorA = '#06b6d4'; // Aktif
+            colorB = '#e11d48'; // Nonaktif
+            subLabel = `${valA}/${totalDocs} Aktif`;
+            titleText = `Portal Links (${totalDocs})`;
           } else {
-            valA = Math.floor(totalDocs * 0.75);
+            valA = totalDocs;
             colorA = '#6366f1';
             colorB = '#1e293b';
+            subLabel = `${totalDocs} Dokumen`;
+            titleText = `${state.currentCollection} (${totalDocs})`;
+          }
+
+          // Perbarui judul mini chart di UI jika ada
+          const titleElem = document.getElementById('mini-chart-title');
+          if (titleElem) {
+            titleElem.innerText = titleText;
           }
 
           const ratioA = totalDocs > 0 ? (valA / totalDocs) : 0;
-          const angleA = ratioA * 2 * Math.PI;
 
-          // Segment A
-          ctx.beginPath();
-          ctx.arc(centerX, centerY, radius, -Math.PI / 2, -Math.PI / 2 + angleA);
-          ctx.lineWidth = lineWidth;
-          ctx.strokeStyle = colorA;
-          ctx.lineCap = 'round';
-          ctx.stroke();
+          if (totalDocs === 0) {
+            // Draw Empty State Ring
+            ctx.beginPath();
+            ctx.arc(centerX, centerY, radius, 0, 2 * Math.PI);
+            ctx.lineWidth = lineWidth;
+            ctx.strokeStyle = '#1e293b';
+            ctx.stroke();
 
-          // Segment B
-          ctx.beginPath();
-          ctx.arc(centerX, centerY, radius, -Math.PI / 2 + angleA, 1.5 * Math.PI);
-          ctx.lineWidth = lineWidth;
-          ctx.strokeStyle = colorB;
-          ctx.lineCap = 'round';
-          ctx.stroke();
+            ctx.fillStyle = '#64748b';
+            ctx.font = 'bold 15px monospace';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText('0%', centerX, centerY - 4);
 
-          // Center Text
-          ctx.fillStyle = '#ffffff';
-          ctx.font = 'bold 15px "Plus Jakarta Sans", sans-serif';
-          ctx.textAlign = 'center';
-          ctx.textBaseline = 'middle';
-          ctx.fillText(`${Math.round(ratioA * 100)}%`, centerX, centerY - 4);
+            ctx.fillStyle = '#475569';
+            ctx.font = '9px monospace';
+            ctx.fillText('0 Data', centerX, centerY + 12);
+          } else if (valA === totalDocs) {
+            // 100% Solid Color A Circle
+            ctx.beginPath();
+            ctx.arc(centerX, centerY, radius, 0, 2 * Math.PI);
+            ctx.lineWidth = lineWidth;
+            ctx.strokeStyle = colorA;
+            ctx.stroke();
 
-          ctx.fillStyle = '#94a3b8';
-          ctx.font = '9px monospace';
-          ctx.fillText('Rasio Utama', centerX, centerY + 12);
+            ctx.fillStyle = '#ffffff';
+            ctx.font = 'bold 15px monospace';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText('100%', centerX, centerY - 4);
+
+            ctx.fillStyle = colorA;
+            ctx.font = 'bold 9px monospace';
+            ctx.fillText(subLabel, centerX, centerY + 12);
+          } else if (valA === 0) {
+            // 0% (100% Solid Color B Circle)
+            ctx.beginPath();
+            ctx.arc(centerX, centerY, radius, 0, 2 * Math.PI);
+            ctx.lineWidth = lineWidth;
+            ctx.strokeStyle = colorB;
+            ctx.stroke();
+
+            ctx.fillStyle = '#ffffff';
+            ctx.font = 'bold 15px monospace';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText('0%', centerX, centerY - 4);
+
+            ctx.fillStyle = colorB;
+            ctx.font = 'bold 9px monospace';
+            ctx.fillText(subLabel, centerX, centerY + 12);
+          } else {
+            // Segmented Donut Arc
+            const angleA = ratioA * 2 * Math.PI;
+
+            // Segment A
+            ctx.beginPath();
+            ctx.arc(centerX, centerY, radius, -Math.PI / 2, -Math.PI / 2 + angleA);
+            ctx.lineWidth = lineWidth;
+            ctx.strokeStyle = colorA;
+            ctx.lineCap = 'round';
+            ctx.stroke();
+
+            // Segment B
+            ctx.beginPath();
+            ctx.arc(centerX, centerY, radius, -Math.PI / 2 + angleA, 1.5 * Math.PI);
+            ctx.lineWidth = lineWidth;
+            ctx.strokeStyle = colorB;
+            ctx.lineCap = 'round';
+            ctx.stroke();
+
+            // Center Text
+            ctx.fillStyle = '#ffffff';
+            ctx.font = 'bold 15px monospace';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText(`${Math.round(ratioA * 100)}%`, centerX, centerY - 4);
+
+            ctx.fillStyle = '#94a3b8';
+            ctx.font = 'bold 9px monospace';
+            ctx.fillText(subLabel, centerX, centerY + 12);
+          }
         }
       }
     } catch (e) {

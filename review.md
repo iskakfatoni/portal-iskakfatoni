@@ -4,6 +4,44 @@ Dokumen ini berisi rangkuman review perubahan kode (*code review*) terbaru yang 
 
 ---
 
+## 📅 Review [2026-08-25 19:23 WIB] - Sinkronisasi Donut Chart AnalyticsManager dengan Hasil Pencarian & Filter Aktif di `db-manager.html`
+
+### 📁 1. Berkas yang Diperbarui
+* 📄 **[pages/database/db-manager.html](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/pages/database/db-manager.html)** `[MODIFY]`
+* 📄 **[assets/js/database/db-manager.js](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/assets/js/database/db-manager.js)** `[MODIFY]`
+
+---
+
+### 📝 2. Rincian Baris & Logika yang Diperbarui
+
+1. 🎯 **Donut Chart Reaktif Mengikuti Hasil Pencarian Siswa / Filter Tabel**:
+   - Memperbarui kalkulasi `AnalyticsManager.updateAnalytics()` pada `db-manager.js` dari yang sebelumnya menggunakan seluruh data global (`state.currentDocsList`) menjadi berbasis **dokumen terfilter/tercari aktif (`TableEngine.getFilteredAndSortedDocs()`)**.
+   - Ketika guru/admin mencari nama/NIS siswa tertentu di search bar (misal: `"Afifa"` atau `"9177"`):
+     - Donat grafik langsung menghitung rasio kehadiran khusus dari baris log siswa yang sedang tampil.
+     - Teks tengah menampilkan persentase (`${pct}%`) dan sub-teks detail (`"${valA}/${totalDocs} Hadir"`).
+     - Jika hasil pencarian terdiri dari beberapa siswa, donat chart menghitung akumulasi kehadiran dari kelompok siswa yang sedang ditampilkan tersebut.
+   - Menambahkan judul dinamis pada kartu chart (`#mini-chart-title`) yang otomatis menampilkan kata kunci pencarian dan jumlah baris aktif (contoh: `🔍 Cari: "Afifa" (3)`).
+
+2. 🍩 **Penanganan 100%, 0%, dan 0-State**:
+   - Jika 100% Hadir -> Lingkaran donat penuh berwarna hijau Zamrud (`#10b981`).
+   - Jika 100% Tidak Hadir -> Lingkaran donat penuh berwarna merah Mawar (`#f43f5e`).
+   - Jika tidak ada data yang cocok dengan pencarian -> Ring gelap kosong (`#1e293b`) dengan teks `0%` dan `0 Data`.
+   - Menaikkan versi script cache buster ke `v=1.8.0` pada [`pages/database/db-manager.html`](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/pages/database/db-manager.html).
+
+---
+
+### 🧪 3. Petunjuk Pengujian Lokal (*Local Verification*)
+
+1. Buka [`pages/database/db-manager.html`](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/pages/database/db-manager.html) di peramban.
+2. Klik tombol **AI Insights** di header untuk membuka panel analitik & donat chart.
+3. Pilih menu **Log Presensi** di sidebar.
+4. Ketik nama siswa (misalnya `"Afifa"`) pada kolom pencarian:
+   - Amati donat chart di panel analitik: grafik donat, persentase tengah, dan sub-label (`... Hadir`) langsung berubah secara realtime mengikuti riwayat siswa tersebut.
+
+---
+
+
+
 ## 📅 Review [2026-08-25 19:18 WIB] - Perbaikan Toleransi Query Riwayat Presensi Siswa (`where in` Variasi NIS) & Render Donut Chart
 
 ### 📁 1. Berkas yang Diperbarui
