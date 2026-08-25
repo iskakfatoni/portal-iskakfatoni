@@ -4,6 +4,36 @@ Dokumen ini berisi rangkuman review perubahan kode (*code review*) terbaru yang 
 
 ---
 
+## 📅 Review [2026-08-25 19:30 WIB] - Relokasi Kartu Metrik Statistik (Total Dokumen, HP Terikat, dsb.) ke Header Utama `db-manager.html`
+
+### 📁 1. Berkas yang Diperbarui
+* 📄 **[pages/database/db-manager.html](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/pages/database/db-manager.html)** `[MODIFY]`
+
+---
+
+### 📝 2. Rincian Baris & Logika yang Diperbarui
+
+1. 🏛️ **Integrasi Kartu Ringkasan Metrik ke Header Command Bar**:
+   - Memindahkan kontainer kartu ringkasan statistik (`#stats-summary-card` yang memuat: *Total Dokumen*, *HP Terikat*, *HP Belum Terikat*, dan *Hasil Filter*) dari dalam area tabel ke dalam kartu header utama (`<header class="glass-card ...">`).
+   - Menyusun header menjadi dua tingkat elegan:
+     - **Baris 1**: Branding ("Manajemen Absensi Siswa", Avatar ASN, Sidebar Toggle) bersama tombol aksi navigasi (*AI Insights*, *Layar Penuh*, *Admin Hub*, *Email Admin*, dan *Logout*).
+     - **Baris 2**: Grid 4 kartu metrik responsif (`Total Dokumen`, `HP Terikat`, `HP Belum Terikat`, `Hasil Filter`) dengan latar belakang semi-transparan `bg-slate-900/60`.
+   - Mengoptimalkan *vertical space* pada kontainer tabel di bawahnya agar tabel data memiliki ruang tampilan yang lebih luas dan nyaman.
+   - Menaikkan script cache buster ke `v=1.8.1` pada [`pages/database/db-manager.html`](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/pages/database/db-manager.html).
+
+---
+
+### 🧪 3. Petunjuk Pengujian Lokal (*Local Verification*)
+
+1. Buka [`pages/database/db-manager.html`](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/pages/database/db-manager.html) di browser.
+2. Perhatikan bagian header di bagian paling atas:
+   - Judul **"Manajemen Absensi Siswa"** kini berada dalam satu kesatuan kartu komando dengan 4 kotak metrik statistik di bawahnya.
+   - Saat berpindah koleksi atau melakukan pencarian di tabel, angka pada kartu metrik di header tetap terupdate secara realtime.
+
+---
+
+
+
 ## 📅 Review [2026-08-25 19:27 WIB] - Pembesaran Tipografi & Ikon Tombol "Analisa Kecurangan" dan "Riwayat Reset HP" di `db-manager.html`
 
 ### 📁 1. Berkas yang Diperbarui
