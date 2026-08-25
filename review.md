@@ -4,6 +4,38 @@ Dokumen ini berisi rangkuman review perubahan kode (*code review*) terbaru yang 
 
 ---
 
+## 📅 Review [2026-08-25 19:48 WIB] - Relokasi Donut Chart "Sebaran Data / Kehadiran" ke Sidebar Kiri (Di Atas Card Koleksi Data)
+
+### 📁 1. Berkas yang Diperbarui
+* 📄 **[pages/database/db-manager.html](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/pages/database/db-manager.html)** `[MODIFY]`
+* 📄 **[assets/js/database/db-manager.js](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/assets/js/database/db-manager.js)** `[MODIFY]`
+
+---
+
+### 📝 2. Rincian Baris & Logika yang Diperbarui
+
+1. 🍩 **Pembuatan Kartu Donut Chart Khusus di Sidebar Kiri**:
+   - Memindahkan komponen Donut Chart (`#miniChartCanvas`), judul dinamis (`#mini-chart-title`), dan tombol aksi analitik (*Analisa Kecurangan* dan *Riwayat Reset HP*) dari panel utama ke dalam kartu kaca (*glass card*) baru pada bilah sisi kiri (`#sidebar-container`), tepat di atas kartu *Koleksi Data*.
+   - Menyederhanakan `#analytics-panel` di atas tabel sehingga menjadi panel khusus untuk *Insight & Anomali Sistem (AI Radar)* yang dapat dibuka/tutup melalui tombol di header.
+
+2. ⚡ **Render Mandiri & Reaktif (*Decoupled Mini Chart Rendering*)**:
+   - Memisahkan fungsi render chart `AnalyticsManager.drawMiniChart()` dari ketergantungan status buka/tutup `#analytics-panel`.
+   - Donut chart di sidebar kiri kini otomatis dan selalu ter-render secara visual saat halaman dimuat, berpindah koleksi, menyaring tanggal log, memfilter perangkat, maupun saat pencarian teks tabel berlangsung secara realtime.
+   - Membersihkan objek `ChartEngine` lama yang redundan dan memperbarui listener data Firestore untuk memanggil `AnalyticsManager.updateAnalytics()`.
+   - Menaikkan script cache buster ke `v=1.8.3`.
+
+---
+
+### 🧪 3. Petunjuk Pengujian Lokal (*Local Verification*)
+
+1. Buka [`pages/database/db-manager.html`](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/pages/database/db-manager.html) di browser.
+2. Perhatikan bilah sisi kiri (sidebar):
+   - Di bagian paling atas sidebar (di atas kotak Koleksi Data) kini terdapat kartu **Sebaran Data** dengan Donut Chart interaktif serta tombol tautan *Analisa Kecurangan* dan *Riwayat Reset HP*.
+   - Saat berpindah koleksi data (misal dari *siswa* ke *log_absensi* atau *sesi_absensi*), donut chart langsung bereaksi dan menampilkan rasio status data.
+   - Coba ketik kata kunci pada kotak pencarian tabel (misal nama siswa atau ID): persentase dan irisan lingkaran donat akan langsung terupdate sesuai hasil pencarian.
+
+---
+
 ## 📅 Review [2026-08-25 19:43 WIB] - Restrukturisasi Header `db-manager.html` Menjadi 1 Baris Tunggal Proporsional & Responsif
 
 ### 📁 1. Berkas yang Diperbarui

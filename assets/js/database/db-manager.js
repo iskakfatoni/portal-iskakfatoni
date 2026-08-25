@@ -283,7 +283,172 @@ const AnalyticsManager = {
     }
   },
 
+  drawMiniChart() {
+    if (!dom.miniChartCanvas) return;
+    const ctx = dom.miniChartCanvas.getContext('2d');
+    if (!ctx) return;
+
+    const w = dom.miniChartCanvas.width = 150;
+    const h = dom.miniChartCanvas.height = 150;
+    ctx.clearRect(0, 0, w, h);
+
+    const centerX = w / 2;
+    const centerY = h / 2;
+    const radius = 52;
+    const lineWidth = 14;
+
+    const currentFilteredDocs = TableEngine.getFilteredAndSortedDocs();
+    const totalDocs = currentFilteredDocs.length;
+    let valA = 0;
+    let colorA = '#38bdf8';
+    let colorB = '#1e293b';
+    let subLabel = 'Rasio Data';
+    let titleText = 'Sebaran Data';
+
+    if (state.currentCollection === 'log_absensi') {
+      valA = currentFilteredDocs.filter(d => {
+        const st = (d.data().status || '').toUpperCase();
+        return st.includes('HADIR') && !st.includes('TIDAK');
+      }).length;
+      colorA = '#10b981'; // Emerald (Hadir)
+      colorB = '#f43f5e'; // Rose (Tidak Hadir / Alpa)
+      subLabel = `${valA}/${totalDocs} Hadir`;
+
+      if (state.searchQuery) {
+        titleText = `Cari: "${state.searchQuery}"`;
+      } else if (state.logDateFilter !== 'all') {
+        titleText = `Log: ${state.logDateFilter}`;
+      } else {
+        titleText = `Presensi Siswa (${totalDocs})`;
+      }
+    } else if (state.currentCollection === 'siswa') {
+      valA = currentFilteredDocs.filter(d => Boolean(d.data().device_id || d.data().device_token || d.data().mac_address)).length;
+      colorA = '#10b981'; // Bound
+      colorB = '#f59e0b'; // Unbound
+      subLabel = `${valA}/${totalDocs} Terikat`;
+
+      if (state.searchQuery) {
+        titleText = `Cari: "${state.searchQuery}"`;
+      } else {
+        titleText = `Status HP Siswa (${totalDocs})`;
+      }
+    } else if (state.currentCollection === 'sesi_absensi') {
+      valA = currentFilteredDocs.filter(d => d.data().is_active).length;
+      colorA = '#10b981'; // Aktif
+      colorB = '#475569'; // Tutup
+      subLabel = `${valA}/${totalDocs} Aktif`;
+      titleText = `Sesi Absensi (${totalDocs})`;
+    } else if (state.currentCollection === 'links') {
+      valA = currentFilteredDocs.filter(d => d.data().is_active !== false).length;
+      colorA = '#06b6d4'; // Aktif
+      colorB = '#e11d48'; // Nonaktif
+      subLabel = `${valA}/${totalDocs} Aktif`;
+      titleText = `Portal Links (${totalDocs})`;
+    } else {
+      valA = totalDocs;
+      colorA = '#6366f1';
+      colorB = '#1e293b';
+      subLabel = `${totalDocs} Dokumen`;
+      titleText = `${state.currentCollection} (${totalDocs})`;
+    }
+
+    // Perbarui judul mini chart di UI jika ada
+    const titleElem = document.getElementById('mini-chart-title');
+    if (titleElem) {
+      titleElem.innerText = titleText;
+    }
+
+    const ratioA = totalDocs > 0 ? (valA / totalDocs) : 0;
+
+    if (totalDocs === 0) {
+      // Draw Empty State Ring
+      ctx.beginPath();
+      ctx.arc(centerX, centerY, radius, 0, 2 * Math.PI);
+      ctx.lineWidth = lineWidth;
+      ctx.strokeStyle = '#1e293b';
+      ctx.stroke();
+
+      ctx.fillStyle = '#64748b';
+      ctx.font = 'bold 15px monospace';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText('0%', centerX, centerY - 4);
+
+      ctx.fillStyle = '#475569';
+      ctx.font = '9px monospace';
+      ctx.fillText('0 Data', centerX, centerY + 12);
+    } else if (valA === totalDocs) {
+      // 100% Solid Color A Circle
+      ctx.beginPath();
+      ctx.arc(centerX, centerY, radius, 0, 2 * Math.PI);
+      ctx.lineWidth = lineWidth;
+      ctx.strokeStyle = colorA;
+      ctx.stroke();
+
+      ctx.fillStyle = '#ffffff';
+      ctx.font = 'bold 15px monospace';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText('100%', centerX, centerY - 4);
+
+      ctx.fillStyle = colorA;
+      ctx.font = 'bold 9px monospace';
+      ctx.fillText(subLabel, centerX, centerY + 12);
+    } else if (valA === 0) {
+      // 0% (100% Solid Color B Circle)
+      ctx.beginPath();
+      ctx.arc(centerX, centerY, radius, 0, 2 * Math.PI);
+      ctx.lineWidth = lineWidth;
+      ctx.strokeStyle = colorB;
+      ctx.stroke();
+
+      ctx.fillStyle = '#ffffff';
+      ctx.font = 'bold 15px monospace';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText('0%', centerX, centerY - 4);
+
+      ctx.fillStyle = colorB;
+      ctx.font = 'bold 9px monospace';
+      ctx.fillText(subLabel, centerX, centerY + 12);
+    } else {
+      // Segmented Donut Arc
+      const angleA = ratioA * 2 * Math.PI;
+
+      // Segment A
+      ctx.beginPath();
+      ctx.arc(centerX, centerY, radius, -Math.PI / 2, -Math.PI / 2 + angleA);
+      ctx.lineWidth = lineWidth;
+      ctx.strokeStyle = colorA;
+      ctx.lineCap = 'round';
+      ctx.stroke();
+
+      // Segment B
+      ctx.beginPath();
+      ctx.arc(centerX, centerY, radius, -Math.PI / 2 + angleA, 1.5 * Math.PI);
+      ctx.lineWidth = lineWidth;
+      ctx.strokeStyle = colorB;
+      ctx.lineCap = 'round';
+      ctx.stroke();
+
+      // Center Text
+      ctx.fillStyle = '#ffffff';
+      ctx.font = 'bold 15px monospace';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(`${Math.round(ratioA * 100)}%`, centerX, centerY - 4);
+
+      ctx.fillStyle = '#94a3b8';
+      ctx.font = 'bold 9px monospace';
+      ctx.fillText(subLabel, centerX, centerY + 12);
+    }
+  },
+
   async updateAnalytics() {
+    // 1. Selalu render visual Donut Chart di sidebar menu kiri
+    this.drawMiniChart();
+
+    // 2. Jika panel AI Insight tidak terbuka, tidak perlu komputasi berat
     if (!dom.analyticsPanel || dom.analyticsPanel.classList.contains('hidden')) return;
 
     try {
@@ -311,7 +476,7 @@ const AnalyticsManager = {
       if (dom.analyticsInsights) {
         if (findings.length === 0) {
           dom.analyticsInsights.innerHTML = `
-            <div class="p-2.5 bg-slate-950/60 rounded-xl border border-slate-800/80 text-emerald-400 font-mono text-[11px] col-span-2 flex items-center gap-2">
+            <div class="p-2.5 bg-slate-950/60 rounded-xl border border-slate-800/80 text-emerald-400 font-mono text-[11px] col-span-2 sm:col-span-4 flex items-center gap-2">
               <i class="fa-solid fa-circle-check text-base"></i>
               <span>Tidak ada anomali atau ancaman manipulasi perangkat terdeteksi.</span>
             </div>
@@ -334,167 +499,6 @@ const AnalyticsManager = {
               </div>
             `;
           }).join('');
-        }
-      }
-
-      // Draw Mini Chart Canvas with Active Filtered & Searched Data
-      if (dom.miniChartCanvas) {
-        const ctx = dom.miniChartCanvas.getContext('2d');
-        if (ctx) {
-          const w = dom.miniChartCanvas.width = 150;
-          const h = dom.miniChartCanvas.height = 150;
-          ctx.clearRect(0, 0, w, h);
-
-          const centerX = w / 2;
-          const centerY = h / 2;
-          const radius = 52;
-          const lineWidth = 14;
-
-          const currentFilteredDocs = TableEngine.getFilteredAndSortedDocs();
-          const totalDocs = currentFilteredDocs.length;
-          let valA = 0;
-          let colorA = '#38bdf8';
-          let colorB = '#1e293b';
-          let subLabel = 'Rasio Data';
-          let titleText = 'Sebaran Data / Kehadiran';
-
-          if (state.currentCollection === 'log_absensi') {
-            valA = currentFilteredDocs.filter(d => {
-              const st = (d.data().status || '').toUpperCase();
-              return st.includes('HADIR') && !st.includes('TIDAK');
-            }).length;
-            colorA = '#10b981'; // Emerald (Hadir)
-            colorB = '#f43f5e'; // Rose (Tidak Hadir / Alpa)
-            subLabel = `${valA}/${totalDocs} Hadir`;
-
-            if (state.searchQuery) {
-              titleText = `🔍 Cari: "${state.searchQuery}" (${totalDocs})`;
-            } else if (state.logDateFilter !== 'all') {
-              titleText = `Log: ${state.logDateFilter} (${totalDocs})`;
-            } else {
-              titleText = `Presensi Siswa (${totalDocs} Log)`;
-            }
-          } else if (state.currentCollection === 'siswa') {
-            valA = currentFilteredDocs.filter(d => Boolean(d.data().device_id || d.data().device_token || d.data().mac_address)).length;
-            colorA = '#10b981'; // Bound
-            colorB = '#f59e0b'; // Unbound
-            subLabel = `${valA}/${totalDocs} Terikat`;
-
-            if (state.searchQuery) {
-              titleText = `🔍 Cari: "${state.searchQuery}" (${totalDocs})`;
-            } else {
-              titleText = `Status HP Siswa (${totalDocs})`;
-            }
-          } else if (state.currentCollection === 'sesi_absensi') {
-            valA = currentFilteredDocs.filter(d => d.data().is_active).length;
-            colorA = '#10b981'; // Aktif
-            colorB = '#475569'; // Tutup
-            subLabel = `${valA}/${totalDocs} Aktif`;
-            titleText = `Sesi Absensi (${totalDocs})`;
-          } else if (state.currentCollection === 'links') {
-            valA = currentFilteredDocs.filter(d => d.data().is_active !== false).length;
-            colorA = '#06b6d4'; // Aktif
-            colorB = '#e11d48'; // Nonaktif
-            subLabel = `${valA}/${totalDocs} Aktif`;
-            titleText = `Portal Links (${totalDocs})`;
-          } else {
-            valA = totalDocs;
-            colorA = '#6366f1';
-            colorB = '#1e293b';
-            subLabel = `${totalDocs} Dokumen`;
-            titleText = `${state.currentCollection} (${totalDocs})`;
-          }
-
-          // Perbarui judul mini chart di UI jika ada
-          const titleElem = document.getElementById('mini-chart-title');
-          if (titleElem) {
-            titleElem.innerText = titleText;
-          }
-
-          const ratioA = totalDocs > 0 ? (valA / totalDocs) : 0;
-
-          if (totalDocs === 0) {
-            // Draw Empty State Ring
-            ctx.beginPath();
-            ctx.arc(centerX, centerY, radius, 0, 2 * Math.PI);
-            ctx.lineWidth = lineWidth;
-            ctx.strokeStyle = '#1e293b';
-            ctx.stroke();
-
-            ctx.fillStyle = '#64748b';
-            ctx.font = 'bold 15px monospace';
-            ctx.textAlign = 'center';
-            ctx.textBaseline = 'middle';
-            ctx.fillText('0%', centerX, centerY - 4);
-
-            ctx.fillStyle = '#475569';
-            ctx.font = '9px monospace';
-            ctx.fillText('0 Data', centerX, centerY + 12);
-          } else if (valA === totalDocs) {
-            // 100% Solid Color A Circle
-            ctx.beginPath();
-            ctx.arc(centerX, centerY, radius, 0, 2 * Math.PI);
-            ctx.lineWidth = lineWidth;
-            ctx.strokeStyle = colorA;
-            ctx.stroke();
-
-            ctx.fillStyle = '#ffffff';
-            ctx.font = 'bold 15px monospace';
-            ctx.textAlign = 'center';
-            ctx.textBaseline = 'middle';
-            ctx.fillText('100%', centerX, centerY - 4);
-
-            ctx.fillStyle = colorA;
-            ctx.font = 'bold 9px monospace';
-            ctx.fillText(subLabel, centerX, centerY + 12);
-          } else if (valA === 0) {
-            // 0% (100% Solid Color B Circle)
-            ctx.beginPath();
-            ctx.arc(centerX, centerY, radius, 0, 2 * Math.PI);
-            ctx.lineWidth = lineWidth;
-            ctx.strokeStyle = colorB;
-            ctx.stroke();
-
-            ctx.fillStyle = '#ffffff';
-            ctx.font = 'bold 15px monospace';
-            ctx.textAlign = 'center';
-            ctx.textBaseline = 'middle';
-            ctx.fillText('0%', centerX, centerY - 4);
-
-            ctx.fillStyle = colorB;
-            ctx.font = 'bold 9px monospace';
-            ctx.fillText(subLabel, centerX, centerY + 12);
-          } else {
-            // Segmented Donut Arc
-            const angleA = ratioA * 2 * Math.PI;
-
-            // Segment A
-            ctx.beginPath();
-            ctx.arc(centerX, centerY, radius, -Math.PI / 2, -Math.PI / 2 + angleA);
-            ctx.lineWidth = lineWidth;
-            ctx.strokeStyle = colorA;
-            ctx.lineCap = 'round';
-            ctx.stroke();
-
-            // Segment B
-            ctx.beginPath();
-            ctx.arc(centerX, centerY, radius, -Math.PI / 2 + angleA, 1.5 * Math.PI);
-            ctx.lineWidth = lineWidth;
-            ctx.strokeStyle = colorB;
-            ctx.lineCap = 'round';
-            ctx.stroke();
-
-            // Center Text
-            ctx.fillStyle = '#ffffff';
-            ctx.font = 'bold 15px monospace';
-            ctx.textAlign = 'center';
-            ctx.textBaseline = 'middle';
-            ctx.fillText(`${Math.round(ratioA * 100)}%`, centerX, centerY - 4);
-
-            ctx.fillStyle = '#94a3b8';
-            ctx.font = 'bold 9px monospace';
-            ctx.fillText(subLabel, centerX, centerY + 12);
-          }
         }
       }
     } catch (e) {
@@ -1087,72 +1091,6 @@ const ModalManager = {
   }
 };
 
-// -----------------------------------------------------------------
-// 6. ANALYTICS & AUDIT ENGINE (CHARTS & SECURITY)
-// -----------------------------------------------------------------
-const ChartEngine = {
-  refreshAnalytics() {
-    const isLog = state.currentCollection === 'log_absensi';
-    const isSiswa = state.currentCollection === 'siswa';
-
-    if (!isLog && !isSiswa) {
-      dom.analyticsPanel.classList.add('hidden');
-      return;
-    }
-
-    dom.analyticsPanel.classList.remove('hidden');
-    const data = state.currentDocsList.map(d => d.data());
-
-    let labels = [], counts = [], colors = [];
-    let insights = [];
-
-    if (isLog) {
-      const hadir = data.filter(d => d.status === 'Hadir' || !d.status).length;
-      const alpa = data.filter(d => d.status && d.status.includes('Tidak')).length;
-      labels = ['Hadir', 'Alpa/Izin'];
-      counts = [hadir, alpa];
-      colors = ['#10b981', '#f43f5e'];
-      insights.push(`<div class="p-2 bg-emerald-500/10 border border-emerald-500/30 rounded-lg text-emerald-400">⚡ Tingkat Kehadiran: ${((hadir/(hadir+alpa || 1))*100).toFixed(1)}%</div>`);
-    } else if (isSiswa) {
-      const bound = data.filter(d => d.device_id).length;
-      const unbound = data.length - bound;
-      labels = ['Terikat', 'Belum'];
-      counts = [bound, unbound];
-      colors = ['#06b6d4', '#475569'];
-
-      // Audit Security (Silent check)
-      const devices = data.map(d => d.device_id).filter(id => id);
-      const dupes = devices.filter((id, index) => devices.indexOf(id) !== index);
-      if (dupes.length > 0) {
-        insights.push(`<div class="p-2 bg-rose-500/10 border border-rose-500/30 rounded-lg text-rose-400">⚠️ Terdeteksi ${new Set(dupes).size} HP Berbagi (Duplikasi ID)!</div>`);
-      } else {
-        insights.push(`<div class="p-2 bg-emerald-500/10 border border-emerald-500/30 rounded-lg text-emerald-400">✔ Integritas Perangkat Aman.</div>`);
-      }
-    }
-
-    dom.analyticsInsights.innerHTML = insights.join('') || '<div class="text-slate-500 p-2">Belum ada anomali terdeteksi.</div>';
-
-    if (state.miniChart) state.miniChart.destroy();
-    if (typeof Chart === 'undefined') {
-      console.warn("Chart.js not loaded.");
-      return;
-    }
-    state.miniChart = new Chart(dom.miniChartCanvas, {
-      type: 'doughnut',
-      data: {
-        labels: labels,
-        datasets: [{ data: counts, backgroundColor: colors, borderWidth: 0 }]
-      },
-      options: {
-        plugins: { legend: { display: false } },
-        cutout: '70%',
-        responsive: true,
-        maintainAspectRatio: false
-      }
-    });
-  }
-};
-
 // 🔒 Fitur 1: Audit Security Toggle
 dom.btnAuditSecurity.addEventListener('click', () => {
   if (state.currentCollection !== 'siswa') {
@@ -1322,8 +1260,8 @@ function loadCollectionData(colName) {
 
     // Update tracking
     state.prevDocIds = newDocIds;
-    // 📊 Fitur 2: Update Charts
-    ChartEngine.refreshAnalytics();
+    // 📊 Fitur 2: Update Charts & Stats
+    AnalyticsManager.updateAnalytics();
 
     // 🔍 Fitur 6: Cross-check alpa jika di log_absensi
     if (colName === 'log_absensi') {
