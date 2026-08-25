@@ -245,19 +245,38 @@ async function loadStudentAttendanceHistory(nis) {
   if (!nis || !dom.riwayatLogContainer) return;
 
   try {
-    const qLog = query(
-      collection(db, "log_absensi"),
-      where("nis", "==", nis),
-      limit(50)
-    );
+    const nisStr = String(nis).trim();
+    const nisHyphen = nisStr.replace(/\//g, '-');
+    const nisSlash = nisStr.replace(/-/g, '/');
+    const nisNoLeadingZero = nisStr.replace(/^0+/, '');
+    const nisNoLeadingZeroHyphen = nisHyphen.replace(/^0+/, '');
+    const nisNoLeadingZeroSlash = nisSlash.replace(/^0+/, '');
 
-    const snap = await getDocs(qLog);
+    const variations = Array.from(new Set([
+      nisStr,
+      nisHyphen,
+      nisSlash,
+      nisNoLeadingZero,
+      nisNoLeadingZeroHyphen,
+      nisNoLeadingZeroSlash
+    ])).filter(Boolean);
 
-    if (snap.empty) {
+    let snap = null;
+    if (variations.length > 0) {
+      const qLog = query(
+        collection(db, "log_absensi"),
+        where("nis", "in", variations),
+        limit(50)
+      );
+      snap = await getDocs(qLog);
+    }
+
+    if (!snap || snap.empty) {
       dom.riwayatLogContainer.innerHTML = '<p style="font-size:0.75rem; color:#94a3b8; text-align:center; padding:20px 0; font-family:monospace;">Belum ada riwayat presensi tercatat.</p>';
       if (dom.countHadir) dom.countHadir.innerText = "0";
       if (dom.countTidakHadir) dom.countTidakHadir.innerText = "0";
       if (dom.riwayatStatusTag) dom.riwayatStatusTag.innerText = "0 Log";
+      renderStudentChart(0, 0);
       return;
     }
 
@@ -310,6 +329,7 @@ async function loadStudentAttendanceHistory(nis) {
   } catch (err) {
     console.error("Gagal memuat riwayat presensi:", err);
     if (dom.riwayatLogContainer) dom.riwayatLogContainer.innerHTML = '<p style="font-size:0.75rem; color:#ef4444; text-align:center; padding:16px 0; font-family:monospace;">Gagal memuat data riwayat.</p>';
+    renderStudentChart(0, 0);
   }
 }
 
@@ -325,7 +345,10 @@ function renderStudentChart(hadirCount, tidakHadirCount) {
 
   if (rateSpan) rateSpan.innerText = `${pct}%`;
   if (labelSpan) {
-    if (pct >= 85) {
+    if (total === 0) {
+      labelSpan.innerText = "Belum Ada Data";
+      labelSpan.style.color = "#94a3b8";
+    } else if (pct >= 85) {
       labelSpan.innerText = "Sangat Baik 🌟";
       labelSpan.style.color = "#34d399";
     } else if (pct >= 75) {
@@ -345,13 +368,13 @@ function renderStudentChart(hadirCount, tidakHadirCount) {
     studentChartInstance = new window.Chart(canvas, {
       type: 'doughnut',
       data: {
-        labels: ['Hadir', 'Tidak Hadir'],
+        labels: total > 0 ? ['Hadir', 'Tidak Hadir'] : ['Belum Ada Data'],
         datasets: [{
-          data: total > 0 ? [hadirCount, tidakHadirCount] : [0, 1],
-          backgroundColor: total > 0 ? ['#10b981', '#f43f5e'] : ['#334155', '#1e293b'],
-          borderColor: ['#047857', '#be123c'],
+          data: total > 0 ? [hadirCount, tidakHadirCount] : [1],
+          backgroundColor: total > 0 ? ['#10b981', '#f43f5e'] : ['#1e293b'],
+          borderColor: total > 0 ? ['#047857', '#be123c'] : ['#334155'],
           borderWidth: 1.5,
-          hoverOffset: 2
+          hoverOffset: total > 0 ? 2 : 0
         }]
       },
       options: {
@@ -361,6 +384,7 @@ function renderStudentChart(hadirCount, tidakHadirCount) {
         plugins: {
           legend: { display: false },
           tooltip: {
+            enabled: total > 0,
             callbacks: {
               label: function(ctx) {
                 return ` ${ctx.label}: ${ctx.raw} Sesi`;

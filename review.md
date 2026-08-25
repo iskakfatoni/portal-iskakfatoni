@@ -4,6 +4,38 @@ Dokumen ini berisi rangkuman review perubahan kode (*code review*) terbaru yang 
 
 ---
 
+## 📅 Review [2026-08-25 19:18 WIB] - Perbaikan Toleransi Query Riwayat Presensi Siswa (`where in` Variasi NIS) & Render Donut Chart
+
+### 📁 1. Berkas yang Diperbarui
+* 📄 **[absensi.html](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/absensi.html)** `[MODIFY]`
+* 📄 **[assets/js/absensi/absensi.js](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/assets/js/absensi/absensi.js)** `[MODIFY]`
+
+---
+
+### 📝 2. Rincian Baris & Logika yang Diperbarui
+
+1. 🔍 **Toleransi Multi-Format Pencarian NIS pada `log_absensi`**:
+   - Menambahkan generator variasi format NIS otomatis (`nisStr`, `nisHyphen`, `nisSlash`, `nisNoLeadingZero`, `nisNoLeadingZeroHyphen`, `nisNoLeadingZeroSlash`) untuk mengatasi perbedaan penyimpanan NIS di Firestore (misalnya `"0318/202"`, `"0318-202"`, atau `"318/202"`).
+   - Mengubah query Firestore dari `where("nis", "==", nis)` menjadi `where("nis", "in", variations)` sehingga seluruh riwayat presensi siswa tetap ditemukan tanpa terhalang format pemisah slash/hyphen.
+
+2. 🍩 **Penyempurnaan Lifecycle Render Donut Chart Siswa**:
+   - Memperbaiki alur kode agar `renderStudentChart(...)` selalu dipanggil baik saat data presensi ditemukan maupun saat log masih kosong (0 riwayat).
+   - Menambahkan status kosong (*0-state*) dengan ring gelap rapi dan label `"Belum Ada Data"` tanpa merusak layout atau membuat kanvas kosong/error.
+   - Menaikkan versi script cache buster ke `v=1.1.0` pada [`absensi.html`](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/absensi.html).
+
+---
+
+### 🧪 3. Petunjuk Pengujian Lokal (*Local Verification*)
+
+1. Buka [`absensi.html`](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/absensi.html) di browser.
+2. Masukkan NIS siswa `0318/202` (Afifa):
+   - Jika siswa memiliki riwayat presensi di `log_absensi`, seluruh log akan ditarik dan grafik Donut menampilkan persentase hijau/merah proporsional.
+   - Jika siswa belum pernah presensi, donat akan merender ring placeholder elegan dengan label `"Belum Ada Data"`.
+
+---
+
+
+
 ## 📅 Review [2026-08-25 19:10 WIB] - Optimasi Gambar Profil Above-the-Fold (`eager` / `fetchpriority="high"`) & Penanganan Warning Tailwind Play CDN
 
 ### 📁 1. Berkas yang Diperbarui
