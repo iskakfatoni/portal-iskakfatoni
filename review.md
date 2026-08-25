@@ -4,6 +4,32 @@ Dokumen ini berisi rangkuman review perubahan kode (*code review*) terbaru yang 
 
 ---
 
+## 📅 Review [2026-08-25 19:27 WIB] - Pembesaran Tipografi & Ikon Tombol "Analisa Kecurangan" dan "Riwayat Reset HP" di `db-manager.html`
+
+### 📁 1. Berkas yang Diperbarui
+* 📄 **[pages/database/db-manager.html](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/pages/database/db-manager.html)** `[MODIFY]`
+
+---
+
+### 📝 2. Rincian Baris & Logika yang Diperbarui
+
+1. 🔤 **Peningkatan Ukuran Tipografi & Kontras Visual**:
+   - Mengubah ukuran teks tombol tautan `"Analisa Kecurangan"` dan `"Riwayat Reset HP"` di panel kiri Analytics dari `text-[10px]` menjadi `text-xs sm:text-sm font-extrabold`.
+   - Memperbesar ukuran ikon robot & reset dari `text-xs` menjadi `text-sm sm:text-base`.
+   - Meningkatkan padding tombol dari `py-2.5` menjadi `py-3 px-4` dengan latar belakang semi-transparan yang lebih tebal (`bg-indigo-500/25` & `bg-amber-500/25`) dan border glow cerah agar sangat mudah terbaca di layar monitor maupun smartphone.
+
+---
+
+### 🧪 3. Petunjuk Pengujian Lokal (*Local Verification*)
+
+1. Buka [`pages/database/db-manager.html`](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/pages/database/db-manager.html) di browser.
+2. Klik tombol **AI Insights** di header untuk membuka panel analitik.
+3. Periksa tombol **Analisa Kecurangan** (ungu/indigo) dan **Riwayat Reset HP** (kuning/amber) di bawah donat chart -> Teks kini tampil jauh lebih besar, tebal (*bold*), dan tajam.
+
+---
+
+
+
 ## 📅 Review [2026-08-25 19:23 WIB] - Sinkronisasi Donut Chart AnalyticsManager dengan Hasil Pencarian & Filter Aktif di `db-manager.html`
 
 ### 📁 1. Berkas yang Diperbarui
