@@ -1,6 +1,7 @@
 import { db } from "../config/firebase-config.js";
 import { initializeAuthGuard } from "../auth/auth-guard.js";
 import { showToast, showConfirm, showPrompt } from "../utils/toast.js";
+import { loadXLSX } from "../utils/lazy-loader.js";
 import {
   collection, 
   doc, 
@@ -162,23 +163,28 @@ initializeAuthGuard({
     if (dom.btnLogout) dom.btnLogout.onclick = () => window.location.href = "../../admin.html";
 
     if (dom.btnExportExcel) {
-      dom.btnExportExcel.onclick = () => {
+      dom.btnExportExcel.onclick = async () => {
         if (state.logsList.length === 0) {
           showToast("Tidak ada riwayat log untuk diekspor.", "warning");
           return;
         }
-        const rows = state.logsList.map(d => ({
-          Waktu: d.data().timestamp ? new Date(d.data().timestamp.seconds * 1000).toLocaleString() : '-',
-          Siswa: d.data().target_name,
-          NIS: d.data().target_nis,
-          Admin: d.data().admin_email,
-          DeviceID: d.data().old_device_id
-        }));
-        const ws = XLSX.utils.json_to_sheet(rows);
-        const wb = XLSX.utils.book_new();
-        XLSX.utils.book_append_sheet(wb, ws, "Resets");
-        XLSX.writeFile(wb, "Riwayat_Reset_HP.xlsx");
-        showToast("Berhasil mengunduh riwayat reset HP!", "success");
+        try {
+          await loadXLSX();
+          const rows = state.logsList.map(d => ({
+            Waktu: d.data().timestamp ? new Date(d.data().timestamp.seconds * 1000).toLocaleString() : '-',
+            Siswa: d.data().target_name,
+            NIS: d.data().target_nis,
+            Admin: d.data().admin_email,
+            DeviceID: d.data().old_device_id
+          }));
+          const ws = XLSX.utils.json_to_sheet(rows);
+          const wb = XLSX.utils.book_new();
+          XLSX.utils.book_append_sheet(wb, ws, "Resets");
+          XLSX.writeFile(wb, "Riwayat_Reset_HP.xlsx");
+          showToast("Berhasil mengunduh riwayat reset HP!", "success");
+        } catch (errXlsx) {
+          showToast("Gagal memproses file Excel: " + errXlsx.message, "error");
+        }
       };
     }
 

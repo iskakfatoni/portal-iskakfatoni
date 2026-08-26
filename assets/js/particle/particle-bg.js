@@ -1,9 +1,18 @@
 // assets/js/particle/particle-bg.js
+// Optimized Particle Background - 0% CPU & battery overhead on mobile devices
 (() => {
   const canvas = document.getElementById('particle-canvas');
   if (!canvas) return;
 
+  const prefersReducedMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if (prefersReducedMotion || window.innerWidth < 768) {
+    // Matikan total canvas & rendering pada perangkat mobile untuk menghemat baterai & memori
+    return;
+  }
+
   const ctx = canvas.getContext('2d');
+  if (!ctx) return;
+
   let particles = [];
   let animationFrameId = null;
   let shouldRun = window.innerWidth >= 768;
@@ -13,15 +22,15 @@
     canvas.height = window.innerHeight;
     particles = [];
 
-    const particleCount = window.innerWidth < 768 ? 10 : 24;
+    const particleCount = 20;
     for (let i = 0; i < particleCount; i++) {
       particles.push({
         x: Math.random() * canvas.width,
         y: Math.random() * canvas.height,
-        radius: Math.random() * 1.6 + 0.8,
-        speedY: Math.random() * -0.35 - 0.1,
-        speedX: (Math.random() - 0.5) * 0.18,
-        opacity: Math.random() * 0.45 + 0.2
+        radius: Math.random() * 1.5 + 0.8,
+        speedY: Math.random() * -0.3 - 0.1,
+        speedX: (Math.random() - 0.5) * 0.15,
+        opacity: Math.random() * 0.4 + 0.2
       });
     }
   }
@@ -33,7 +42,8 @@
     const isDarkMode = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
     const particleColor = isDarkMode ? '0, 245, 212' : '139, 92, 246';
 
-    particles.forEach((p) => {
+    for (let i = 0; i < particles.length; i++) {
+      const p = particles[i];
       ctx.beginPath();
       ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
       ctx.fillStyle = `rgba(${particleColor}, ${p.opacity})`;
@@ -48,15 +58,14 @@
         p.y = canvas.height;
         p.x = Math.random() * canvas.width;
       }
-    });
+    }
 
     animationFrameId = window.requestAnimationFrame(drawParticles);
   }
 
   function startParticles() {
-    if (!shouldRun) {
-      shouldRun = true;
-    }
+    if (window.innerWidth < 768) return;
+    shouldRun = true;
     if (animationFrameId) return;
     initCanvas();
     drawParticles();
@@ -76,7 +85,7 @@
     } else {
       startParticles();
     }
-  });
+  }, { passive: true });
 
   document.addEventListener('visibilitychange', () => {
     if (document.hidden) {
@@ -84,10 +93,8 @@
         window.cancelAnimationFrame(animationFrameId);
         animationFrameId = null;
       }
-    } else {
-      if (shouldRun && !animationFrameId) {
-        drawParticles();
-      }
+    } else if (shouldRun && !animationFrameId && window.innerWidth >= 768) {
+      drawParticles();
     }
   });
 

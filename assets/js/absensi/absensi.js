@@ -3,6 +3,7 @@
 
 import { db } from "../config/firebase-config.js";
 import { getHardwareFingerprint } from "../utils/device-fingerprint.js";
+import { loadChartJS } from "../utils/lazy-loader.js";
 import { 
   doc, 
   getDoc, 
@@ -335,7 +336,7 @@ async function loadStudentAttendanceHistory(nis) {
 
 let studentChartInstance = null;
 
-function renderStudentChart(hadirCount, tidakHadirCount) {
+async function renderStudentChart(hadirCount, tidakHadirCount) {
   const rateSpan = document.getElementById('student-attendance-rate');
   const labelSpan = document.getElementById('student-attendance-label');
   const canvas = document.getElementById('student-attendance-chart');
@@ -360,12 +361,20 @@ function renderStudentChart(hadirCount, tidakHadirCount) {
     }
   }
 
-  if (canvas && typeof window.Chart !== 'undefined') {
-    if (studentChartInstance) {
-      studentChartInstance.destroy();
-    }
+  if (!canvas) return;
 
-    studentChartInstance = new window.Chart(canvas, {
+  try {
+    await loadChartJS();
+  } catch (err) {
+    console.warn('Grafik rasio presensi dilewati:', err);
+    return;
+  }
+
+  if (studentChartInstance) {
+    studentChartInstance.destroy();
+  }
+
+  studentChartInstance = new window.Chart(canvas, {
       type: 'doughnut',
       data: {
         labels: total > 0 ? ['Hadir', 'Tidak Hadir'] : ['Belum Ada Data'],

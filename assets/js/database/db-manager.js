@@ -2,6 +2,7 @@ import { db } from "../config/firebase-config.js";
 import { initializeAuthGuard } from "../auth/auth-guard.js";
 import { AIInsightEngine } from "./ai-insights.js";
 import { showToast, showConfirm, showPrompt } from "../utils/toast.js";
+import { loadXLSX } from "../utils/lazy-loader.js";
 import { collection, doc, getDocs, setDoc, addDoc, deleteDoc, updateDoc, deleteField, onSnapshot, writeBatch, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
 // -----------------------------------------------------------------
@@ -1545,7 +1546,7 @@ if (dom.btnResetSelectedDevice) {
 }
 
 if (dom.btnExportSelectedExcel) {
-  dom.btnExportSelectedExcel.addEventListener('click', () => {
+  dom.btnExportSelectedExcel.addEventListener('click', async () => {
     const count = state.selectedDocIds.size;
     if (count === 0) return;
 
@@ -1557,31 +1558,37 @@ if (dom.btnExportSelectedExcel) {
       return;
     }
 
-    const exportRows = selectedDocs.map((docSnap, index) => {
-      const data = docSnap.data();
-      const row = { "No": index + 1, "Document ID": docSnap.id };
+    try {
+      await loadXLSX();
 
-      state.currentDynamicFields.forEach(fieldKey => {
-        const headerName = Sanitizer.formatHeaderName(fieldKey);
-        let val = data[fieldKey];
-        if (typeof val === 'object' && val !== null && val.seconds !== undefined) {
-          val = new Date(val.seconds * 1000).toLocaleString('id-ID');
-        } else if (typeof val === 'object' && val !== null) {
-          val = JSON.stringify(val);
-        }
-        row[headerName] = val !== undefined && val !== null ? val : "-";
+      const exportRows = selectedDocs.map((docSnap, index) => {
+        const data = docSnap.data();
+        const row = { "No": index + 1, "Document ID": docSnap.id };
+
+        state.currentDynamicFields.forEach(fieldKey => {
+          const headerName = Sanitizer.formatHeaderName(fieldKey);
+          let val = data[fieldKey];
+          if (typeof val === 'object' && val !== null && val.seconds !== undefined) {
+            val = new Date(val.seconds * 1000).toLocaleString('id-ID');
+          } else if (typeof val === 'object' && val !== null) {
+            val = JSON.stringify(val);
+          }
+          row[headerName] = val !== undefined && val !== null ? val : "-";
+        });
+
+        return row;
       });
 
-      return row;
-    });
+      const worksheet = XLSX.utils.json_to_sheet(exportRows);
+      const workbook = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(workbook, worksheet, `Selected_${state.currentCollection}`);
 
-    const worksheet = XLSX.utils.json_to_sheet(exportRows);
-    const workbook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(workbook, worksheet, `Selected_${state.currentCollection}`);
-
-    const today = new Date().toISOString().split('T')[0];
-    XLSX.writeFile(workbook, `Ekspor_Terpilih_${state.currentCollection}_${today}.xlsx`);
-    showToast(`Berhasil mengunduh ${exportRows.length} data terpilih!`, "success");
+      const today = new Date().toISOString().split('T')[0];
+      XLSX.writeFile(workbook, `Ekspor_Terpilih_${state.currentCollection}_${today}.xlsx`);
+      showToast(`Berhasil mengunduh ${exportRows.length} data terpilih!`, "success");
+    } catch (errXlsx) {
+      showToast("Gagal memproses ekspor Excel: " + errXlsx.message, "error");
+    }
   });
 }
 
@@ -1732,12 +1739,13 @@ dom.importFileInput.addEventListener('change', (e) => {
   const fileName = file.name.toLowerCase();
   const reader = new FileReader();
 
-  reader.onload = (evt) => {
+  reader.onload = async (evt) => {
     try {
       if (fileName.endsWith('.json')) {
         const rawJson = JSON.parse(evt.target.result);
         state.parsedImportData = Array.isArray(rawJson) ? rawJson : [rawJson];
       } else {
+        await loadXLSX();
         const data = new Uint8Array(evt.target.result);
         const workbook = XLSX.read(data, { type: 'array' });
         const firstSheet = workbook.SheetNames[0];
@@ -1897,19 +1905,24 @@ dom.btnDownloadTemplate.addEventListener('click', () => {
     colWidths = [{ wch: 15 }, { wch: 30 }, { wch: 35 }];
   }
 
-  const ws = XLSX.utils.json_to_sheet(sampleData);
-  if (colWidths.length > 0) {
-    ws['!cols'] = colWidths;
+  try {
+    await loadXLSX();
+    const ws = XLSX.utils.json_to_sheet(sampleData);
+    if (colWidths.length > 0) {
+      ws['!cols'] = colWidths;
+    }
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, `Template_${state.currentCollection}`);
+    XLSX.writeFile(wb, `Template_Import_${state.currentCollection}.xlsx`);
+    showToast(`Template Excel resmi (${sampleData.length} baris dummy) untuk "${state.currentCollection}" berhasil diunduh!`, "success");
+  } catch (err) {
+    showToast("Gagal mengunduh template: " + err.message, "error");
   }
-  const wb = XLSX.utils.book_new();
-  XLSX.utils.book_append_sheet(wb, ws, `Template_${state.currentCollection}`);
-  XLSX.writeFile(wb, `Template_Import_${state.currentCollection}.xlsx`);
-  showToast(`Template Excel resmi (${sampleData.length} baris dummy) untuk "${state.currentCollection}" berhasil diunduh!`, "success");
 });
 
 // 📤 Export Perangkat Siswa Excel (Smart Contextual Filtered Export)
 if (dom.btnExportDeviceExcel) {
-  dom.btnExportDeviceExcel.addEventListener('click', () => {
+  dom.btnExportDeviceExcel.addEventListener('click', async () => {
     if (state.currentCollection !== 'siswa') {
       showToast('Fitur ekspor perangkat HP hanya tersedia untuk koleksi "siswa".', 'warning');
       return;
@@ -1921,51 +1934,57 @@ if (dom.btnExportDeviceExcel) {
       return;
     }
 
-    const exportData = filteredDocs.map((docSnap, index) => {
-      const data = docSnap.data();
-      const isBound = Boolean(data.device_id || data.device_token || data.mac_address);
+    try {
+      await loadXLSX();
 
-      return {
-        "No": index + 1,
-        "Document ID": docSnap.id,
-        "NIS": data.nis || docSnap.id,
-        "Nama Siswa": data.nama_siswa || data.nama || "-",
-        "ID Kelas": data.id_kelas || "-",
-        "Nama Kelas": data.nama_kelas || "-",
-        "Status Perangkat": isBound ? "TERIKAT (BOUND)" : "BELUM TERIKAT",
-        "Device ID / Fingerprint": data.device_id || "-",
-        "Device Token": data.device_token || "-",
-        "Waktu Terikat": data.registered_at && data.registered_at.seconds
-          ? new Date(data.registered_at.seconds * 1000).toLocaleString('id-ID')
-          : "-"
-      };
-    });
+      const exportData = filteredDocs.map((docSnap, index) => {
+        const data = docSnap.data();
+        const isBound = Boolean(data.device_id || data.device_token || data.mac_address);
 
-    const worksheet = XLSX.utils.json_to_sheet(exportData);
-    worksheet['!cols'] = [
-      { wch: 5 }, { wch: 15 }, { wch: 15 },
-      { wch: 28 }, { wch: 12 }, { wch: 15 },
-      { wch: 20 }, { wch: 35 }, { wch: 30 }, { wch: 22 }
-    ];
+        return {
+          "No": index + 1,
+          "Document ID": docSnap.id,
+          "NIS": data.nis || docSnap.id,
+          "Nama Siswa": data.nama_siswa || data.nama || "-",
+          "ID Kelas": data.id_kelas || "-",
+          "Nama Kelas": data.nama_kelas || "-",
+          "Status Perangkat": isBound ? "TERIKAT (BOUND)" : "BELUM TERIKAT",
+          "Device ID / Fingerprint": data.device_id || "-",
+          "Device Token": data.device_token || "-",
+          "Waktu Terikat": data.registered_at && data.registered_at.seconds
+            ? new Date(data.registered_at.seconds * 1000).toLocaleString('id-ID')
+            : "-"
+        };
+      });
 
-    const workbook = XLSX.utils.book_new();
-    
-    let sheetName = "Perangkat Siswa";
-    let filePrefix = "Rekap_Perangkat_Siswa";
+      const worksheet = XLSX.utils.json_to_sheet(exportData);
+      worksheet['!cols'] = [
+        { wch: 5 }, { wch: 15 }, { wch: 15 },
+        { wch: 28 }, { wch: 12 }, { wch: 15 },
+        { wch: 20 }, { wch: 35 }, { wch: 30 }, { wch: 22 }
+      ];
 
-    if (state.deviceFilter === 'bound') {
-      sheetName = "HP Terikat";
-      filePrefix = "Rekap_HP_Terikat_Siswa";
-    } else if (state.deviceFilter === 'unbound') {
-      sheetName = "Belum Terikat";
-      filePrefix = "Rekap_HP_Belum_Terikat_Siswa";
+      const workbook = XLSX.utils.book_new();
+      
+      let sheetName = "Perangkat Siswa";
+      let filePrefix = "Rekap_Perangkat_Siswa";
+
+      if (state.deviceFilter === 'bound') {
+        sheetName = "HP Terikat";
+        filePrefix = "Rekap_HP_Terikat_Siswa";
+      } else if (state.deviceFilter === 'unbound') {
+        sheetName = "Belum Terikat";
+        filePrefix = "Rekap_HP_Belum_Terikat_Siswa";
+      }
+
+      XLSX.utils.book_append_sheet(workbook, worksheet, sheetName);
+
+      const today = new Date().toISOString().split('T')[0];
+      XLSX.writeFile(workbook, `${filePrefix}_${today}.xlsx`);
+      showToast("Berhasil mengunduh rekap perangkat HP siswa!", "success");
+    } catch (errXlsx) {
+      showToast("Gagal mengekspor data: " + errXlsx.message, "error");
     }
-
-    XLSX.utils.book_append_sheet(workbook, worksheet, sheetName);
-
-    const today = new Date().toISOString().split('T')[0];
-    XLSX.writeFile(workbook, `${filePrefix}_${today}.xlsx`);
-    showToast("Berhasil mengunduh rekap perangkat HP siswa!", "success");
   });
 }
 

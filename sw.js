@@ -1,5 +1,5 @@
 // sw.js - Service Worker Optimized for Performance & Offline PWA
-const CACHE_NAME = 'portal-iskakfatoni-v11';
+const CACHE_NAME = 'portal-iskakfatoni-v12';
 
 const LOCAL_ASSETS = [
   './',
@@ -17,8 +17,10 @@ const LOCAL_ASSETS = [
   'pages/siswa/result.html',
   'pages/link/index.html',
   'pages/database/db-manager.html',
-  'pages/database/system-logs.html',
+  'pages/database/reset-logs.html',
+  'pages/database/analysis.html',
   'style/style.css',
+  'style/tailwind.min.css',
   'assets/manifest.json',
   'assets/img/foto_asn_profile.webp',
   'assets/img/nisnas_logo_colorful.webp',
@@ -26,6 +28,7 @@ const LOCAL_ASSETS = [
   'assets/js/auth/auth-guard.js',
   'assets/js/utils/device-fingerprint.js',
   'assets/js/utils/toast.js',
+  'assets/js/utils/lazy-loader.js',
   'assets/js/particle/particle-bg.js',
   'assets/js/portal/portal-links.js',
   'assets/js/admin/admin-auth.js',
@@ -37,7 +40,7 @@ const LOCAL_ASSETS = [
   'assets/js/siswa/siswa-result.js',
   'assets/js/link/link-manager.js',
   'assets/js/database/db-manager.js',
-  'assets/js/database/system-logs.js',
+  'assets/js/database/reset-logs.js',
   'assets/js/database/ai-insights.js'
 ];
 
@@ -98,11 +101,11 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // Stale-While-Revalidate untuk Berkas Statis (CSS, JS, Gambar)
+  // Cache-First / Stale-While-Revalidate untuk Asset Statis & CDN (CSS, JS, Fonts, Gambar)
   event.respondWith(
     caches.match(event.request).then((cachedResponse) => {
       const fetchPromise = fetch(event.request).then((networkResponse) => {
-        if (networkResponse && networkResponse.status === 200 && networkResponse.type === 'basic') {
+        if (networkResponse && (networkResponse.status === 200 || networkResponse.type === 'opaque' || networkResponse.type === 'basic')) {
           const responseToCache = networkResponse.clone();
           caches.open(CACHE_NAME).then((cache) => cache.put(event.request, responseToCache));
         }

@@ -7,33 +7,13 @@
   <title>Manajemen Absensi Siswa | Portal Iskak Fatoni</title>
   <link rel="icon" type="image/webp" href="../../assets/img/nisnas_logo_colorful.webp">
 
-  <!-- TAILWIND CSS & FONTAWESOME -->
-  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- STATIC TAILWIND CSS & FONTAWESOME -->
+  <link rel="preload" href="../../style/tailwind.min.css" as="style">
+  <link rel="stylesheet" href="../../style/tailwind.min.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-  <!-- SHEETJS (XLSX) FOR EXCEL EXPORT & IMPORT -->
-  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
-  <!-- CHART.JS FOR ANALYTICS -->
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
   <!-- MODERN DESIGN SYSTEM STYLING TUNGGAL -->
   <link rel="stylesheet" href="../../style/style.css">
-
-  <script>
-    tailwind.config = {
-      darkMode: 'class',
-      theme: {
-        extend: {
-          colors: {
-            brand: {
-              50: '#f0fdfa',
-              500: '#14b8a6',
-              900: '#134e4a',
-            }
-          }
-        }
-      }
-    }
-  </script>
 </head>
 
 <body class="bg-slate-950 text-slate-100 font-sans antialiased min-h-screen relative overflow-x-hidden theme-dashboard">

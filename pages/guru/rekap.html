@@ -7,25 +7,9 @@
 
   <link rel="preload" href="../../style/style.css" as="style">
   <link rel="stylesheet" href="../../style/style.css">
-  <!-- Tailwind CSS via CDN -->
-  <script src="https://cdn.tailwindcss.com"></script>
-  <!-- SheetJS / xlsx Library untuk Export Excel -->
-  <script defer src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-  <!-- Chart.js Library untuk Visualisasi & Analitik Kehadiran -->
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <script>
-    tailwind.config = {
-      theme: {
-        extend: {
-          colors: {
-            darkSlate: '#0F172A',
-            deepIndigo: '#1E1B4B',
-            accentCyan: '#00F5D4'
-          }
-        }
-      }
-    }
-  </script>
+  <link rel="preload" href="../../style/tailwind.min.css" as="style">
+  <link rel="stylesheet" href="../../style/tailwind.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body class="bg-gradient-to-b from-darkSlate to-deepIndigo text-slate-100 min-h-screen p-3 sm:p-5 lg:p-8">
 

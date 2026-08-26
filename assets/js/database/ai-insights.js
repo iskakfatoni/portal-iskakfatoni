@@ -3,6 +3,7 @@
 // Engine deteksi anomali presensi, manipulasi perangkat, dan analisis pola kedisiplinan siswa berbasis client-side pattern recognition.
 
 import { showToast } from "../utils/toast.js";
+import { loadXLSX } from "../utils/lazy-loader.js";
 
 export const AIInsightEngine = {
   // -----------------------------------------------------------------
@@ -894,14 +895,16 @@ export const AIInsightEngine = {
   // -----------------------------------------------------------------
   // 8. EKSPOR LAPORAN ANOMALI KE EXCEL (.XLSX)
   // -----------------------------------------------------------------
-  exportToExcel(findingsList = [], filenamePrefix = 'Laporan_Anomali_Presensi') {
-    if (typeof XLSX === 'undefined') {
-      showToast('Library XLSX tidak ditemukan.', 'error');
+  async exportToExcel(findingsList = [], filenamePrefix = 'Laporan_Anomali_Presensi') {
+    if (findingsList.length === 0) {
+      showToast('Tidak ada temuan anomali untuk diekspor.', 'warning');
       return;
     }
 
-    if (findingsList.length === 0) {
-      showToast('Tidak ada temuan anomali untuk diekspor.', 'warning');
+    try {
+      await loadXLSX();
+    } catch (err) {
+      showToast('Gagal memuat modul Excel: ' + err.message, 'error');
       return;
     }
 

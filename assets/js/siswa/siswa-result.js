@@ -1,5 +1,4 @@
-// assets/js/siswa/siswa-result.js
-// 🎯 SISWA ATTENDANCE RESULT DISPLAY & CONFETTI CELEBRATION
+import { loadConfetti } from '../utils/lazy-loader.js';
 
 export function goBack() {
   window.location.href = window.location.pathname.includes('/pages/') ? "../../absensi.html" : "../absensi.html";
@@ -37,15 +36,15 @@ document.addEventListener('DOMContentLoaded', () => {
     if (resWaktu) resWaktu.innerText = waktu || '-';
     if (detailBox) detailBox.classList.remove('hidden');
 
-    // EFEK PERAYAAN
-    if (typeof confetti === 'function') {
+    // EFEK PERAYAAN (ON-DEMAND LAZY LOAD)
+    loadConfetti().then((confetti) => {
       confetti({
-        particleCount: 100,
-        spread: 70,
+        particleCount: 80,
+        spread: 60,
         origin: { y: 0.6 },
         colors: ['#00F5D4', '#3B82F6', '#ffffff']
       });
-    }
+    }).catch(() => {});
 
   } else if (status === 'already') {
     if (iconContainer) iconContainer.className = "w-24 h-24 mx-auto rounded-full flex items-center justify-center text-4xl shadow-lg bg-amber-500/20 text-amber-400 border border-amber-500/50";

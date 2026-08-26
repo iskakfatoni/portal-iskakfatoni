@@ -4,6 +4,72 @@ Dokumen ini berisi rangkuman review perubahan kode (*code review*) terbaru yang 
 
 ---
 
+## 📅 Review [2026-08-27 06:48 WIB] - Optimasi Performa Ekstrem, Reduksi Ukuran Web & Akselerasi Loading Android App (PWA/TWA/WebView)
+
+### 📁 1. Berkas yang Dibuat & Diperbarui
+* 📄 **[style/tailwind.min.css](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/style/tailwind.min.css)** `[NEW]`
+* 📄 **[assets/js/utils/lazy-loader.js](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/assets/js/utils/lazy-loader.js)** `[NEW]`
+* 📄 **[sw.js](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/sw.js)** `[MODIFY]`
+* 📄 **[assets/js/particle/particle-bg.js](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/assets/js/particle/particle-bg.js)** `[MODIFY]`
+* 📄 **[assets/img/nisnas_logo_colorful.webp](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/assets/img/nisnas_logo_colorful.webp)** `[MODIFY]`
+* 📄 **[absensi.html](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/absensi.html)** `[MODIFY]`
+* 📄 **[assets/js/absensi/absensi.js](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/assets/js/absensi/absensi.js)** `[MODIFY]`
+* 📄 **[pages/siswa/login.html](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/pages/siswa/login.html)** `[MODIFY]`
+* 📄 **[pages/siswa/scanner.html](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/pages/siswa/scanner.html)** `[MODIFY]`
+* 📄 **[pages/siswa/result.html](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/pages/siswa/result.html)** `[MODIFY]`
+* 📄 **[assets/js/siswa/siswa-result.js](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/assets/js/siswa/siswa-result.js)** `[MODIFY]`
+* 📄 **[pages/link/index.html](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/pages/link/index.html)** `[MODIFY]`
+* 📄 **[pages/guru/index.html](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/pages/guru/index.html)** `[MODIFY]`
+* 📄 **[pages/guru/rekap.html](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/pages/guru/rekap.html)** `[MODIFY]`
+* 📄 **[assets/js/guru/rekap.js](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/assets/js/guru/rekap.js)** `[MODIFY]`
+* 📄 **[pages/database/db-manager.html](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/pages/database/db-manager.html)** `[MODIFY]`
+* 📄 **[assets/js/database/db-manager.js](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/assets/js/database/db-manager.js)** `[MODIFY]`
+* 📄 **[assets/js/database/ai-insights.js](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/assets/js/database/ai-insights.js)** `[MODIFY]`
+* 📄 **[pages/database/reset-logs.html](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/pages/database/reset-logs.html)** `[MODIFY]`
+* 📄 **[assets/js/database/reset-logs.js](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/assets/js/database/reset-logs.js)** `[MODIFY]`
+* 📄 **[pages/database/analysis.html](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/pages/database/analysis.html)** `[MODIFY]`
+
+---
+
+### 📝 2. Rincian Baris & Logika yang Diperbarui
+
+1. 🚀 **Eliminasi Total Runtime Tailwind Play CDN (`cdn.tailwindcss.com`)**:
+   - Menghapus compiler JavaScript runtime `cdn.tailwindcss.com` (~400 KB + beban kompilasi CPU mobile) dari seluruh berkas HTML.
+   - Menghasilkan bundle CSS statis terpurged dan diminifikasi [`style/tailwind.min.css`](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/style/tailwind.min.css) (~44 KB mentah, ~8 KB terkompresi gzipped).
+   - Menghubungkan CSS statis dengan `<link rel="preload" as="style">` sehingga browser/WebView Android langsung merender UI secara instan tanpa delay kompilasi JavaScript.
+
+2. ⚡ **Arsitektur Lazy Loading On-Demand Library Berat (SheetJS, Chart.js, Confetti)**:
+   - Membuat utilitas mandiri [`assets/js/utils/lazy-loader.js`](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/assets/js/utils/lazy-loader.js) untuk memuat library berat hanya saat dibutuhkan pengguna:
+     - `loadXLSX()`: Mengunduh SheetJS (~850 KB) hanya saat pengguna menekan tombol *Export Excel*, *Download Template*, atau *Import File*.
+     - `loadChartJS()`: Mengunduh Chart.js (~200 KB) secara asynchronous saat rendering grafik presensi dipanggil.
+     - `loadConfetti()`: Mengunduh efek perayaan selebrasi (~20 KB) hanya jika presensi siswa berhasil (`status === 'success'`).
+   - Menghapus pemuatan script XLSX dan Chart.js yang tidak terpakai/redundant dari `<head>` `guru/index.html` dan `database/db-manager.html`.
+
+3. 💾 **Peningkatan Kapabilitas Service Worker Caching (`sw.js` v12)**:
+   - Memperbarui Service Worker cache menjadi `portal-iskakfatoni-v12`.
+   - Menambahkan berkas CSS/JS baru ke daftar offline cache lokal.
+   - Mengoptimalkan handler fetch agar asset CDN pihak ketiga (Google Fonts, Font Awesome, jsdelivr) otomatis tersimpan ke cache lokal perangkat (mendukung opaque cross-origin response), sehingga kunjungan berikutnya terbuka 100% instan dari memori internal smartphone.
+
+4. 🔋 **Optimasi Animasi Partikel 0% CPU Mobile**:
+   - Pada [`assets/js/particle/particle-bg.js`](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/assets/js/particle/particle-bg.js), pembuatan context canvas dan loop `requestAnimationFrame` langsung dilewati (*bypassed*) jika lebar layar `< 768px` (ponsel) atau saat mode hemat baterai/`prefers-reduced-motion` aktif. Menghemat daya baterai dan memori WebView Android secara signifikan.
+
+5. 🖼️ **Kompresi Aset Gambar WebP**:
+   - Mengoptimalkan berkas gambar logo [`assets/img/nisnas_logo_colorful.webp`](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/assets/img/nisnas_logo_colorful.webp) menjadi 512x512 lanczos sharp WebP, memangkas ukuran berkas sebesar 50% (dari 88.5 KB menjadi 44.3 KB).
+
+---
+
+### 🧪 3. Petunjuk Pengujian Lokal (*Local Verification*)
+
+1. Buka halaman utama [`index.html`](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/index.html) dan portal presensi [`absensi.html`](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/absensi.html) di browser / emulator Android.
+2. Buka DevTools (`Network` tab):
+   - Perhatikan tidak ada lagi request besar ke `cdn.tailwindcss.com` compiler.
+   - Script `xlsx.full.min.js` dan `chart.js` tidak dimuat di awal halaman.
+3. Buka halaman rekap [`pages/guru/rekap.html`](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/pages/guru/rekap.html) atau [`pages/database/db-manager.html`](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/pages/database/db-manager.html):
+   - Klik tombol **"Ekspor Excel"** atau **"Download Template"**: perhatikan library XLSX dimuat secara mulus di latar belakang (*on-demand*) dan file Excel langsung terunduh secara sukses.
+4. Buka tab `Application -> Service Workers`: perhatikan cache `portal-iskakfatoni-v12` aktif dan seluruh aset statis ter-cache secara sempurna.
+
+---
+
 ## 📅 Review [2026-08-25 19:48 WIB] - Relokasi Donut Chart "Sebaran Data / Kehadiran" ke Sidebar Kiri (Di Atas Card Koleksi Data)
 
 ### 📁 1. Berkas yang Diperbarui

@@ -1,6 +1,7 @@
 import { db } from "../config/firebase-config.js";
 import { initializeAuthGuard } from "../auth/auth-guard.js";
 import { showToast, showConfirm } from "../utils/toast.js";
+import { loadXLSX, loadChartJS } from "../utils/lazy-loader.js";
 import { 
   collection, 
   getDocs, 
@@ -326,9 +327,7 @@ async function loadData() {
 let doughnutChartInstance = null;
 let barChartInstance = null;
 
-function updateAttendanceCharts(data) {
-  if (typeof window.Chart === 'undefined') return;
-
+async function updateAttendanceCharts(data) {
   const countHadir = data.filter(d => d.status.toLowerCase().includes('hadir') && !d.status.toLowerCase().includes('tidak')).length;
   const countAlpa = data.filter(d => d.status.toLowerCase().includes('tidak') || d.status.toLowerCase().includes('alpa')).length;
 
@@ -336,6 +335,13 @@ function updateAttendanceCharts(data) {
   const chartAlpaText = document.getElementById('chart-alpa-text');
   if (chartHadirText) chartHadirText.innerText = countHadir;
   if (chartAlpaText) chartAlpaText.innerText = countAlpa;
+
+  try {
+    await loadChartJS();
+  } catch (err) {
+    console.warn('Gagal memuat Chart.js untuk visualisasi:', err);
+    return;
+  }
 
   // 1. Doughnut Chart: Rasio Kehadiran
   const doughnutCanvas = document.getElementById('chart-attendance-doughnut');
@@ -610,42 +616,56 @@ if (btnSaveAlpaLogs) {
 // -----------------------------------------------------------------
 // 6. EXPORT LAPORAN EXCEL (.XLSX) VIA SHEETJS
 // -----------------------------------------------------------------
-btnExportExcel.addEventListener('click', () => {
+btnExportExcel.addEventListener('click', async () => {
   if (currentData.length === 0) {
     showToast("Tidak ada data untuk di-export. Silakan muat data terlebih dahulu.", "warning");
     return;
   }
 
-  const excelRows = currentData.map((item, index) => ({
-    "No": index + 1,
-    "Waktu / Tanggal": item.waktu,
-    "NIS": item.nis,
-    "Nama Siswa": item.nama,
-    "Kelas": item.kelas,
-    "Mata Pelajaran": item.mapel || "-",
-    "Status Kehadiran": item.status,
-    "Keterangan Perangkat": item.isSharedDevice ? `HP Berbagi (${item.sharedCount} Siswa)` : 'HP Mandiri'
-  }));
+  btnExportExcel.disabled = true;
+  const originalText = btnExportExcel.innerHTML;
+  btnExportExcel.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Mengekspor...';
 
-  const worksheet = XLSX.utils.json_to_sheet(excelRows);
-  const workbook = XLSX.utils.book_new();
+  try {
+    await loadXLSX();
 
-  worksheet['!cols'] = [
-    { wch: 6 },  // No
-    { wch: 28 }, // Waktu / Tanggal
-    { wch: 15 }, // NIS
-    { wch: 30 }, // Nama Siswa
-    { wch: 15 }, // Kelas
-    { wch: 18 }, // Status Kehadiran
-    { wch: 25 }  // Keterangan Perangkat
-  ];
+    const excelRows = currentData.map((item, index) => ({
+      "No": index + 1,
+      "Waktu / Tanggal": item.waktu,
+      "NIS": item.nis,
+      "Nama Siswa": item.nama,
+      "Kelas": item.kelas,
+      "Mata Pelajaran": item.mapel || "-",
+      "Status Kehadiran": item.status,
+      "Keterangan Perangkat": item.isSharedDevice ? `HP Berbagi (${item.sharedCount} Siswa)` : 'HP Mandiri'
+    }));
 
-  XLSX.utils.book_append_sheet(workbook, worksheet, "Rekap Presensi");
+    const worksheet = XLSX.utils.json_to_sheet(excelRows);
+    const workbook = XLSX.utils.book_new();
 
-  const kelasPrefix = filterKelas.value.trim() ? `${filterKelas.value.trim().replace(/\s+/g, '_')}_` : '';
-  const filename = `Rekap_Presensi_${kelasPrefix}${DateUtils.getTodayISO()}.xlsx`;
+    worksheet['!cols'] = [
+      { wch: 6 },  // No
+      { wch: 28 }, // Waktu / Tanggal
+      { wch: 15 }, // NIS
+      { wch: 30 }, // Nama Siswa
+      { wch: 15 }, // Kelas
+      { wch: 18 }, // Status Kehadiran
+      { wch: 25 }  // Keterangan Perangkat
+    ];
 
-  XLSX.writeFile(workbook, filename);
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Rekap Presensi");
+
+    const kelasPrefix = filterKelas.value.trim() ? `${filterKelas.value.trim().replace(/\s+/g, '_')}_` : '';
+    const filename = `Rekap_Presensi_${kelasPrefix}${DateUtils.getTodayISO()}.xlsx`;
+
+    XLSX.writeFile(workbook, filename);
+  } catch (errXlsx) {
+    console.error("Gagal mengekspor Excel:", errXlsx);
+    showToast("Gagal memproses file Excel: " + errXlsx.message, "error");
+  } finally {
+    btnExportExcel.disabled = false;
+    btnExportExcel.innerHTML = originalText;
+  }
 });
 
 // -----------------------------------------------------------------
@@ -659,6 +679,7 @@ if (btnExportMatrixExcel) {
     btnExportMatrixExcel.innerHTML = '<span>Menyiapkan...</span>';
 
     try {
+      await loadXLSX();
       // 1. Tentukan Bulan & Tahun target (berdasarkan tanggal hari ini / filter)
       const now = new Date();
       const year = now.getFullYear();
