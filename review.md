@@ -4,6 +4,38 @@ Dokumen ini berisi rangkuman review perubahan kode (*code review*) terbaru yang 
 
 ---
 
+## 📅 Review [2026-08-27 06:53 WIB] - Perbaikan Sintaks Unexpected Token `}` pada `absensi.js` & Penyesuaian `async` Listener di `db-manager.js`
+
+### 📁 1. Berkas yang Diperbarui
+* 📄 **[assets/js/absensi/absensi.js](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/assets/js/absensi/absensi.js)** `[MODIFY]`
+* 📄 **[absensi.html](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/absensi.html)** `[MODIFY]`
+* 📄 **[assets/js/database/db-manager.js](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/assets/js/database/db-manager.js)** `[MODIFY]`
+
+---
+
+### 📝 2. Rincian Baris & Logika yang Diperbarui
+
+1. 🐛 **Pembersihan Kurung Kurawal Berlebih (*Unexpected token `}`*)**:
+   - Menghapus 1 kurung kurawal sisa penutup pada akhir fungsi `renderStudentChart()` di [`assets/js/absensi/absensi.js`](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/assets/js/absensi/absensi.js).
+   - Memperbarui cache buster `absensi.js?v=1.2.0` di [`absensi.html`](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/absensi.html).
+
+2. ⚡ **Validasi `async` pada Callback Template Excel di `db-manager.js`**:
+   - Menambahkan keyword `async` pada event listener tombol `dom.btnDownloadTemplate` di [`assets/js/database/db-manager.js`](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/assets/js/database/db-manager.js) untuk mendukung `await loadXLSX()`.
+
+3. ✅ **Verifikasi Menyeluruh**:
+   - Menjalankan uji validasi sintaks otomatis berbasis engine Node.js ECMAScript Module (`SourceTextModule`) ke seluruh 20+ berkas JavaScript di dalam workspace untuk memastikan 100% bebas dari kesalahan sintaksis.
+
+---
+
+### 🧪 3. Petunjuk Pengujian Lokal (*Local Verification*)
+
+1. Buka halaman presensi [`absensi.html`](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/absensi.html) di browser.
+2. Buka DevTools Console (F12):
+   - Pastikan tidak ada lagi error `Uncaught SyntaxError: Unexpected token '}'`.
+   - Form input NIS siswa dan grafik rasio presensi dapat beroperasi normal.
+
+---
+
 ## 📅 Review [2026-08-27 06:48 WIB] - Optimasi Performa Ekstrem, Reduksi Ukuran Web & Akselerasi Loading Android App (PWA/TWA/WebView)
 
 ### 📁 1. Berkas yang Dibuat & Diperbarui

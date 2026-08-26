@@ -1847,7 +1847,7 @@ dom.btnProcessImport.addEventListener('click', async () => {
   dom.btnProcessImport.disabled = false;
 });
 
-dom.btnDownloadTemplate.addEventListener('click', () => {
+dom.btnDownloadTemplate.addEventListener('click', async () => {
   let sampleData = [];
   let colWidths = [];
 

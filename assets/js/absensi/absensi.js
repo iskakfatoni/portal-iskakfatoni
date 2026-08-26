@@ -403,7 +403,6 @@ async function renderStudentChart(hadirCount, tidakHadirCount) {
         }
       }
     });
-  }
 }
 
 function setLoading(isLoading) {
