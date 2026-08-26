@@ -4,6 +4,31 @@ Dokumen ini berisi rangkuman review perubahan kode (*code review*) terbaru yang 
 
 ---
 
+## 📅 Review [2026-08-27 06:56 WIB] - Perbaikan Null Check Event Listener pada `analysis.js` & Cache Buster `v=1.1.0`
+
+### 📁 1. Berkas yang Diperbarui
+* 📄 **[assets/js/database/analysis.js](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/assets/js/database/analysis.js)** `[MODIFY]`
+* 📄 **[pages/database/analysis.html](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/pages/database/analysis.html)** `[MODIFY]`
+
+---
+
+### 📝 2. Rincian Baris & Logika yang Diperbarui
+
+1. 🛡️ **Null Safety Guard pada Event Listener & DOM Registry**:
+   - Menambahkan pengecekan keberadaan elemen (`if (dom.btnToggleFullscreen)`, `if (dom.btnLogout)`, `if (dom.userEmailDisplay)`) pada callback `onAuthenticated` di [`assets/js/database/analysis.js`](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/assets/js/database/analysis.js). Hal ini mencegah runtime exception `Cannot read properties of null (reading 'addEventListener')` saat halaman tidak memiliki tombol fullscreen.
+   - Memperbarui cache buster `analysis.js?v=1.1.0` pada [`pages/database/analysis.html`](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/pages/database/analysis.html).
+
+---
+
+### 🧪 3. Petunjuk Pengujian Lokal (*Local Verification*)
+
+1. Buka halaman analisa [`pages/database/analysis.html`](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/pages/database/analysis.html) di browser.
+2. Buka DevTools Console (F12):
+   - Pastikan autentikasi admin berhasil tanpa pesan error `Cannot read properties of null`.
+   - Ringkasan statistik anomali dan daftar kartu radar AI tampil normal dan interaktif.
+
+---
+
 ## 📅 Review [2026-08-27 06:53 WIB] - Perbaikan Sintaks Unexpected Token `}` pada `absensi.js` & Penyesuaian `async` Listener di `db-manager.js`
 
 ### 📁 1. Berkas yang Diperbarui

@@ -173,7 +173,9 @@ const AIInsightManager = {
 // -----------------------------------------------------------------
 initializeAuthGuard({
   onAuthenticated: async (user) => {
-    dom.userEmailDisplay.innerText = user.email;
+    if (dom.userEmailDisplay) {
+      dom.userEmailDisplay.innerText = user.email;
+    }
 
     // Initial analysis
     const qLogs = query(collection(db, "system_logs"), orderBy("timestamp", "desc"));
@@ -184,16 +186,20 @@ initializeAuthGuard({
       AIInsightManager.runAnalysis();
     });
 
-    dom.btnLogout.addEventListener('click', () => {
-      window.location.href = "../../admin.html";
-    });
+    if (dom.btnLogout) {
+      dom.btnLogout.addEventListener('click', () => {
+        window.location.href = "../../admin.html";
+      });
+    }
 
-    dom.btnToggleFullscreen.addEventListener('click', () => {
-      if (!document.fullscreenElement) {
-        document.documentElement.requestFullscreen().catch(err => console.warn(err));
-      } else {
-        document.exitFullscreen().catch(err => console.warn(err));
-      }
-    });
+    if (dom.btnToggleFullscreen) {
+      dom.btnToggleFullscreen.addEventListener('click', () => {
+        if (!document.fullscreenElement) {
+          document.documentElement.requestFullscreen().catch(err => console.warn(err));
+        } else {
+          document.exitFullscreen().catch(err => console.warn(err));
+        }
+      });
+    }
   }
 });
