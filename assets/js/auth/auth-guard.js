@@ -12,15 +12,16 @@ function getDefaultRedirectPath() {
 const DEFAULT_REDIRECT_PATH = getDefaultRedirectPath();
 
 function revealPage() {
-  document.documentElement.style.display = "block";
+  document.documentElement.style.display = "";
   document.documentElement.classList.remove("auth-guard");
 }
 
 function redirectToLogin(redirectPath = DEFAULT_REDIRECT_PATH) {
-  showToast("Akses ditolak! Anda harus login atau mengikat perangkat terlebih dahulu.", "error");
+  revealPage();
+  showToast("Akses ditolak! Silakan login di Admin Hub terlebih dahulu.", "error");
   setTimeout(() => {
     window.location.href = redirectPath;
-  }, 1200);
+  }, 800);
 }
 
 export function initializeAuthGuard({

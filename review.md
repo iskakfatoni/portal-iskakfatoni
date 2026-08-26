@@ -4,6 +4,38 @@ Dokumen ini berisi rangkuman review perubahan kode (*code review*) terbaru yang 
 
 ---
 
+## 📅 Review [2026-08-27 06:58 WIB] - Perbaikan Halaman Blank pada `pages/link/index.html` & Peningkatan Visual Auth Guard
+
+### 📁 1. Berkas yang Diperbarui
+* 📄 **[pages/link/index.html](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/pages/link/index.html)** `[MODIFY]`
+* 📄 **[assets/js/auth/auth-guard.js](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/assets/js/auth/auth-guard.js)** `[MODIFY]`
+* 📄 **[pages/guru/index.html](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/pages/guru/index.html)** `[MODIFY]`
+* 📄 **[pages/siswa/scanner.html](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/pages/siswa/scanner.html)** `[MODIFY]`
+* 📄 **[pages/siswa/result.html](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/pages/siswa/result.html)** `[MODIFY]`
+
+---
+
+### 📝 2. Rincian Baris & Logika yang Diperbarui
+
+1. 🎨 **Penyambungan Kembali `style.css` Utama**:
+   - Memulihkan tautan `<link rel="stylesheet" href="../../style/style.css">` pada [`pages/link/index.html`](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/pages/link/index.html), [`pages/guru/index.html`](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/pages/guru/index.html), [`pages/siswa/scanner.html`](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/pages/siswa/scanner.html), dan [`pages/siswa/result.html`](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/pages/siswa/result.html).
+   - Menghubungkan secara harmonis file desain sistem `style.css` (glassmorphism, tema dashboard, animasi) dan `tailwind.min.css`.
+
+2. 🛡️ **Pencegahan Tampilan Blank pada `auth-guard.js`**:
+   - Pada fungsi `revealPage()`, mengubah pengembalian display dari `display = "block"` menjadi `display = ""` (clearing inline style) agar aturan CSS tata letak halaman asli tetap aktif tanpa terhalang.
+   - Pada `redirectToLogin()`, memanggil `revealPage()` sebelum menampilkan toast notifikasi agar pesan penolakan akses dan proses redirect tampil secara visual dengan jelas ke pengguna dan tidak menghasilkan layar kosong (*blank screen*).
+   - Memperbarui cache buster `link-manager.js?v=1.1.0` di [`pages/link/index.html`](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/pages/link/index.html).
+
+---
+
+### 🧪 3. Petunjuk Pengujian Lokal (*Local Verification*)
+
+1. Buka halaman kelola tautan [`pages/link/index.html`](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/pages/link/index.html) di browser.
+2. Jika sudah login: Halaman akan langsung merender antarmuka kaca gelap modern, toggle status portal, form tambah link, dan daftar link secara rapi.
+3. Jika belum login: Layar tidak akan blank, melainkan menampilkan notifikasi toast penolakan akses dan otomatis mengarahkan ke halaman Admin Hub.
+
+---
+
 ## 📅 Review [2026-08-27 06:56 WIB] - Perbaikan Null Check Event Listener pada `analysis.js` & Cache Buster `v=1.1.0`
 
 ### 📁 1. Berkas yang Diperbarui
