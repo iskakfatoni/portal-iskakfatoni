@@ -4,6 +4,38 @@ Dokumen ini berisi rangkuman review perubahan kode (*code review*) terbaru yang 
 
 ---
 
+## 📅 Review [2026-08-27 07:13 WIB] - Penambahan Deklarasi Favicon Eksplisit di Seluruh Halaman HTML (Mengatasi HTTP 404 Favicon)
+
+### 📁 1. Berkas yang Diperbarui
+* 📄 **[index.html](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/index.html)** `[MODIFY]`
+* 📄 **[portal.html](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/portal.html)** `[MODIFY]`
+* 📄 **[absensi.html](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/absensi.html)** `[MODIFY]`
+* 📄 **[admin.html](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/admin.html)** `[MODIFY]`
+* 📄 **[perangkat.html](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/perangkat.html)** `[MODIFY]`
+* 📄 **[pages/link/index.html](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/pages/link/index.html)** `[MODIFY]`
+* 📄 **[pages/guru/index.html](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/pages/guru/index.html)** `[MODIFY]`
+* 📄 **[pages/guru/rekap.html](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/pages/guru/rekap.html)** `[MODIFY]`
+* 📄 **[pages/siswa/login.html](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/pages/siswa/login.html)** `[MODIFY]`
+* 📄 **[pages/siswa/scanner.html](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/pages/siswa/scanner.html)** `[MODIFY]`
+* 📄 **[pages/siswa/result.html](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/pages/siswa/result.html)** `[MODIFY]`
+
+---
+
+### 📝 2. Rincian Baris & Logika yang Diperbarui
+
+1. 🌐 **Pemberian Tag `<link rel="icon">` Eksplisit**:
+   - Menambahkan deklarasi `<link rel="icon" type="image/webp" href="...">` ke seluruh berkas HTML.
+   - Mencegah browser melakukan request *fallback* ke root origin domain (`https://iskakfatoni.github.io/favicon.ico`) yang menghasilkan status HTTP 404.
+
+---
+
+### 🧪 3. Petunjuk Pengujian Lokal (*Local Verification*)
+
+1. Buka salah satu halaman portal di browser dengan Console (F12).
+2. Periksa tab Network/Console: Permintaan `GET /favicon.ico` 404 tidak lagi muncul, dan ikon logo sekolah tampil di tab browser.
+
+---
+
 ## 📅 Review [2026-08-27 07:09 WIB] - Pembuatan Aplikasi Windows Desktop (.EXE) Standalone dengan Bottom Navigation Toolbar di Folder `app/`
 
 ### 📁 1. Berkas yang Dibuat & Ditambahkan
