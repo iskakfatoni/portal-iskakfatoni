@@ -13,6 +13,8 @@ const DEFAULT_REDIRECT_PATH = getDefaultRedirectPath();
 
 function revealPage() {
   document.documentElement.style.display = "";
+  document.documentElement.style.opacity = "1";
+  document.documentElement.style.pointerEvents = "auto";
   document.documentElement.classList.remove("auth-guard");
 }
 
@@ -29,7 +31,6 @@ export function initializeAuthGuard({
   onAuthenticated = null,
   onUnauthenticated = null
 } = {}) {
-  document.documentElement.style.display = "none";
   document.documentElement.classList.add("auth-guard");
 
   return onAuthStateChanged(auth, async (user) => {

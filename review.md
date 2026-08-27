@@ -4,6 +4,37 @@ Dokumen ini berisi rangkuman review perubahan kode (*code review*) terbaru yang 
 
 ---
 
+## 📅 Review [2026-08-27 07:01 WIB] - Perbaikan Halaman Dashboard Guru `guru/index.html` & Transisi Halus `style.css`
+
+### 📁 1. Berkas yang Diperbarui
+* 📄 **[pages/guru/index.html](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/pages/guru/index.html)** `[MODIFY]`
+* 📄 **[pages/guru/rekap.html](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/pages/guru/rekap.html)** `[MODIFY]`
+* 📄 **[pages/link/index.html](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/pages/link/index.html)** `[MODIFY]`
+* 📄 **[style/style.css](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/style/style.css)** `[MODIFY]`
+* 📄 **[assets/js/auth/auth-guard.js](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/assets/js/auth/auth-guard.js)** `[MODIFY]`
+
+---
+
+### 📝 2. Rincian Baris & Logika yang Diperbarui
+
+1. 🚫 **Penghapusan Class Hardcoded `auth-guard` di Tag `<html>`**:
+   - Menghapus atribut statis `class="auth-guard"` dari tag `<html>` pada [`pages/guru/index.html`](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/pages/guru/index.html), [`pages/guru/rekap.html`](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/pages/guru/rekap.html), dan [`pages/link/index.html`](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/pages/link/index.html).
+   - Memastikan kontrol visibilitas sepenuhnya dikendalikan secara dinamis dan aman oleh runtime `auth-guard.js`.
+
+2. 🎨 **Transisi Opasitas Halus pada `style.css` & `auth-guard.js`**:
+   - Mengubah aturan CSS `html.auth-guard` di [`style/style.css`](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/style/style.css) dari `display: none` menjadi `opacity: 0; pointer-events: none; transition: opacity 0.2s ease-in-out`.
+   - Hal ini membuat halaman tidak pernah "terkunci" dalam display kosong dan transisi saat status autentikasi terkonfirmasi berjalan mulus (*smooth fade-in*).
+   - Memperbarui cache buster `guru-dashboard.js?v=1.1.0` pada [`pages/guru/index.html`](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/pages/guru/index.html).
+
+---
+
+### 🧪 3. Petunjuk Pengujian Lokal (*Local Verification*)
+
+1. Buka halaman dashboard guru [`pages/guru/index.html`](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/pages/guru/index.html) di browser.
+2. Periksa tampilan: Sesi QR, dropdown kelas, mata pelajaran, dan log kehadiran langsung terender tanpa kendala layar blank.
+
+---
+
 ## 📅 Review [2026-08-27 06:58 WIB] - Perbaikan Halaman Blank pada `pages/link/index.html` & Peningkatan Visual Auth Guard
 
 ### 📁 1. Berkas yang Diperbarui

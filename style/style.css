@@ -118,7 +118,9 @@ html {
    `document.documentElement.style.display = 'block'` via inline style,
    yang otomatis menang atas class ini begitu status login diketahui. */
 html.auth-guard {
-  display: none;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease-in-out;
 }
 
 /* ==========================================================================
