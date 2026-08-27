@@ -4,6 +4,50 @@ Dokumen ini berisi rangkuman review perubahan kode (*code review*) terbaru yang 
 
 ---
 
+## 📅 Review [2026-08-27 07:09 WIB] - Pembuatan Aplikasi Windows Desktop (.EXE) Standalone dengan Bottom Navigation Toolbar di Folder `app/`
+
+### 📁 1. Berkas yang Dibuat & Ditambahkan
+* 📄 **[app/Portal-IskakFatoni.exe](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/app/Portal-IskakFatoni.exe)** `[NEW]`
+* 📄 **[app/src/Program.cs](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/app/src/Program.cs)** `[NEW]`
+* 📄 **[app/build.bat](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/app/build.bat)** `[NEW]`
+* 📄 **[app/README.md](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/app/README.md)** `[NEW]`
+* 📄 **[app/app_icon.ico](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/app/app_icon.ico)** `[NEW]`
+* 📄 **[app/download-libs.js](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/app/download-libs.js)** `[NEW]`
+* 📄 **[app/Microsoft.Web.WebView2.Core.dll](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/app/Microsoft.Web.WebView2.Core.dll)** `[NEW]`
+* 📄 **[app/Microsoft.Web.WebView2.WinForms.dll](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/app/Microsoft.Web.WebView2.WinForms.dll)** `[NEW]`
+* 📄 **[app/WebView2Loader.dll](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/app/WebView2Loader.dll)** `[NEW]`
+
+---
+
+### 📝 2. Rincian Baris & Fitur yang Diimplementasikan
+
+1. ⚡ **Engine WebView2 Native Super Ringan**:
+   - Membangun aplikasi desktop Windows berbasis Microsoft Edge Chromium WebView2 Runtime yang hemat RAM dan responsif.
+   - Sesi terisolasi di folder `%LOCALAPPDATA%\PortalIskakFatoni\WebView2UserData`.
+   - Izin akses kamera otomatis diaktifkan untuk pemindaian QR presensi siswa & guru.
+
+2. 🧭 **Bottom Navigation Toolbar (Docked di Bagian Bawah)**:
+   - 🏠 **Portal** (`portal.html`)
+   - 📱 **Presensi Siswa** (`absensi.html`)
+   - 👨‍🏫 **Sesi Guru** (`pages/guru/index.html`)
+   - 📊 **Rekap** (`pages/guru/rekap.html`)
+   - 🗄️ **Database** (`pages/database/db-manager.html`)
+   - 🛡️ **Admin Hub** (`admin.html`)
+   - Kontrol sisi kanan: `◀` (Kembali / Alt+Left), `▶` (Maju / Alt+Right), `🔄` (Muat Ulang / F5), `⛶` (Layar Penuh / F11), dan indikator status muat.
+
+3. 🔨 **Automated Build Script**:
+   - Menyediakan `app/build.bat` untuk kompilasi ulang langsung via C# compiler bawaan Windows (`csc.exe`).
+
+---
+
+### 🧪 3. Petunjuk Pengujian Lokal (*Local Verification*)
+
+1. Buka folder `app/` di Windows Explorer.
+2. Klik ganda **`Portal-IskakFatoni.exe`**.
+3. Pastikan jendela aplikasi terbuka dengan mulus, bilah navigasi bawah aktif dengan *highlight* halaman aktif, dan tombol pintasan (F11, F5, Alt+Left/Right) berfungsi normal.
+
+---
+
 ## 📅 Review [2026-08-27 07:01 WIB] - Perbaikan Halaman Dashboard Guru `guru/index.html` & Transisi Halus `style.css`
 
 ### 📁 1. Berkas yang Diperbarui
