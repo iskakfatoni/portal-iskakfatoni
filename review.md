@@ -4,6 +4,32 @@ Dokumen ini berisi rangkuman review perubahan kode (*code review*) terbaru yang 
 
 ---
 
+## 📅 Review [2026-08-27 07:14 WIB] - Penambahan Standar Meta Tag `<meta name="mobile-web-app-capable" content="yes">` (Standar PWA Modern)
+
+### 📁 1. Berkas yang Diperbarui
+* 📄 **[index.html](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/index.html)** `[MODIFY]`
+* 📄 **[portal.html](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/portal.html)** `[MODIFY]`
+* 📄 **[absensi.html](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/absensi.html)** `[MODIFY]`
+* 📄 **[admin.html](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/admin.html)** `[MODIFY]`
+* 📄 **[perangkat.html](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/perangkat.html)** `[MODIFY]`
+
+---
+
+### 📝 2. Rincian Baris & Logika yang Diperbarui
+
+1. 📱 **Standarisasi Meta Tag PWA**:
+   - Menambahkan `<meta name="mobile-web-app-capable" content="yes">` berdampingan dengan `<meta name="apple-mobile-web-app-capable" content="yes">`.
+   - Mengatasi peringatan depresiasi browser Chromium/Android modern sembari mempertahankan kompatibilitas penuh untuk iOS Safari PWA.
+
+---
+
+### 🧪 3. Petunjuk Pengujian Lokal (*Local Verification*)
+
+1. Buka `index.html` atau `portal.html` di browser Chrome/Edge.
+2. Buka DevTools Console (F12): Peringatan depresiasi *apple-mobile-web-app-capable* sudah tidak muncul lagi.
+
+---
+
 ## 📅 Review [2026-08-27 07:13 WIB] - Penambahan Deklarasi Favicon Eksplisit di Seluruh Halaman HTML (Mengatasi HTTP 404 Favicon)
 
 ### 📁 1. Berkas yang Diperbarui
