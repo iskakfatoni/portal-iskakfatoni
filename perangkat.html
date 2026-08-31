@@ -47,7 +47,7 @@
       </div>
 
       <!-- TAB SWITCHER MANUAL -->
-      <div class="device-tab-group" role="tablist">
+      <div id="device-tab-group" class="device-tab-group" role="tablist">
         <button id="tab-ios" class="device-tab-btn" role="tab" onclick="switchTab('ios')">
           <i class="fa-brands fa-apple"></i>
           <span>iPhone / iOS</span>
@@ -60,7 +60,7 @@
 
       <!-- PANEL 1: iOS (IPHONE / IPAD) -->
       <div id="panel-ios" class="device-panel hidden">
-        <div class="device-panel-title">
+        <div id="ios-panel-title" class="device-panel-title">
           <i class="fa-brands fa-apple" style="color: #cbd5e1;"></i>
           <span>Portal Pengguna iPhone &amp; iPad</span>
         </div>
@@ -237,7 +237,7 @@
       </div>
 
       <!-- TOMBOL BUKA PORTAL MATERI -->
-      <div style="margin-top: 20px; text-align: center;">
+      <div id="bottom-portal-link" style="margin-top: 20px; text-align: center;">
         <a href="portal.html?no_redirect=true" class="update-link" style="justify-content: center; opacity: 0.9;">
           <i class="fa-solid fa-book-open"></i>
           <span>Buka Portal Materi &amp; Link Tugas</span>
@@ -330,6 +330,9 @@
       const iosBrowser = detectIOSBrowser();
       const badgeText = document.getElementById('detected-text');
       const badgeEl = document.getElementById('detected-badge');
+      const tabGroup = document.getElementById('device-tab-group');
+      const iosPanelTitle = document.getElementById('ios-panel-title');
+      const bottomPortalLink = document.getElementById('bottom-portal-link');
       const iosPwaMenu = document.getElementById('ios-pwa-menu');
       const iosGuideChrome = document.getElementById('ios-guide-chrome');
       const iosGuideSafari = document.getElementById('ios-guide-safari');
@@ -339,6 +342,9 @@
           badgeText.innerHTML = '<i class="fa-brands fa-apple"></i> <strong>iPhone PWA (Layar Utama)</strong>';
           badgeEl.style.borderColor = 'rgba(52, 211, 153, 0.5)';
           badgeEl.style.color = '#34d399';
+          if (tabGroup) tabGroup.classList.add('hidden');
+          if (iosPanelTitle) iosPanelTitle.classList.add('hidden');
+          if (bottomPortalLink) bottomPortalLink.classList.add('hidden');
           if (iosPwaMenu) iosPwaMenu.classList.remove('hidden');
           if (iosGuideChrome) iosGuideChrome.classList.add('hidden');
           if (iosGuideSafari) iosGuideSafari.classList.add('hidden');
@@ -346,6 +352,9 @@
           badgeText.innerHTML = '<i class="fa-brands fa-chrome"></i> Terdeteksi: <strong>Google Chrome di iPhone</strong>';
           badgeEl.style.borderColor = 'rgba(56, 189, 248, 0.5)';
           badgeEl.style.color = '#38bdf8';
+          if (tabGroup) tabGroup.classList.remove('hidden');
+          if (iosPanelTitle) iosPanelTitle.classList.remove('hidden');
+          if (bottomPortalLink) bottomPortalLink.classList.remove('hidden');
           if (iosPwaMenu) iosPwaMenu.classList.add('hidden');
           if (iosGuideChrome) iosGuideChrome.classList.remove('hidden');
           if (iosGuideSafari) iosGuideSafari.classList.add('hidden');
@@ -353,6 +362,9 @@
           badgeText.innerHTML = '<i class="fa-brands fa-apple"></i> Terdeteksi: <strong>iPhone / iPad (Safari)</strong>';
           badgeEl.style.borderColor = 'rgba(255, 255, 255, 0.4)';
           badgeEl.style.color = '#ffffff';
+          if (tabGroup) tabGroup.classList.remove('hidden');
+          if (iosPanelTitle) iosPanelTitle.classList.remove('hidden');
+          if (bottomPortalLink) bottomPortalLink.classList.remove('hidden');
           if (iosPwaMenu) iosPwaMenu.classList.add('hidden');
           if (iosGuideChrome) iosGuideChrome.classList.add('hidden');
           if (iosGuideSafari) iosGuideSafari.classList.remove('hidden');
@@ -362,11 +374,15 @@
         badgeText.innerHTML = '<i class="fa-brands fa-android"></i> Terdeteksi: <strong>Android Device</strong>';
         badgeEl.style.borderColor = 'rgba(52, 211, 153, 0.4)';
         badgeEl.style.color = '#34d399';
+        if (tabGroup) tabGroup.classList.remove('hidden');
+        if (bottomPortalLink) bottomPortalLink.classList.remove('hidden');
         switchTab('android');
       } else {
         badgeText.innerHTML = '<i class="fa-solid fa-mobile-screen"></i> Pilih Tipe Perangkat Ponsel Anda';
         badgeEl.style.borderColor = 'rgba(56, 189, 248, 0.4)';
         badgeEl.style.color = '#38bdf8';
+        if (tabGroup) tabGroup.classList.remove('hidden');
+        if (bottomPortalLink) bottomPortalLink.classList.remove('hidden');
         switchTab('android');
       }
     });

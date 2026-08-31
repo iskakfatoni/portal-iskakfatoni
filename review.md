@@ -3748,6 +3748,30 @@ Dokumen ini berisi rangkuman review perubahan kode (*code review*) terbaru yang 
    - Buka `perangkat.html` dalam mode simulasi PWA Standalone iPhone (`display-mode: standalone`).
    - Verifikasi bahwa menu yang tampil hanya ada 2 tombol (Absensi Siswa dan Portal Materi), dan tombol Admin Hub sudah bersih/tidak tampil.
 
+---
+
+## 📅 Review [2026-08-31 20:17 WIB] - Pembersihan Antarmuka PWA iPhone (Penyembunyian Tab Switcher iOS & Android)
+
+### 📁 1. Berkas yang Diubah
+* 📄 **[perangkat.html](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/perangkat.html)**
+
+---
+
+### 📝 2. Rincian Baris & Logika yang Diperbarui
+
+1. **Penyembunyian Tab Switcher (`#device-tab-group`)**:
+   - Menambahkan id `device-tab-group` pada baris tombol switcher iOS & Android.
+   - Saat terdeteksi mode iOS (terutama mode PWA Layar Utama), sistem otomatis menambahkan kelas `hidden` pada tombol tab switcher, judul panduan, dan tombol tautan bawah yang redundan sehingga tampilan kartu menjadi sangat bersih, elegan, dan langsung fokus pada menu presensi dan materi.
+
+---
+
+### 🧪 3. Petunjuk Pengujian Lokal (*Local Verification*)
+
+1. **Uji Tampilan PWA Standalone**:
+   - Buka `perangkat.html` dalam mode Standalone PWA (`window.navigator.standalone === true` / `display-mode: standalone`).
+   - Verifikasi bahwa dua tombol tab (iPhone & Android) **tidak muncul sama sekali**, kartu hanya menampilkan lencana aktif dan 2 menu utama.
+
+
 
 
 
