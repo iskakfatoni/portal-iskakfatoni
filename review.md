@@ -3771,6 +3771,29 @@ Dokumen ini berisi rangkuman review perubahan kode (*code review*) terbaru yang 
    - Buka `perangkat.html` dalam mode Standalone PWA (`window.navigator.standalone === true` / `display-mode: standalone`).
    - Verifikasi bahwa dua tombol tab (iPhone & Android) **tidak muncul sama sekali**, kartu hanya menampilkan lencana aktif dan 2 menu utama.
 
+---
+
+## 📅 Review [2026-08-31 20:18 WIB] - Penghapusan Permanen Tombol Tautan Bawah pada `perangkat.html`
+
+### 📁 1. Berkas yang Diubah
+* 📄 **[perangkat.html](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/perangkat.html)**
+
+---
+
+### 📝 2. Rincian Baris & Logika yang Diperbarui
+
+1. **Penghapusan Elemen `#bottom-portal-link`**:
+   - Menghapus tombol *"Buka Portal Materi & Link Tugas"* di bagian bawah kartu `perangkat.html` secara permanen.
+   - Halaman `perangkat.html` kini menjadi halaman khusus instalasi/unduh dan menu PWA, tanpa tombol navigasi membingungkan di bagian bawah saat dibuka via browser maupun peramban in-app WhatsApp.
+
+---
+
+### 🧪 3. Petunjuk Pengujian Lokal (*Local Verification*)
+
+1. **Uji Tampilan di Peramban Web / WhatsApp In-App**:
+   - Buka `perangkat.html` dari peramban biasa atau in-app browser WhatsApp $\rightarrow$ Verifikasi bagian bawah kartu bersih dan tombol *"Buka Portal Materi & Link Tugas"* tidak lagi muncul.
+
+
 
 
 

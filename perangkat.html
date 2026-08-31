@@ -236,14 +236,6 @@
         </div>
       </div>
 
-      <!-- TOMBOL BUKA PORTAL MATERI -->
-      <div id="bottom-portal-link" style="margin-top: 20px; text-align: center;">
-        <a href="portal.html?no_redirect=true" class="update-link" style="justify-content: center; opacity: 0.9;">
-          <i class="fa-solid fa-book-open"></i>
-          <span>Buka Portal Materi &amp; Link Tugas</span>
-        </a>
-      </div>
-
     </section>
 
     <!-- Footer -->
@@ -332,7 +324,6 @@
       const badgeEl = document.getElementById('detected-badge');
       const tabGroup = document.getElementById('device-tab-group');
       const iosPanelTitle = document.getElementById('ios-panel-title');
-      const bottomPortalLink = document.getElementById('bottom-portal-link');
       const iosPwaMenu = document.getElementById('ios-pwa-menu');
       const iosGuideChrome = document.getElementById('ios-guide-chrome');
       const iosGuideSafari = document.getElementById('ios-guide-safari');
@@ -344,7 +335,6 @@
           badgeEl.style.color = '#34d399';
           if (tabGroup) tabGroup.classList.add('hidden');
           if (iosPanelTitle) iosPanelTitle.classList.add('hidden');
-          if (bottomPortalLink) bottomPortalLink.classList.add('hidden');
           if (iosPwaMenu) iosPwaMenu.classList.remove('hidden');
           if (iosGuideChrome) iosGuideChrome.classList.add('hidden');
           if (iosGuideSafari) iosGuideSafari.classList.add('hidden');
@@ -354,7 +344,6 @@
           badgeEl.style.color = '#38bdf8';
           if (tabGroup) tabGroup.classList.remove('hidden');
           if (iosPanelTitle) iosPanelTitle.classList.remove('hidden');
-          if (bottomPortalLink) bottomPortalLink.classList.remove('hidden');
           if (iosPwaMenu) iosPwaMenu.classList.add('hidden');
           if (iosGuideChrome) iosGuideChrome.classList.remove('hidden');
           if (iosGuideSafari) iosGuideSafari.classList.add('hidden');
@@ -364,7 +353,6 @@
           badgeEl.style.color = '#ffffff';
           if (tabGroup) tabGroup.classList.remove('hidden');
           if (iosPanelTitle) iosPanelTitle.classList.remove('hidden');
-          if (bottomPortalLink) bottomPortalLink.classList.remove('hidden');
           if (iosPwaMenu) iosPwaMenu.classList.add('hidden');
           if (iosGuideChrome) iosGuideChrome.classList.add('hidden');
           if (iosGuideSafari) iosGuideSafari.classList.remove('hidden');
@@ -375,14 +363,12 @@
         badgeEl.style.borderColor = 'rgba(52, 211, 153, 0.4)';
         badgeEl.style.color = '#34d399';
         if (tabGroup) tabGroup.classList.remove('hidden');
-        if (bottomPortalLink) bottomPortalLink.classList.remove('hidden');
         switchTab('android');
       } else {
         badgeText.innerHTML = '<i class="fa-solid fa-mobile-screen"></i> Pilih Tipe Perangkat Ponsel Anda';
         badgeEl.style.borderColor = 'rgba(56, 189, 248, 0.4)';
         badgeEl.style.color = '#38bdf8';
         if (tabGroup) tabGroup.classList.remove('hidden');
-        if (bottomPortalLink) bottomPortalLink.classList.remove('hidden');
         switchTab('android');
       }
     });
