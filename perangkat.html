@@ -90,8 +90,56 @@
           </div>
         </div>
 
-        <!-- PANDUAN PWA IOS (Tampil jika masih di browser Safari biasa) -->
-        <div id="ios-browser-guide">
+        <!-- PANDUAN PWA IOS: GOOGLE CHROME DI IPHONE -->
+        <div id="ios-guide-chrome" class="hidden">
+          <div style="padding: 10px 14px; border-radius: 12px; background: rgba(56, 189, 248, 0.12); border: 1px solid rgba(56, 189, 248, 0.3); margin-bottom: 14px; text-align: left; display: flex; align-items: center; gap: 10px;">
+            <i class="fa-brands fa-chrome text-cyan-400 text-lg"></i>
+            <div style="font-size: 0.75rem; color: #e2e8f0;">
+              <strong>Google Chrome di iPhone Terdeteksi</strong><br>Anda dapat memasang PWA langsung dari Chrome atau membukanya via Safari.
+            </div>
+          </div>
+
+          <!-- LANGKAH-LANGKAH PWA CHROME IOS -->
+          <div class="step-guide-box">
+            <div class="step-guide-header">
+              <i class="fa-brands fa-chrome" style="color: #38bdf8;"></i> Cara Tambah ke Layar Utama di Google Chrome (iOS):
+            </div>
+            <div class="step-list">
+              <div class="step-item">
+                <span class="step-number">1</span>
+                <div class="step-text">
+                  Ketuk ikon <strong>Bagikan (Share)</strong> <i class="fa-solid fa-arrow-up-from-bracket" style="color: #38bdf8;"></i> di kanan atas bilah URL atau tombol <strong>Menu Titik Tiga (...)</strong> di Chrome.
+                </div>
+              </div>
+              <div class="step-item">
+                <span class="step-number">2</span>
+                <div class="step-text">
+                  Gulir ke bawah dan ketuk menu <strong>"Tambahkan ke Layar Utama" (Add to Home Screen)</strong> <i class="fa-solid fa-square-plus" style="color: #38bdf8;"></i>.
+                </div>
+              </div>
+              <div class="step-item">
+                <span class="step-number">3</span>
+                <div class="step-text">
+                  Ketuk <strong>"Tambahkan"</strong> di pojok kanan atas. Ikon Portal Iskak Fatoni kini aktif di Layar Utama!
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- OPSI SALIN LINK KE SAFARI -->
+          <div style="margin-top: 14px; padding: 12px; border-radius: 14px; background: rgba(15, 23, 42, 0.7); border: 1px solid rgba(255, 255, 255, 0.1); text-align: center;">
+            <p style="font-size: 0.75rem; color: #94a3b8; margin-bottom: 8px;">
+              Jika menu belum muncul di Chrome Anda (iOS < 16.4), pasang melalui peramban <strong>Safari</strong>:
+            </p>
+            <button onclick="copyPortalUrl()" class="btn" style="background: rgba(255, 255, 255, 0.1); color: #38bdf8; border: 1px solid rgba(56, 189, 248, 0.3); font-size: 0.75rem; padding: 8px 14px; width: 100%; justify-content: center;">
+              <i class="fa-solid fa-copy"></i>
+              <span id="copy-btn-text">Salin Tautan Portal untuk Buka di Safari</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- PANDUAN PWA IOS: SAFARI (STANDAR) -->
+        <div id="ios-guide-safari" class="hidden">
           <p class="device-panel-desc">
             Perangkat Apple iOS tidak menggunakan berkas APK. Anda dapat memasang <strong>Portal Web App (PWA)</strong> secara langsung ke Layar Utama iPhone Anda tanpa melalui App Store!
           </p>
@@ -104,10 +152,10 @@
             </div>
           </div>
 
-          <!-- LANGKAH-LANGKAH PWA IOS -->
+          <!-- LANGKAH-LANGKAH PWA SAFARI -->
           <div class="step-guide-box">
             <div class="step-guide-header">
-              <i class="fa-solid fa-list-check"></i> Cara Tambahkan ke Layar Utama (iPhone):
+              <i class="fa-brands fa-safari" style="color: #38bdf8;"></i> Cara Tambahkan ke Layar Utama di Safari (iPhone):
             </div>
             <div class="step-list">
               <div class="step-item">
@@ -238,6 +286,14 @@
       return 'other';
     }
 
+    function detectIOSBrowser() {
+      const ua = navigator.userAgent || '';
+      if (/CriOS/i.test(ua)) return 'chrome';
+      if (/FxiOS/i.test(ua)) return 'firefox';
+      if (/EdgiOS/i.test(ua)) return 'edge';
+      return 'safari';
+    }
+
     function checkIsPWA() {
       const isStandaloneIOS = ('standalone' in window.navigator) && window.navigator.standalone;
       const isStandaloneCSS = window.matchMedia('(display-mode: standalone)').matches;
@@ -257,13 +313,30 @@
       if (targetTab) targetTab.classList.add('active');
     }
 
+    function copyPortalUrl() {
+      const portalUrl = window.location.origin + window.location.pathname.replace('perangkat.html', 'index.html');
+      navigator.clipboard.writeText(portalUrl).then(() => {
+        const btnText = document.getElementById('copy-btn-text');
+        if (btnText) {
+          btnText.innerText = '✔ Tautan Disalin! Buka Safari & Tempel di Bilah Alamat';
+          setTimeout(() => {
+            btnText.innerText = 'Salin Tautan Portal untuk Buka di Safari';
+          }, 3500);
+        }
+      }).catch(() => {
+        alert('Salin tautan ini: ' + window.location.href);
+      });
+    }
+
     document.addEventListener('DOMContentLoaded', () => {
       const currentDevice = detectDeviceType();
       const isPWA = checkIsPWA();
+      const iosBrowser = detectIOSBrowser();
       const badgeText = document.getElementById('detected-text');
       const badgeEl = document.getElementById('detected-badge');
       const iosPwaMenu = document.getElementById('ios-pwa-menu');
-      const iosBrowserGuide = document.getElementById('ios-browser-guide');
+      const iosGuideChrome = document.getElementById('ios-guide-chrome');
+      const iosGuideSafari = document.getElementById('ios-guide-safari');
 
       if (currentDevice === 'ios') {
         if (isPWA) {
@@ -271,13 +344,22 @@
           badgeEl.style.borderColor = 'rgba(52, 211, 153, 0.5)';
           badgeEl.style.color = '#34d399';
           if (iosPwaMenu) iosPwaMenu.classList.remove('hidden');
-          if (iosBrowserGuide) iosBrowserGuide.classList.add('hidden');
+          if (iosGuideChrome) iosGuideChrome.classList.add('hidden');
+          if (iosGuideSafari) iosGuideSafari.classList.add('hidden');
+        } else if (iosBrowser === 'chrome') {
+          badgeText.innerHTML = '<i class="fa-brands fa-chrome"></i> Terdeteksi: <strong>Google Chrome di iPhone</strong>';
+          badgeEl.style.borderColor = 'rgba(56, 189, 248, 0.5)';
+          badgeEl.style.color = '#38bdf8';
+          if (iosPwaMenu) iosPwaMenu.classList.add('hidden');
+          if (iosGuideChrome) iosGuideChrome.classList.remove('hidden');
+          if (iosGuideSafari) iosGuideSafari.classList.add('hidden');
         } else {
           badgeText.innerHTML = '<i class="fa-brands fa-apple"></i> Terdeteksi: <strong>iPhone / iPad (Safari)</strong>';
           badgeEl.style.borderColor = 'rgba(255, 255, 255, 0.4)';
           badgeEl.style.color = '#ffffff';
           if (iosPwaMenu) iosPwaMenu.classList.add('hidden');
-          if (iosBrowserGuide) iosBrowserGuide.classList.remove('hidden');
+          if (iosGuideChrome) iosGuideChrome.classList.add('hidden');
+          if (iosGuideSafari) iosGuideSafari.classList.remove('hidden');
         }
         switchTab('ios');
       } else if (currentDevice === 'android') {

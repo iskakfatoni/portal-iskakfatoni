@@ -3695,6 +3695,35 @@ Dokumen ini berisi rangkuman review perubahan kode (*code review*) terbaru yang 
 3. **Uji Kamera Scanner di iOS**:
    - Buka scanner QR presensi $\rightarrow$ kamera terbuka lancar secara inline tanpa jeda fullscreen video player bawaan iOS.
 
+---
+
+## 📅 Review [2026-08-31 20:14 WIB] - Deteksi Cerdas & Panduan PWA Pengguna Google Chrome di iPhone (iOS)
+
+### 📁 1. Berkas yang Diubah
+* 📄 **[perangkat.html](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/perangkat.html)**
+
+---
+
+### 📝 2. Rincian Baris & Logika yang Diperbarui
+
+1. **Deteksi Otomatis Google Chrome di iPhone (`detectIOSBrowser()`)**:
+   - Menambahkan pengenal token peramban `CriOS` pada User-Agent untuk mendeteksi secara akurat ketika iPhone membuka portal menggunakan aplikasi Google Chrome.
+2. **Panduan Adaptif PWA Khusus Chrome iOS**:
+   - Menyediakan instruksi langkah demi langkah yang sesuai dengan antarmuka Google Chrome di iOS: Ketuk tombol **Share / Titik Tiga (...)** $\rightarrow$ **"Tambahkan ke Layar Utama" (Add to Home Screen)**.
+3. **Fasilitas Salin Tautan Cepat ke Safari**:
+   - Menyediakan tombol `copyPortalUrl()` dengan umpan balik visual (*toast feedback*) agar siswa dengan iOS versi lama (< 16.4) yang belum mendukung PWA dari Chrome dapat dengan mudah menyalin tautan dan membukanya di Safari.
+
+---
+
+### 🧪 3. Petunjuk Pengujian Lokal (*Local Verification*)
+
+1. **Simulasi Google Chrome di iPhone**:
+   - Buka DevTools (`F12`) $\rightarrow$ Ubah User Agent menjadi:
+     `Mozilla/5.0 (iPhone; CPU iPhone OS 17_4 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) CriOS/123.0.6312.58 Mobile/15E148 Safari/604.1`
+   - Buka `perangkat.html` $\rightarrow$ Verifikasi badge atas menampilkan **"Terdeteksi: Google Chrome di iPhone 🌐"** dan panduan berganti ke instruksi tombol Chrome.
+   - Klik tombol **"Salin Tautan Portal untuk Buka di Safari"** $\rightarrow$ Verifikasi teks tombol berganti menjadi konfirmasi sukses *"Tautan Disalin!"*.
+
+
 
 
 
