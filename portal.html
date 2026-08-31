@@ -2,7 +2,7 @@
 <html lang="id">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, viewport-fit=cover">
   <title>PORTAL::IskakFatoni - Tautan &amp; Materi Pembelajaran</title>
   <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
   <link rel="preload" href="style/style.css" as="style">
@@ -19,10 +19,12 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="Portal Iskak">
 
-
-  <!-- PROTEKSI AKSES PERANGKAT IPHONE (WAJIB PWA) -->
+  <!-- PROTEKSI AKSES PERANGKAT IPHONE (WAJIB PWA / NO_REDIRECT) -->
   <script>
     (function checkIOSPWARequirement() {
+      const urlParams = new URLSearchParams(window.location.search);
+      if (urlParams.get('no_redirect') === 'true') return;
+
       const ua = navigator.userAgent || navigator.vendor || window.opera || '';
       const isIOS = /iPhone|iPod/.test(ua) || 
                     (/iPad/.test(ua)) || 

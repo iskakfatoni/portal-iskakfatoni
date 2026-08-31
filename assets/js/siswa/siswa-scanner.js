@@ -205,7 +205,17 @@ async function startWebScanner() {
   if (typeof Html5Qrcode === 'undefined') return;
   html5QrCode = new Html5Qrcode("reader");
   try {
-    await html5QrCode.start({ facingMode: "environment" }, { fps: 10, qrbox: 250 }, onScanSuccess);
+    await html5QrCode.start(
+      { facingMode: "environment" }, 
+      { fps: 10, qrbox: { width: 250, height: 250 }, aspectRatio: 1.0 }, 
+      onScanSuccess
+    );
+    // Optimasi Kamera iOS Webkit
+    const videoEl = document.querySelector('#reader video');
+    if (videoEl) {
+      videoEl.setAttribute('playsinline', 'true');
+      videoEl.setAttribute('webkit-playsinline', 'true');
+    }
     if (cameraLoading) cameraLoading.classList.add('hidden');
   } catch (e) {
     console.error("Gagal start kamera web:", e);

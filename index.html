@@ -2,7 +2,7 @@
 <html lang="id">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, viewport-fit=cover">
   <title>PORTAL::IskakFatoni</title>
   <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
   <link rel="preload" href="style/style.css" as="style">
@@ -21,7 +21,6 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="Portal Iskak">
 
-
   <!-- DETEKSI OTOMATIS PENGGUNA IPHONE / IPAD -->
   <script>
     (function() {
@@ -35,7 +34,13 @@
                     (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
 
       if (isIOS) {
-        window.location.replace('iphone.html');
+        const isStandaloneIOS = ('standalone' in window.navigator) && window.navigator.standalone;
+        const isStandaloneCSS = window.matchMedia('(display-mode: standalone)').matches;
+        const isPWA = isStandaloneIOS || isStandaloneCSS;
+
+        if (!isPWA) {
+          window.location.replace('iphone.html');
+        }
       }
     })();
   </script>

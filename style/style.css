@@ -141,7 +141,10 @@ body.theme-glass {
   display: flex;
   justify-content: center;
   align-items: center;
-  padding: 24px 16px;
+  padding-top: max(24px, env(safe-area-inset-top));
+  padding-bottom: max(24px, env(safe-area-inset-bottom));
+  padding-left: max(16px, env(safe-area-inset-left));
+  padding-right: max(16px, env(safe-area-inset-right));
   position: relative;
   overflow-x: hidden;
   transition: background 0.5s ease, color 0.5s ease;

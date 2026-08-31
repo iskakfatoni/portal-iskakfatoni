@@ -2,7 +2,7 @@
 <html lang="id">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, viewport-fit=cover">
   <title>Aplikasi &amp; Deteksi Perangkat - PORTAL::IskakFatoni</title>
   <meta name="description" content="Unduh aplikasi portal sekolah untuk Android atau pasang Web App PWA di iPhone (iOS). Deteksi perangkat otomatis.">
   <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
@@ -12,6 +12,7 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer">
   <link rel="manifest" href="assets/manifest.json">
   <link rel="icon" type="image/webp" href="assets/img/nisnas_logo_colorful.webp">
+  <link rel="apple-touch-icon" href="assets/img/nisnas_logo_colorful.webp">
   <meta name="theme-color" content="#0b0f19">
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
@@ -61,52 +62,82 @@
       <div id="panel-ios" class="device-panel hidden">
         <div class="device-panel-title">
           <i class="fa-brands fa-apple" style="color: #cbd5e1;"></i>
-          <span>Panduan Pengguna iPhone &amp; iPad</span>
-        </div>
-        <p class="device-panel-desc">
-          Perangkat Apple iOS tidak menggunakan berkas APK. Anda dapat memasang <strong>Portal Web App (PWA)</strong> secara langsung ke Layar Utama iPhone Anda tanpa melalui App Store!
-        </p>
-
-        <!-- TIPS PWA IOS -->
-        <div class="ios-tip-badge">
-          <i class="fa-solid fa-circle-info"></i>
-          <div>
-            <strong>Info iOS:</strong> Menambahkan ke Layar Utama memberikan tampilan full-screen dan kecepatan akses yang sama persis seperti aplikasi native.
-          </div>
+          <span>Portal Pengguna iPhone &amp; iPad</span>
         </div>
 
-        <!-- LANGKAH-LANGKAH PWA IOS -->
-        <div class="step-guide-box">
-          <div class="step-guide-header">
-            <i class="fa-solid fa-list-check"></i> Cara Tambahkan ke Layar Utama (iPhone):
+        <!-- MENU PINTASAN PWA IPHONE (Tampil jika sudah Add to Home Screen) -->
+        <div id="ios-pwa-menu" class="hidden" style="margin-bottom: 16px;">
+          <div style="padding: 10px 14px; border-radius: 12px; background: rgba(16, 185, 129, 0.15); border: 1px solid rgba(16, 185, 129, 0.3); margin-bottom: 14px; text-align: left; display: flex; align-items: center; gap: 10px;">
+            <i class="fa-solid fa-circle-check text-emerald-400 text-lg"></i>
+            <div style="font-size: 0.75rem; color: #e2e8f0;">
+              <strong>PWA Layar Utama Aktif</strong><br>Aplikasi berjalan optimal di iPhone Anda.
+            </div>
           </div>
-          <div class="step-list">
-            <div class="step-item">
-              <span class="step-number">1</span>
-              <div class="step-text">
-                Buka portal menggunakan peramban <strong>Safari</strong> di iPhone/iPad Anda.
-              </div>
+
+          <div style="display: flex; flex-direction: column; gap: 10px;">
+            <a href="absensi.html" class="btn btn-emerald" style="justify-content: center; padding: 14px; font-size: 0.85rem;">
+              <i class="fa-solid fa-qrcode"></i>
+              <span>Presensi &amp; Absensi Siswa</span>
+            </a>
+            <a href="portal.html?no_redirect=true" class="btn btn-cyan" style="justify-content: center; padding: 14px; font-size: 0.85rem;">
+              <i class="fa-solid fa-book-open"></i>
+              <span>Portal Materi &amp; Link Tugas</span>
+            </a>
+            <a href="admin.html" class="btn" style="background: rgba(15, 23, 42, 0.9); color: #cbd5e1; border: 1px solid rgba(255, 255, 255, 0.15); justify-content: center; padding: 12px; font-size: 0.8rem;">
+              <i class="fa-solid fa-shield-halved text-cyan-400"></i>
+              <span>Admin &amp; Guru Hub</span>
+            </a>
+          </div>
+        </div>
+
+        <!-- PANDUAN PWA IOS (Tampil jika masih di browser Safari biasa) -->
+        <div id="ios-browser-guide">
+          <p class="device-panel-desc">
+            Perangkat Apple iOS tidak menggunakan berkas APK. Anda dapat memasang <strong>Portal Web App (PWA)</strong> secara langsung ke Layar Utama iPhone Anda tanpa melalui App Store!
+          </p>
+
+          <!-- TIPS PWA IOS -->
+          <div class="ios-tip-badge">
+            <i class="fa-solid fa-circle-info"></i>
+            <div>
+              <strong>Info iOS:</strong> Menambahkan ke Layar Utama memberikan tampilan full-screen dan kecepatan akses yang sama persis seperti aplikasi native.
             </div>
-            <div class="step-item">
-              <span class="step-number">2</span>
-              <div class="step-text">
-                Ketuk tombol <strong>Bagikan (Share)</strong> <i class="fa-solid fa-arrow-up-from-bracket" style="color: #38bdf8;"></i> di bagian bawah layar Safari.
-              </div>
+          </div>
+
+          <!-- LANGKAH-LANGKAH PWA IOS -->
+          <div class="step-guide-box">
+            <div class="step-guide-header">
+              <i class="fa-solid fa-list-check"></i> Cara Tambahkan ke Layar Utama (iPhone):
             </div>
-            <div class="step-item">
-              <span class="step-number">3</span>
-              <div class="step-text">
-                Gulir ke bawah dan pilih menu <strong>"Tambah ke Layar Utama" (Add to Home Screen)</strong> <i class="fa-solid fa-square-plus" style="color: #38bdf8;"></i>.
+            <div class="step-list">
+              <div class="step-item">
+                <span class="step-number">1</span>
+                <div class="step-text">
+                  Buka portal menggunakan peramban <strong>Safari</strong> di iPhone/iPad Anda.
+                </div>
               </div>
-            </div>
-            <div class="step-item">
-              <span class="step-number">4</span>
-              <div class="step-text">
-                Ketuk <strong>"Tambah"</strong> di sudut kanan atas. Ikon Portal Iskak Fatoni kini siap di layar utama!
+              <div class="step-item">
+                <span class="step-number">2</span>
+                <div class="step-text">
+                  Ketuk tombol <strong>Bagikan (Share)</strong> <i class="fa-solid fa-arrow-up-from-bracket" style="color: #38bdf8;"></i> di bagian bawah layar Safari.
+                </div>
+              </div>
+              <div class="step-item">
+                <span class="step-number">3</span>
+                <div class="step-text">
+                  Gulir ke bawah dan pilih menu <strong>"Tambah ke Layar Utama" (Add to Home Screen)</strong> <i class="fa-solid fa-square-plus" style="color: #38bdf8;"></i>.
+                </div>
+              </div>
+              <div class="step-item">
+                <span class="step-number">4</span>
+                <div class="step-text">
+                  Ketuk <strong>"Tambah"</strong> di sudut kanan atas. Ikon Portal Iskak Fatoni siap di layar utama!
+                </div>
               </div>
             </div>
           </div>
         </div>
+
       </div>
 
       <!-- PANEL 2: ANDROID -->
@@ -161,11 +192,11 @@
         </div>
       </div>
 
-      <!-- TOMBOL KEMBALI KE HOME -->
+      <!-- TOMBOL BUKA PORTAL MATERI -->
       <div style="margin-top: 20px; text-align: center;">
-        <a href="index.html" class="update-link" style="justify-content: center; opacity: 0.85;">
-          <i class="fa-solid fa-house"></i>
-          <span>Kembali ke Halaman Utama</span>
+        <a href="portal.html?no_redirect=true" class="update-link" style="justify-content: center; opacity: 0.9;">
+          <i class="fa-solid fa-book-open"></i>
+          <span>Buka Portal Materi &amp; Link Tugas</span>
         </a>
       </div>
 
@@ -189,7 +220,7 @@
 
   </main>
 
-  <!-- JS DETEKSI PERANGKAT -->
+  <!-- JS DETEKSI PERANGKAT & SMART PWA MODE -->
   <script>
     function detectDeviceType() {
       const ua = navigator.userAgent || navigator.vendor || window.opera || '';
@@ -207,6 +238,12 @@
       return 'other';
     }
 
+    function checkIsPWA() {
+      const isStandaloneIOS = ('standalone' in window.navigator) && window.navigator.standalone;
+      const isStandaloneCSS = window.matchMedia('(display-mode: standalone)').matches;
+      return Boolean(isStandaloneIOS || isStandaloneCSS);
+    }
+
     function switchTab(device) {
       // Sembunyikan semua panel
       document.querySelectorAll('.device-panel').forEach(p => p.classList.add('hidden'));
@@ -222,13 +259,26 @@
 
     document.addEventListener('DOMContentLoaded', () => {
       const currentDevice = detectDeviceType();
+      const isPWA = checkIsPWA();
       const badgeText = document.getElementById('detected-text');
       const badgeEl = document.getElementById('detected-badge');
+      const iosPwaMenu = document.getElementById('ios-pwa-menu');
+      const iosBrowserGuide = document.getElementById('ios-browser-guide');
 
       if (currentDevice === 'ios') {
-        badgeText.innerHTML = '<i class="fa-brands fa-apple"></i> Terdeteksi: <strong>iPhone / iPad (iOS)</strong>';
-        badgeEl.style.borderColor = 'rgba(255, 255, 255, 0.4)';
-        badgeEl.style.color = '#ffffff';
+        if (isPWA) {
+          badgeText.innerHTML = '<i class="fa-brands fa-apple"></i> <strong>iPhone PWA (Layar Utama)</strong>';
+          badgeEl.style.borderColor = 'rgba(52, 211, 153, 0.5)';
+          badgeEl.style.color = '#34d399';
+          if (iosPwaMenu) iosPwaMenu.classList.remove('hidden');
+          if (iosBrowserGuide) iosBrowserGuide.classList.add('hidden');
+        } else {
+          badgeText.innerHTML = '<i class="fa-brands fa-apple"></i> Terdeteksi: <strong>iPhone / iPad (Safari)</strong>';
+          badgeEl.style.borderColor = 'rgba(255, 255, 255, 0.4)';
+          badgeEl.style.color = '#ffffff';
+          if (iosPwaMenu) iosPwaMenu.classList.add('hidden');
+          if (iosBrowserGuide) iosBrowserGuide.classList.remove('hidden');
+        }
         switchTab('ios');
       } else if (currentDevice === 'android') {
         badgeText.innerHTML = '<i class="fa-brands fa-android"></i> Terdeteksi: <strong>Android Device</strong>';

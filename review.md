@@ -3650,6 +3650,52 @@ Dokumen ini berisi rangkuman review perubahan kode (*code review*) terbaru yang 
    - Buka `absensi.html` $\rightarrow$ Muncul notifikasi toast: *"✨ Presensi offline Anda telah berhasil disinkronkan ke server!"*.
    - Data antrean di IndexedDB terhapus dan log presensi tercatat resmi di Firestore.
 
+---
+
+## 📅 Review [2026-08-31 20:05 WIB] - Optimasi Menyeluruh Ekosistem iPhone (iOS & PWA)
+
+### 📁 1. Berkas yang Diubah
+* 📄 **[perangkat.html](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/perangkat.html)**
+* 📄 **[style/style.css](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/style/style.css)**
+* 📄 **[index.html](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/index.html)**
+* 📄 **[portal.html](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/portal.html)**
+* 📄 **[absensi.html](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/absensi.html)**
+* 📄 **[admin.html](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/admin.html)**
+* 📄 **[pages/siswa/scanner.html](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/pages/siswa/scanner.html)**
+* 📄 **[pages/siswa/result.html](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/pages/siswa/result.html)**
+* 📄 **[assets/js/siswa/siswa-scanner.js](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/assets/js/siswa/siswa-scanner.js)**
+
+---
+
+### 📝 2. Rincian Baris & Logika yang Diperbarui
+
+1. **Smart PWA Menu pada `perangkat.html`**:
+   - Menambahkan pengecekan `checkIsPWA()`. Jika siswa membuka aplikasi dari Home Screen iPhone (`isPWA === true`), panduan instalasi disembunyikan dan sistem langsung memunculkan menu pintasan: Presensi Siswa, Portal Materi, dan Admin Hub dengan badge `iPhone PWA (Layar Utama)`.
+   - Mengarahkan tombol navigasi kembali ke `portal.html?no_redirect=true` untuk memutus potensi *redirect loop*.
+
+2. **Dukungan Safe Area Insets (`style.css`)**:
+   - Menambahkan properti CSS `padding: max(..., env(safe-area-inset-*))` pada `body.theme-glass` dan kartu tampilan utama agar tidak bertabrakan dengan poni/Notch iPhone, Dynamic Island, dan garis Home Bar.
+
+3. **Standarisasi Meta Viewport & iOS Standalone**:
+   - Menambahkan deklarasi `viewport-fit=cover` pada meta viewport seluruh halaman utama HTML.
+   - Menambahkan pengecekan `isPWA` pada `index.html` dan `portal.html` agar tidak melempar pengguna jika sudah dalam mode standalone PWA.
+
+4. **Optimasi Video Scanner iOS (`siswa-scanner.js` & `scanner.html`)**:
+   - Menyuntikkan atribut `playsinline` dan `webkit-playsinline` pada elemen video kamera scanner untuk mencegah layar hitam di Webkit iOS.
+
+---
+
+### 🧪 3. Petunjuk Pengujian Lokal (*Local Verification*)
+
+1. **Uji Safari iPhone (Browser Biasa)**:
+   - Akses `index.html` via Safari iPhone $\rightarrow$ dialihkan ke panduan instalasi PWA di `perangkat.html`.
+   - Klik tombol "Buka Portal Materi" $\rightarrow$ `portal.html` terbuka lancar tanpa redirect loop.
+2. **Uji Mode PWA iPhone (Layar Utama)**:
+   - Tambahkan ke Layar Utama (*Add to Home Screen*) lalu buka dari ikon Home Screen $\rightarrow$ muncul menu pintasan instan ke Absensi dan Portal Materi.
+3. **Uji Kamera Scanner di iOS**:
+   - Buka scanner QR presensi $\rightarrow$ kamera terbuka lancar secara inline tanpa jeda fullscreen video player bawaan iOS.
+
+
 
 
 
