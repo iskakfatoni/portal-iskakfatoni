@@ -2,48 +2,56 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
-    // 1. Koleksi log_absensi: Siswa (publik) dapat menambahkan (create) log presensi saat scan QR,
-    //    serta Guru/Admin dapat membaca (read), mengedit (update), dan menghapus (delete) log absensi.
+    // FUNGSI PEMBANTU: Cek apakah user adalah Admin terautentikasi (Firebase Auth)
+    function isAdmin() {
+      return request.auth != null;
+    }
+
+    // 1. Koleksi log_absensi: Siswa bisa kirim log & baca history, Admin bebas kelola.
     match /log_absensi/{docId} {
-      allow read, create, update, delete: if true;
+      allow read, create: if true;
+      allow update, delete: if isAdmin();
     }
 
-    // 2. Koleksi sesi_absensi: Siswa (publik) dapat membaca (read) status & QR token sesi aktif,
-    //    Guru/Admin dapat membuat, memutar token, dan menutup sesi (write/update).
+    // 2. Koleksi sesi_absensi: Siswa baca status sesi, Admin kelola sesi.
     match /sesi_absensi/{docId} {
-      allow read, create, update, delete: if true;
+      allow read: if true;
+      allow write, update, delete: if isAdmin();
     }
 
-    // 3. Koleksi siswa: Siswa (publik) dapat membaca profil & memperbarui (update) device_id saat verifikasi HP,
-    //    Admin dapat mengelola data master siswa.
+    // 3. Koleksi siswa: Siswa baca profil & ikat device, Admin kelola master data.
     match /siswa/{docId} {
-      allow read, create, update, delete: if true;
+      allow read, update: if true;
+      allow create, delete: if isAdmin();
     }
 
-    // 4. Koleksi kelas, mapel, & links
+    // 4. Koleksi publik (Read-Only untuk Siswa, Write untuk Admin)
     match /kelas/{docId} {
-      allow read, create, update, delete: if true;
+      allow read: if true;
+      allow write, update, delete: if isAdmin();
     }
     match /mapel/{docId} {
-      allow read, create, update, delete: if true;
+      allow read: if true;
+      allow write, update, delete: if isAdmin();
     }
     match /links/{docId} {
-      allow read, create, update, delete: if true;
-    }
-    // 5. Koleksi admin_devices & settings: Pengikatan HP/perangkat admin & pengaturan portal
-    match /admin_devices/{docId} {
-      allow read, create, update, delete: if true;
+      allow read: if true;
+      allow write, update, delete: if isAdmin();
     }
     match /settings/{docId} {
-      allow read, create, update, delete: if true;
+      allow read: if true;
+      allow write, update, delete: if isAdmin();
     }
 
-    // 6. Koleksi system_logs & trash_bin (Logs & Recycle Bin)
+    // 5. Koleksi SENSITIF (HANYA ADMIN): Log keamanan, recycle bin, & daftar device admin.
+    match /admin_devices/{docId} {
+      allow read, write, update, delete: if isAdmin();
+    }
     match /system_logs/{docId} {
-      allow read, create, update, delete: if true;
+      allow read, write, update, delete: if isAdmin();
     }
     match /trash_bin/{docId} {
-      allow read, create, update, delete: if true;
+      allow read, write, update, delete: if isAdmin();
     }
   }
 }
