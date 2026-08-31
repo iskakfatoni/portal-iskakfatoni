@@ -3723,6 +3723,32 @@ Dokumen ini berisi rangkuman review perubahan kode (*code review*) terbaru yang 
    - Buka `perangkat.html` $\rightarrow$ Verifikasi badge atas menampilkan **"Terdeteksi: Google Chrome di iPhone 🌐"** dan panduan berganti ke instruksi tombol Chrome.
    - Klik tombol **"Salin Tautan Portal untuk Buka di Safari"** $\rightarrow$ Verifikasi teks tombol berganti menjadi konfirmasi sukses *"Tautan Disalin!"*.
 
+---
+
+## 📅 Review [2026-08-31 20:15 WIB] - Penyederhanaan Menu PWA iPhone (Penghapusan Akses Admin Hub)
+
+### 📁 1. Berkas yang Diubah
+* 📄 **[perangkat.html](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/perangkat.html)**
+
+---
+
+### 📝 2. Rincian Baris & Logika yang Diperbarui
+
+1. **Penghapusan Tombol Admin & Guru Hub**:
+   - Menghapus tautan `admin.html` dari kontainer `#ios-pwa-menu` pada `perangkat.html`.
+   - Menu PWA iPhone kini difokuskan eksklusif hanya untuk kebutuhan siswa:
+     - 📷 **Presensi & Absensi Siswa** (`absensi.html`)
+     - 📚 **Portal Materi & Link Tugas** (`portal.html?no_redirect=true`)
+
+---
+
+### 🧪 3. Petunjuk Pengujian Lokal (*Local Verification*)
+
+1. **Uji Menu PWA iPhone**:
+   - Buka `perangkat.html` dalam mode simulasi PWA Standalone iPhone (`display-mode: standalone`).
+   - Verifikasi bahwa menu yang tampil hanya ada 2 tombol (Absensi Siswa dan Portal Materi), dan tombol Admin Hub sudah bersih/tidak tampil.
+
+
 
 
 
