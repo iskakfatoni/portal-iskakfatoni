@@ -14,6 +14,7 @@ import {
 } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
 import { getScreenOrientationInfo } from "../utils/device-fingerprint.js";
+import { enqueueAttendance } from "../utils/offline-queue.js";
 
 let isProcessing = false;
 let html5QrCode = null;
@@ -66,6 +67,14 @@ async function onScanSuccess(decodedText) {
   const namaSiswaVal = currentSiswaUser.nama_siswa || currentSiswaUser.nama || "Siswa";
   const idKelasSiswa = currentSiswaUser.id_kelas || "-";
   const namaKelasSiswa = currentSiswaUser.nama_kelas || currentSiswaUser.id_kelas || "-";
+  const currentDeviceId = currentSiswaUser.device_id || localStorage.getItem('portal_device_id') || '';
+
+  const now = new Date();
+  const days = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
+  const hariStr = days[now.getDay()];
+  const tanggalStr = now.toLocaleDateString('id-ID', { year: 'numeric', month: '2-digit', day: '2-digit' }).split('/').reverse().join('-');
+  const waktuStr = now.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', second: '2-digit' }) + ' WIB';
+  const screenOrientation = getScreenOrientationInfo();
 
   try {
     // 1. Validasi Sesi QR yang Aktif
@@ -119,17 +128,8 @@ async function onScanSuccess(decodedText) {
       return;
     }
 
-    // 4. Simpan Absensi ke Firestore
-    const now = new Date();
-    const days = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
-    const hariStr = days[now.getDay()];
-    const tanggalStr = now.toLocaleDateString('id-ID', { year: 'numeric', month: '2-digit', day: '2-digit' }).split('/').reverse().join('-');
-    const waktuStr = now.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', second: '2-digit' }) + ' WIB';
-    const currentDeviceId = currentSiswaUser.device_id || localStorage.getItem('portal_device_id') || '';
-
-    const screenOrientation = getScreenOrientationInfo();
-
-    await addDoc(collection(db, "log_absensi"), {
+    // 4. Payload data presensi
+    const logPayload = {
       id_sesi: sesiDoc.id,
       nis: currentSiswaUser.nis,
       nama_siswa: namaSiswaVal,
@@ -142,16 +142,55 @@ async function onScanSuccess(decodedText) {
       waktu: waktuStr,
       device_id: currentDeviceId,
       orientasi_layar: screenOrientation,
-      status: "Hadir",
-      created_at: serverTimestamp()
-    });
+      status: "Hadir"
+    };
 
-    // 5. REDIRECT KE HASIL
-    window.location.href = `result.html?status=success&nama=${encodeURIComponent(namaSiswaVal)}&mapel=${encodeURIComponent(sesiData.nama_mapel)}&waktu=${encodeURIComponent(waktuStr)}`;
+    // 5. Coba Simpan ke Firestore, jika jaringan terputus simpan ke Offline Buffer IndexedDB
+    try {
+      await addDoc(collection(db, "log_absensi"), {
+        ...logPayload,
+        created_at: serverTimestamp()
+      });
+
+      // Redirect ke hasil sukses online
+      window.location.href = `result.html?status=success&nama=${encodeURIComponent(namaSiswaVal)}&mapel=${encodeURIComponent(sesiData.nama_mapel)}&waktu=${encodeURIComponent(waktuStr)}`;
+    } catch (saveErr) {
+      console.warn("Koneksi Firestore gagal saat simpan, mengalihkan ke antrean offline IndexedDB:", saveErr);
+      await enqueueAttendance(logPayload);
+      window.location.href = `result.html?status=offline_queued&nama=${encodeURIComponent(namaSiswaVal)}&mapel=${encodeURIComponent(sesiData.nama_mapel)}&waktu=${encodeURIComponent(waktuStr)}`;
+    }
 
   } catch (err) {
-    console.error("Absensi Error:", err);
-    window.location.href = `result.html?status=error&msg=${encodeURIComponent("Terjadi kesalahan teknis: " + err.message)}`;
+    console.error("Absensi Scanner Error:", err);
+    
+    // Jika kegagalan disebabkan oleh jaringan offline saat getDocs
+    if (!navigator.onLine || err.message?.toLowerCase().includes('offline') || err.message?.toLowerCase().includes('network')) {
+      try {
+        const fallbackPayload = {
+          id_sesi: "offline_session",
+          scanned_token: scannedToken,
+          nis: currentSiswaUser.nis,
+          nama_siswa: namaSiswaVal,
+          id_kelas: idKelasSiswa,
+          nama_kelas: namaKelasSiswa,
+          nama_sekolah: currentSiswaUser.nama_sekolah || '',
+          nama_mapel: "Presensi Kelas",
+          hari: hariStr,
+          tanggal: tanggalStr,
+          waktu: waktuStr,
+          device_id: currentDeviceId,
+          orientasi_layar: screenOrientation,
+          status: "Hadir"
+        };
+        await enqueueAttendance(fallbackPayload);
+        window.location.href = `result.html?status=offline_queued&nama=${encodeURIComponent(namaSiswaVal)}&mapel=${encodeURIComponent('Presensi Kelas')}&waktu=${encodeURIComponent(waktuStr)}`;
+        return;
+      } catch (queueErr) {
+        console.error("Gagal simpan ke offline queue:", queueErr);
+      }
+    }
+
+    window.location.href = `result.html?status=error&msg=${encodeURIComponent("Terjadi kesalahan: " + err.message)}`;
   }
 }
 

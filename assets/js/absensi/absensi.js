@@ -4,6 +4,7 @@
 import { db } from "../config/firebase-config.js";
 import { getHardwareFingerprint } from "../utils/device-fingerprint.js";
 import { loadChartJS } from "../utils/lazy-loader.js";
+import { initAutoSyncListener } from "../utils/offline-queue.js";
 import { 
   doc, 
   getDoc, 
@@ -42,6 +43,13 @@ let unsubscribeProfile = null;
 
 // INISIALISASI APLIKASI
 document.addEventListener('DOMContentLoaded', async () => {
+  // Inisialisasi Auto-Sync Listener untuk antrean offline
+  initAutoSyncListener(db, (count) => {
+    showToast(`✨ ${count} data presensi offline berhasil disinkronkan ke server!`, "success");
+    const user = JSON.parse(localStorage.getItem('portal_siswa_user') || 'null');
+    if (user && user.nis) loadStudentAttendanceHistory(user.nis);
+  });
+
   currentDeviceId = await getHardwareFingerprint();
   localStorage.setItem('portal_device_id', currentDeviceId);
 

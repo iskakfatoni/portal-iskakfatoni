@@ -1,5 +1,5 @@
 // sw.js - Service Worker Optimized for Performance & Offline PWA
-const CACHE_NAME = 'portal-iskakfatoni-v12';
+const CACHE_NAME = 'portal-iskakfatoni-v13';
 
 const LOCAL_ASSETS = [
   './',
@@ -27,6 +27,7 @@ const LOCAL_ASSETS = [
   'assets/js/config/firebase-config.js',
   'assets/js/auth/auth-guard.js',
   'assets/js/utils/device-fingerprint.js',
+  'assets/js/utils/offline-queue.js',
   'assets/js/utils/toast.js',
   'assets/js/utils/lazy-loader.js',
   'assets/js/particle/particle-bg.js',

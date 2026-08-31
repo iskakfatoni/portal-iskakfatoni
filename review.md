@@ -3603,6 +3603,54 @@ Dokumen ini berisi rangkuman review perubahan kode (*code review*) terbaru yang 
 3. **Uji Rekap Guru**:
    - Buka [`pages/guru/rekap.html`](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/pages/guru/rekap.html) &rarr; Kolom **Status** berada persis di sebelah kiri **Nama Siswa**.
 
+---
+
+## 📅 Review [2026-08-31 19:51 WIB] - Implementasi Offline Buffer & Queueing (IndexedDB & Background Sync)
+
+### 📁 1. Berkas yang Diubah / Dibuat
+* 📄 **`[NEW]` [assets/js/utils/offline-queue.js](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/assets/js/utils/offline-queue.js)**
+* 📄 **`[MODIFY]` [assets/js/siswa/siswa-scanner.js](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/assets/js/siswa/siswa-scanner.js)**
+* 📄 **`[MODIFY]` [assets/js/siswa/siswa-result.js](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/assets/js/siswa/siswa-result.js)**
+* 📄 **`[MODIFY]` [assets/js/absensi/absensi.js](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/assets/js/absensi/absensi.js)**
+* 📄 **`[MODIFY]` [sw.js](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/sw.js)**
+
+---
+
+### 📝 2. Rincian Baris & Logika yang Diperbarui
+
+1. **Modul Pengelola Antrean IndexedDB (`offline-queue.js`)**:
+   - Membuat basis data peramban lokal `PortalAttendanceDB` (object store: `pending_attendance_queue`).
+   - Menyediakan fungsi `enqueueAttendance(payload)`, `getPendingQueue()`, `removeQueuedItem(id)`, dan `flushAttendanceQueue(firestoreDb)`.
+   - Mengaktifkan `initAutoSyncListener()` yang memantau event `window.addEventListener('online')` untuk sinkronisasi otomatis batch saat koneksi pulih.
+
+2. **Integrasi Scanner Siswa (`siswa-scanner.js`)**:
+   - Menambahkan mekanisme fallback otomatis ke IndexedDB jika proses `addDoc` ke Firestore gagal akibat sinyal internet offline / drop.
+   - Mengalihkan siswa ke halaman hasil dengan status `offline_queued`.
+
+3. **Penyempurnaan Halaman Hasil (`siswa-result.js`)**:
+   - Menambahkan dukungan status `offline_queued` dengan ikon awan (`fa-cloud-arrow-up`), tema cyan berdenyut (*animate-pulse*), serta teks ramah bahwa data aman di HP dan akan tersinkron otomatis.
+
+4. **Background Auto-Sync di Dashboard Siswa (`absensi.js`)**:
+   - Menjalankan `initAutoSyncListener()` saat inisialisasi awal halaman absensi siswa untuk auto-flush data antrean tertunda dan memperbarui riwayat presensi.
+
+5. **Pembaruan Service Worker PWA (`sw.js`)**:
+   - Mendaftarkan `assets/js/utils/offline-queue.js` ke dalam `LOCAL_ASSETS` dan menaikkan cache ke `portal-iskakfatoni-v13`.
+
+---
+
+### 🧪 3. Petunjuk Pengujian Lokal (*Local Verification*)
+
+1. **Simulasi Scan Offline**:
+   - Buka halaman Scanner Siswa di browser (`pages/siswa/scanner.html`).
+   - Buka DevTools (`F12`) $\rightarrow$ Tab **Network** $\rightarrow$ pilih **Offline**.
+   - Lakukan scan QR $\rightarrow$ Layar menampilkan **"Presensi Disimpan (Offline)"** dengan ikon awan.
+   - Periksa **DevTools $\rightarrow$ Application $\rightarrow$ IndexedDB $\rightarrow$ PortalAttendanceDB** untuk memastikan payload tersimpan di `pending_attendance_queue`.
+2. **Simulasi Sinkronisasi Otomatis**:
+   - Kembalikan mode Network ke **Online / No throttling**.
+   - Buka `absensi.html` $\rightarrow$ Muncul notifikasi toast: *"✨ Presensi offline Anda telah berhasil disinkronkan ke server!"*.
+   - Data antrean di IndexedDB terhapus dan log presensi tercatat resmi di Firestore.
+
+
 
 
 

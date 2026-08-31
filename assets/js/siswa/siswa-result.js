@@ -46,6 +46,23 @@ document.addEventListener('DOMContentLoaded', () => {
       });
     }).catch(() => {});
 
+  } else if (status === 'offline_queued') {
+    if (iconContainer) iconContainer.className = "w-24 h-24 mx-auto rounded-full flex items-center justify-center text-4xl shadow-lg bg-cyan-500/20 text-cyan-400 border border-cyan-500/50 animate-pulse";
+    if (icon) icon.className = "fa-solid fa-cloud-arrow-up";
+    if (title) {
+      title.innerText = "Presensi Disimpan (Offline)";
+      title.classList.add('text-cyan-400');
+    }
+    if (message) message.innerHTML = "Koneksi internet Anda sedang lemah. Data presensi Anda telah <strong>diamankan di HP</strong> dan akan otomatis disinkronkan ke server saat internet kembali aktif. ⏳";
+
+    const resNama = document.getElementById('res-nama');
+    const resMapel = document.getElementById('res-mapel');
+    const resWaktu = document.getElementById('res-waktu');
+    if (resNama) resNama.innerText = nama || '-';
+    if (resMapel) resMapel.innerText = mapel || '-';
+    if (resWaktu) resWaktu.innerText = waktu || '-';
+    if (detailBox) detailBox.classList.remove('hidden');
+
   } else if (status === 'already') {
     if (iconContainer) iconContainer.className = "w-24 h-24 mx-auto rounded-full flex items-center justify-center text-4xl shadow-lg bg-amber-500/20 text-amber-400 border border-amber-500/50";
     if (icon) icon.className = "fa-solid fa-triangle-exclamation";
