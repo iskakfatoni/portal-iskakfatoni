@@ -2,10 +2,13 @@ name: Auto Simpan Presensi Tidak Hadir (Alpa 15:30 WIB)
 
 on:
   schedule:
-    # 08:30 UTC = 15:30 WIB (Senin s.d. Jumat)
+    # 08:30 UTC = 15:30 WIB (Senin s.d. Jumat) - Sebagai fallback
     - cron: '30 8 * * 1-5'
   # Memungkinkan eksekusi manual via tombol 'Run workflow' di tab Actions GitHub
   workflow_dispatch:
+  # Pemicu instan presisi tepat waktu via Webhook/API (misal dari cron-job.org)
+  repository_dispatch:
+    types: [trigger-alpa]
 
 jobs:
   auto-alpa:
@@ -18,7 +21,7 @@ jobs:
       - name: 🟢 Setup Node.js Environment
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '22'
 
       - name: 🤖 Jalankan Auto-Alpa Script (15:30 WIB)
         run: node scripts/auto-alpa.js

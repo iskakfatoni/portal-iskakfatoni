@@ -4,6 +4,43 @@ Dokumen ini berisi rangkuman review perubahan kode (*code review*) terbaru yang 
 
 ---
 
+## 📅 Review [2026-09-08 20:15 WIB] - Penambahan Trigger Webhook (repository_dispatch) untuk Eksekusi Tepat Waktu Presensi Otomatis
+
+### 📁 1. Berkas yang Diperbarui
+* 📄 **[.github/workflows/auto-alpa.yml](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/.github/workflows/auto-alpa.yml)** `[MODIFY]`
+
+---
+
+### 📝 2. Rincian Baris & Logika yang Diperbarui
+
+1. ⚡ **Pemicu Instan Presisi Realtime (`repository_dispatch`)**:
+   - Menambahkan event `repository_dispatch` dengan custom type `types: [trigger-alpa]` pada workflow `auto-alpa.yml`.
+   - Mengatasi delay cron internal GitHub Actions yang tertunda 4 hingga 8 jam karena antrean server gratis GitHub.
+   - Memungkinkan layanan cron pihak ketiga seperti **cron-job.org** memicu workflow tepat pada pukul 15:30:00 WIB tanpa delay.
+2. 🔄 **Pembaruan Node.js Environment**:
+   - Memperbarui versi runtime `setup-node` dari `node-version: '20'` ke `'22'` guna menghindari pesan peringatan deprecation Node 20 pada GitHub Actions runner.
+
+---
+
+### 🧪 3. Petunjuk Pengujian Lokal & Webhook (*Verification*)
+
+1. **Uji Coba Pemicu via GitHub CLI**:
+   Jalankan command dispatch:
+   ```bash
+   gh api repos/iskakfatoni/portal-iskakfatoni/dispatches -f event_type=trigger-alpa
+   ```
+2. **Setup cron-job.org**:
+   - URL: `https://api.github.com/repos/iskakfatoni/portal-iskakfatoni/dispatches`
+   - Method: `POST`
+   - Headers:
+     - `Accept: application/vnd.github+json`
+     - `Authorization: Bearer <GITHUB_TOKEN>`
+     - `User-Agent: cronjob-auto-alpa`
+   - Body: `{"event_type": "trigger-alpa"}`
+   - Schedule: Setiap Senin-Jumat, 15:30 WIB (Asia/Jakarta).
+
+---
+
 ## 📅 Review [2026-09-08 19:08 WIB] - Pembuatan Ekstensi Antigravity / VS Code: Tamandata AI Chat Assistant
 
 ### 📁 1. Berkas yang Dibuat
