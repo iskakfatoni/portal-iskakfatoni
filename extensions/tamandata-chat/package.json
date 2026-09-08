@@ -1,0 +1,97 @@
+{
+  "name": "tamandata-chat-assistant",
+  "displayName": "Tamandata AI Chat Assistant",
+  "description": "Sidebar chat assistant langsung terhubung ke Tamandata AI (cx/gpt-6-astra) di Antigravity IDE",
+  "version": "1.0.0",
+  "publisher": "iskakfatoni",
+  "engines": {
+    "vscode": "^1.80.0"
+  },
+  "categories": [
+    "Machine Learning",
+    "AI",
+    "Programming Languages"
+  ],
+  "main": "./extension.js",
+  "activationEvents": [
+    "onView:tamandata.chatView"
+  ],
+  "contributes": {
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "tamandata-sidebar-container",
+          "title": "Tamandata AI",
+          "icon": "media/icon.svg"
+        }
+      ]
+    },
+    "views": {
+      "tamandata-sidebar-container": [
+        {
+          "type": "webview",
+          "id": "tamandata.chatView",
+          "name": "Tamandata Chat",
+          "visibility": "visible"
+        }
+      ]
+    },
+    "commands": [
+      {
+        "command": "tamandata.openChat",
+        "title": "Tamandata: Buka Chat",
+        "category": "Tamandata AI"
+      },
+      {
+        "command": "tamandata.setApiKey",
+        "title": "Tamandata: Atur API Key",
+        "category": "Tamandata AI"
+      },
+      {
+        "command": "tamandata.sendSelection",
+        "title": "Tamandata: Tanya Kode Terpilih",
+        "category": "Tamandata AI"
+      },
+      {
+        "command": "tamandata.clearHistory",
+        "title": "Tamandata: Hapus Riwayat Chat",
+        "category": "Tamandata AI"
+      }
+    ],
+    "menus": {
+      "editor/context": [
+        {
+          "command": "tamandata.sendSelection",
+          "when": "editorHasSelection",
+          "group": "1_modification"
+        }
+      ]
+    },
+    "configuration": {
+      "title": "Tamandata AI",
+      "properties": {
+        "tamandata.apiKey": {
+          "type": "string",
+          "default": "",
+          "description": "API Key Tamandata AI dari https://ai.tamandata.com"
+        },
+        "tamandata.baseUrl": {
+          "type": "string",
+          "default": "https://ai.tamandata.com/v1",
+          "description": "Base URL API Tamandata AI"
+        },
+        "tamandata.defaultModel": {
+          "type": "string",
+          "default": "cx/gpt-6-astra",
+          "enum": [
+            "cx/gpt-6-astra",
+            "tamandata",
+            "z/deepseek-v4-flash",
+            "gemini/gemini-3.7-flash"
+          ],
+          "description": "Model default yang digunakan untuk menjawab"
+        }
+      }
+    }
+  }
+}

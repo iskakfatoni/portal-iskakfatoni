@@ -4,6 +4,50 @@ Dokumen ini berisi rangkuman review perubahan kode (*code review*) terbaru yang 
 
 ---
 
+## 📅 Review [2026-09-08 19:08 WIB] - Pembuatan Ekstensi Antigravity / VS Code: Tamandata AI Chat Assistant
+
+### 📁 1. Berkas yang Dibuat
+* 📄 **[extensions/tamandata-chat/package.json](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/extensions/tamandata-chat/package.json)** `[NEW]`
+* 📄 **[extensions/tamandata-chat/extension.js](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/extensions/tamandata-chat/extension.js)** `[NEW]`
+* 📄 **[extensions/tamandata-chat/media/icon.svg](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/extensions/tamandata-chat/media/icon.svg)** `[NEW]`
+* 📄 **[extensions/tamandata-chat/media/chat.css](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/extensions/tamandata-chat/media/chat.css)** `[NEW]`
+* 📄 **[extensions/tamandata-chat/media/chat.js](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/extensions/tamandata-chat/media/chat.js)** `[NEW]`
+* 📄 **[extensions/tamandata-chat/README.md](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/extensions/tamandata-chat/README.md)** `[NEW]`
+
+---
+
+### 📝 2. Rincian Baris & Logika yang Diperbarui
+
+1. 🚀 **Sidebar View & Activity Bar Integration (`package.json`)**:
+   - Mendaftarkan container sidebar `tamandata-sidebar-container` dengan ikon SVG khusus.
+   - Menyediakan Webview View `tamandata.chatView` untuk interaksi obrolan.
+   - Mendaftarkan commands: `tamandata.openChat`, `tamandata.setApiKey`, `tamandata.sendSelection`, dan `tamandata.clearHistory`.
+   - Menambahkan menu klik kanan editor (`editor/context`) untuk langsung mengirim potongan kode ke obrolan Tamandata AI.
+2. 🔌 **Extension Provider & API Communication (`extension.js`)**:
+   - Mengimplementasikan `vscode.WebviewViewProvider` dengan retensi status Webview.
+   - Komunikasi HTTP/HTTPS langsung ke Tamandata AI API (`https://ai.tamandata.com/v1/chat/completions`) menggunakan model bawaan `cx/gpt-6-astra`.
+   - Mengintegrasikan penyimpanan aman API Key melalui `vscode.SecretStorage`.
+   - Aksi cepat kontekstual: *Jelaskan*, *Cari Bug*, *Refactor*, dan *Unit Test*.
+   - Fitur *Insert Code into Editor* langsung dari balasan chat.
+3. 🎨 **Antarmuka Pengguna Interaktif (`media/chat.css` & `media/chat.js`)**:
+   - Tema gelap/terang modern selaras dengan tema editor VS Code/Antigravity.
+   - Parsing markdown ringan untuk kode blok dengan tombol *Salin* dan *Sisipkan*.
+   - State caching menggunakan `vscode.getState()` agar obrolan tidak hilang saat panel diminimalkan.
+4. 📦 **Instalasi Lokal**:
+   - Ekstensi telah disalin ke `c:\Users\iskak\.vscode\extensions\tamandata-chat-assistant` sehingga langsung aktif di lingkungan kerja IDE.
+
+---
+
+### 🧪 3. Petunjuk Pengujian Lokal (*Local Verification*)
+
+1. Buka Command Palette di Antigravity / VS Code (`Ctrl+Shift+P`).
+2. Ketik **`Developer: Reload Window`** untuk memuat ekstensi baru.
+3. Klik ikon Tamandata AI (huruf T berlatar biru) pada Activity Bar sebelah kiri.
+4. Klik tombol kunci (🔑) untuk memasukkan API Key Tamandata Anda (dari https://ai.tamandata.com).
+5. Ketik pertanyaan atau pilih kode di editor lalu klik kanan -> **Tamandata: Tanya Kode Terpilih**.
+
+---
+
 ## 📅 Review [2026-08-27 07:14 WIB] - Penambahan Standar Meta Tag `<meta name="mobile-web-app-capable" content="yes">` (Standar PWA Modern)
 
 ### 📁 1. Berkas yang Diperbarui
