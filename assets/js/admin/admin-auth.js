@@ -75,50 +75,36 @@ function detectDeviceType() {
 
 const deviceType = detectDeviceType();
 
-// 1. INSIALISASI PERANGKAT & CEK DEVICE BINDING AUTO-LOGIN
+// 1. INSIALISASI PERANGKAT & CEK STATUS SETELAH LOGIN AUTH
 document.addEventListener('DOMContentLoaded', async () => {
   try {
     currentHwFingerprint = await getHardwareFingerprint();
     if (dom.currentDeviceId) dom.currentDeviceId.innerText = currentHwFingerprint;
     if (dom.currentDeviceName) dom.currentDeviceName.innerText = deviceType.name;
     if (dom.currentDeviceIcon) dom.currentDeviceIcon.className = `${deviceType.icon} device-bind-icon`;
-
-    // Cek apakah perangkat ini terikat di Firestore
-    const deviceRef = doc(db, "admin_devices", currentHwFingerprint);
-    const docSnap = await getDoc(deviceRef);
-
-    if (docSnap.exists() && docSnap.data().is_active === true) {
-      const data = docSnap.data();
-      isCurrentDeviceBound = true;
-      activeAdminEmail = data.admin_email || "admin@bound-device";
-      
-      renderDeviceBindStatus(true);
-      
-      // Jika Firebase Auth belum terautentikasi, izinkan auto-login instant perangkat terikat
-      if (!auth.currentUser) {
-        if (dom.userEmailDisplay) dom.userEmailDisplay.innerText = `${activeAdminEmail} (Perangkat Terikat)`;
-        if (dom.sectionLogin) dom.sectionLogin.classList.add('hidden');
-        if (dom.sectionDashboard) dom.sectionDashboard.classList.remove('hidden');
-        updateDoc(deviceRef, { last_login: serverTimestamp() }).catch(() => {});
-        listenAdminDevices();
-      }
-    } else {
-      renderDeviceBindStatus(false);
-    }
   } catch (err) {
-    console.error("Gagal mendeteksi device binding:", err);
+    console.error("Gagal mendeteksi spesifikasi perangkat:", err);
   }
 });
 
-onAuthStateChanged(auth, (user) => {
+onAuthStateChanged(auth, async (user) => {
   if (user) {
     activeAdminEmail = user.email;
     if (dom.sectionLogin) dom.sectionLogin.classList.add('hidden');
     if (dom.sectionDashboard) dom.sectionDashboard.classList.remove('hidden');
     if (dom.userEmailDisplay) dom.userEmailDisplay.innerText = user.email;
+    
+    // Setelah terautentikasi (memenuhi aturan isAdmin() Firestore), periksa status binding
+    await checkCurrentDeviceBindStatus();
     listenAdminDevices();
-    checkCurrentDeviceBindStatus();
-  } else if (!isCurrentDeviceBound) {
+  } else {
+    activeAdminEmail = "";
+    isCurrentDeviceBound = false;
+    renderDeviceBindStatus(false);
+    if (unsubscribeDevices) {
+      unsubscribeDevices();
+      unsubscribeDevices = null;
+    }
     if (dom.sectionLogin) dom.sectionLogin.classList.remove('hidden');
     if (dom.sectionDashboard) dom.sectionDashboard.classList.add('hidden');
   }

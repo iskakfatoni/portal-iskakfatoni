@@ -40,31 +40,7 @@ export function initializeAuthGuard({
       return;
     }
 
-    // Jika user belum login via Firebase Auth, cek status Hardware Device Binding
-    try {
-      const hwId = await getHardwareFingerprint();
-      const deviceRef = doc(db, "admin_devices", hwId);
-      const docSnap = await getDoc(deviceRef);
-
-      if (docSnap.exists() && docSnap.data().is_active === true) {
-        const data = docSnap.data();
-        revealPage();
-        // Update timestamp login terakhir
-        updateDoc(deviceRef, { last_login: serverTimestamp() }).catch(() => {});
-        if (onAuthenticated) {
-          onAuthenticated({
-            email: data.admin_email || "admin@portal",
-            isBoundDevice: true,
-            deviceId: hwId,
-            deviceName: data.device_name || "Bound Device"
-          });
-        }
-        return;
-      }
-    } catch (err) {
-      console.warn("[AuthGuard] Gagal memeriksa status device binding:", err);
-    }
-
+    // Jika belum login via Firebase Auth, arahkan ke login
     if (onUnauthenticated) {
       onUnauthenticated();
     } else {

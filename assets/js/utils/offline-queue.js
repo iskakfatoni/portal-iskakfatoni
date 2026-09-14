@@ -2,7 +2,15 @@
 // 📶 OFFLINE BUFFER & QUEUEING ENGINE BERBASIS INDEXEDDB
 // Menyimpan data presensi lokal saat koneksi internet offline / drop dan auto-sync saat online
 
-import { collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+import { 
+  collection, 
+  addDoc, 
+  serverTimestamp, 
+  query, 
+  where, 
+  getDocs, 
+  limit 
+} from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
 const DB_NAME = 'PortalAttendanceDB';
 const DB_VERSION = 1;
@@ -187,10 +195,89 @@ export async function flushAttendanceQueue(firestoreDb) {
         firestoreData.is_offline_synced = true;
         firestoreData.offline_scanned_at = queued_at || new Date().toISOString();
 
+        // Resolusi Sesi Dinamis jika id_sesi masih berstatus PENDING_LOOKUP atau offline_session
+        if (!firestoreData.id_sesi || firestoreData.id_sesi === 'PENDING_LOOKUP' || firestoreData.id_sesi === 'offline_session') {
+          let resolvedSesiId = null;
+          let resolvedMapel = null;
+
+          // 1. Coba cari sesi berdasarkan scanned_token jika tersedia
+          if (item.scanned_token) {
+            try {
+              const qToken = query(
+                collection(firestoreDb, "sesi_absensi"),
+                where("current_qr_token", "==", item.scanned_token),
+                limit(1)
+              );
+              const snapToken = await getDocs(qToken);
+              if (!snapToken.empty) {
+                const sDoc = snapToken.docs[0];
+                resolvedSesiId = sDoc.id;
+                resolvedMapel = sDoc.data().nama_mapel;
+              }
+            } catch (eToken) {
+              console.warn("[OfflineQueue] Gagal lookup token QR:", eToken);
+            }
+          }
+
+          // 2. Jika token sudah kadaluwarsa / berganti, cocokkan dengan sesi kelas pada tanggal yang sama
+          if (!resolvedSesiId && firestoreData.id_kelas) {
+            try {
+              const targetDate = firestoreData.tanggal || new Date().toISOString().split('T')[0];
+              const qClass = query(
+                collection(firestoreDb, "sesi_absensi"),
+                where("id_kelas", "==", firestoreData.id_kelas),
+                where("tanggal", "==", targetDate),
+                limit(1)
+              );
+              const snapClass = await getDocs(qClass);
+              if (!snapClass.empty) {
+                const sDoc = snapClass.docs[0];
+                resolvedSesiId = sDoc.id;
+                resolvedMapel = sDoc.data().nama_mapel;
+              }
+            } catch (eClass) {
+              console.warn("[OfflineQueue] Gagal lookup sesi kelas:", eClass);
+            }
+          }
+
+          if (resolvedSesiId) {
+            firestoreData.id_sesi = resolvedSesiId;
+            if (resolvedMapel && (!firestoreData.nama_mapel || firestoreData.nama_mapel === 'Presensi Kelas')) {
+              firestoreData.nama_mapel = resolvedMapel;
+            }
+          }
+        }
+
+        // 3. Pencegahan Duplikasi: Cek apakah log untuk sesi dan siswa ini sudah tercatat
+        if (firestoreData.id_sesi && !firestoreData.id_sesi.startsWith('PENDING_') && firestoreData.nis) {
+          try {
+            const qDup = query(
+              collection(firestoreDb, "log_absensi"),
+              where("id_sesi", "==", firestoreData.id_sesi),
+              where("nis", "==", firestoreData.nis),
+              limit(1)
+            );
+            const snapDup = await getDocs(qDup);
+            if (!snapDup.empty) {
+              console.log(`[OfflineQueue] Presensi [${item.nama_siswa}] sudah tercatat di server. Menghapus dari antrean.`);
+              await removeQueuedItem(id);
+              successCount++;
+              continue;
+            }
+          } catch (eDup) {
+            console.warn("[OfflineQueue] Gagal cek duplikasi:", eDup);
+          }
+        }
+
+        // Hapus property sementara scanned_token sebelum disimpan ke Firestore
+        if (firestoreData.scanned_token) {
+          delete firestoreData.scanned_token;
+        }
+
         await addDoc(collection(firestoreDb, "log_absensi"), firestoreData);
         await removeQueuedItem(id);
         successCount++;
-        console.log(`[OfflineQueue] Presensi [${item.nama_siswa} - NIS: ${item.nis}] sukses tersinkronisasi.`);
+        console.log(`[OfflineQueue] Presensi [${item.nama_siswa} - NIS: ${item.nis}] sukses tersinkronisasi ke Sesi: ${firestoreData.id_sesi}.`);
       } catch (postErr) {
         console.warn(`[OfflineQueue] Gagal sinkronisasi antrean ID ${item.id}:`, postErr.message);
         failCount++;

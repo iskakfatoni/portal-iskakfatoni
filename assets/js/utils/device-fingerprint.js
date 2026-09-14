@@ -67,33 +67,123 @@ function getCanvas2dHash() {
   }
 }
 
+/**
+ * Mengambil atau membuat UUID perangkat unik persisten (LocalStorage + IndexedDB resilience)
+ */
+async function getOrCreatePersistentDeviceUUID() {
+  const STORAGE_KEY = 'portal_persistent_device_uuid';
+  const DB_NAME = 'PortalIdentityDB';
+  const STORE_NAME = 'identity_store';
+
+  // Helper IndexedDB
+  const getIdFromIndexedDB = () => new Promise((resolve) => {
+    if (!window.indexedDB) return resolve(null);
+    try {
+      const req = indexedDB.open(DB_NAME, 1);
+      req.onupgradeneeded = (e) => {
+        const db = e.target.result;
+        if (!db.objectStoreNames.contains(STORE_NAME)) {
+          db.createObjectStore(STORE_NAME);
+        }
+      };
+      req.onsuccess = (e) => {
+        const db = e.target.result;
+        const tx = db.transaction([STORE_NAME], 'readonly');
+        const getReq = tx.objectStore(STORE_NAME).get('device_uuid');
+        getReq.onsuccess = () => resolve(getReq.result || null);
+        getReq.onerror = () => resolve(null);
+      };
+      req.onerror = () => resolve(null);
+    } catch (e) {
+      resolve(null);
+    }
+  });
+
+  const saveIdToIndexedDB = (uuid) => new Promise((resolve) => {
+    if (!window.indexedDB || !uuid) return resolve();
+    try {
+      const req = indexedDB.open(DB_NAME, 1);
+      req.onsuccess = (e) => {
+        const db = e.target.result;
+        const tx = db.transaction([STORE_NAME], 'readwrite');
+        tx.objectStore(STORE_NAME).put(uuid, 'device_uuid');
+        tx.oncomplete = () => resolve();
+        tx.onerror = () => resolve();
+      };
+      req.onerror = () => resolve();
+    } catch (e) {
+      resolve();
+    }
+  });
+
+  let uuid = localStorage.getItem(STORAGE_KEY);
+  if (!uuid) {
+    uuid = await getIdFromIndexedDB();
+    if (uuid) {
+      localStorage.setItem(STORAGE_KEY, uuid);
+    }
+  }
+
+  if (!uuid) {
+    if (typeof crypto !== 'undefined' && crypto.randomUUID) {
+      uuid = crypto.randomUUID();
+    } else {
+      uuid = 'dev-' + Date.now().toString(36) + '-' + Math.random().toString(36).substring(2, 10);
+    }
+    localStorage.setItem(STORAGE_KEY, uuid);
+    await saveIdToIndexedDB(uuid);
+  } else {
+    // Sinkronisasi ulang untuk ketahanan cache
+    saveIdToIndexedDB(uuid).catch(() => {});
+  }
+
+  return uuid;
+}
+
 export async function getHardwareFingerprint() {
-  // 1. Ambil sinyal WebGL Hardware (Sangat Stabil untuk 1 model HP)
+  // 0. Prioritaskan ID Native jika berjalan di dalam container aplikasi Android
+  if (window.AndroidNativeBridge && typeof window.AndroidNativeBridge.getDeviceId === 'function') {
+    try {
+      const nativeId = window.AndroidNativeBridge.getDeviceId();
+      if (nativeId && nativeId.trim() !== '') {
+        return 'HW-' + nativeId.trim().toUpperCase();
+      }
+    } catch (e) {
+      console.warn("Gagal memanggil AndroidNativeBridge.getDeviceId:", e);
+    }
+  }
+
+  // 1. Ambil sinyal WebGL & Canvas Hardware
   const webglSig = getWebGLFingerprint();
   const canvasSig = getCanvas2dHash();
 
-  // 2. Gunakan parameter fisik yang 100% STATIS & Tahan Rotasi
-  // Menggunakan sort agar ID tidak berubah saat HP dimiringkan (Landscape/Portrait)
+  // 2. Ambil UUID perangkat persisten unik untuk mencegah collision antar perangkat sejenis
+  const persistentUUID = await getOrCreatePersistentDeviceUUID();
+
+  // 3. Gunakan parameter fisik statis
   const screenRes = [screen.width, screen.height].sort((a, b) => a - b).join('x');
 
-  const rawString = [
-    screenRes,                               // Resolusi Layar (Tahan Rotasi)
+  const rawHardwareString = [
+    screenRes,                               // Resolusi Layar
     screen.colorDepth || 24,                 // Kedalaman Warna
     window.devicePixelRatio || 1,            // Kerapatan Pixel
     navigator.hardwareConcurrency || 2,      // Jumlah Core CPU
     navigator.deviceMemory || 'unknown',     // Estimasi RAM
     navigator.maxTouchPoints || 0,           // Jumlah Titik Sentuh
-    webglSig,                                // Spesifikasi GPU (Sangat Unik)
-    canvasSig                                // Font Rendering Engine (DNA Browser/OS)
+    webglSig,                                // Spesifikasi GPU
+    canvasSig                                // Font/Render Engine
   ].join('||');
 
-  // 3. Enkripsi String ke Hash SHA-256 Hex 16 Karakter (Persisten Hardware Murni)
-  const msgBuffer = new TextEncoder().encode(rawString);
-  const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
-  const hashArray = Array.from(new Uint8Array(hashBuffer));
-  const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
-  
-  return 'HW-' + hashHex.substring(0, 16).toUpperCase();
+  // 4. Hash Hardware Specs (8 Karakter Pertama)
+  const hwBuffer = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(rawHardwareString));
+  const hwHex = Array.from(new Uint8Array(hwBuffer)).map(b => b.toString(16).padStart(2, '0')).join('').substring(0, 8);
+
+  // 5. Hash Persistent UUID (8 Karakter)
+  const uuidBuffer = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(persistentUUID));
+  const uuidHex = Array.from(new Uint8Array(uuidBuffer)).map(b => b.toString(16).padStart(2, '0')).join('').substring(0, 8);
+
+  // Format tetap standar 'HW-XXXXXXXXXXXXXXXX' (16 Hex Karakter) kompatibel dengan seluruh sistem & DB
+  return 'HW-' + (hwHex + uuidHex).toUpperCase();
 }
 
 // FUNGSI DETEKSI ORIENTASI & RESOLUSI LAYAR REAL-TIME SAAT ABSENSI

@@ -3874,6 +3874,54 @@ Dokumen ini berisi rangkuman review perubahan kode (*code review*) terbaru yang 
 1. **Uji Tampilan di Peramban Web / WhatsApp In-App**:
    - Buka `perangkat.html` dari peramban biasa atau in-app browser WhatsApp $\rightarrow$ Verifikasi bagian bawah kartu bersih dan tombol *"Buka Portal Materi & Link Tugas"* tidak lagi muncul.
 
+---
+
+## 📅 Review [2026-09-14 16:22 WIB] - Perbaikan Menyeluruh: Pseudo-Hardware ID, Admin Auth Guard, Offline Queue Session Lookup, & Auto-Alpa Normalization
+
+### 📁 1. Berkas yang Diubah / Dibuat
+* 📄 **[assets/js/utils/device-fingerprint.js](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/assets/js/utils/device-fingerprint.js)**
+* 📄 **[assets/js/admin/admin-auth.js](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/assets/js/admin/admin-auth.js)**
+* 📄 **[assets/js/auth/auth-guard.js](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/assets/js/auth/auth-guard.js)**
+* 📄 **[assets/js/siswa/siswa-scanner.js](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/assets/js/siswa/siswa-scanner.js)**
+* 📄 **[assets/js/utils/offline-queue.js](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/assets/js/utils/offline-queue.js)**
+* 📄 **[scripts/auto-alpa.js](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/scripts/auto-alpa.js)**
+* 📄 **[assets/js/database/ai-insights.js](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/assets/js/database/ai-insights.js)**
+* 📄 **[.gitignore](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/.gitignore)**
+
+---
+
+### 📝 2. Rincian Baris & Logika yang Diperbarui
+1. **Device Fingerprint (`device-fingerprint.js`)**:
+   - Menambahkan pembangkitan UUID persisten (`portal_persistent_device_uuid`) dengan redundansi `localStorage` + `IndexedDB`.
+   - Mengombinasikan 8 karakter hash parameter fisik/GPU dengan 8 karakter hash UUID perangkat unik.
+   - Mengeliminasi 100% false-positive bentrok identitas (dua perangkat HP tipe/model sama tidak lagi saling menolak/terdeteksi sebagai perangkat yang sama).
+   - Mempertahankan format `HW-XXXXXXXXXXXXXXXX` (16 Hex) agar kompatibel penuh dengan seluruh struktur data Firestore dan audit log.
+2. **Admin Auth & Auth Guard (`admin-auth.js` & `auth-guard.js`)**:
+   - Menghapus pembacaan unauthenticated ke koleksi `admin_devices` sebelum login Firebase Auth yang sebelumnya memicu error `Firestore permission-denied`.
+   - Menyelaraskan alur autentikasi dengan `firestore.rules` (`isAdmin() == request.auth != null`).
+   - Pengecekan hardware binding perangkat admin kini hanya dilakukan setelah sesi Firebase Auth terverifikasi aktif.
+3. **Offline Queue Dynamic Session Resolution (`siswa-scanner.js` & `offline-queue.js`)**:
+   - Mengganti teks statis `id_sesi: "offline_session"` menjadi penanda `PENDING_LOOKUP`.
+   - Pada saat sinkronisasi (`flushAttendanceQueue`), sistem mencari sesi asli di `sesi_absensi` berdasarkan token QR yang tersimpan (`scanned_token`) atau berdasarkan kelas & tanggal.
+   - Menambahkan proteksi duplikasi agar log offline yang sudah tercatat di server tidak ditulis berulang.
+4. **Auto-Alpa Script Normalization (`auto-alpa.js`)**:
+   - Menghapus hardcode jam `'15:30 WIB'` menjadi waktu dinamis riil `${hh}:${min} WIB` waktu Jakarta.
+   - Menghapus hardcode sekolah kaku dan mengutamakan metadata kelas (`kf.nama_sekolah`), variabel lingkungan `process.env.SCHOOL_NAME`, atau sesi aktif.
+5. **Heuristic Engine Transparency (`ai-insights.js`)**:
+   - Memperbarui dokumentasi arsitektur header modul untuk secara eksplisit menerangkan bahwa mesin bekerja berdasarkan algoritma deteksi pola heuristik/deterministik di sisi klien (*sliding window, collision clustering, threshold analysis*).
+6. **Gitignore (`.gitignore`)**:
+   - Mendaftarkan `node_modules/`, `.DS_Store`, dan `Thumbs.db` untuk mencegah file cache dan paket lokal terunggah ke repositori.
+
+---
+
+### 🧪 3. Petunjuk Pengujian Lokal (*Local Verification*)
+1. **Uji Validasi Kode & Sintaks**:
+   - Jalankan `node -c scripts/auto-alpa.js` $\rightarrow$ Pastikan sintaks skrip lolos tanpa error.
+2. **Uji Resolusi Fingerprint Browser**:
+   - Buka `absensi.html` atau periksa `localStorage` $\rightarrow$ Pastikan `portal_persistent_device_uuid` dan `portal_device_id` berformat `HW-` 16 karakter unik terbentuk.
+3. **Uji Admin Auth Guard**:
+   - Buka `admin.html` dalam keadaan belum login $\rightarrow$ Pastikan tidak ada error *permission-denied* dari Firestore pada Developer Console.
+
 
 
 

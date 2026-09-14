@@ -1,6 +1,7 @@
 // assets/js/database/ai-insights.js
-// 🤖 AI ATTENDANCE & SECURITY INSIGHT ENGINE
-// Engine deteksi anomali presensi, manipulasi perangkat, dan analisis pola kedisiplinan siswa berbasis client-side pattern recognition.
+// 🔍 ATTENDANCE & SECURITY INSIGHT ENGINE (HEURISTIC PATTERN RECOGNITION)
+// Engine deteksi anomali presensi, manipulasi perangkat, dan analisis kedisiplinan siswa
+// Berbasis deterministik algoritma (sliding window, collision clustering, threshold analysis) di sisi klien.
 
 import { showToast } from "../utils/toast.js";
 import { loadXLSX } from "../utils/lazy-loader.js";

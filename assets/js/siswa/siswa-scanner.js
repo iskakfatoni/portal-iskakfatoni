@@ -167,7 +167,7 @@ async function onScanSuccess(decodedText) {
     if (!navigator.onLine || err.message?.toLowerCase().includes('offline') || err.message?.toLowerCase().includes('network')) {
       try {
         const fallbackPayload = {
-          id_sesi: "offline_session",
+          id_sesi: "PENDING_LOOKUP",
           scanned_token: scannedToken,
           nis: currentSiswaUser.nis,
           nama_siswa: namaSiswaVal,

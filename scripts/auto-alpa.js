@@ -77,10 +77,14 @@ function getTodayWIB() {
   const dd = String(jakartaTime.getDate()).padStart(2, '0');
   const todayISO = `${yyyy}-${mm}-${dd}`;
 
+  const hh = String(jakartaTime.getHours()).padStart(2, '0');
+  const min = String(jakartaTime.getMinutes()).padStart(2, '0');
+  const waktuStr = `${hh}:${min} WIB`;
+
   const days = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
   const hariStr = days[jakartaTime.getDay()];
 
-  return { todayISO, hariStr, jakartaTime };
+  return { todayISO, hariStr, waktuStr, jakartaTime };
 }
 
 // Eksekusi Batch Create Log Absensi
@@ -150,9 +154,9 @@ async function sendWhatsAppFonnte(target, message) {
 
 // MAIN FUNCTION
 async function main() {
-  const { todayISO, hariStr } = getTodayWIB();
+  const { todayISO, hariStr, waktuStr } = getTodayWIB();
   console.log(`=======================================================`);
-  console.log(`🤖 AUTO-ALPA CRON JOB: ${hariStr}, ${todayISO} 15:30 WIB`);
+  console.log(`🤖 AUTO-ALPA CRON JOB: ${hariStr}, ${todayISO} (${waktuStr})`);
   console.log(`=======================================================`);
 
   try {
@@ -230,7 +234,7 @@ async function main() {
       });
 
       let targetWaGroup = '';
-      let namaSekolah = 'SMK Negeri 1 Jetis Mojokerto';
+      let namaSekolah = process.env.SCHOOL_NAME || (sFields.nama_sekolah && sFields.nama_sekolah.stringValue) || 'SMK Negeri 1 Jetis Mojokerto';
       let namaKelasDisplay = sKelas;
 
       if (matchingKelasDoc && matchingKelasDoc.fields) {
@@ -306,7 +310,7 @@ async function main() {
               nama_mapel: sMapel,
               hari: hariStr,
               tanggal: todayISO,
-              waktu: '15:30 WIB',
+              waktu: waktuStr,
               status: 'Tidak Hadir'
             });
 
@@ -339,7 +343,7 @@ async function main() {
 
         const waMessage = 
 `📢 *LAPORAN PRESENSI HARIAN*
-📅 *${hariStr}, ${todayISO}* (15:30 WIB)
+📅 *${hariStr}, ${todayISO}* (${waktuStr})
 🏫 *${namaSekolah}*
 ━━━━━━━━━━━━━━━━━━━━━━━
 📌 *Kelas:* *${namaKelasDisplay}*
