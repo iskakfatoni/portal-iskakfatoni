@@ -3922,19 +3922,32 @@ Dokumen ini berisi rangkuman review perubahan kode (*code review*) terbaru yang 
 3. **Uji Admin Auth Guard**:
    - Buka `admin.html` dalam keadaan belum login $\rightarrow$ Pastikan tidak ada error *permission-denied* dari Firestore pada Developer Console.
 
+---
 
+## 📅 Review [2026-09-14 16:37 WIB] - Pembersihan Kode Sampah & Optimasi Pengalihan Langsung (Dead Code Cleanup)
 
+### 📁 1. Berkas yang Diubah / Dibuat
+* 📄 **[assets/js/utils/device-fingerprint.js](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/assets/js/utils/device-fingerprint.js)**
+* 📄 **[index.html](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/index.html)**
+* 📄 **[absensi.html](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/absensi.html)**
+* 📄 **[portal.html](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/portal.html)**
 
+---
 
+### 📝 2. Rincian Baris & Logika yang Diperbarui
+1. **Pembersihan Dead Code `getAudioFingerprint` (`device-fingerprint.js`)**:
+   - Menghapus 29 baris kode fungsi `getAudioFingerprint()` yang tidak pernah dipanggil maupun diekspor di mana pun dalam proyek.
+   - Mengurangi beban inisialisasi modul dan menghilangkan pembuatan objek `AudioContext` yatim.
+2. **Eliminasi Pengalihan Ganda (*Double Redirect Hop*)**:
+   - Mengubah target pengalihan otomatis iOS non-PWA pada `index.html`, `absensi.html`, dan `portal.html` dari `iphone.html` langsung menuju `perangkat.html`.
+   - Mengurangi latensi navigasi pengguna iPhone dan menghilangkan round-trip perantara yang tidak dibutuhkan.
+3. **Pembersihan Whitespace & Format (`review.md`)**:
+   - Merapikan trailing blank lines pada dokumen ulasan proyek.
 
+---
 
-
-
-
-
-
-
-
-
-
-
+### 🧪 3. Petunjuk Pengujian Lokal (*Local Verification*)
+1. **Uji Jalur Pengalihan iOS**:
+   - Buka `index.html` dengan User-Agent Safari iPhone $\rightarrow$ Pastikan langsung terarah ke `perangkat.html` dalam 1 kali lompatan (*single redirect*).
+2. **Uji Modul Fingerprint**:
+   - Buka `absensi.html` $\rightarrow$ Pastikan modul `device-fingerprint.js` berjalan bersih tanpa referensi audio konteks mati.

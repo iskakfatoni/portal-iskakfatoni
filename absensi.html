@@ -34,9 +34,9 @@
         const isStandaloneCSS = window.matchMedia('(display-mode: standalone)').matches;
         const isPWA = isStandaloneIOS || isStandaloneCSS;
 
-        // Jika iPhone mengakses dari browser biasa (Non-PWA), alihkan langsung ke iphone.html
+        // Jika iPhone mengakses dari browser biasa (Non-PWA), alihkan langsung ke perangkat.html
         if (!isPWA) {
-          window.location.replace('iphone.html');
+          window.location.replace('perangkat.html');
         }
       }
     })();

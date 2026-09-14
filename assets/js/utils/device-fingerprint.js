@@ -1,35 +1,6 @@
 // assets/js/utils/device-fingerprint.js
 // FUNGSI PURE HARDWARE FINGERPRINT (PERSISTEN, STORAGE-INDEPENDENT / TAHAN HAPUS DATA & CACHE)
 
-async function getAudioFingerprint() {
-  try {
-    const AudioContext = window.AudioContext || window.webkitAudioContext;
-    if (!AudioContext) return 'no-audio-ctx';
-    const context = new AudioContext();
-    const oscillator = context.createOscillator();
-    const compressor = context.createDynamicsCompressor();
-
-    oscillator.type = 'triangle';
-    oscillator.frequency.value = 10000;
-
-    compressor.threshold.value = -50;
-    compressor.knee.value = 40;
-    compressor.ratio.value = 12;
-    compressor.reduction.value = -20;
-    compressor.attack.value = 0;
-    compressor.release.value = 0.25;
-
-    oscillator.connect(compressor);
-    compressor.connect(context.destination);
-
-    oscillator.start(0);
-    const audioSig = `${context.sampleRate}_${context.destination.channelCount}_${compressor.reduction.value}`;
-    context.close();
-    return audioSig;
-  } catch (e) {
-    return 'audio-err';
-  }
-}
 
 function getWebGLFingerprint() {
   try {
