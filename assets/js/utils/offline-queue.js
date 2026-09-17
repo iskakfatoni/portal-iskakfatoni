@@ -213,6 +213,18 @@ export async function flushAttendanceQueue(firestoreDb) {
                 const sDoc = snapToken.docs[0];
                 resolvedSesiId = sDoc.id;
                 resolvedMapel = sDoc.data().nama_mapel;
+              } else {
+                const qPrev = query(
+                  collection(firestoreDb, "sesi_absensi"),
+                  where("previous_qr_token", "==", item.scanned_token),
+                  limit(1)
+                );
+                const snapPrev = await getDocs(qPrev);
+                if (!snapPrev.empty) {
+                  const sDoc = snapPrev.docs[0];
+                  resolvedSesiId = sDoc.id;
+                  resolvedMapel = sDoc.data().nama_mapel;
+                }
               }
             } catch (eToken) {
               console.warn("[OfflineQueue] Gagal lookup token QR:", eToken);

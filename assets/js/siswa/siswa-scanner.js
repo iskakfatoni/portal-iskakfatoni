@@ -78,11 +78,37 @@ async function onScanSuccess(decodedText) {
 
   try {
     // 1. Validasi Sesi QR yang Aktif
-    const qSesi = query(collection(db, "sesi_absensi"), where("current_qr_token", "==", scannedToken), where("is_active", "==", true));
-    const sesiSnap = await getDocs(qSesi);
+    // Cek token utama (current_qr_token)
+    let qSesi = query(collection(db, "sesi_absensi"), where("current_qr_token", "==", scannedToken), where("is_active", "==", true));
+    let sesiSnap = await getDocs(qSesi);
 
+    // Jika tidak cocok dengan token aktif saat ini, beri grace period 25 detik dengan memeriksa previous_qr_token
     if (sesiSnap.empty) {
-      window.location.href = `result.html?status=error&msg=${encodeURIComponent('QR Code tidak valid atau sesi guru sudah ditutup.')}`;
+      const qPrev = query(collection(db, "sesi_absensi"), where("previous_qr_token", "==", scannedToken), where("is_active", "==", true));
+      const prevSnap = await getDocs(qPrev);
+      if (!prevSnap.empty) {
+        const candidateDoc = prevSnap.docs[0];
+        const candidateData = candidateDoc.data();
+        const rotTimeMs = candidateData.token_rotated_at?.seconds ? (candidateData.token_rotated_at.seconds * 1000) : 0;
+        if (rotTimeMs === 0 || (Date.now() - rotTimeMs) <= 25000) {
+          sesiSnap = prevSnap;
+        }
+      }
+    }
+
+    // Jika tetap tidak ditemukan, lakukan diagnosa pesan error yang spesifik dan jelas
+    if (sesiSnap.empty) {
+      const qAnyActive = query(collection(db, "sesi_absensi"), where("is_active", "==", true));
+      const anyActiveSnap = await getDocs(qAnyActive);
+
+      let errorMsg = 'QR Code tidak valid atau sudah kedaluwarsa.';
+      if (anyActiveSnap.empty) {
+        errorMsg = 'Sesi presensi belum dibuka atau sudah ditutup oleh guru.';
+      } else {
+        errorMsg = 'QR Code sudah kedaluwarsa karena rotasi waktu. Silakan scan ulang QR terbaru di layar guru.';
+      }
+
+      window.location.href = `result.html?status=error&msg=${encodeURIComponent(errorMsg)}`;
       return;
     }
 
@@ -90,11 +116,11 @@ async function onScanSuccess(decodedText) {
     const sesiData = sesiDoc.data();
 
     // 1.1 Proteksi Kedaluwarsa Sesi (> 1 Jam)
-    if (sesiData.created_at && sesiData.created_at.seconds) {
-      const createdTimeMs = sesiData.created_at.seconds * 1000;
+    const refTimestamp = sesiData.resumed_at || sesiData.opened_at || sesiData.created_at;
+    if (refTimestamp && refTimestamp.seconds) {
+      const refTimeMs = refTimestamp.seconds * 1000;
       const nowMs = Date.now();
-      if ((nowMs - createdTimeMs) > 60 * 60 * 1000) {
-        await updateDoc(doc(db, "sesi_absensi", sesiDoc.id), { is_active: false });
+      if ((nowMs - refTimeMs) > 60 * 60 * 1000) {
         window.location.href = `result.html?status=error&msg=${encodeURIComponent('Sesi presensi sudah kedaluwarsa (> 1 jam). Minta guru membuka sesi baru.')}`;
         return;
       }

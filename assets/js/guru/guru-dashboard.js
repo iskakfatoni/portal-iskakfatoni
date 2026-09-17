@@ -234,11 +234,12 @@ async function checkAndRestoreActiveSesi() {
     if (!activeDocId || !activeDocData) return;
 
     let isExpired = false;
-    let createdTimeMs = Date.now();
-    if (activeDocData.created_at && activeDocData.created_at.seconds) {
-      createdTimeMs = activeDocData.created_at.seconds * 1000;
+    let refTimeMs = Date.now();
+    const refTimestamp = activeDocData.resumed_at || activeDocData.opened_at || activeDocData.created_at;
+    if (refTimestamp && refTimestamp.seconds) {
+      refTimeMs = refTimestamp.seconds * 1000;
       const nowMs = Date.now();
-      if ((nowMs - createdTimeMs) > 60 * 60 * 1000) {
+      if ((nowMs - refTimeMs) > 60 * 60 * 1000) {
         isExpired = true;
       }
     }
@@ -285,17 +286,23 @@ async function checkAndRestoreActiveSesi() {
 
     updateQRDisplay(activeToken);
 
-    const createdMs = activeDocData.created_at?.seconds ? (activeDocData.created_at.seconds * 1000) : Date.now();
-    startCountdownTimer(createdMs);
+    startCountdownTimer(refTimeMs);
 
     if (qrInterval) clearInterval(qrInterval);
     qrInterval = setInterval(async () => {
       if (!currentSesiId) return;
+      const prevToken = activeToken;
       activeToken = 'QR-' + Math.random().toString(36).substring(2, 10).toUpperCase();
-      await updateDoc(doc(db, "sesi_absensi", currentSesiId), {
-        current_qr_token: activeToken
-      });
-      updateQRDisplay(activeToken);
+      try {
+        await updateDoc(doc(db, "sesi_absensi", currentSesiId), {
+          current_qr_token: activeToken,
+          previous_qr_token: prevToken,
+          token_rotated_at: serverTimestamp()
+        });
+        updateQRDisplay(activeToken);
+      } catch (eRot) {
+        console.warn("Gagal rotasi token QR:", eRot);
+      }
     }, 10000);
 
     listenToLogAbsensi(currentSesiId);
@@ -429,6 +436,8 @@ if (dom.btnStartSesi) {
         await updateDoc(doc(db, "sesi_absensi", currentSesiId), {
           is_active: true,
           current_qr_token: activeToken,
+          previous_qr_token: null,
+          resumed_at: serverTimestamp(),
           updated_at: serverTimestamp()
         });
         showToast(`Melanjutkan sesi presensi kelas [${kelasNama}]`, "info");
@@ -441,7 +450,9 @@ if (dom.btnStartSesi) {
           tanggal: tanggalStr,
           waktu: waktuStr,
           current_qr_token: activeToken,
+          previous_qr_token: null,
           is_active: true,
+          opened_at: serverTimestamp(),
           created_at: serverTimestamp()
         });
         currentSesiId = docRef.id;
@@ -475,11 +486,18 @@ if (dom.btnStartSesi) {
       if (qrInterval) clearInterval(qrInterval);
       qrInterval = setInterval(async () => {
         if (!currentSesiId) return;
+        const prevToken = activeToken;
         activeToken = 'QR-' + Math.random().toString(36).substring(2, 10).toUpperCase();
-        await updateDoc(doc(db, "sesi_absensi", currentSesiId), {
-          current_qr_token: activeToken
-        });
-        updateQRDisplay(activeToken);
+        try {
+          await updateDoc(doc(db, "sesi_absensi", currentSesiId), {
+            current_qr_token: activeToken,
+            previous_qr_token: prevToken,
+            token_rotated_at: serverTimestamp()
+          });
+          updateQRDisplay(activeToken);
+        } catch (eRot) {
+          console.warn("Gagal rotasi token QR:", eRot);
+        }
       }, 10000);
 
       listenToLogAbsensi(currentSesiId);
@@ -508,6 +526,8 @@ if (dom.btnStopSesi) {
         try {
           await updateDoc(doc(db, "sesi_absensi", activeId), { 
             is_active: false,
+            current_qr_token: null,
+            previous_qr_token: null,
             closed_at: serverTimestamp()
           });
           showToast("Sesi presensi telah ditutup.", "info");

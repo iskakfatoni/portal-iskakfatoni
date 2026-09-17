@@ -3951,3 +3951,44 @@ Dokumen ini berisi rangkuman review perubahan kode (*code review*) terbaru yang 
    - Buka `index.html` dengan User-Agent Safari iPhone $\rightarrow$ Pastikan langsung terarah ke `perangkat.html` dalam 1 kali lompatan (*single redirect*).
 2. **Uji Modul Fingerprint**:
    - Buka `absensi.html` $\rightarrow$ Pastikan modul `device-fingerprint.js` berjalan bersih tanpa referensi audio konteks mati.
+
+---
+
+## 📅 Review [2026-09-17 14:56 WIB] - Penambahan Grace Period Rotasi QR, Presisi Waktu Sesi, dan Spesifikasi Pesan Error Scanner
+
+### 📁 1. Berkas yang Diubah / Dibuat
+* 📄 **[assets/js/guru/guru-dashboard.js](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/assets/js/guru/guru-dashboard.js)**
+* 📄 **[assets/js/siswa/siswa-scanner.js](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/assets/js/siswa/siswa-scanner.js)**
+* 📄 **[assets/js/utils/offline-queue.js](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/assets/js/utils/offline-queue.js)**
+
+---
+
+### 📝 2. Rincian Baris & Logika yang Diperbarui
+1. **Pemberian Masa Toleransi Rotasi Token QR (*Grace Period*) (`guru-dashboard.js` & `siswa-scanner.js`)**:
+   - Sistem rotasi token QR (10 detik) di Dashboard Guru kini menyimpan `previous_qr_token` dan `token_rotated_at: serverTimestamp()` secara atomik bersama `current_qr_token`.
+   - Di sisi `siswa-scanner.js`, jika pemindaian tidak cocok dengan `current_qr_token`, sistem melakukan pengecekan terhadap `previous_qr_token` dengan batas toleransi 25 detik. Siswa yang memindai tepat pada detik pergantian token atau mengalami latensi internet ponsel tidak lagi digagalkan secara instan.
+2. **Penyempurnaan & Spesifikasi Pesan Kesalahan Scanner Siswa (`siswa-scanner.js`)**:
+   - Pesan ambigu *"QR Code tidak valid atau sesi guru sudah ditutup"* kini dipecah menjadi diagnosa status yang informatif dan tepat sasaran:
+     - Jika sesi guru memang belum aktif/sudah ditutup $\rightarrow$ *"Sesi presensi belum dibuka atau sudah ditutup oleh guru."*
+     - Jika sesi sedang aktif namun token QR kadaluwarsa $\rightarrow$ *"QR Code sudah kedaluwarsa karena rotasi waktu. Silakan scan ulang QR terbaru di layar guru."*
+     - Jika token tidak dikenali sama sekali $\rightarrow$ *"QR Code tidak valid atau sudah kedaluwarsa."*
+3. **Penyelarasan Acuan Waktu Sesi Kedaluwarsa (`guru-dashboard.js` & `siswa-scanner.js`)**:
+   - Perhitungan kedaluwarsa sesi (1 jam) kini menggunakan prioritas `resumed_at || opened_at || created_at`.
+   - Menghindari bug penutupan prematur ketika guru melanjutkan sesi (*resume session*) yang pernah dibuat sebelumnya pada hari yang sama.
+   - Menghapus pemanggilan ilegal `updateDoc(..., { is_active: false })` dari sisi klien siswa tanpa hak otorisasi admin (`firestore.rules`).
+4. **Pembersihan Token saat Sesi Resmi Ditutup (`guru-dashboard.js`)**:
+   - Saat Guru menekan tombol Tutup Sesi, field `current_qr_token` dan `previous_qr_token` dikosongkan (`null`) agar tidak ada token sisa yang dapat dipindai setelah penutupan.
+5. **Dukungan Resolusi Offline Queue (`offline-queue.js`)**:
+   - Menambahkan pengecekan fallback terhadap `previous_qr_token` pada proses resolusi sesi antrean sinkronisasi offline.
+
+---
+
+### 🧪 3. Petunjuk Pengujian Lokal (*Local Verification*)
+1. **Uji Toleransi Rotasi QR Code**:
+   - Buka Dashboard Guru (`pages/guru/index.html`), mulai sesi kelas.
+   - Pindai QR code sesaat setelah token berganti di layar proyektor.
+   - **Hasil**: Siswa tetap berhasil melakukan presensi tanpa kegagalan token rotasi.
+2. **Uji Pesan Error Spesifik**:
+   - Pindai QR lama saat sesi guru masih berjalan $\rightarrow$ Muncul notifikasi *"QR Code sudah kedaluwarsa karena rotasi waktu. Silakan scan ulang QR terbaru di layar guru."*
+   - Tutup sesi guru, lalu pindai lagi $\rightarrow$ Muncul notifikasi *"Sesi presensi belum dibuka atau sudah ditutup oleh guru."*
+
