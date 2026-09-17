@@ -3992,3 +3992,51 @@ Dokumen ini berisi rangkuman review perubahan kode (*code review*) terbaru yang 
    - Pindai QR lama saat sesi guru masih berjalan $\rightarrow$ Muncul notifikasi *"QR Code sudah kedaluwarsa karena rotasi waktu. Silakan scan ulang QR terbaru di layar guru."*
    - Tutup sesi guru, lalu pindai lagi $\rightarrow$ Muncul notifikasi *"Sesi presensi belum dibuka atau sudah ditutup oleh guru."*
 
+---
+
+## 📅 Review [2026-09-17 15:04 WIB] - Implementasi Fitur Absensi Manual Siswa di Dashboard Guru & Rekapitulasi
+
+### 📁 1. Berkas yang Diubah / Dibuat
+* 📄 **[pages/guru/index.html](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/pages/guru/index.html)**
+* 📄 **[assets/js/guru/guru-dashboard.js](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/assets/js/guru/guru-dashboard.js)**
+* 📄 **[pages/guru/rekap.html](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/pages/guru/rekap.html)**
+* 📄 **[assets/js/guru/rekap.js](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/assets/js/guru/rekap.js)**
+
+---
+
+### 📝 2. Rincian Baris & Logika yang Diperbarui
+1. **Antarmuka Modal Absensi Manual Premium (`pages/guru/index.html` & `pages/guru/rekap.html`)**:
+   - Menambahkan tombol **`Absen Manual`** dengan ikon `fa-user-pen` di header log realtime Dashboard Guru dan header halaman Rekapitulasi.
+   - Merancang modal bergaya Glassmorphism modern yang responsif dan elegan:
+     - Dropdown pemilihan **Kelas** (otomatis sinkron dengan sesi aktif).
+     - Dropdown pemilihan **Siswa** dinamis berdasarkan kelas yang dipilih dari koleksi `siswa`, lengkap dengan indikator status jika siswa sudah terdata hadir `[✔ Status]`.
+     - Input **Mata Pelajaran** (otomatis terisi dari sesi aktif).
+     - Pilihan status kehadiran visual via radio card: **Hadir** (hijau), **Terlambat** (kuning/amber), **Sakit** (biru muda), dan **Izin** (ungu indigo).
+     - Input catatan/alasan opsional (misal: "Kamera HP rusak", "HP tertinggal", "Surat dokter").
+2. **Logika Penyimpanan & Anti-Duplikasi (`assets/js/guru/guru-dashboard.js`)**:
+   - Memuat data siswa berdasarkan kelas target dengan sistem caching memori lokal per kelas (`cachedStudentsByClass`).
+   - Melakukan pengecekan duplikasi presensi pada sesi aktif: jika siswa sudah terdaftar pada sesi tersebut, sistem menampilkan dialog konfirmasi `showConfirm` untuk memberikan opsi memperbarui status kehadiran siswa.
+   - Menyimpan dokumen baru/update ke koleksi Firestore `log_absensi` dengan atribut standar: `metode: "Manual Guru"`, `device_id: "MANUAL_GURU"`, `keterangan`, `status`, dan stempel waktu server.
+   - Membunyikan suara *chime notification* dan menampilkan toast konfirmasi sukses.
+3. **Penyempurnaan Tampilan Log Realtime (`guru-dashboard.js`) & Tabel Rekap (`rekap.js`)**:
+   - Mendukung visual badge warna-warni yang presisi untuk setiap status (`Hadir`, `Terlambat`, `Sakit`, `Izin`, dan `Tidak Hadir`).
+   - Menyematkan badge penanda **`Manual`** berwarna cyan pada baris log dan tabel kehadiran untuk membedakan antara presensi via scan QR mandiri dan presensi yang dimasukkan manual oleh guru.
+4. **Integrasi Absensi Manual pada Halaman Rekapitulasi (`rekap.js`)**:
+   - Mengizinkan Guru melakukan pencatatan absensi manual langsung dari halaman `rekap.html` untuk tanggal tertentu (`manualInputTanggal`), dengan pembaruan instan pada tabel dan metrik statistik tanpa perlu reload halaman.
+
+---
+
+### 🧪 3. Petunjuk Pengujian Lokal (*Local Verification*)
+1. **Uji Absensi Manual Realtime**:
+   - Buka `pages/guru/index.html`, buka sesi kelas (misal: XI TEI 1).
+   - Klik tombol **`Absen Manual`** di samping "Suara: ON".
+   - Pilih siswa dari dropdown, pilih status misal **Sakit** atau **Hadir**, isi keterangan jika perlu, lalu klik **Simpan Presensi**.
+   - **Hasil**: Siswa langsung muncul di daftar *Realtime Attendance Log* dengan badge status yang sesuai dan label `Manual`.
+2. **Uji Pencegahan / Update Duplikasi**:
+   - Buka kembali modal absen manual untuk siswa yang sama $\rightarrow$ Sistem menandai `[✔ Status]`.
+   - Pilih status berbeda dan simpan $\rightarrow$ Muncul dialog konfirmasi pembaruan status dan data terupdate secara bersih.
+3. **Uji Absen Manual pada Halaman Rekap**:
+   - Buka `pages/guru/rekap.html` $\rightarrow$ Klik tombol **`Absen Manual`** di bar header atas.
+   - Masukkan presensi manual siswa $\rightarrow$ Data tabel dan grafik rasio kehadiran langsung ter-refresh secara otomatis.
+
+

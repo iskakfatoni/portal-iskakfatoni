@@ -43,7 +43,20 @@ const dom = {
   btnExtendSession: document.getElementById('btn-extend-session'),
   btnToggleSound: document.getElementById('btn-toggle-sound'),
   iconSound: document.getElementById('icon-sound'),
-  textSound: document.getElementById('text-sound')
+  textSound: document.getElementById('text-sound'),
+
+  // DOM Elemen Absensi Manual
+  btnOpenManualAbsen: document.getElementById('btn-open-manual-absen'),
+  modalManualAbsen: document.getElementById('modal-manual-absen'),
+  btnCloseManualModal: document.getElementById('btn-close-manual-modal'),
+  btnCancelManualModal: document.getElementById('btn-cancel-manual-modal'),
+  formManualAbsen: document.getElementById('form-manual-absen'),
+  manualSelectKelas: document.getElementById('manual-select-kelas'),
+  manualSelectSiswa: document.getElementById('manual-select-siswa'),
+  manualStudentCount: document.getElementById('manual-student-count'),
+  manualInputMapel: document.getElementById('manual-input-mapel'),
+  manualInputKeterangan: document.getElementById('manual-input-keterangan'),
+  btnSubmitManualAbsen: document.getElementById('btn-submit-manual-absen')
 };
 
 let currentSesiId = null;
@@ -579,16 +592,41 @@ function listenToLogAbsensi(sesiId) {
       const data = docSnap.data();
       const item = document.createElement('div');
       item.className = 'flex items-center justify-between p-3 bg-slate-950/90 rounded-xl border border-slate-800 text-xs hover:border-cyan-500/30 transition';
+      let badgeClass = 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20';
+      let statusIcon = '✔';
+      const st = (data.status || 'Hadir').toLowerCase();
+      if (st.includes('terlambat')) {
+        badgeClass = 'bg-amber-500/10 text-amber-400 border-amber-500/20';
+        statusIcon = '⏰';
+      } else if (st.includes('sakit')) {
+        badgeClass = 'bg-sky-500/10 text-sky-400 border-sky-500/20';
+        statusIcon = '🏥';
+      } else if (st.includes('izin')) {
+        badgeClass = 'bg-indigo-500/10 text-indigo-400 border-indigo-500/20';
+        statusIcon = '📝';
+      } else if (st.includes('tidak') || st.includes('alpa')) {
+        badgeClass = 'bg-rose-500/10 text-rose-400 border-rose-500/20';
+        statusIcon = '❌';
+      }
+
+      const isManual = data.metode === 'Manual Guru' || data.device_id === 'MANUAL_GURU';
+      const manualBadge = isManual 
+        ? `<span class="px-1.5 py-0.5 ml-1 text-[9px] font-mono bg-cyan-500/20 text-cyan-300 border border-cyan-500/30 rounded">Manual</span>` 
+        : '';
+
       item.innerHTML = `
         <div class="flex items-center gap-3">
           <div class="w-8 h-8 rounded-lg bg-cyan-500/10 text-cyan-400 font-bold flex items-center justify-center">${count}</div>
           <div>
-            <p class="font-bold text-white text-sm">${data.nama_siswa}</p>
-            <p class="text-[11px] text-slate-400 font-mono">NIS: ${data.nis} | ${data.id_kelas}</p>
+            <p class="font-bold text-white text-sm flex items-center gap-1.5">
+              ${data.nama_siswa}
+              ${manualBadge}
+            </p>
+            <p class="text-[11px] text-slate-400 font-mono">NIS: ${data.nis} | ${data.id_kelas || data.nama_kelas || '-'}</p>
           </div>
         </div>
-        <span class="px-3 py-1 rounded-full text-xs font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
-          ✔ ${data.status || 'Hadir'}
+        <span class="px-3 py-1 rounded-full text-xs font-bold border ${badgeClass}">
+          ${statusIcon} ${data.status || 'Hadir'}
         </span>
       `;
       dom.logSiswaContainer.appendChild(item);
@@ -628,3 +666,228 @@ function resetSesiState() {
   if (dom.qrContainer) dom.qrContainer.innerHTML = '<p class="text-xs text-slate-500 font-sans">Sesi Belum Aktif</p>';
   if (dom.qrModal) dom.qrModal.classList.add('hidden');
 }
+
+// -----------------------------------------------------------------
+// 📝 LOGIKA INTERAKTIF FITUR ABSENSI MANUAL
+// -----------------------------------------------------------------
+let cachedStudentsByClass = {};
+
+async function loadStudentsForManualSelect(kelasId) {
+  if (!dom.manualSelectSiswa) return;
+  dom.manualSelectSiswa.innerHTML = '<option value="">-- Memuat Siswa... --</option>';
+  if (dom.manualStudentCount) dom.manualStudentCount.innerText = 'Memuat...';
+
+  if (!kelasId) {
+    dom.manualSelectSiswa.innerHTML = '<option value="">-- Pilih Kelas Terlebih Dahulu --</option>';
+    if (dom.manualStudentCount) dom.manualStudentCount.innerText = '0 Siswa';
+    return;
+  }
+
+  const normTarget = normClass(kelasId);
+  try {
+    let studentList = cachedStudentsByClass[normTarget];
+    if (!studentList) {
+      const q = query(collection(db, "siswa"));
+      const snap = await getDocs(q);
+      const allStudents = [];
+      snap.forEach(docSnap => {
+        const d = docSnap.data();
+        allStudents.push({
+          id: docSnap.id,
+          nis: d.nis || docSnap.id,
+          nama_siswa: d.nama_siswa || d.nama || "Tanpa Nama",
+          id_kelas: d.id_kelas || "-",
+          nama_kelas: d.nama_kelas || d.id_kelas || "-",
+          nama_sekolah: d.nama_sekolah || ""
+        });
+      });
+
+      studentList = allStudents.filter(s => {
+        return (s.id_kelas === kelasId) || (normClass(s.id_kelas) === normTarget) || (normClass(s.nama_kelas) === normTarget);
+      }).sort((a, b) => (a.nama_siswa || '').localeCompare(b.nama_siswa || ''));
+
+      cachedStudentsByClass[normTarget] = studentList;
+    }
+
+    // Periksa status kehadiran siswa di sesi aktif saat ini
+    let attendedNisMap = new Map();
+    if (currentSesiId) {
+      try {
+        const qLog = query(collection(db, "log_absensi"), where("id_sesi", "==", currentSesiId));
+        const logSnap = await getDocs(qLog);
+        logSnap.forEach(lDoc => {
+          const lData = lDoc.data();
+          if (lData.nis) attendedNisMap.set(lData.nis, lData.status || 'Hadir');
+        });
+      } catch (eLog) {
+        console.warn("Gagal cek log hadir:", eLog);
+      }
+    }
+
+    dom.manualSelectSiswa.innerHTML = '<option value="">-- Pilih Siswa (' + studentList.length + ') --</option>';
+    studentList.forEach(s => {
+      const attendedStatus = attendedNisMap.get(s.nis);
+      const opt = document.createElement('option');
+      opt.value = JSON.stringify(s);
+      opt.textContent = `${s.nama_siswa} (NIS: ${s.nis})${attendedStatus ? ` [✔ ${attendedStatus}]` : ''}`;
+      if (attendedStatus) {
+        opt.className = 'text-emerald-400 font-semibold';
+      }
+      dom.manualSelectSiswa.appendChild(opt);
+    });
+
+    if (dom.manualStudentCount) dom.manualStudentCount.innerText = `${studentList.length} Siswa`;
+
+  } catch (err) {
+    console.error("Gagal memuat daftar siswa:", err);
+    dom.manualSelectSiswa.innerHTML = '<option value="">Gagal memuat siswa</option>';
+    if (dom.manualStudentCount) dom.manualStudentCount.innerText = 'Error';
+  }
+}
+
+// Buka Modal Absen Manual
+if (dom.btnOpenManualAbsen && dom.modalManualAbsen) {
+  dom.btnOpenManualAbsen.addEventListener('click', async () => {
+    dom.modalManualAbsen.classList.remove('hidden');
+
+    if (dom.manualSelectKelas && dom.selectKelas) {
+      dom.manualSelectKelas.innerHTML = dom.selectKelas.innerHTML;
+      if (dom.selectKelas.value) {
+        dom.manualSelectKelas.value = dom.selectKelas.value;
+      }
+    }
+
+    if (dom.manualInputMapel) {
+      if (dom.modalMapelTitle && dom.modalMapelTitle.innerText && dom.modalMapelTitle.innerText !== '-') {
+        dom.manualInputMapel.value = dom.modalMapelTitle.innerText;
+      } else if (dom.selectMapel && dom.selectMapel.value) {
+        dom.manualInputMapel.value = dom.selectMapel.value;
+      }
+    }
+
+    const currentClass = dom.manualSelectKelas ? dom.manualSelectKelas.value : '';
+    if (currentClass) {
+      await loadStudentsForManualSelect(currentClass);
+    }
+  });
+}
+
+// Tutup Modal
+if (dom.btnCloseManualModal && dom.modalManualAbsen) {
+  dom.btnCloseManualModal.addEventListener('click', () => dom.modalManualAbsen.classList.add('hidden'));
+}
+if (dom.btnCancelManualModal && dom.modalManualAbsen) {
+  dom.btnCancelManualModal.addEventListener('click', () => dom.modalManualAbsen.classList.add('hidden'));
+}
+
+// Event ganti kelas pada form modal
+if (dom.manualSelectKelas) {
+  dom.manualSelectKelas.addEventListener('change', async (e) => {
+    await loadStudentsForManualSelect(e.target.value);
+  });
+}
+
+// Submit Absensi Manual
+if (dom.formManualAbsen) {
+  dom.formManualAbsen.addEventListener('submit', async (e) => {
+    e.preventDefault();
+
+    const rawStudent = dom.manualSelectSiswa ? dom.manualSelectSiswa.value : '';
+    if (!rawStudent) {
+      showToast("Pilih siswa terlebih dahulu!", "warning");
+      return;
+    }
+
+    let student = null;
+    try {
+      student = JSON.parse(rawStudent);
+    } catch(err) {
+      showToast("Data siswa tidak valid.", "error");
+      return;
+    }
+
+    const selectedStatus = document.querySelector('input[name="manual-status"]:checked')?.value || 'Hadir';
+    const mapel = dom.manualInputMapel ? dom.manualInputMapel.value.trim() : '-';
+    const keterangan = dom.manualInputKeterangan ? dom.manualInputKeterangan.value.trim() : '';
+    const selectedKelas = dom.manualSelectKelas ? dom.manualSelectKelas.value : student.id_kelas;
+    const selectedOpt = dom.manualSelectKelas ? dom.manualSelectKelas.selectedOptions[0] : null;
+    const namaKelasVal = selectedOpt?.dataset?.namaKelas || selectedKelas || student.nama_kelas;
+
+    const now = new Date();
+    const tanggalStr = now.toLocaleDateString('id-ID', { year: 'numeric', month: '2-digit', day: '2-digit' }).split('/').reverse().join('-');
+    const days = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
+    const hariStr = days[now.getDay()];
+    const waktuStr = now.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', second: '2-digit' }) + ' WIB';
+
+    let existingDocId = null;
+    if (currentSesiId) {
+      try {
+        const qCheck = query(
+          collection(db, "log_absensi"),
+          where("id_sesi", "==", currentSesiId),
+          where("nis", "==", student.nis)
+        );
+        const checkSnap = await getDocs(qCheck);
+        if (!checkSnap.empty) {
+          existingDocId = checkSnap.docs[0].id;
+          const confirmed = await showConfirm({
+            title: "Siswa Sudah Memiliki Presensi",
+            message: `Siswa [${student.nama_siswa}] sudah memiliki catatan pada sesi ini. Apakah Anda ingin memperbarui statusnya menjadi [${selectedStatus}]?`,
+            icon: "fa-triangle-exclamation",
+            confirmText: "Ya, Perbarui Status",
+            type: "warning"
+          });
+          if (!confirmed) return;
+        }
+      } catch(eChk) {
+        console.warn("Gagal cek duplikasi sesi:", eChk);
+      }
+    }
+
+    if (dom.btnSubmitManualAbsen) dom.btnSubmitManualAbsen.disabled = true;
+
+    try {
+      const payload = {
+        id_sesi: currentSesiId || "MANUAL_GURU",
+        nis: student.nis,
+        nama_siswa: student.nama_siswa,
+        id_kelas: selectedKelas,
+        nama_kelas: namaKelasVal,
+        nama_sekolah: student.nama_sekolah || "",
+        nama_mapel: mapel,
+        hari: hariStr,
+        tanggal: tanggalStr,
+        waktu: waktuStr,
+        status: selectedStatus,
+        keterangan: keterangan || (selectedStatus === 'Hadir' ? 'Presensi Manual oleh Guru' : `Keterangan: ${selectedStatus}`),
+        metode: "Manual Guru",
+        device_id: "MANUAL_GURU"
+      };
+
+      if (existingDocId) {
+        await updateDoc(doc(db, "log_absensi", existingDocId), {
+          ...payload,
+          updated_at: serverTimestamp()
+        });
+        showToast(`Status presensi [${student.nama_siswa}] berhasil diperbarui menjadi ${selectedStatus}`, "success");
+      } else {
+        await addDoc(collection(db, "log_absensi"), {
+          ...payload,
+          created_at: serverTimestamp()
+        });
+        showToast(`Presensi manual berhasil dicatat: [${student.nama_siswa}] - ${selectedStatus}`, "success");
+        audioNotifier.playChime();
+      }
+
+      if (dom.modalManualAbsen) dom.modalManualAbsen.classList.add('hidden');
+      if (dom.manualInputKeterangan) dom.manualInputKeterangan.value = '';
+
+    } catch (err) {
+      console.error("Gagal simpan absensi manual:", err);
+      showToast("Gagal menyimpan presensi manual: " + err.message, "error");
+    } finally {
+      if (dom.btnSubmitManualAbsen) dom.btnSubmitManualAbsen.disabled = false;
+    }
+  });
+}
+

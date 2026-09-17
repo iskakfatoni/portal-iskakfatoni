@@ -7,6 +7,8 @@ import {
   getDocs, 
   getDoc,
   doc, 
+  addDoc,
+  updateDoc,
   query, 
   orderBy, 
   where, 
@@ -53,6 +55,20 @@ const btnSaveAlpaLogs = document.getElementById('btn-save-alpa-logs');
 const todayDateStrSpan = document.getElementById('today-date-str');
 const statHadirCount = document.getElementById('stat-hadir-count');
 const statAlpaCount = document.getElementById('stat-alpa-count');
+
+// DOM Elemen Absen Manual di Rekap
+const btnOpenRekapManual = document.getElementById('btn-open-rekap-manual');
+const modalManualAbsen = document.getElementById('modal-manual-absen');
+const btnCloseManualModal = document.getElementById('btn-close-manual-modal');
+const btnCancelManualModal = document.getElementById('btn-cancel-manual-modal');
+const formManualAbsen = document.getElementById('form-manual-absen');
+const manualSelectKelas = document.getElementById('manual-select-kelas');
+const manualSelectSiswa = document.getElementById('manual-select-siswa');
+const manualStudentCount = document.getElementById('manual-student-count');
+const manualInputMapel = document.getElementById('manual-input-mapel');
+const manualInputTanggal = document.getElementById('manual-input-tanggal');
+const manualInputKeterangan = document.getElementById('manual-input-keterangan');
+const btnSubmitManualAbsen = document.getElementById('btn-submit-manual-absen');
 
 let currentData = [];
 
@@ -507,20 +523,38 @@ function renderTable(data) {
 
   let html = '';
   data.forEach((item, idx) => {
-    const isHadir = item.status.toLowerCase().includes('hadir') && !item.status.toLowerCase().includes('tidak');
-    const badgeClass = isHadir 
-      ? 'bg-emerald-500/15 text-emerald-400 border-emerald-500/30 font-semibold' 
-      : 'bg-rose-500/15 text-rose-400 border-rose-500/40 font-bold';
+    let badgeClass = 'bg-emerald-500/15 text-emerald-400 border-emerald-500/30 font-semibold';
+    let iconHTML = '<i class="fa-solid fa-circle-check text-emerald-400 mr-1"></i>';
+    const st = (item.status || 'Hadir').toLowerCase();
 
-    const iconHTML = isHadir 
-      ? '<i class="fa-solid fa-circle-check text-emerald-400 mr-1"></i>' 
-      : '<i class="fa-solid fa-triangle-exclamation text-rose-400 mr-1"></i>';
+    if (st.includes('terlambat')) {
+      badgeClass = 'bg-amber-500/15 text-amber-400 border-amber-500/30 font-semibold';
+      iconHTML = '<i class="fa-solid fa-clock text-amber-400 mr-1"></i>';
+    } else if (st.includes('sakit')) {
+      badgeClass = 'bg-sky-500/15 text-sky-400 border-sky-500/30 font-semibold';
+      iconHTML = '<i class="fa-solid fa-notes-medical text-sky-400 mr-1"></i>';
+    } else if (st.includes('izin')) {
+      badgeClass = 'bg-indigo-500/15 text-indigo-400 border-indigo-500/30 font-semibold';
+      iconHTML = '<i class="fa-solid fa-envelope-open-text text-indigo-400 mr-1"></i>';
+    } else if (st.includes('tidak') || st.includes('alpa')) {
+      badgeClass = 'bg-rose-500/15 text-rose-400 border-rose-500/40 font-bold';
+      iconHTML = '<i class="fa-solid fa-triangle-exclamation text-rose-400 mr-1"></i>';
+    }
 
     let sharedBadgeHTML = '';
     if (item.isSharedDevice) {
       sharedBadgeHTML = `
         <span class="px-2 py-0.5 ml-1.5 rounded text-[10px] bg-amber-500/20 text-amber-300 border border-amber-500/40 font-mono inline-flex items-center gap-1" title="Perangkat HP ini digunakan oleh ${item.sharedCount} siswa untuk absen">
           <i class="fa-solid fa-mobile-screen-button text-amber-400"></i> HP Berbagi (${item.sharedCount} Siswa)
+        </span>
+      `;
+    }
+
+    let manualBadgeHTML = '';
+    if (item.metode === 'Manual Guru' || item.device_id === 'MANUAL_GURU') {
+      manualBadgeHTML = `
+        <span class="px-2 py-0.5 ml-1.5 rounded text-[10px] bg-cyan-500/20 text-cyan-300 border border-cyan-500/30 font-mono inline-flex items-center gap-1" title="Presensi dicatat manual oleh Guru">
+          <i class="fa-solid fa-user-pen text-cyan-400"></i> Manual
         </span>
       `;
     }
@@ -539,6 +573,7 @@ function renderTable(data) {
             ${iconHTML} ${item.status}
           </span>
           ${sharedBadgeHTML}
+          ${manualBadgeHTML}
         </td>
         <td class="px-3 sm:px-4 py-2.5 sm:py-3 font-semibold text-white col-truncate-md" title="${item.nama}">${item.nama}</td>
         <td class="px-3 sm:px-4 py-2.5 sm:py-3 text-xs text-slate-300 col-truncate-sm" title="${item.kelas}">
@@ -821,3 +856,236 @@ if (btnExportMatrixExcel) {
     }
   });
 }
+
+// -----------------------------------------------------------------
+// 📝 LOGIKA INTERAKTIF FITUR ABSENSI MANUAL (HALAMAN REKAP)
+// -----------------------------------------------------------------
+let cachedStudentsRekap = {};
+
+async function loadStudentsForRekapManual(kelasId, targetDate) {
+  if (!manualSelectSiswa) return;
+  manualSelectSiswa.innerHTML = '<option value="">-- Memuat Siswa... --</option>';
+  if (manualStudentCount) manualStudentCount.innerText = 'Memuat...';
+
+  if (!kelasId) {
+    manualSelectSiswa.innerHTML = '<option value="">-- Pilih Kelas Terlebih Dahulu --</option>';
+    if (manualStudentCount) manualStudentCount.innerText = '0 Siswa';
+    return;
+  }
+
+  const normTarget = normClass(kelasId);
+  try {
+    let studentList = cachedStudentsRekap[normTarget];
+    if (!studentList) {
+      const q = query(collection(db, "siswa"));
+      const snap = await getDocs(q);
+      const allStudents = [];
+      snap.forEach(docSnap => {
+        const d = docSnap.data();
+        allStudents.push({
+          id: docSnap.id,
+          nis: d.nis || docSnap.id,
+          nama_siswa: d.nama_siswa || d.nama || "Tanpa Nama",
+          id_kelas: d.id_kelas || "-",
+          nama_kelas: d.nama_kelas || d.id_kelas || "-",
+          nama_sekolah: d.nama_sekolah || ""
+        });
+      });
+
+      studentList = allStudents.filter(s => {
+        return (s.id_kelas === kelasId) || (normClass(s.id_kelas) === normTarget) || (normClass(s.nama_kelas) === normTarget);
+      }).sort((a, b) => (a.nama_siswa || '').localeCompare(b.nama_siswa || ''));
+
+      cachedStudentsRekap[normTarget] = studentList;
+    }
+
+    // Cek catatan presensi siswa pada tanggal target
+    let attendedMap = new Map();
+    if (targetDate) {
+      try {
+        const qLog = query(
+          collection(db, "log_absensi"),
+          where("tanggal", "==", targetDate)
+        );
+        const logSnap = await getDocs(qLog);
+        logSnap.forEach(lDoc => {
+          const lData = lDoc.data();
+          if (lData.nis) attendedMap.set(lData.nis, lData.status || 'Hadir');
+        });
+      } catch (eLog) {
+        console.warn("Gagal cek log hadir rekap:", eLog);
+      }
+    }
+
+    manualSelectSiswa.innerHTML = '<option value="">-- Pilih Siswa (' + studentList.length + ') --</option>';
+    studentList.forEach(s => {
+      const attendedStatus = attendedMap.get(s.nis);
+      const opt = document.createElement('option');
+      opt.value = JSON.stringify(s);
+      opt.textContent = `${s.nama_siswa} (NIS: ${s.nis})${attendedStatus ? ` [✔ ${attendedStatus}]` : ''}`;
+      if (attendedStatus) {
+        opt.className = 'text-emerald-400 font-semibold';
+      }
+      manualSelectSiswa.appendChild(opt);
+    });
+
+    if (manualStudentCount) manualStudentCount.innerText = `${studentList.length} Siswa`;
+
+  } catch (err) {
+    console.error("Gagal memuat daftar siswa rekap:", err);
+    manualSelectSiswa.innerHTML = '<option value="">Gagal memuat siswa</option>';
+    if (manualStudentCount) manualStudentCount.innerText = 'Error';
+  }
+}
+
+if (btnOpenRekapManual && modalManualAbsen) {
+  btnOpenRekapManual.addEventListener('click', async () => {
+    modalManualAbsen.classList.remove('hidden');
+
+    if (manualInputTanggal) {
+      manualInputTanggal.value = DateUtils.getTodayISO();
+    }
+
+    if (manualSelectKelas && filterKelas) {
+      manualSelectKelas.innerHTML = filterKelas.innerHTML;
+      const firstOpt = manualSelectKelas.querySelector('option[value=""]');
+      if (firstOpt) firstOpt.textContent = '-- Pilih Kelas --';
+      if (filterKelas.value) {
+        manualSelectKelas.value = filterKelas.value;
+      }
+    }
+
+    const currentClass = manualSelectKelas ? manualSelectKelas.value : '';
+    const dateVal = manualInputTanggal ? manualInputTanggal.value : DateUtils.getTodayISO();
+    if (currentClass) {
+      await loadStudentsForRekapManual(currentClass, dateVal);
+    }
+  });
+}
+
+if (btnCloseManualModal && modalManualAbsen) {
+  btnCloseManualModal.addEventListener('click', () => modalManualAbsen.classList.add('hidden'));
+}
+if (btnCancelManualModal && modalManualAbsen) {
+  btnCancelManualModal.addEventListener('click', () => modalManualAbsen.classList.add('hidden'));
+}
+
+if (manualSelectKelas) {
+  manualSelectKelas.addEventListener('change', async (e) => {
+    const dateVal = manualInputTanggal ? manualInputTanggal.value : DateUtils.getTodayISO();
+    await loadStudentsForRekapManual(e.target.value, dateVal);
+  });
+}
+if (manualInputTanggal) {
+  manualInputTanggal.addEventListener('change', async (e) => {
+    const currentClass = manualSelectKelas ? manualSelectKelas.value : '';
+    if (currentClass) {
+      await loadStudentsForRekapManual(currentClass, e.target.value);
+    }
+  });
+}
+
+if (formManualAbsen) {
+  formManualAbsen.addEventListener('submit', async (e) => {
+    e.preventDefault();
+
+    const rawStudent = manualSelectSiswa ? manualSelectSiswa.value : '';
+    if (!rawStudent) {
+      showToast("Pilih siswa terlebih dahulu!", "warning");
+      return;
+    }
+
+    let student = null;
+    try {
+      student = JSON.parse(rawStudent);
+    } catch(err) {
+      showToast("Data siswa tidak valid.", "error");
+      return;
+    }
+
+    const selectedStatus = document.querySelector('input[name="manual-status"]:checked')?.value || 'Hadir';
+    const mapel = manualInputMapel ? manualInputMapel.value.trim() : '-';
+    const dateVal = manualInputTanggal ? manualInputTanggal.value : DateUtils.getTodayISO();
+    const keterangan = manualInputKeterangan ? manualInputKeterangan.value.trim() : '';
+    const selectedKelas = manualSelectKelas ? manualSelectKelas.value : student.id_kelas;
+    const selectedOpt = manualSelectKelas ? manualSelectKelas.selectedOptions[0] : null;
+    const namaKelasVal = selectedOpt?.dataset?.namaKelas || selectedKelas || student.nama_kelas;
+
+    const days = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
+    const parsedDate = new Date(dateVal);
+    const hariStr = isNaN(parsedDate.getTime()) ? 'Senin' : days[parsedDate.getDay()];
+    const now = new Date();
+    const waktuStr = now.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', second: '2-digit' }) + ' WIB';
+
+    let existingDocId = null;
+    try {
+      const qCheck = query(
+        collection(db, "log_absensi"),
+        where("nis", "==", student.nis),
+        where("tanggal", "==", dateVal)
+      );
+      const checkSnap = await getDocs(qCheck);
+      if (!checkSnap.empty) {
+        existingDocId = checkSnap.docs[0].id;
+        const confirmed = await showConfirm({
+          title: "Siswa Sudah Terdata",
+          message: `Siswa [${student.nama_siswa}] sudah memiliki catatan presensi pada tanggal ${dateVal}. Apakah Anda ingin memperbarui statusnya menjadi [${selectedStatus}]?`,
+          icon: "fa-triangle-exclamation",
+          confirmText: "Ya, Perbarui Status",
+          type: "warning"
+        });
+        if (!confirmed) return;
+      }
+    } catch (eChk) {
+      console.warn("Gagal cek duplikasi rekap:", eChk);
+    }
+
+    if (btnSubmitManualAbsen) btnSubmitManualAbsen.disabled = true;
+
+    try {
+      const payload = {
+        id_sesi: "MANUAL_REKAP",
+        nis: student.nis,
+        nama_siswa: student.nama_siswa,
+        id_kelas: selectedKelas,
+        nama_kelas: namaKelasVal,
+        nama_sekolah: student.nama_sekolah || "",
+        nama_mapel: mapel,
+        hari: hariStr,
+        tanggal: dateVal,
+        waktu: waktuStr,
+        status: selectedStatus,
+        keterangan: keterangan || (selectedStatus === 'Hadir' ? 'Presensi Manual Guru' : `Keterangan: ${selectedStatus}`),
+        metode: "Manual Guru",
+        device_id: "MANUAL_GURU"
+      };
+
+      if (existingDocId) {
+        await updateDoc(doc(db, "log_absensi", existingDocId), {
+          ...payload,
+          updated_at: serverTimestamp()
+        });
+        showToast(`Status presensi [${student.nama_siswa}] berhasil diperbarui menjadi ${selectedStatus}`, "success");
+      } else {
+        await addDoc(collection(db, "log_absensi"), {
+          ...payload,
+          created_at: serverTimestamp()
+        });
+        showToast(`Presensi manual berhasil disimpan: [${student.nama_siswa}] - ${selectedStatus}`, "success");
+      }
+
+      if (modalManualAbsen) modalManualAbsen.classList.add('hidden');
+      if (manualInputKeterangan) manualInputKeterangan.value = '';
+
+      // Muat ulang data rekap tabel
+      loadData();
+
+    } catch (err) {
+      console.error("Gagal simpan absensi manual rekap:", err);
+      showToast("Gagal menyimpan presensi manual: " + err.message, "error");
+    } finally {
+      if (btnSubmitManualAbsen) btnSubmitManualAbsen.disabled = false;
+    }
+  });
+}
+
