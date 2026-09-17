@@ -1,14 +1,14 @@
 // scripts/auto-alpa.js
 // Skrip otomatisasi untuk menyimpan data siswa yang 'Tidak Hadir' ke Firestore
-// Dijalankan setiap hari Senin - Jumat pukul 15:30 WIB via GitHub Actions atau Manual Run
+// Dijalankan via GitHub Actions (repository_dispatch) atau Manual Run
 
 const https = require('https');
 
 const PROJECT_ID = 'portal-iskakfatoni';
 const FIRESTORE_BASE_URL = `https://firestore.googleapis.com/v1/projects/${PROJECT_ID}/databases/(default)/documents`;
 
-// Helper HTTP Request
-function httpRequest(url, options = {}, postData = null) {
+// 1. Helper HTTP Request dengan Timeout dan Error Handling Ketat
+function httpRequest(url, options = {}, postData = null, timeoutMs = 20000) {
   return new Promise((resolve, reject) => {
     const postDataStr = postData ? (typeof postData === 'string' ? postData : JSON.stringify(postData)) : null;
     const headers = Object.assign({}, options.headers || {});
@@ -23,22 +23,33 @@ function httpRequest(url, options = {}, postData = null) {
       let body = '';
       res.on('data', chunk => body += chunk);
       res.on('end', () => {
+        let parsed;
         try {
-          const parsed = body ? JSON.parse(body) : {};
-          if (res.statusCode >= 200 && res.statusCode < 300) {
-            resolve(parsed);
-          } else {
-            resolve(parsed); // Jangan lempar fatal error agar proses tidak crash
-          }
+          parsed = body ? JSON.parse(body) : {};
         } catch (e) {
-          resolve(body);
+          parsed = { rawBody: body };
+        }
+
+        // Hanya resolve jika HTTP Status Code 2xx
+        if (res.statusCode >= 200 && res.statusCode < 300) {
+          resolve(parsed);
+        } else {
+          const errMsg = (parsed && parsed.error && (parsed.error.message || JSON.stringify(parsed.error))) || `HTTP ${res.statusCode}: ${body}`;
+          const err = new Error(errMsg);
+          err.statusCode = res.statusCode;
+          err.response = parsed;
+          reject(err);
         }
       });
     });
 
+    req.setTimeout(timeoutMs, () => {
+      req.destroy();
+      reject(new Error(`HTTP Timeout (${timeoutMs}ms) saat menghubungi: ${url}`));
+    });
+
     req.on('error', (err) => {
-      console.warn("HTTP Request Warning:", err.message);
-      resolve({ error: err.message });
+      reject(err);
     });
 
     if (postDataStr) req.write(postDataStr);
@@ -46,7 +57,7 @@ function httpRequest(url, options = {}, postData = null) {
   });
 }
 
-// Fetch all documents with pagination
+// 2. Fetch all documents dengan Pagination & Propagasi Error
 async function fetchAllDocuments(collectionName) {
   let allDocs = [];
   let pageToken = '';
@@ -55,39 +66,46 @@ async function fetchAllDocuments(collectionName) {
     const url = `${FIRESTORE_BASE_URL}/${collectionName}?pageSize=300${pageToken ? '&pageToken=' + pageToken : ''}`;
     const res = await httpRequest(url, { method: 'GET' });
 
-    if (res.documents) allDocs = allDocs.concat(res.documents);
-    if (res.nextPageToken) pageToken = res.nextPageToken;
-    else break;
+    if (res && res.documents) {
+      allDocs = allDocs.concat(res.documents);
+    }
+    if (res && res.nextPageToken) {
+      pageToken = res.nextPageToken;
+    } else {
+      break;
+    }
   }
   return allDocs;
 }
 
-// Normalisasi Nama Kelas (menghapus spasi, strip, case-insensitive)
+// 3. Normalisasi Nama Kelas (menghapus spasi, strip, case-insensitive)
 function normClass(name) {
   return (name || '').toLowerCase().replace(/[^a-z0-9]/g, '');
 }
 
-// Ambil Tanggal Hari Ini dalam format WIB (Asia/Jakarta)
+// 4. Hitung Waktu WIB (UTC+7) secara Deterministik & Aman dari Variasi Locale
 function getTodayWIB() {
   const now = new Date();
-  const jakartaTime = new Date(now.toLocaleString('en-US', { timeZone: 'Asia/Jakarta' }));
-  
-  const yyyy = jakartaTime.getFullYear();
-  const mm = String(jakartaTime.getMonth() + 1).padStart(2, '0');
-  const dd = String(jakartaTime.getDate()).padStart(2, '0');
+  // Hitung offset UTC + 7 jam secara matematis
+  const utcMs = now.getTime() + (now.getTimezoneOffset() * 60000);
+  const wibDate = new Date(utcMs + (7 * 3600000));
+
+  const yyyy = wibDate.getFullYear();
+  const mm = String(wibDate.getMonth() + 1).padStart(2, '0');
+  const dd = String(wibDate.getDate()).padStart(2, '0');
   const todayISO = `${yyyy}-${mm}-${dd}`;
 
-  const hh = String(jakartaTime.getHours()).padStart(2, '0');
-  const min = String(jakartaTime.getMinutes()).padStart(2, '0');
+  const hh = String(wibDate.getHours()).padStart(2, '0');
+  const min = String(wibDate.getMinutes()).padStart(2, '0');
   const waktuStr = `${hh}:${min} WIB`;
 
   const days = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
-  const hariStr = days[jakartaTime.getDay()];
+  const hariStr = days[wibDate.getDay()];
 
-  return { todayISO, hariStr, waktuStr, jakartaTime };
+  return { todayISO, hariStr, waktuStr, wibDate };
 }
 
-// Eksekusi Batch Create Log Absensi
+// 5. Eksekusi Create Log Absensi (Memvalidasi Dokumen Terbuat)
 async function createLogAbsensiDoc(logData) {
   const url = `${FIRESTORE_BASE_URL}/log_absensi`;
   
@@ -108,24 +126,29 @@ async function createLogAbsensiDoc(logData) {
     }
   };
 
-  return httpRequest(url, {
+  const res = await httpRequest(url, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' }
   }, body);
+
+  if (!res || !res.name) {
+    throw new Error(`Firestore tidak mengembalikan id dokumen valid: ${JSON.stringify(res)}`);
+  }
+  return res;
 }
 
-// Helper Pengiriman WhatsApp Fonnte
+// 6. Helper Pengiriman WhatsApp Fonnte dengan Verifikasi Status Ketat
 async function sendWhatsAppFonnte(target, message) {
   const rawToken = process.env.FONNTE_TOKEN || '';
   const token = rawToken.trim();
 
   if (!token) {
     console.log('   ℹ️ [WhatsApp] FONNTE_TOKEN tidak diatur di environment secrets. Pengiriman WA dilewati.');
-    return;
+    return { success: false, reason: 'no_token' };
   }
   if (!target) {
     console.log('   ℹ️ [WhatsApp] Target / wa_group_id untuk kelas ini belum diatur di database.');
-    return;
+    return { success: false, reason: 'no_target' };
   }
 
   const url = 'https://api.fonnte.com/send';
@@ -141,14 +164,18 @@ async function sendWhatsAppFonnte(target, message) {
       message: message,
       countryCode: '62'
     });
-    console.log(`   📲 [WhatsApp] Respon Fonnte:`, JSON.stringify(res));
-    if (res && res.status === false) {
-      console.warn(`   ⚠️ [WhatsApp] Fonnte mengembalikan status false: ${res.reason || res.detail || JSON.stringify(res)}`);
-    } else {
+
+    if (res && res.status === true) {
       console.log(`   📲 [WhatsApp] Pesan laporan berhasil dikirim ke: ${target}`);
+      return { success: true, res };
+    } else {
+      const reason = res && (res.reason || res.detail || JSON.stringify(res));
+      console.warn(`   ⚠️ [WhatsApp] Fonnte mengembalikan status gagal: ${reason}`);
+      return { success: false, reason };
     }
   } catch (errWA) {
     console.error(`   ❌ [WhatsApp] Gagal mengirim pesan ke ${target}:`, errWA.message);
+    return { success: false, error: errWA.message };
   }
 }
 
@@ -156,7 +183,7 @@ async function sendWhatsAppFonnte(target, message) {
 async function main() {
   const { todayISO, hariStr, waktuStr } = getTodayWIB();
   console.log(`=======================================================`);
-  console.log(`🤖 AUTO-ALPA CRON JOB: ${hariStr}, ${todayISO} (${waktuStr})`);
+  console.log(`🤖 AUTO-ALPA SCRIPT: ${hariStr}, ${todayISO} (${waktuStr})`);
   console.log(`=======================================================`);
 
   try {
@@ -169,6 +196,11 @@ async function main() {
     ]);
 
     console.log(`📊 Data Terbaca: ${sesiDocs.length} Sesi, ${siswaDocs.length} Siswa, ${kelasDocs.length} Kelas, ${logDocs.length} Total Log`);
+
+    // Guard Keamanan: Pastikan data master tidak kosong
+    if (siswaDocs.length === 0 || kelasDocs.length === 0) {
+      throw new Error(`Data master kosong (Siswa: ${siswaDocs.length}, Kelas: ${kelasDocs.length}). Auto-alpa dibatalkan demi mencegah silent failure alpa massal.`);
+    }
 
     // 1. Temukan sesi yang aktif atau dibuka HARI INI
     const todaySessions = sesiDocs.filter(doc => {
@@ -188,32 +220,36 @@ async function main() {
       console.log(`   - Kelas: ${f.id_kelas && f.id_kelas.stringValue} | Mapel: ${f.nama_mapel && f.nama_mapel.stringValue} (${s.name.split('/').pop()})`);
     });
 
-    // 2. Kumpulkan NIS siswa yang hadir vs tidak hadir hari ini
+    // 2. Kumpulkan NIS siswa yang hadir vs tidak hadir hari ini dengan binding per ID Sesi
     const todayLogs = logDocs.filter(doc => {
       const f = doc.fields || {};
       return f.tanggal && f.tanggal.stringValue === todayISO;
     });
 
-    const presentNisSet = new Set();
-    const existingAlpaNisSet = new Set();
+    // Set spesifik per sesi dan per hari
+    const presentSessionNisSet = new Set();
+    const existingAlpaSessionNisSet = new Set();
 
     todayLogs.forEach(doc => {
       const f = doc.fields || {};
       const nis = (f.nis && f.nis.stringValue || '').trim();
+      const sId = (f.id_sesi && f.id_sesi.stringValue || '').trim();
       const status = (f.status && f.status.stringValue || '').toLowerCase();
       if (!nis) return;
 
-      if (status.includes('hadir') && !status.includes('tidak')) {
-        presentNisSet.add(nis);
+      const isHadir = status.includes('hadir') && !status.includes('tidak');
+      if (isHadir) {
+        if (sId && sId !== '-') presentSessionNisSet.add(`${sId}_${nis}`);
+        presentSessionNisSet.add(`any_${nis}`);
       } else {
-        existingAlpaNisSet.add(nis);
+        if (sId && sId !== '-') existingAlpaSessionNisSet.add(`${sId}_${nis}`);
+        existingAlpaSessionNisSet.add(`any_${nis}`);
       }
     });
 
-    console.log(`👥 Presensi Hari Ini -> Hadir: ${presentNisSet.size} siswa | Alpa/Tidak Hadir: ${existingAlpaNisSet.size} siswa`);
-
     // 3. Proses setiap sesi untuk mencari siswa yang belum absen & kirim notifikasi WhatsApp
     let totalSavedAlpa = 0;
+    const sentWaTargets = new Set(); // Mencegah pesan WhatsApp ganda ke grup yang sama dalam 1 run
 
     for (const sessionDoc of todaySessions) {
       const sFields = sessionDoc.fields || {};
@@ -252,7 +288,7 @@ async function main() {
         targetWaGroup = process.env.WHATSAPP_TARGET;
       }
 
-      // Cari siswa di kelas ini (utamakan id_kelas relasional)
+      // Cari siswa di kelas ini dengan toleransi penulisan nama sekolah
       const targetDocId = matchingKelasDoc ? matchingKelasDoc.name.split('/').pop() : sKelas;
       const classStudents = siswaDocs.filter(sw => {
         const swF = sw.fields || {};
@@ -262,31 +298,35 @@ async function main() {
 
         if (swIdKelas && targetDocId && normClass(swIdKelas) === normClass(targetDocId)) return true;
         if (swIdKelas && normClass(swIdKelas) === normSKelas) return true;
-        if (normClass(swNamaKelas) === normClass(namaKelasDisplay) && swSekolah === namaSekolah) return true;
+        if (normClass(swNamaKelas) === normClass(namaKelasDisplay)) {
+          if (!swSekolah || !namaSekolah || normClass(swSekolah) === normClass(namaSekolah) || swSekolah.toLowerCase().includes('jetis')) {
+            return true;
+          }
+        }
         return false;
       });
 
       console.log(`\n📌 Memeriksa Kelas [${namaKelasDisplay} - ${namaSekolah}] (Total Rombel: ${classStudents.length} siswa)...`);
 
-      // Siswa yang Hadir
+      // Siswa yang Hadir pada sesi ini
       const presentStudents = classStudents.filter(sw => {
         const swF = sw.fields || {};
         const nis = (swF.nis && swF.nis.stringValue || sw.name.split('/').pop()).trim();
-        return presentNisSet.has(nis);
+        return presentSessionNisSet.has(`${sId}_${nis}`) || presentSessionNisSet.has(`any_${nis}`);
       });
 
       // Siswa yang Tidak Hadir (Alpa)
       const alpaStudents = classStudents.filter(sw => {
         const swF = sw.fields || {};
         const nis = (swF.nis && swF.nis.stringValue || sw.name.split('/').pop()).trim();
-        return !presentNisSet.has(nis);
+        return !(presentSessionNisSet.has(`${sId}_${nis}`) || presentSessionNisSet.has(`any_${nis}`));
       });
 
       // Simpan alpa yang belum tersimpan di Firestore ke database
       const unsavedAlpaStudents = alpaStudents.filter(sw => {
         const swF = sw.fields || {};
         const nis = (swF.nis && swF.nis.stringValue || sw.name.split('/').pop()).trim();
-        return !existingAlpaNisSet.has(nis);
+        return !(existingAlpaSessionNisSet.has(`${sId}_${nis}`) || existingAlpaSessionNisSet.has(`any_${nis}`));
       });
 
       if (unsavedAlpaStudents.length > 0) {
@@ -314,9 +354,10 @@ async function main() {
               status: 'Tidak Hadir'
             });
 
-            existingAlpaNisSet.add(nis);
+            existingAlpaSessionNisSet.add(`${sId}_${nis}`);
+            existingAlpaSessionNisSet.add(`any_${nis}`);
             totalSavedAlpa++;
-            console.log(`      + [Alpa Baru] ${nis} - ${nama}`);
+            console.log(`      + [Alpa Baru Tersimpan] ${nis} - ${nama}`);
           } catch (errPost) {
             console.error(`      ❌ Gagal simpan alpa ${nis}:`, errPost.message);
           }
@@ -327,6 +368,11 @@ async function main() {
 
       // SUSUN PESAN LAPORAN WHATSAPP UNTUK GRUP KELAS INI
       if (targetWaGroup) {
+        if (sentWaTargets.has(targetWaGroup)) {
+          console.log(`   ℹ️ [WhatsApp] Pesan laporan untuk grup ${targetWaGroup} sudah dikirim pada sesi sebelumnya dalam run ini.`);
+          continue;
+        }
+
         const presentCount = presentStudents.length;
         const alpaCount = alpaStudents.length;
         const totalStudents = classStudents.length;
@@ -358,19 +404,21 @@ ${alpaCount > 0
   ? `❌ *Daftar Siswa Tidak Hadir:*\n${alpaListText}` 
   : `✨ *Alhamdulillah, seluruh siswa hadir lengkap (100%)!*`}`;
 
-        await sendWhatsAppFonnte(targetWaGroup, waMessage);
+        const sendResult = await sendWhatsAppFonnte(targetWaGroup, waMessage);
+        if (sendResult && sendResult.success) {
+          sentWaTargets.add(targetWaGroup);
+        }
       }
     }
 
     console.log(`\n=======================================================`);
-    console.log(`🎉 SUKSES: Total ${totalSavedAlpa} log 'Tidak Hadir' berhasil disimpan permanen ke Firestore.`);
+    console.log(`🎉 SUKSES: Total ${totalSavedAlpa} log 'Tidak Hadir' baru berhasil diverifikasi & disimpan permanen.`);
     console.log(`=======================================================`);
 
   } catch (err) {
-    console.error('❌ Terjadi kesalahan pada Auto-Alpa Cron:', err);
+    console.error('❌ Terjadi kesalahan pada Auto-Alpa Cron:', err.message);
     process.exit(1);
   }
 }
 
 main();
-

@@ -4,6 +4,47 @@ Dokumen ini berisi rangkuman review perubahan kode (*code review*) terbaru yang 
 
 ---
 
+## 📅 Review [2026-09-17 16:48 WIB] - Audit Mendalam & Perbaikan Bug, Silent Failure, dan False Positive pada Skrip Auto-Alpa
+
+### 📁 1. Berkas yang Diperbarui
+* 📄 **[scripts/auto-alpa.js](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/scripts/auto-alpa.js)** `[MODIFY]`
+
+---
+
+### 📝 2. Rincian Baris & Logika yang Diperbarui
+
+1. 🛡️ **Pencegahan Deceptive / False Success pada Firestore REST API**:
+   - `httpRequest()` kini memvalidasi status kode HTTP (`res.statusCode >= 200 && res.statusCode < 300`). Jika Firestore mengembalikan error (400, 403, 500), Promise langsung di-reject dengan pesan error jelas.
+   - Menambahkan verifikasi `res.name` pada `createLogAbsensiDoc()` agar blok `try ... catch` menangkap kegagalan penyimpanan secara nyata dan tidak mencetak status sukses palsu jika data ditolak oleh Firestore.
+2. ⏱️ **Pencegahan Silent Failure & Timeout Protection**:
+   - Menambahkan timeout 20 detik pada setiap HTTP request via `req.setTimeout(timeoutMs)` untuk mencegah skrip hanging jika server tujuan tidak merespons.
+   - Menambahkan guard keamanan pada `main()`: Jika data master siswa atau kelas kosong (misal karena jaringan terputus saat query), proses langsung dibatalkan dengan error aman, mencegah bencana data di mana 100% siswa dianggap alpa.
+3. 🌐 **Kalkulasi Timezone Deterministik (WIB = UTC+7)**:
+   - Mengganti anti-pattern `new Date(now.toLocaleString('en-US'))` dengan kalkulasi matematis offset UTC+7 (`utcMs + (7 * 3600000)`), menjamin tanggal dan jam WIB selalu tepat di environment runner Linux GitHub Actions.
+4. 🎯 **Binding Kehadiran Siswa Berbasis ID Sesi**:
+   - Melacak kehadiran siswa per sesi dengan kombinasi kunci `${sId}_${nis}`, memastikan jika seorang guru membuka lebih dari 1 sesi dalam satu hari, kehadiran di sesi sebelumnya tidak mengaburkan status kehadiran di sesi lainnya.
+5. 📲 **Validasi Status Pengiriman WhatsApp Fonnte & Deduplikasi**:
+   - Mengecek secara eksplisit `res && res.status === true` sebelum mengonfirmasi keberhasilan pengiriman pesan WA.
+   - Menambahkan `sentWaTargets` (Set) untuk memastikan tidak ada pengiriman pesan laporan ganda ke grup WhatsApp yang sama dalam satu kali siklus eksekusi.
+6. 🏫 **Toleransi Pencocokan Siswa Rombel Kelas**:
+   - Memperbaiki logika matching sekolah pada siswa agar toleran terhadap variasi penamaan (misal perbedaan huruf kapital atau penulisan singkatan SMK/SMKS), sehingga seluruh siswa rombel terdata dengan lengkap.
+
+---
+
+### 🧪 3. Petunjuk Pengujian (*Verification*)
+
+1. **Uji Coba Eksekusi Lokal**:
+   Jalankan perintah berikut di terminal:
+   ```bash
+   node scripts/auto-alpa.js
+   ```
+2. **Verifikasi Output**:
+   - Skrip berhasil mengambil data Firestore secara cepat (< 2 detik).
+   - Menampilkan ringkasan siswa yang tersimpan tanpa error.
+   - Pada eksekusi kedua, skrip mendeteksi `Seluruh status siswa sudah tersimpan di database (Total 0 log baru)` secara idempoten.
+
+---
+
 ## 📅 Review [2026-09-17 16:40 WIB] - Eliminasi Duplikasi Pengiriman WhatsApp Presensi dengan Menghapus Trigger Scheduled Cron GitHub Actions
 
 ### 📁 1. Berkas yang Diperbarui
