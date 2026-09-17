@@ -4,6 +4,37 @@ Dokumen ini berisi rangkuman review perubahan kode (*code review*) terbaru yang 
 
 ---
 
+## 📅 Review [2026-09-17 16:40 WIB] - Eliminasi Duplikasi Pengiriman WhatsApp Presensi dengan Menghapus Trigger Scheduled Cron GitHub Actions
+
+### 📁 1. Berkas yang Diperbarui
+* 📄 **[.github/workflows/auto-alpa.yml](file:///c:/Users/iskak/Antigravity-Projetcs/portal-iskakfatoni/.github/workflows/auto-alpa.yml)** `[MODIFY]`
+
+---
+
+### 📝 2. Rincian Baris & Logika yang Diperbarui
+
+1. 🚫 **Penghapusan Trigger `schedule` (Cron Bawaan GitHub Actions)**:
+   - Menghapus konfigurasi `schedule: - cron: '30 8 * * 1-5'` yang sebelumnya difungsikan sebagai fallback.
+   - Hasil audit log eksekusi (`gh run list`) membuktikan bahwa cron bawaan GitHub Actions pada tier gratis mengalami penundaan antrean server selama 5–7 jam. Akibatnya, alih-alih jalan pukul 15:30 WIB (08:30 UTC), cron baru dieksekusi di rentang pukul 20:39–20:46 WIB (bahkan 22:10 WIB), memicu eksekusi ulang skrip dan mengirim pesan WhatsApp kedua kalinya ke grup kelas.
+2. 🎯 **Fokus Penuh pada Pemicu Presisi**:
+   - Mempertahankan `repository_dispatch: types: [trigger-alpa]` yang telah terbukti 100% presisi dan tepat waktu dieksekusi setiap hari kerja pukul 15:30 WIB via webhook (cron-job.org).
+   - Mempertahankan `workflow_dispatch` untuk eksekusi manual sewaktu-waktu melalui tombol GitHub Actions.
+
+---
+
+### 🧪 3. Petunjuk Pengujian (*Verification*)
+
+1. **Verifikasi Konfigurasi Workflow**:
+   Pastikan file `.github/workflows/auto-alpa.yml` hanya memiliki event `repository_dispatch` dan `workflow_dispatch`.
+2. **Monitoring Eksekusi Malam Hari**:
+   Periksa daftar workflow runs:
+   ```bash
+   gh run list --workflow=auto-alpa.yml -L 5
+   ```
+   Pastikan malam ini dan seterusnya tidak ada lagi workflow run bersumber `schedule` yang berjalan di luar jam 15:30 WIB.
+
+---
+
 ## 📅 Review [2026-09-08 20:15 WIB] - Penambahan Trigger Webhook (repository_dispatch) untuk Eksekusi Tepat Waktu Presensi Otomatis
 
 ### 📁 1. Berkas yang Diperbarui
