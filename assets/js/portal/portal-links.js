@@ -48,6 +48,7 @@ document.addEventListener('DOMContentLoaded', async () => {
           nama_siswa: studentData.nama_siswa,
           id_kelas: studentData.id_kelas,
           nama_kelas: studentData.nama_kelas || studentData.id_kelas,
+          nama_sekolah: studentData.nama_sekolah || "",
           device_id: currentDeviceId
         };
         localStorage.setItem('portal_siswa_user', JSON.stringify(syncUser));

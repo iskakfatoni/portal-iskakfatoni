@@ -68,6 +68,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         nama_siswa: dbData.nama_siswa,
         id_kelas: dbData.id_kelas,
         nama_kelas: dbData.nama_kelas || dbData.id_kelas,
+        nama_sekolah: dbData.nama_sekolah || "",
         device_id: currentDeviceId,
         device_info: dbData.device_info || null
       };
@@ -198,6 +199,7 @@ if (dom.btnVerifikasi) {
         nama_siswa: dataSiswa.nama_siswa,
         id_kelas: dataSiswa.id_kelas,
         nama_kelas: dataSiswa.nama_kelas || dataSiswa.id_kelas,
+        nama_sekolah: dataSiswa.nama_sekolah || "",
         device_id: currentDeviceId,
         device_info: updateData.device_info || null
       };

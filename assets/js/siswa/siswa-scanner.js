@@ -132,14 +132,42 @@ async function onScanSuccess(decodedText) {
     const sessionIdKelasNorm = (sesiData.id_kelas || "").toLowerCase().replace(/[^a-z0-9]/g, '');
     const sessionNamaKelasNorm = (sesiData.nama_kelas || sesiData.id_kelas || "").toLowerCase().replace(/[^a-z0-9]/g, '');
 
-    const isIdKelasMatch = studentIdKelasNorm && sessionIdKelasNorm && (studentIdKelasNorm === sessionIdKelasNorm);
-    const isNamaKelasMatch = studentNamaKelasNorm && sessionNamaKelasNorm && (studentNamaKelasNorm === sessionNamaKelasNorm);
-
     const studentSchoolNorm = (currentSiswaUser.nama_sekolah || "").toLowerCase().replace(/[^a-z0-9]/g, '');
     const sessionSchoolNorm = (sesiData.nama_sekolah || "").toLowerCase().replace(/[^a-z0-9]/g, '');
-    const isSchoolMismatch = studentSchoolNorm && sessionSchoolNorm && (studentSchoolNorm !== sessionSchoolNorm);
 
-    if ((!isIdKelasMatch && !isNamaKelasMatch) || isSchoolMismatch) {
+    // 2.1 Deteksi Sekolah Silang (Cross-School Detection)
+    let isSchoolMismatch = false;
+    if (studentSchoolNorm && sessionSchoolNorm) {
+      const isMutuStudent = studentSchoolNorm.includes('kemlagi') || studentSchoolNorm.includes('mutu') || studentSchoolNorm.includes('muhammadiyah');
+      const isMutuSession = sessionSchoolNorm.includes('kemlagi') || sessionSchoolNorm.includes('mutu') || sessionSchoolNorm.includes('muhammadiyah');
+      const isJetisStudent = studentSchoolNorm.includes('jetis');
+      const isJetisSession = sessionSchoolNorm.includes('jetis');
+
+      if ((isMutuStudent && !isMutuSession) || (!isMutuStudent && isMutuSession)) isSchoolMismatch = true;
+      if ((isJetisStudent && !isJetisSession) || (!isJetisStudent && isJetisSession)) isSchoolMismatch = true;
+      if (!isMutuStudent && !isJetisStudent && studentSchoolNorm !== sessionSchoolNorm) isSchoolMismatch = true;
+    }
+
+    // 2.2 Deteksi Sekolah dari ID Kelas jika nama_sekolah tidak lengkap
+    const isMutuIdStudent = studentIdKelasNorm.includes('mutu');
+    const isMutuIdSession = sessionIdKelasNorm.includes('mutu');
+    if ((isMutuIdStudent && !isMutuIdSession) || (!isMutuIdStudent && isMutuIdSession)) {
+      isSchoolMismatch = true;
+    }
+
+    // 2.3 Pencocokan Kelas Presisi
+    let isClassMatch = false;
+    if (studentIdKelasNorm && sessionIdKelasNorm) {
+      isClassMatch = (studentIdKelasNorm === sessionIdKelasNorm);
+    }
+    if (!isClassMatch && studentNamaKelasNorm && sessionNamaKelasNorm && (studentNamaKelasNorm === sessionNamaKelasNorm)) {
+      // Hanya izinkan pencocokan nama_kelas jika tidak ada ketidakcocokan sekolah
+      if (!isSchoolMismatch) {
+        isClassMatch = true;
+      }
+    }
+
+    if (!isClassMatch || isSchoolMismatch) {
       const sesiKelasDisplay = sesiData.nama_kelas || sesiData.id_kelas || 'Lain';
       window.location.href = `result.html?status=error&msg=${encodeURIComponent(`Gagal! Anda terdaftar di kelas [${namaKelasSiswa}], bukan sesi kelas [${sesiKelasDisplay}].`)}`;
       return;

@@ -4162,3 +4162,56 @@ Dokumen ini berisi rangkuman review perubahan kode (*code review*) terbaru yang 
    - Buka `pages/guru/rekap.html` di browser.
    - Filter sesi hari ini (`2026-09-24`) atau pilih kelas `XI TEI 1 (SMK MUTU)`.
    - **Hasil**: Hanya siswa dari SMKS Muhammadiyah 1 Kemlagi yang tampil.
+
+---
+
+## 📌 Laporan Perubahan & Review: Audit & Pencegahan Potensi Bug Silang Kelas & Sekolah Menyeluruh
+**Waktu & Tanggal**: 2026-09-24 21:30 WIB
+
+### 📁 1. Berkas yang Diperbarui
+* 📝 **[assets/js/siswa/siswa-login.js](file:///d:/Cloud/ISKAK/WORKSPACE/portal-iskakfatoni/assets/js/siswa/siswa-login.js)**
+* 📝 **[assets/js/absensi/absensi.js](file:///d:/Cloud/ISKAK/WORKSPACE/portal-iskakfatoni/assets/js/absensi/absensi.js)**
+* 📝 **[assets/js/portal/portal-links.js](file:///d:/Cloud/ISKAK/WORKSPACE/portal-iskakfatoni/assets/js/portal/portal-links.js)**
+* 📝 **[assets/js/siswa/siswa-scanner.js](file:///d:/Cloud/ISKAK/WORKSPACE/portal-iskakfatoni/assets/js/siswa/siswa-scanner.js)**
+* 📝 **[assets/js/guru/rekap.js](file:///d:/Cloud/ISKAK/WORKSPACE/portal-iskakfatoni/assets/js/guru/rekap.js)**
+* 📝 **[assets/js/guru/guru-dashboard.js](file:///d:/Cloud/ISKAK/WORKSPACE/portal-iskakfatoni/assets/js/guru/guru-dashboard.js)**
+
+---
+
+### 🔍 2. Temuan Potensi Bug Sejenis
+1. **Kehilangan Metadata `nama_sekolah` pada Penyimpanan Sesi Siswa (`siswa-login.js`, `absensi.js`, `portal-links.js`)**:
+   - Objek `sessionPayload` di `localStorage.setItem('siswa_session')` dan `portal_siswa_user` tidak menyertakan atribut `nama_sekolah` dari dokumen Firestore siswa.
+   - Dampaknya: Saat siswa membuka scanner presensi, `currentSiswaUser.nama_sekolah` bernilai `undefined`, sehingga deteksi perbedaan sekolah tidak berfungsi.
+2. **Validasi Scanner QR Terlalu Longgar (`siswa-scanner.js`)**:
+   - Pengecekan `(!isIdKelasMatch && !isNamaKelasMatch)` menyebabkan siswa antarsekolah dengan nama kelas sama (misal `XI TEI 1` di Jetis vs `XI TEI 1` di Kemlagi) lolos karena `isNamaKelasMatch` bernilai `true`.
+   - Diperbaiki dengan memprioritaskan pencocokan `id_kelas` unik dan isolasi silang berdasarkan kata kunci sekolah (`mutu`/`kemlagi`/`muhammadiyah` vs `jetis`).
+3. **Filter Kelas Log Presensi di Rekapitulasi (`rekap.js`)**:
+   - Filter `loadData()` mencocokkan `k2 === normInputKelas` atau `k1.includes(normInputKelas)` tanpa validasi sekolah, menyebabkan saat memilih kelas `XI-TEI-1` Jetis, siswa Kemlagi ikut tampil di tabel rekapitulasi.
+   - Diperbaiki dengan mengunci pencocokan presisi pada `id_kelas` dan menyertakan validasi `data-nama-sekolah`.
+4. **Pencarian Sesi Aktif Sehari di Dashboard Guru (`guru-dashboard.js`)**:
+   - Menambahkan verifikasi `nama_sekolah` agar sesi guru di sekolah yang berbeda dengan mata pelajaran sama tidak tertukar saat dimuat ulang.
+
+---
+
+### 🛠️ 3. Rincian Baris & Logika yang Diperbarui
+1. `siswa-login.js`, `absensi.js`, `portal-links.js`:
+   - Menyimpan `nama_sekolah` secara konsisten ke seluruh objek profil/sesi siswa di `localStorage`.
+2. `siswa-scanner.js`:
+   - Menolak presensi jika terdapat perbedaan sekolah antara akun siswa dan sesi guru.
+   - Menolak presensi jika `id_kelas` siswa berbeda dengan `id_kelas` sesi (misal `XI-TEI-1` vs `XI-TEI-1-MUTU`).
+3. `rekap.js`:
+   - Memperbaiki `Filter 2` pada fungsi `loadData()` agar menyaring log presensi secara presisi sesuai sekolah dan ID kelas yang dipilih di dropdown.
+4. `guru-dashboard.js`:
+   - Menambahkan pengecekan `sMatch` (`nama_sekolah`) pada pemulihan sesi harian.
+
+---
+
+### 🧪 4. Petunjuk Pengujian Lokal (*Local Verification*)
+1. **Uji Validasi Scanner QR Antarsekolah**:
+   - Login sebagai siswa Jetis (`9177/413` - `XI-TEI-1`).
+   - Scan QR code sesi Kemlagi (`XI-TEI-1-MUTU`).
+   - **Hasil**: Sistem menampilkan layar error merah: *"Gagal! Anda terdaftar di kelas [XI TEI 1], bukan sesi kelas [XI TEI 1]"* (karena beda sekolah/id_kelas).
+2. **Uji Filter Rekapitulasi**:
+   - Buka `pages/guru/rekap.html`.
+   - Pilih filter kelas `XI TEI 1 (SMKN 1 JETIS)`.
+   - **Hasil**: Hanya log siswa SMKN 1 Jetis yang tampil. Log siswa SMK MUTU tidak ikut masuk.

@@ -405,7 +405,8 @@ if (dom.btnStartSesi) {
           const d = docSnap.data();
           const kMatch = (d.id_kelas === kelasId) || (normClass(d.id_kelas) === normSelectedKelas);
           const mMapel = (d.nama_mapel || '').trim().toLowerCase() === normSelectedMapel;
-          return kMatch && mMapel;
+          const sMatch = (!sekolahNama || !d.nama_sekolah || normClass(d.nama_sekolah) === normClass(sekolahNama));
+          return kMatch && mMapel && sMatch;
         }).sort((a, b) => {
           const tA = (a.data().closed_at?.seconds || a.data().updated_at?.seconds || a.data().created_at?.seconds || 0);
           const tB = (b.data().closed_at?.seconds || b.data().updated_at?.seconds || b.data().created_at?.seconds || 0);

@@ -97,6 +97,7 @@ if (dom.formLogin) {
           nama: dataSiswa.nama_siswa || dataSiswa.nama || "Siswa",
           id_kelas: dataSiswa.id_kelas || "-",
           nama_kelas: dataSiswa.nama_kelas || "-",
+          nama_sekolah: dataSiswa.nama_sekolah || "",
           logged_at: new Date().toISOString()
         };
 

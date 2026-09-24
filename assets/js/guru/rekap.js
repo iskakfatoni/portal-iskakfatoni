@@ -188,11 +188,35 @@ async function loadData() {
         if (!isToday) return;
       }
 
-      // Filter 2: Filter kelas menggunakan normalisasi cerdas
+      // Filter 2: Filter kelas menggunakan normalisasi cerdas & isolasi sekolah
       if (normInputKelas) {
         const k1 = normClass(d.id_kelas);
         const k2 = normClass(d.nama_kelas);
-        const kMatch = (k1 === normInputKelas || k2 === normInputKelas || k1 === normInputKelasNama || k2 === normInputKelasNama || k1.includes(normInputKelas) || k2.includes(normInputKelas));
+        const dSekolah = normClass(d.nama_sekolah);
+        const selectedSekolah = normClass(selectedKelasOpt?.dataset?.namaSekolah);
+
+        // 2.1 Isolasi sekolah jika ada data sekolah
+        if (selectedSekolah && dSekolah) {
+          const isMutuFilter = selectedSekolah.includes('kemlagi') || selectedSekolah.includes('mutu') || selectedSekolah.includes('muhammadiyah');
+          const isMutuLog = dSekolah.includes('kemlagi') || dSekolah.includes('mutu') || dSekolah.includes('muhammadiyah');
+          const isJetisFilter = selectedSekolah.includes('jetis');
+          const isJetisLog = dSekolah.includes('jetis');
+
+          if (isMutuFilter && !isMutuLog) return;
+          if (isJetisFilter && !isJetisLog) return;
+          if (!isMutuFilter && !isJetisFilter && selectedSekolah !== dSekolah) return;
+        }
+
+        // 2.2 Pencocokan presisi: prioritaskan k1 (id_kelas unik)
+        let kMatch = (k1 === normInputKelas);
+        if (!kMatch && k2 === normInputKelasNama) {
+          // Hanya izinkan pencocokan nama_kelas jika sekolah cocok
+          if (selectedSekolah && dSekolah) {
+            kMatch = (selectedSekolah === dSekolah || (selectedSekolah.includes('kemlagi') && dSekolah.includes('kemlagi')) || (selectedSekolah.includes('jetis') && dSekolah.includes('jetis')));
+          } else if (!k1 || k1 === normInputKelas) {
+            kMatch = true;
+          }
+        }
         if (!kMatch) return;
       }
 
