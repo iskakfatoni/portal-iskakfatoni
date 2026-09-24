@@ -4112,3 +4112,53 @@ Dokumen ini berisi rangkuman review perubahan kode (*code review*) terbaru yang 
    - Masukkan presensi manual siswa $\rightarrow$ Data tabel dan grafik rasio kehadiran langsung ter-refresh secara otomatis.
 
 
+
+---
+
+## 📌 Laporan Perubahan & Review: Perbaikan Isolasi Sekolah dan Pencocokan Siswa per Kelas pada Laporan Alpa
+**Waktu & Tanggal**: 2026-09-24 17:50 WIB
+
+### 📁 1. Berkas yang Diperbarui
+* 📝 **[scripts/auto-alpa.js](file:///d:/Cloud/ISKAK/WORKSPACE/portal-iskakfatoni/scripts/auto-alpa.js)**
+* 📝 **[assets/js/guru/rekap.js](file:///d:/Cloud/ISKAK/WORKSPACE/portal-iskakfatoni/assets/js/guru/rekap.js)**
+* 📝 **[assets/js/guru/guru-dashboard.js](file:///d:/Cloud/ISKAK/WORKSPACE/portal-iskakfatoni/assets/js/guru/guru-dashboard.js)**
+
+---
+
+### 🔍 2. Analisis Akar Masalah (Root Cause)
+1. **Dua Sekolah Memiliki Nama Kelas yang Sama**:
+   - Di SMK Negeri 1 Jetis Mojokerto terdapat kelas dengan `nama_kelas: 'XI TEI 1'` (`id_kelas: 'XI-TEI-1'`).
+   - Di SMKS Muhammadiyah 1 Kemlagi Mojokerto terdapat kelas dengan `nama_kelas: 'XI TEI 1'` (`id_kelas: 'XI-TEI-1-MUTU'`).
+2. **Kondisi Pencocokan Fallback Longgar di `scripts/auto-alpa.js`**:
+   - Skrip mencocokkan `normClass(swNamaKelas) === normClass(namaKelasDisplay)` yang menghasilkan `true` untuk kedua sekolah.
+   - Ditambah terdapat baris toleransi hardcoded `swSekolah.toLowerCase().includes('jetis')` yang menyebabkan seluruh siswa SMKN 1 Jetis **selalu dimasukkan ke rombel kelas manapun**, termasuk ketika sesi absensi yang aktif adalah milik SMKS Muhammadiyah 1 Kemlagi.
+   - Akibatnya, pada sesi hari ini (24 September 2026 untuk kelas `XI-TEI-1-MUTU`), 36 siswa XI TEI 1 dari SMKN 1 Jetis ikut tersaring masuk ke rombel Kemlagi. Karena siswa Jetis tidak melakukan scan di Kemlagi, ke-36 siswa tersebut tercatat sebagai 'Tidak Hadir' (Alpa) massal dan pesan WhatsApp melaporkan 41 siswa Tidak Hadir (seharusnya hanya 5 siswa dari total rombel 24 siswa).
+3. **Pencocokan Siswa pada `rekap.js` & `guru-dashboard.js`**:
+   - Pada halaman rekapitulasi (`rekap.js`) dan modal absensi manual di rekap & dashboard guru, penyaringan siswa juga menggunakan `normClass(s.nama_kelas) === normTarget` tanpa mengisolasi `nama_sekolah`, sehingga siswa antarsekolah dengan nama kelas sama berpotensi saling campur.
+
+---
+
+### 🛠️ 3. Rincian Baris & Logika yang Diperbarui
+1. **Perbaikan `scripts/auto-alpa.js`**:
+   - Menghapus aturan hardcoded `swSekolah.toLowerCase().includes('jetis')`.
+   - Menambahkan **Isolasi Sekolah Ketat**: Jika sesi absensi dibuka untuk sekolah tertentu (misal: Kemlagi / Muhammadiyah / MUTU), siswa dari sekolah lain (misal: Jetis) secara mutlak dilewati (`return false`).
+   - Memprioritaskan pencocokan presisi `id_kelas` unik (`XI-TEI-1-MUTU` vs `XI-TEI-1`).
+   - Menjaga agar fallback pencocokan nama kelas hanya berlaku jika sekolahnya benar-benar cocok.
+2. **Penyempurnaan `assets/js/guru/rekap.js`**:
+   - Menambahkan atribut `data-nama-sekolah` pada opsi dropdown `filterKelas`.
+   - Mengubah struktur deteksi alpa dari set string menjadi `targetClassMap` berbasis objek terstruktur (`id_kelas`, `nama_kelas`, `sekolah`, `id_sesi`, `mapel`).
+   - Menerapkan isolasi sekolah pada pencarian siswa alpa virtual sehingga siswa Jetis tidak pernah muncul di rekap alpa Kemlagi dan sebaliknya.
+   - Menerapkan isolasi sekolah pada fitur **Ekspor Matriks Bulanan** (`btnExportMatrixExcel`) dan **Absen Manual** (`loadStudentsForRekapManual`).
+3. **Penyempurnaan `assets/js/guru/guru-dashboard.js`**:
+   - Menambahkan filter isolasi sekolah pada dropdown modal **Absen Manual** (`loadStudentsForManualSelect`) serta memisahkan cache siswa per kombinasi kelas & sekolah (`${normTarget}_${normTargetSekolah}`).
+
+---
+
+### 🧪 4. Petunjuk Pengujian Lokal (*Local Verification*)
+1. **Verifikasi Skrip Auto-Alpa**:
+   - Jalankan: `node scripts/auto-alpa.js`
+   - **Hasil**: Total rombel untuk sesi aktif `XI-TEI-1-MUTU` terbaca tepat **24 siswa** (bukan 60 siswa), dan 0 siswa dari SMKN 1 Jetis ikut tersaring.
+2. **Verifikasi Tampilan Rekapitulasi**:
+   - Buka `pages/guru/rekap.html` di browser.
+   - Filter sesi hari ini (`2026-09-24`) atau pilih kelas `XI TEI 1 (SMK MUTU)`.
+   - **Hasil**: Hanya siswa dari SMKS Muhammadiyah 1 Kemlagi yang tampil.

@@ -105,6 +105,7 @@ async function initKelasDropdown() {
         const opt = document.createElement('option');
         opt.value = docId;
         opt.dataset.namaKelas = kName;
+        opt.dataset.namaSekolah = sName;
         opt.innerText = sTag ? `${kName} (${sTag})` : kName;
         filterKelas.appendChild(opt);
       });
@@ -232,7 +233,7 @@ async function loadData() {
         const presentNisSet = new Set(currentData.map(d => String(d.nis).trim()));
 
         // Tentukan daftar kelas & metadata sesi yang akan disaring alpa
-        const targetClassSet = new Set();
+        const targetClassMap = {};
         const classSessionMap = {};
 
         const qTodaySesi = query(collection(db, "sesi_absensi"), where("tanggal", "==", todayISOStr));
@@ -240,14 +241,14 @@ async function loadData() {
         todaySesiSnap.forEach(s => {
           const sd = s.data();
           const kId = normClass(sd.id_kelas);
-          const kNama = normClass(sd.nama_kelas);
           const meta = {
             id_sesi: s.id,
+            id_kelas: sd.id_kelas || '',
+            nama_kelas: sd.nama_kelas || '',
             mapel: sd.nama_mapel || "-",
             sekolah: sd.nama_sekolah || ""
           };
           if (kId) classSessionMap[kId] = meta;
-          if (kNama) classSessionMap[kNama] = meta;
         });
 
         let selectedSesiMeta = null;
@@ -255,58 +256,110 @@ async function loadData() {
           const sesiDoc = await getDoc(doc(db, "sesi_absensi", selectedSesiId));
           if (sesiDoc.exists()) {
             const sd = sesiDoc.data();
-            const sKelas = sd.id_kelas || '';
-            if (sKelas) targetClassSet.add(sKelas);
+            const sKelas = sd.id_kelas || selectedSesiId;
             selectedSesiMeta = {
               id_sesi: sesiDoc.id,
+              id_kelas: sKelas,
+              nama_kelas: sd.nama_kelas || sKelas,
               mapel: sd.nama_mapel || "-",
               sekolah: sd.nama_sekolah || ""
             };
+            targetClassMap[sKelas] = selectedSesiMeta;
           }
         } else if (inputKelasVal) {
-          targetClassSet.add(inputKelasVal);
+          const sSekolah = selectedKelasOpt?.dataset?.namaSekolah || classSessionMap[normClass(inputKelasVal)]?.sekolah || '';
+          targetClassMap[inputKelasVal] = {
+            id_kelas: inputKelasVal,
+            nama_kelas: inputKelasNama,
+            sekolah: sSekolah,
+            id_sesi: classSessionMap[normClass(inputKelasVal)]?.id_sesi || '-',
+            mapel: classSessionMap[normClass(inputKelasVal)]?.mapel || '-'
+          };
         } else {
-          // Ambil semua kelas yang memiliki log aktif
-          currentData.forEach(item => {
-            if (item.kelas && item.kelas !== '-') targetClassSet.add(item.kelas);
-          });
-
-          // Juga masukkan kelas dari sesi hari ini jika mode hari ini aktif
+          // Masukkan kelas dari sesi hari ini jika mode hari ini aktif
           if (onlyToday) {
             todaySesiSnap.forEach(s => {
-              const k = s.data().id_kelas || '';
-              if (k) targetClassSet.add(k);
+              const sd = s.data();
+              const k = sd.id_kelas || s.id;
+              if (k && !targetClassMap[k]) {
+                targetClassMap[k] = {
+                  id_kelas: k,
+                  nama_kelas: sd.nama_kelas || k,
+                  sekolah: sd.nama_sekolah || '',
+                  id_sesi: s.id,
+                  mapel: sd.nama_mapel || '-'
+                };
+              }
             });
           }
+
+          // Juga ambil dari log aktif yang ada di currentData
+          currentData.forEach(item => {
+            const kId = (item.id_kelas && item.id_kelas !== '-') ? item.id_kelas : item.kelas;
+            if (kId && kId !== '-' && !targetClassMap[kId]) {
+              targetClassMap[kId] = {
+                id_kelas: kId,
+                nama_kelas: item.kelas || kId,
+                sekolah: item.nama_sekolah || '',
+                id_sesi: item.id_sesi || '-',
+                mapel: item.mapel || '-'
+              };
+            }
+          });
         }
 
-        // Loop setiap kelas target & identifikasi siswa yang belum absen
-        targetClassSet.forEach(targetClass => {
-          const normTarget = normClass(targetClass);
-          if (!normTarget) return;
+        // Loop setiap kelas target & identifikasi siswa yang belum absen dengan isolasi sekolah ketat
+        Object.values(targetClassMap).forEach(target => {
+          const normTargetId = normClass(target.id_kelas);
+          const normTargetNama = normClass(target.nama_kelas);
+          const normTargetSekolah = normClass(target.sekolah);
+          if (!normTargetId && !normTargetNama) return;
 
           snapSiswa.forEach(siswaDoc => {
             const s = siswaDoc.data();
             const sK1 = normClass(s.id_kelas);
             const sK2 = normClass(s.nama_kelas);
-            const sK3 = normClass(s.kelas);
+            const sSekolah = normClass(s.nama_sekolah);
 
-            const match = (sK1 === normTarget || sK2 === normTarget || sK3 === normTarget);
+            // 1. Isolasi Sekolah: Jangan izinkan siswa antar sekolah bercampur
+            if (normTargetSekolah && sSekolah) {
+              const isMutuTarget = normTargetSekolah.includes('muhammadiyah') || normTargetSekolah.includes('kemlagi') || normTargetSekolah.includes('mutu');
+              const isMutuStudent = sSekolah.includes('muhammadiyah') || sSekolah.includes('kemlagi') || sSekolah.includes('mutu');
+              const isJetisTarget = normTargetSekolah.includes('jetis');
+              const isJetisStudent = sSekolah.includes('jetis');
+
+              if (isMutuTarget && !isMutuStudent) return;
+              if (isJetisTarget && !isJetisStudent) return;
+              if (!isMutuTarget && !isJetisTarget && normTargetSekolah !== sSekolah) return;
+            }
+
+            // 2. Pencocokan ID kelas unik
+            let match = false;
+            if (sK1 && normTargetId && sK1 === normTargetId) {
+              match = true;
+            } else if (sK2 && normTargetNama && sK2 === normTargetNama) {
+              if (normTargetSekolah && sSekolah) {
+                match = (normTargetSekolah === sSekolah ||
+                         (normTargetSekolah.includes('kemlagi') && sSekolah.includes('kemlagi')) ||
+                         (normTargetSekolah.includes('jetis') && sSekolah.includes('jetis')));
+              } else if (!sK1 || !normTargetId || sK1 === normTargetId) {
+                match = true;
+              }
+            }
 
             if (match) {
               const sNis = String(s.nis || siswaDoc.id).trim();
               if (!presentNisSet.has(sNis)) {
-                const sessionMeta = selectedSesiMeta || classSessionMap[normTarget] || classSessionMap[sK1] || classSessionMap[sK2] || {};
                 currentData.push({
                   id: `alpa-${sNis}`,
                   isVirtualAlpa: true,
                   nis: s.nis || siswaDoc.id || "-",
                   nama: s.nama_siswa || s.nama || "-",
-                  kelas: s.nama_kelas || targetClass,
-                  id_kelas: s.id_kelas || targetClass,
-                  mapel: sessionMeta.mapel || "-",
-                  id_sesi: sessionMeta.id_sesi || "-",
-                  nama_sekolah: s.nama_sekolah || sessionMeta.sekolah || "",
+                  kelas: s.nama_kelas || target.nama_kelas || target.id_kelas,
+                  id_kelas: s.id_kelas || target.id_kelas,
+                  mapel: target.mapel || "-",
+                  id_sesi: target.id_sesi || "-",
+                  nama_sekolah: s.nama_sekolah || target.sekolah || "",
                   waktu: `Tidak Absen (s.d. 15:30 WIB)`,
                   status: "Tidak Hadir"
                 });
@@ -727,16 +780,40 @@ if (btnExportMatrixExcel) {
       // 2. Ambil Semua Siswa
       const snapSiswa = await getDocs(collection(db, "siswa"));
       const selectedClassVal = filterKelas.value ? filterKelas.value.trim() : '';
+      const selectedClassOpt = filterKelas.selectedOptions ? filterKelas.selectedOptions[0] : null;
+      const selectedClassSekolah = selectedClassOpt?.dataset?.namaSekolah || '';
       const normSelectedClass = normClass(selectedClassVal);
+      const normSelectedSekolah = normClass(selectedClassSekolah);
 
       let targetStudents = [];
       snapSiswa.forEach(docSnap => {
         const s = docSnap.data();
         const k1 = normClass(s.id_kelas);
         const k2 = normClass(s.nama_kelas);
-        const k3 = normClass(s.kelas);
+        const sSekolah = normClass(s.nama_sekolah);
 
-        if (!normSelectedClass || k1 === normSelectedClass || k2 === normSelectedClass || k3 === normSelectedClass) {
+        let match = false;
+        if (!selectedClassVal) {
+          match = true;
+        } else {
+          // Isolasi Sekolah
+          if (normSelectedSekolah && sSekolah) {
+            const isMutuTarget = normSelectedSekolah.includes('kemlagi') || normSelectedSekolah.includes('mutu') || normSelectedSekolah.includes('muhammadiyah');
+            const isMutuStudent = sSekolah.includes('kemlagi') || sSekolah.includes('mutu') || sSekolah.includes('muhammadiyah');
+            const isJetisTarget = normSelectedSekolah.includes('jetis');
+            const isJetisStudent = sSekolah.includes('jetis');
+
+            if (isMutuTarget && !isMutuStudent) return;
+            if (isJetisTarget && !isJetisStudent) return;
+          }
+
+          match = (k1 === normSelectedClass);
+          if (!match && k2 === normSelectedClass && (!normSelectedSekolah || !sSekolah || normSelectedSekolah === sSekolah)) {
+            match = true;
+          }
+        }
+
+        if (match) {
           targetStudents.push({
             nis: (s.nis || docSnap.id || '').trim(),
             nama: (s.nama_siswa || s.nama || 'Siswa').trim(),
@@ -873,9 +950,14 @@ async function loadStudentsForRekapManual(kelasId, targetDate) {
     return;
   }
 
+  const selectedOpt = manualSelectKelas ? manualSelectKelas.selectedOptions[0] : null;
+  const targetSekolah = selectedOpt?.dataset?.namaSekolah || '';
+  const normTargetSekolah = normClass(targetSekolah);
   const normTarget = normClass(kelasId);
+  const cacheKey = `${normTarget}_${normTargetSekolah}`;
+
   try {
-    let studentList = cachedStudentsRekap[normTarget];
+    let studentList = cachedStudentsRekap[cacheKey];
     if (!studentList) {
       const q = query(collection(db, "siswa"));
       const snap = await getDocs(q);
@@ -893,10 +975,24 @@ async function loadStudentsForRekapManual(kelasId, targetDate) {
       });
 
       studentList = allStudents.filter(s => {
-        return (s.id_kelas === kelasId) || (normClass(s.id_kelas) === normTarget) || (normClass(s.nama_kelas) === normTarget);
+        const sSekolah = normClass(s.nama_sekolah);
+        if (normTargetSekolah && sSekolah) {
+          const isMutuTarget = normTargetSekolah.includes('kemlagi') || normTargetSekolah.includes('mutu') || normTargetSekolah.includes('muhammadiyah');
+          const isMutuStudent = sSekolah.includes('kemlagi') || sSekolah.includes('mutu') || sSekolah.includes('muhammadiyah');
+          const isJetisTarget = normTargetSekolah.includes('jetis');
+          const isJetisStudent = sSekolah.includes('jetis');
+          if (isMutuTarget && !isMutuStudent) return false;
+          if (isJetisTarget && !isJetisStudent) return false;
+        }
+
+        if (s.id_kelas === kelasId || normClass(s.id_kelas) === normTarget) return true;
+        if (normClass(s.nama_kelas) === normTarget && (!normTargetSekolah || !sSekolah || normTargetSekolah === sSekolah)) {
+          return true;
+        }
+        return false;
       }).sort((a, b) => (a.nama_siswa || '').localeCompare(b.nama_siswa || ''));
 
-      cachedStudentsRekap[normTarget] = studentList;
+      cachedStudentsRekap[cacheKey] = studentList;
     }
 
     // Cek catatan presensi siswa pada tanggal target

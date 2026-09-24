@@ -683,9 +683,14 @@ async function loadStudentsForManualSelect(kelasId) {
     return;
   }
 
+  const selectedOpt = dom.manualSelectKelas ? dom.manualSelectKelas.selectedOptions[0] : null;
+  const targetSekolah = selectedOpt?.dataset?.namaSekolah || '';
+  const normTargetSekolah = normClass(targetSekolah);
   const normTarget = normClass(kelasId);
+  const cacheKey = `${normTarget}_${normTargetSekolah}`;
+
   try {
-    let studentList = cachedStudentsByClass[normTarget];
+    let studentList = cachedStudentsByClass[cacheKey];
     if (!studentList) {
       const q = query(collection(db, "siswa"));
       const snap = await getDocs(q);
@@ -703,10 +708,24 @@ async function loadStudentsForManualSelect(kelasId) {
       });
 
       studentList = allStudents.filter(s => {
-        return (s.id_kelas === kelasId) || (normClass(s.id_kelas) === normTarget) || (normClass(s.nama_kelas) === normTarget);
+        const sSekolah = normClass(s.nama_sekolah);
+        if (normTargetSekolah && sSekolah) {
+          const isMutuTarget = normTargetSekolah.includes('kemlagi') || normTargetSekolah.includes('mutu') || normTargetSekolah.includes('muhammadiyah');
+          const isMutuStudent = sSekolah.includes('kemlagi') || sSekolah.includes('mutu') || sSekolah.includes('muhammadiyah');
+          const isJetisTarget = normTargetSekolah.includes('jetis');
+          const isJetisStudent = sSekolah.includes('jetis');
+          if (isMutuTarget && !isMutuStudent) return false;
+          if (isJetisTarget && !isJetisStudent) return false;
+        }
+
+        if (s.id_kelas === kelasId || normClass(s.id_kelas) === normTarget) return true;
+        if (normClass(s.nama_kelas) === normTarget && (!normTargetSekolah || !sSekolah || normTargetSekolah === sSekolah)) {
+          return true;
+        }
+        return false;
       }).sort((a, b) => (a.nama_siswa || '').localeCompare(b.nama_siswa || ''));
 
-      cachedStudentsByClass[normTarget] = studentList;
+      cachedStudentsByClass[cacheKey] = studentList;
     }
 
     // Periksa status kehadiran siswa di sesi aktif saat ini

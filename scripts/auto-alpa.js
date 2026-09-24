@@ -256,7 +256,9 @@ async function main() {
       const sId = sessionDoc.name.split('/').pop();
       const sKelas = (sFields.id_kelas && sFields.id_kelas.stringValue) || '';
       const sMapel = (sFields.nama_mapel && sFields.nama_mapel.stringValue) || 'Mapel';
+      const sSekolah = (sFields.nama_sekolah && sFields.nama_sekolah.stringValue) || '';
       const normSKelas = normClass(sKelas);
+      const normSSekolah = normClass(sSekolah);
 
       if (!normSKelas) continue;
 
@@ -264,13 +266,26 @@ async function main() {
       const matchingKelasDoc = kelasDocs.find(kd => {
         const kf = kd.fields || {};
         const docId = kd.name.split('/').pop();
-        const kId = normClass(kf.id_kelas && kf.id_kelas.stringValue) || normClass(docId);
-        const kNama = normClass(kf.nama_kelas && kf.nama_kelas.stringValue);
-        return docId === sKelas || kId === normSKelas || kNama === normSKelas;
+        const kId = (kf.id_kelas && kf.id_kelas.stringValue) || docId;
+        const kSekolah = (kf.nama_sekolah && kf.nama_sekolah.stringValue) || '';
+
+        // 1. Prioritas utama: kecocokan persis docId atau id_kelas
+        if (docId === sKelas || kId === sKelas) return true;
+        if (normClass(docId) === normSKelas || normClass(kId) === normSKelas) return true;
+
+        // 2. Jika nama_kelas cocok, sekolah WAJIB cocok
+        const kNama = (kf.nama_kelas && kf.nama_kelas.stringValue) || '';
+        if (normClass(kNama) === normSKelas) {
+          if (normSSekolah && normClass(kSekolah)) {
+            return normClass(kSekolah) === normSSekolah;
+          }
+          return true;
+        }
+        return false;
       });
 
       let targetWaGroup = '';
-      let namaSekolah = process.env.SCHOOL_NAME || (sFields.nama_sekolah && sFields.nama_sekolah.stringValue) || 'SMK Negeri 1 Jetis Mojokerto';
+      let namaSekolah = sSekolah || process.env.SCHOOL_NAME || 'SMK Negeri 1 Jetis Mojokerto';
       let namaKelasDisplay = sKelas;
 
       if (matchingKelasDoc && matchingKelasDoc.fields) {
@@ -288,21 +303,51 @@ async function main() {
         targetWaGroup = process.env.WHATSAPP_TARGET;
       }
 
-      // Cari siswa di kelas ini dengan toleransi penulisan nama sekolah
+      // ID kelas unik dari dokumen kelas atau sesi (contoh: 'XI-TEI-1-MUTU' atau 'XI-TEI-1')
       const targetDocId = matchingKelasDoc ? matchingKelasDoc.name.split('/').pop() : sKelas;
+      const normTargetDocId = normClass(targetDocId);
+      const sessionSekolahNorm = normClass(namaSekolah);
+
+      // Cari siswa di kelas ini secara presisi dan terisolasi per sekolah
       const classStudents = siswaDocs.filter(sw => {
         const swF = sw.fields || {};
         const swIdKelas = (swF.id_kelas && swF.id_kelas.stringValue) || '';
         const swNamaKelas = (swF.nama_kelas && swF.nama_kelas.stringValue) || '';
         const swSekolah = (swF.nama_sekolah && swF.nama_sekolah.stringValue) || '';
+        const normSwIdKelas = normClass(swIdKelas);
+        const normSwNamaKelas = normClass(swNamaKelas);
+        const normSwSekolah = normClass(swSekolah);
 
-        if (swIdKelas && targetDocId && normClass(swIdKelas) === normClass(targetDocId)) return true;
-        if (swIdKelas && normClass(swIdKelas) === normSKelas) return true;
-        if (normClass(swNamaKelas) === normClass(namaKelasDisplay)) {
-          if (!swSekolah || !namaSekolah || normClass(swSekolah) === normClass(namaSekolah) || swSekolah.toLowerCase().includes('jetis')) {
-            return true;
-          }
+        // 1. Isolasi Sekolah: Siswa wajib dari sekolah yang sama
+        if (sessionSekolahNorm && normSwSekolah) {
+          const isMutuSession = sessionSekolahNorm.includes('muhammadiyah') || sessionSekolahNorm.includes('kemlagi') || sessionSekolahNorm.includes('mutu');
+          const isMutuStudent = normSwSekolah.includes('muhammadiyah') || normSwSekolah.includes('kemlagi') || normSwSekolah.includes('mutu');
+          const isJetisSession = sessionSekolahNorm.includes('jetis');
+          const isJetisStudent = normSwSekolah.includes('jetis');
+
+          if (isMutuSession && !isMutuStudent) return false;
+          if (isJetisSession && !isJetisStudent) return false;
+          if (!isMutuSession && !isJetisSession && sessionSekolahNorm !== normSwSekolah) return false;
         }
+
+        // 2. Pencocokan ID kelas unik (sangat presisi, misal 'XI-TEI-1-MUTU' vs 'XI-TEI-1')
+        if (swIdKelas) {
+          if (normSwIdKelas === normTargetDocId || normSwIdKelas === normSKelas) return true;
+        }
+
+        // 3. Fallback pencocokan nama_kelas HANYA jika sekolah cocok
+        if (normSwNamaKelas === normClass(namaKelasDisplay)) {
+          if (sessionSekolahNorm && normSwSekolah) {
+            return sessionSekolahNorm === normSwSekolah ||
+                   (sessionSekolahNorm.includes('kemlagi') && normSwSekolah.includes('kemlagi')) ||
+                   (sessionSekolahNorm.includes('jetis') && normSwSekolah.includes('jetis'));
+          }
+          if (swIdKelas && targetDocId && normSwIdKelas !== normTargetDocId) {
+            return false;
+          }
+          return true;
+        }
+
         return false;
       });
 
