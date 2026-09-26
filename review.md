@@ -4215,3 +4215,32 @@ Dokumen ini berisi rangkuman review perubahan kode (*code review*) terbaru yang 
    - Buka `pages/guru/rekap.html`.
    - Pilih filter kelas `XI TEI 1 (SMKN 1 JETIS)`.
    - **Hasil**: Hanya log siswa SMKN 1 Jetis yang tampil. Log siswa SMK MUTU tidak ikut masuk.
+
+## 📅 Ulasan Pembaruan: 2026-09-26 22:40 WIB
+
+### 📝 1. Ringkasan Pekerjaan
+- Mempersiapkan konfigurasi migrasi web app ke **Vercel** (`vercel.json`) dan menginstal `vercel` CLI di lingkungan lokal.
+- Mengatur rute URL bersih (*Clean URLs*), kontrol cache Service Worker PWA (`sw.js`), serta *security headers*.
+
+---
+
+### 📂 2. Berkas yang Diubah / Dibuat
+- `vercel.json` (dibuat baru)
+
+---
+
+### 🛠️ 3. Rincian Baris & Logika yang Diperbarui
+1. **`cleanUrls: true` & `trailingSlash: false`**:
+   - Memungkinkan navigasi halaman tanpa akhiran `.html` (misal `https://.../portal` atau `https://.../absensi`) sekaligus mempertahankan kompatibilitas URL lama berekstensi `.html`.
+2. **PWA & Service Worker Rules (`/sw.js`)**:
+   - Mengatur `Cache-Control: no-cache, no-store, must-revalidate` dan `Service-Worker-Allowed: /` agar siklus pembaruan PWA tidak terkendala caching agresif CDN Vercel.
+3. **Optimasi Asset & Security Headers**:
+   - Mengatur caching immutable 1 tahun untuk aset statis (`assets/*`, `style/*`).
+   - Menyertakan header keamanan `X-Content-Type-Options: nosniff` dan `X-XSS-Protection: 1; mode=block`.
+
+---
+
+### 🧪 4. Petunjuk Pengujian Lokal (*Local Verification*)
+1. Jalankan `npx vercel dev` pada terminal lokal untuk melihat preview lokal dengan engine Vercel.
+2. Akses halaman tanpa ekstensi `.html` (contoh: `http://localhost:3000/portal` dan `http://localhost:3000/absensi`).
+3. Pastikan `sw.js` terlayani dengan respons status HTTP 200 dan header `Service-Worker-Allowed: /`.
